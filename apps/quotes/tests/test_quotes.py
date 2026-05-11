@@ -163,3 +163,22 @@ def test_quotation_from_deal_view(client, user, membership, tenant) -> None:
     assert resp.status_code == 302
     with tenant_context(tenant):
         assert SalesDocument.objects.filter(deal=deal).count() == 1
+
+
+def test_quotation_pdf_renders(client, user, membership, tenant) -> None:
+    doc = _doc(tenant)
+    _line(
+        tenant,
+        doc,
+        description="โต๊ะประชุม 12 ที่นั่ง",
+        quantity=Decimal("1"),
+        unit_price=Decimal("35000"),
+    )
+    with tenant_context(tenant):
+        doc.doc_number = "QT-2569-0009"
+        doc.save()
+    client.force_login(user)
+    resp = client.get(reverse("quotes:quotation_pdf", args=[doc.pk]))
+    assert resp.status_code == 200
+    assert resp["Content-Type"] == "application/pdf"
+    assert resp.content[:5] == b"%PDF-"

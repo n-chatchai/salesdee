@@ -8,7 +8,10 @@
       <a href="{% url 'quotes:quotations' %}" class="text-sm text-slate-500 hover:underline">&larr; ใบเสนอราคาทั้งหมด</a>
       <h1 class="mt-1 text-xl font-semibold">ใบเสนอราคา {{ document.doc_number }}{% if document.revision %} Rev.{{ document.revision }}{% endif %}</h1>
     </div>
-    <a href="{% url 'quotes:quotation_edit' document.pk %}" class="rounded border px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">แก้ไขหัวเอกสาร</a>
+    <div class="flex gap-2">
+      <a href="{% url 'quotes:quotation_pdf' document.pk %}" target="_blank" class="rounded bg-slate-800 px-3 py-1.5 text-sm text-white hover:bg-slate-700">พิมพ์ / PDF</a>
+      <a href="{% url 'quotes:quotation_edit' document.pk %}" class="rounded border px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">แก้ไขหัวเอกสาร</a>
+    </div>
   </div>
 
   <section class="mt-4 grid gap-x-8 gap-y-1 rounded-lg border bg-white p-4 text-sm sm:grid-cols-2">

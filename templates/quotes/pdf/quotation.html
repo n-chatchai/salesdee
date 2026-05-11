@@ -1,0 +1,126 @@
+{% load static %}<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<style>
+  /* Thai font: relies on a system Thai font (install fonts-thai-tlwg on Linux) or bundle Sarabun
+     + @font-face with a file:// url for production. */
+  @page {
+    size: A4;
+    margin: 16mm 14mm 18mm 14mm;
+    @bottom-center { content: "หน้า " counter(page) " / " counter(pages); font-size: 8pt; color: #666; }
+  }
+  * { box-sizing: border-box; }
+  body { font-family: "Sarabun", "TH Sarabun New", "Noto Sans Thai", "Loma", sans-serif; font-size: 10pt; color: #1f2937; }
+  h1 { font-size: 16pt; margin: 0; }
+  table { width: 100%; border-collapse: collapse; }
+  .muted { color: #6b7280; }
+  .right { text-align: right; }
+  .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #111; padding-bottom: 8px; }
+  .company { font-size: 9pt; line-height: 1.4; }
+  .docmeta { text-align: right; font-size: 9pt; }
+  .docmeta .num { font-size: 13pt; font-weight: 700; }
+  .parties { margin-top: 10px; font-size: 9pt; }
+  .grouptitle { margin: 12px 0 4px; font-weight: 700; }
+  .items th, .items td { border: 1px solid #d1d5db; padding: 4px 6px; vertical-align: top; }
+  .items th { background: #f3f4f6; font-size: 9pt; }
+  .items td.r, .items th.r { text-align: right; }
+  .groupsub td { background: #f9fafb; font-weight: 600; }
+  .totals { width: 62%; margin-left: 38%; margin-top: 10px; font-size: 9.5pt; }
+  .totals td { padding: 2px 6px; }
+  .totals .grand td { border-top: 1.5px solid #111; font-weight: 700; font-size: 11pt; }
+  .words { margin-top: 4px; font-size: 9pt; }
+  .terms { margin-top: 12px; font-size: 9pt; line-height: 1.5; }
+  .sigs { margin-top: 28px; width: 100%; }
+  .sigs td { width: 33.33%; text-align: center; font-size: 8.5pt; padding-top: 28px; }
+  .sigline { border-top: 1px solid #9ca3af; margin: 0 12px; padding-top: 4px; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="company">
+      <h1>{{ company.name_th|default:"บริษัท" }}</h1>
+      {% if company %}
+        <div>{{ company.address|linebreaksbr }}</div>
+        {% if company.tax_id %}<div>เลขประจำตัวผู้เสียภาษี {{ company.tax_id }} ({{ company.branch_label }})</div>{% endif %}
+        <div>{% if company.phone %}โทร {{ company.phone }}{% endif %}{% if company.email %} · {{ company.email }}{% endif %}{% if company.line_id %} · LINE {{ company.line_id }}{% endif %}</div>
+      {% endif %}
+    </div>
+    <div class="docmeta">
+      <div style="font-weight:700">ใบเสนอราคา / QUOTATION</div>
+      <div class="num">{{ document.doc_number|default:"(ร่าง)" }}{% if document.revision %} Rev.{{ document.revision }}{% endif %}</div>
+      <div>วันที่: {{ document.issue_date|date:"d/m/Y" }}</div>
+      <div>ยืนราคาถึง: {{ document.valid_until|date:"d/m/Y"|default:"—" }}</div>
+    </div>
+  </div>
+
+  <table class="parties"><tr>
+    <td style="width:60%">
+      <strong>ลูกค้า:</strong> {{ document.customer.name|default:"—" }}{% if document.customer.tax_id %} (เลขผู้เสียภาษี {{ document.customer.tax_id }}){% endif %}<br>
+      {% if document.customer.billing_address %}{{ document.customer.billing_address|linebreaksbr }}<br>{% endif %}
+      {% if document.contact %}ผู้ติดต่อ: {{ document.contact.name }}{% if document.contact.phone %} · {{ document.contact.phone }}{% endif %}{% endif %}
+    </td>
+    <td style="vertical-align:top">
+      {% if document.reference %}<strong>อ้างอิง:</strong> {{ document.reference }}<br>{% endif %}
+      {% if document.salesperson %}<strong>พนักงานขาย:</strong> {{ document.salesperson.get_full_name }}{% endif %}
+    </td>
+  </tr></table>
+
+  {% for g in totals.groups %}
+    {% if g.label %}<div class="grouptitle">{{ g.label }}</div>{% endif %}
+    <table class="items">
+      <thead><tr>
+        <th style="width:5%">#</th><th>รายละเอียด</th><th class="r" style="width:12%">จำนวน</th>
+        <th class="r" style="width:14%">ราคา/หน่วย</th><th class="r" style="width:12%">ส่วนลด</th><th class="r" style="width:16%">จำนวนเงิน</th>
+      </tr></thead>
+      <tbody>
+        {% for ln in g.lines %}
+          {% if ln.line_type == 'heading' %}
+            <tr><td colspan="6" style="background:#eef2f7;font-weight:700">{{ ln.description }}</td></tr>
+          {% elif ln.line_type == 'note' %}
+            <tr><td colspan="6" class="muted">{{ ln.description|linebreaksbr }}</td></tr>
+          {% else %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ ln.description|linebreaksbr }}{% if ln.dimensions or ln.material %}<div class="muted">{{ ln.dimensions }}{% if ln.dimensions and ln.material %} · {% endif %}{{ ln.material }}</div>{% endif %}</td>
+              <td class="r">{{ ln.quantity|floatformat:"-2" }} {{ ln.unit }}</td>
+              <td class="r">{{ ln.unit_price|floatformat:2 }}</td>
+              <td class="r">{% if ln.discount_value %}{{ ln.discount_value|floatformat:"-2" }}{% if ln.discount_kind == 'percent' %}%{% endif %}{% else %}—{% endif %}</td>
+              <td class="r">{{ ln.amount|floatformat:2 }}</td>
+            </tr>
+          {% endif %}
+        {% endfor %}
+        {% if g.subtotal %}<tr class="groupsub"><td colspan="5" class="r">รวม{% if g.label %} {{ g.label }}{% endif %}</td><td class="r">{{ g.subtotal|floatformat:2 }}</td></tr>{% endif %}
+      </tbody>
+    </table>
+  {% endfor %}
+
+  <table class="totals">
+    <tr><td class="muted">รวมเป็นเงิน</td><td class="r">{{ totals.subtotal|floatformat:2 }}</td></tr>
+    {% if totals.end_discount %}<tr><td class="muted">หักส่วนลดท้ายบิล</td><td class="r">-{{ totals.end_discount|floatformat:2 }}</td></tr>
+    <tr><td class="muted">มูลค่าหลังหักส่วนลด</td><td class="r">{{ totals.after_discount|floatformat:2 }}</td></tr>{% endif %}
+    {% if totals.has_zero_rated %}<tr><td class="muted">มูลค่าที่เสีย VAT 7%</td><td class="r">{{ totals.base_vat7|floatformat:2 }}</td></tr>
+    <tr><td class="muted">มูลค่ายกเว้น / VAT 0%</td><td class="r">{{ totals.base_vat0|add:totals.base_exempt|add:totals.base_none|floatformat:2 }}</td></tr>{% endif %}
+    <tr><td class="muted">ภาษีมูลค่าเพิ่ม 7%</td><td class="r">{{ totals.vat_amount|floatformat:2 }}</td></tr>
+    <tr class="grand"><td>ยอดรวมทั้งสิ้น</td><td class="r">{{ totals.grand_total|floatformat:2 }} บาท</td></tr>
+  </table>
+  <div class="words">({{ totals.amount_in_words }})</div>
+  {% if totals.withholding_estimate %}<div class="muted words">* ภาษีหัก ณ ที่จ่ายโดยประมาณ {{ totals.withholding_estimate|floatformat:2 }} บาท · ยอดรับสุทธิโดยประมาณ {{ totals.net_expected|floatformat:2 }} บาท</div>{% endif %}
+
+  {% if document.payment_terms or document.lead_time or document.warranty or document.bank_account or document.notes %}
+  <div class="terms">
+    {% if document.payment_terms %}<div><strong>เงื่อนไขการชำระเงิน:</strong> {{ document.payment_terms|linebreaksbr }}</div>{% endif %}
+    {% if document.lead_time %}<div><strong>กำหนดส่งมอบ/ติดตั้ง:</strong> {{ document.lead_time }}</div>{% endif %}
+    {% if document.warranty %}<div><strong>การรับประกัน:</strong> {{ document.warranty }}</div>{% endif %}
+    {% if document.bank_account %}<div><strong>ชำระเข้าบัญชี:</strong> {{ document.bank_account.bank_name }} {{ document.bank_account.account_number }} ({{ document.bank_account.account_name }})</div>{% endif %}
+    {% if document.notes %}<div>{{ document.notes|linebreaksbr }}</div>{% endif %}
+  </div>
+  {% endif %}
+
+  <table class="sigs"><tr>
+    <td><div class="sigline">ผู้เสนอราคา / วันที่</div></td>
+    <td><div class="sigline">ผู้มีอำนาจอนุมัติ / วันที่</div></td>
+    <td><div class="sigline">ผู้อนุมัติสั่งซื้อ (ลูกค้า) / วันที่</div></td>
+  </tr></table>
+</body>
+</html>

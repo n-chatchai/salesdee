@@ -8,6 +8,7 @@ urlpatterns = [
     path("", views.quotation_list, name="quotations"),
     path("new/", views.quotation_create, name="quotation_create"),
     path("<int:pk>/", views.quotation_detail, name="quotation_detail"),
+    path("<int:pk>/pdf/", views.quotation_pdf, name="quotation_pdf"),
     path("<int:pk>/edit/", views.quotation_edit, name="quotation_edit"),
     path("<int:pk>/lines/add/", views.quotation_add_line, name="quotation_add_line"),
     path(

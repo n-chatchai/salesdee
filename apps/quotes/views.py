@@ -12,6 +12,7 @@ from apps.crm.models import Deal
 
 from .forms import QuotationForm, SalesDocLineForm
 from .models import DocStatus, DocType, SalesDocLine, SalesDocument
+from .pdf import render_quotation_pdf
 from .services import compute_document_totals, create_quotation_from_deal, next_document_number
 
 
@@ -111,3 +112,20 @@ def quotation_from_deal(request: HttpRequest, deal_pk: int) -> HttpResponse:
     deal = get_object_or_404(Deal, pk=deal_pk)
     doc = create_quotation_from_deal(deal, salesperson=request.user)
     return redirect("quotes:quotation_detail", pk=doc.pk)
+
+
+@login_required
+def quotation_pdf(request: HttpRequest, pk: int) -> HttpResponse:
+    doc = get_object_or_404(
+        SalesDocument.objects.select_related(
+            "customer", "contact", "salesperson", "bank_account"
+        ).prefetch_related("lines"),
+        pk=pk,
+        doc_type=DocType.QUOTATION,
+    )
+    pdf = render_quotation_pdf(doc)
+    resp = HttpResponse(pdf, content_type="application/pdf")
+    resp["Content-Disposition"] = (
+        f'inline; filename="{doc.doc_number or f"quotation-{doc.pk}"}.pdf"'
+    )
+    return resp

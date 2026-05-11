@@ -134,7 +134,7 @@ If you're unsure which bucket → ask, don't guess. Default to "make it a settin
 - **Withholding tax**: on quotations it's informational only (not deducted from totals); on payment recording (phase 2) it's actual. Common rates 1/2/3/5% — configurable.
 - **Tax invoice (full form, Revenue Code §86/4)**: see REQUIREMENTS.md §5.2 for the required fields — enforce all of them when issuing.
 - **PDPA**: this app processes tenants' customers' personal data → tenant = controller, we = processor. Support export/delete of a data subject's data; keep access scoped; log access. Don't add tracking/data flows beyond what the spec calls for.
-- Embed Thai fonts in generated PDFs (don't rely on system fonts).
+- PDF generation: `apps/quotes/pdf.py` renders `templates/quotes/pdf/quotation.html` via WeasyPrint (lazy import). The PDF template currently relies on a **system Thai font** — install one in the runtime image (Linux: `fonts-thai-tlwg`) **or** bundle `Sarabun-*.ttf` in `static/fonts/` and add an `@font-face { src: url('file://…') }` to the template. Don't make the PDF fetch remote fonts at render time (slow/flaky). Keep per-line images out of the PDF until `base_url`/media serving is sorted.
 
 ---
 
