@@ -71,6 +71,33 @@ def create_quotation_from_deal(deal, *, salesperson=None) -> SalesDocument:
     return doc
 
 
+# --- Lines ---------------------------------------------------------------------
+def apply_catalog_defaults(line) -> None:
+    """When a line is linked to a catalog product/variant, take the product's tax type & unit as
+    authoritative, and fill price / description / dimensions / material when the line leaves them blank."""
+    product = line.product
+    variant = line.variant
+    if variant is not None and product is None:
+        product = variant.product
+        line.product = product
+    if product is None:
+        return
+    line.tax_type = product.tax_type
+    line.unit = product.unit
+    if not line.unit_price:
+        line.unit_price = (
+            variant.price if variant is not None and variant.price else product.default_price
+        ) or 0
+    if not line.description.strip():
+        line.description = (
+            f"{product.name} — {variant.name}" if variant is not None else product.name
+        )
+    if not line.dimensions and product.dimensions:
+        line.dimensions = product.dimensions
+    if not line.material and product.material:
+        line.material = product.material
+
+
 # --- Sharing / customer response ---------------------------------------------
 def get_or_create_share_link(
     document: SalesDocument, *, created_by=None, days: int = 30

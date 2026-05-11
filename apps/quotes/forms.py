@@ -76,19 +76,13 @@ class SalesDocLineForm(forms.ModelForm):
         set_queryset(self, "product", Product.objects.filter(is_active=True))
         set_queryset(self, "variant", ProductVariant.objects.filter(is_active=True))
         for name in (
-            "product",
-            "variant",
-            "unit",
-            "quantity",
-            "unit_price",
-            "discount_value",
-            "withholding_rate",
-        ):
+            "product", "variant", "description", "line_type", "unit", "quantity",
+            "unit_price", "discount_kind", "discount_value", "tax_type", "withholding_rate",
+        ):  # fmt: skip
             self.fields[name].required = False
         self.fields["quantity"].initial = 1
         self.fields["unit_price"].initial = 0
         self.fields["unit"].initial = "ชิ้น"
-        self.fields["description"].required = True
 
     def _num(self, name, default):
         value = self.cleaned_data.get(name)
@@ -108,3 +102,24 @@ class SalesDocLineForm(forms.ModelForm):
 
     def clean_unit(self):
         return self.cleaned_data.get("unit") or "ชิ้น"
+
+    def clean_line_type(self):
+        return (
+            self.cleaned_data.get("line_type") or SalesDocLine._meta.get_field("line_type").default
+        )
+
+    def clean_discount_kind(self):
+        return (
+            self.cleaned_data.get("discount_kind")
+            or SalesDocLine._meta.get_field("discount_kind").default
+        )
+
+    def clean_tax_type(self):
+        return self.cleaned_data.get("tax_type") or SalesDocLine._meta.get_field("tax_type").default
+
+    def clean(self):
+        cleaned = super().clean()
+        desc = (cleaned.get("description") or "").strip()
+        if not desc and not cleaned.get("product") and not cleaned.get("variant"):
+            self.add_error("description", "ระบุรายละเอียด หรือเลือกสินค้าจากแคตตาล็อก")
+        return cleaned

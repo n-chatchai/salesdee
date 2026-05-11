@@ -25,6 +25,7 @@ from .models import (
 )
 from .pdf import render_quotation_pdf
 from .services import (
+    apply_catalog_defaults,
     compute_document_totals,
     create_quotation_from_deal,
     get_or_create_share_link,
@@ -82,46 +83,81 @@ def quotation_edit(request: HttpRequest, pk: int) -> HttpResponse:
     return render(request, "quotes/quotation_form.html", {"form": form, "document": doc})
 
 
-@login_required
-def quotation_detail(request: HttpRequest, pk: int) -> HttpResponse:
-    doc = get_object_or_404(
+def _quote_for_edit(pk: int) -> SalesDocument:
+    return get_object_or_404(
         SalesDocument.objects.select_related(
             "customer", "contact", "salesperson", "deal", "bank_account"
-        ).prefetch_related("lines"),
+        ).prefetch_related("lines__product", "lines__variant"),
         pk=pk,
         doc_type=DocType.QUOTATION,
     )
-    return render(
-        request,
-        "quotes/quotation_detail.html",
-        {"document": doc, "totals": compute_document_totals(doc), "line_form": SalesDocLineForm()},
-    )
+
+
+def _lines_ctx(doc: SalesDocument, *, add_form=None, editing_line_id=None, edit_form=None) -> dict:
+    return {
+        "document": doc,
+        "totals": compute_document_totals(doc),
+        "line_form": add_form or SalesDocLineForm(),
+        "editing_line_id": editing_line_id,
+        "line_edit_form": edit_form,
+    }
+
+
+@login_required
+def quotation_detail(request: HttpRequest, pk: int) -> HttpResponse:
+    doc = _quote_for_edit(pk)
+    return render(request, "quotes/quotation_detail.html", _lines_ctx(doc))
+
+
+@login_required
+def quotation_lines_partial(request: HttpRequest, pk: int) -> HttpResponse:
+    return render(request, "quotes/_quote_lines.html", _lines_ctx(_quote_for_edit(pk)))
 
 
 @login_required
 @require_POST
 def quotation_add_line(request: HttpRequest, pk: int) -> HttpResponse:
-    doc = get_object_or_404(SalesDocument, pk=pk, doc_type=DocType.QUOTATION)
+    doc = _quote_for_edit(pk)
     form = SalesDocLineForm(request.POST)
     if form.is_valid():
         line = form.save(commit=False)
         line.document = doc
         line.position = (doc.lines.aggregate(m=Max("position"))["m"] or 0) + 1
+        apply_catalog_defaults(line)
         line.save()
-        return redirect("quotes:quotation_detail", pk=doc.pk)
-    return render(
-        request,
-        "quotes/quotation_detail.html",
-        {"document": doc, "totals": compute_document_totals(doc), "line_form": form},
-    )
+        return render(request, "quotes/_quote_lines.html", _lines_ctx(_quote_for_edit(pk)))
+    return render(request, "quotes/_quote_lines.html", _lines_ctx(doc, add_form=form))
 
 
 @login_required
 @require_POST
 def quotation_delete_line(request: HttpRequest, pk: int, line_pk: int) -> HttpResponse:
-    doc = get_object_or_404(SalesDocument, pk=pk, doc_type=DocType.QUOTATION)
+    doc = _quote_for_edit(pk)
     get_object_or_404(SalesDocLine, pk=line_pk, document=doc).delete()
-    return redirect("quotes:quotation_detail", pk=doc.pk)
+    return render(request, "quotes/_quote_lines.html", _lines_ctx(_quote_for_edit(pk)))
+
+
+@login_required
+def quotation_line_edit(request: HttpRequest, pk: int, line_pk: int) -> HttpResponse:
+    doc = _quote_for_edit(pk)
+    line = get_object_or_404(SalesDocLine, pk=line_pk, document=doc)
+    if request.method == "POST":
+        form = SalesDocLineForm(request.POST, instance=line)
+        if form.is_valid():
+            obj = form.save(commit=False)
+            apply_catalog_defaults(obj)
+            obj.save()
+            return render(request, "quotes/_quote_lines.html", _lines_ctx(_quote_for_edit(pk)))
+        return render(
+            request,
+            "quotes/_quote_lines.html",
+            _lines_ctx(doc, editing_line_id=line.pk, edit_form=form),
+        )
+    return render(
+        request,
+        "quotes/_quote_lines.html",
+        _lines_ctx(doc, editing_line_id=line.pk, edit_form=SalesDocLineForm(instance=line)),
+    )
 
 
 @login_required

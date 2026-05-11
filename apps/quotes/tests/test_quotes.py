@@ -127,7 +127,7 @@ def test_quotation_create_view(client, user, membership, tenant) -> None:
     assert resp.url == reverse("quotes:quotation_detail", args=[doc.pk])
 
 
-def test_quotation_add_and_delete_line(client, user, membership, tenant) -> None:
+def test_quotation_add_and_delete_line_htmx(client, user, membership, tenant) -> None:
     doc = _doc(tenant)
     client.force_login(user)
     resp = client.post(
@@ -137,19 +137,72 @@ def test_quotation_add_and_delete_line(client, user, membership, tenant) -> None
             "description": "โต๊ะประชุม 12 ที่นั่ง",
             "quantity": "1",
             "unit_price": "35000",
-            "tax_type": TaxType.VAT7,
-            "discount_kind": "amount",
         },
     )
-    assert resp.status_code == 302
+    assert resp.status_code == 200  # htmx -> the #quote-lines partial
+    assert "โต๊ะประชุม 12 ที่นั่ง" in resp.content.decode()
     with tenant_context(tenant):
         assert doc.lines.count() == 1
         line = doc.lines.first()
         assert line is not None
     resp = client.post(reverse("quotes:quotation_delete_line", args=[doc.pk, line.pk]))
-    assert resp.status_code == 302
+    assert resp.status_code == 200
     with tenant_context(tenant):
         assert doc.lines.count() == 0
+
+
+def test_quotation_lines_partial_renders(client, user, membership, tenant) -> None:
+    doc = _doc(tenant)
+    client.force_login(user)
+    resp = client.get(reverse("quotes:quotation_lines_partial", args=[doc.pk]))
+    assert resp.status_code == 200
+    assert "เพิ่มรายการ" in resp.content.decode()
+
+
+def test_quotation_line_edit_get_and_post(client, user, membership, tenant) -> None:
+    doc = _doc(tenant)
+    _line(tenant, doc, description="เก่า", quantity=Decimal("1"), unit_price=Decimal("100"))
+    with tenant_context(tenant):
+        line = doc.lines.get()
+    client.force_login(user)
+    get_resp = client.get(reverse("quotes:quotation_line_edit", args=[doc.pk, line.pk]))
+    assert get_resp.status_code == 200
+    assert "เก่า" in get_resp.content.decode()  # the bound edit form
+    post_resp = client.post(
+        reverse("quotes:quotation_line_edit", args=[doc.pk, line.pk]),
+        {"line_type": "item", "description": "ใหม่", "quantity": "3", "unit_price": "250"},
+    )
+    assert post_resp.status_code == 200
+    with tenant_context(tenant):
+        line.refresh_from_db()
+        assert line.description == "ใหม่"
+        assert line.quantity == Decimal("3")
+        assert line.unit_price == Decimal("250")
+
+
+def test_add_line_with_product_fills_defaults(client, user, membership, tenant) -> None:
+    from apps.catalog.models import Product
+
+    with tenant_context(tenant):
+        prod = Product.objects.create(
+            name="โต๊ะ X", default_price=Decimal("1200"), unit="ตัว", tax_type=TaxType.VAT7
+        )
+        doc = SalesDocument.objects.create(
+            doc_type=DocType.QUOTATION,
+            customer=Customer.objects.create(name="C"),
+            issue_date=date.today(),
+        )
+    client.force_login(user)
+    resp = client.post(
+        reverse("quotes:quotation_add_line", args=[doc.pk]),
+        {"line_type": "item", "product": prod.pk},
+    )
+    assert resp.status_code == 200
+    with tenant_context(tenant):
+        line = doc.lines.get()
+        assert line.unit_price == Decimal("1200")
+        assert line.description == "โต๊ะ X"
+        assert line.unit == "ตัว"
 
 
 def test_quotation_list_and_detail_render(client, user, membership, tenant) -> None:
