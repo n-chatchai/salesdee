@@ -2,12 +2,22 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
 
+from apps.quotes import views as quote_views
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("apps.accounts.urls")),
     path("crm/", include("apps.crm.urls")),
     path("catalog/", include("apps.catalog.urls")),
     path("quotes/", include("apps.quotes.urls")),
+    # Public, login-free quotation share links (tenant resolved from the token).
+    path("q/<str:token>/", quote_views.public_quotation, name="public_quotation"),
+    path(
+        "q/<str:token>/respond/",
+        quote_views.public_quotation_respond,
+        name="public_quotation_respond",
+    ),
+    path("q/<str:token>/pdf/", quote_views.public_quotation_pdf, name="public_quotation_pdf"),
     path("", include("apps.core.urls")),
 ]
 

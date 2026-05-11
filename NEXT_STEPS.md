@@ -36,15 +36,15 @@ Then in Django admin (`/admin`): create a **Workspace (Tenant)** and a **Members
 - ✅ **Rebrand → `salesdee`** (working name; product display name in templates/docs).
 - ✅ **Catalog** (`apps/catalog`) — `ProductCategory`, `Product` (furniture fields), `ProductImage`, `ProductVariant`, `ProductOption`, `BundleItem` (+ RLS); admin with inlines; product list/detail/create/edit UI; **`import_catalog` management command** (xlsx → products).
 - ✅ **Quotation — round 1** (`apps/quotes`) — `DocumentNumberSequence` (per tenant/doc-type/year, `select_for_update`, gap-free), `SalesDocument`(QUOTATION) + `SalesDocLine` (room/zone grouping, per-line image, free-text or catalog-linked), **totals engine** (subtotal → end-of-bill discount allocated proportionally → VAT bases per rate → VAT 7% → grand total + withholding estimate + net expected + **BahtText** + rounding; EXCLUSIVE pricing only for now), admin with line inline, quotation list/detail/create/edit UI, non-htmx add/delete line, **create-quotation-from-deal**.
-- ✅ **Quotation PDF** — `apps/quotes/pdf.py` + `templates/quotes/pdf/quotation.html` rendered via WeasyPrint (A4, page numbers, company header from `CompanyProfile`, room groups, lines table, totals box, BahtText, signature blocks); "พิมพ์ / PDF" link on the detail page. *(Thai font: needs a system Thai font / bundled Sarabun — see CLAUDE.md; per-line images not in the PDF yet.)* `make check` green (78 tests).
+- ✅ **Quotation PDF** — `apps/quotes/pdf.py` + `templates/quotes/pdf/quotation.html` via WeasyPrint (A4, page numbers, company header, room groups, lines table, totals box, BahtText, signature blocks); "พิมพ์ / PDF" link. *(Thai font: needs a system Thai font / bundled Sarabun — see CLAUDE.md; per-line images not in the PDF yet.)*
+- ✅ **Quotation sending** — `QuotationShareLink` (tokenised, BaseModel/no-RLS, like `TenantDomain`); "ส่งให้ลูกค้า" → creates a share link + marks SENT + auto follow-up task + emails the contact; **public login-free quote page** at `/q/<token>/` (web view of the quote, "ดาวน์โหลด PDF", and a **ยอมรับ / ขอแก้ไข / ปฏิเสธ** form with e-signature name + timestamp + IP → updates the document status); expired/invalid token → friendly page; public PDF at `/q/<token>/pdf/`. `make check` green (84 tests).
 
 ## Phase 1 backlog (next, suggested order — see REQUIREMENTS.md §4)
 
-1. **Sending** — share link (signed token + expiry → public read-only quote page, no login), send via email / LINE (attach the PDF), public **accept / request-changes / reject** with e-signature (name + timestamp + IP) → updates the deal/quote status; auto follow-up tasks ("X days after sent, no reply"). §4.8
-2. **Quotation — round 2** — htmx line editor (add/edit/reorder lines, live totals; pick from catalog auto-fills price/desc/tax/image); document statuses + transitions; **revisions** (snapshot on send + diff); **discount-approval workflow** (using `Membership` caps); INCLUSIVE-VAT pricing; rounding-diff line; per-line images in the PDF. §4.7
-3. **Reports/dashboard** — pipeline value, win/loss + lost reasons, sales targets vs actual, quotation conversion rate. §4.9
-4. **Roles & permissions** — enforce role-based access + approval caps from `Membership`. §4.15
-5. **Customer import** — `import_customers` command / web import (catalog import command exists).
+1. **Quotation — round 2** — htmx line editor (add/edit/reorder lines inline, live totals; pick from catalog auto-fills price/desc/tax/image; per-line image upload); document statuses + transitions (approve/cancel/expire-on-validity); **revisions** (snapshot on send + diff between revisions); **discount-approval workflow** (`Membership.max_discount_percent`/`approval_limit`); INCLUSIVE-VAT pricing; rounding-diff line; per-line images in the PDF; LINE send. §4.7
+2. **Reports/dashboard** — pipeline value, win/loss + lost reasons, sales targets vs actual, quotation conversion rate, sent-not-responded list. §4.9
+3. **Roles & permissions** — enforce role-based access + approval caps from `Membership`. §4.15
+4. **Customer import** — `import_customers` command / web import (catalog import command exists).
 
 ### Smaller follow-ups (optional, can defer)
 - LINE inbound (Messaging API webhook → create/link Lead) — currently only the public web form + manual entry exist.

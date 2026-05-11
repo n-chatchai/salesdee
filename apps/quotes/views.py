@@ -2,18 +2,36 @@ from __future__ import annotations
 
 from datetime import date, timedelta
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
 from django.db.models import Max
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from apps.crm.models import Deal
+from apps.core.current_tenant import tenant_context
+from apps.crm.models import Deal, Task, TaskKind
 
 from .forms import QuotationForm, SalesDocLineForm
-from .models import DocStatus, DocType, SalesDocLine, SalesDocument
+from .models import (
+    CustomerResponse,
+    DocStatus,
+    DocType,
+    QuotationShareLink,
+    SalesDocLine,
+    SalesDocument,
+)
 from .pdf import render_quotation_pdf
-from .services import compute_document_totals, create_quotation_from_deal, next_document_number
+from .services import (
+    compute_document_totals,
+    create_quotation_from_deal,
+    get_or_create_share_link,
+    mark_sent,
+    next_document_number,
+    record_customer_response,
+)
 
 
 @login_required
@@ -127,5 +145,113 @@ def quotation_pdf(request: HttpRequest, pk: int) -> HttpResponse:
     resp = HttpResponse(pdf, content_type="application/pdf")
     resp["Content-Disposition"] = (
         f'inline; filename="{doc.doc_number or f"quotation-{doc.pk}"}.pdf"'
+    )
+    return resp
+
+
+# --- Sending / public share link ---------------------------------------------
+def _public_quote_url(request: HttpRequest, token: str) -> str:
+    from django.urls import reverse
+
+    return request.build_absolute_uri(reverse("public_quotation", args=[token]))
+
+
+@login_required
+@require_POST
+def quotation_send(request: HttpRequest, pk: int) -> HttpResponse:
+    doc = get_object_or_404(
+        SalesDocument.objects.select_related("contact", "deal", "customer", "salesperson"),
+        pk=pk,
+        doc_type=DocType.QUOTATION,
+    )
+    link = get_or_create_share_link(doc, created_by=request.user)
+    mark_sent(doc)
+    # auto follow-up task (to the salesperson, or unassigned if none)
+    Task.objects.create(
+        deal=doc.deal,
+        customer=doc.customer,
+        kind=TaskKind.FOLLOW_UP,
+        description=f"ติดตามใบเสนอราคา {doc.doc_number}",
+        due_at=timezone.now() + timedelta(days=7),
+        assignee=doc.salesperson,
+    )
+    url = _public_quote_url(request, link.token)
+    if doc.contact and doc.contact.email:
+        send_mail(
+            subject=f"ใบเสนอราคา {doc.doc_number}",
+            message=f"เรียนคุณ {doc.contact.name}\n\nดูใบเสนอราคาได้ที่ลิงก์นี้: {url}\n\nขอบคุณครับ",
+            from_email=None,
+            recipient_list=[doc.contact.email],
+            fail_silently=True,
+        )
+        messages.success(request, f"ส่งอีเมลถึง {doc.contact.email} แล้ว · ลิงก์: {url}")
+    else:
+        messages.success(request, f"สร้างลิงก์แชร์แล้ว · {url}")
+    return redirect("quotes:quotation_detail", pk=doc.pk)
+
+
+def _resolve_link(token: str) -> QuotationShareLink | None:
+    link = (
+        QuotationShareLink.objects.filter(token=token)
+        .select_related(
+            "document",
+            "document__customer",
+            "document__contact",
+            "document__salesperson",
+            "document__bank_account",
+            "tenant",
+        )
+        .first()
+    )
+    return link if link is not None and link.is_valid() else None
+
+
+def public_quotation(request: HttpRequest, token: str) -> HttpResponse:
+    """Public, login-free quotation view. The tenant is resolved from the token."""
+    link = _resolve_link(token)
+    if link is None:
+        return render(request, "quotes/public_quotation_invalid.html")
+    from apps.tenants.models import CompanyProfile
+
+    with tenant_context(link.tenant):
+        doc = link.document
+        ctx = {
+            "document": doc,
+            "totals": compute_document_totals(doc),
+            "company": CompanyProfile.objects.filter(tenant_id=doc.tenant_id).first(),
+            "token": token,
+            "responses": CustomerResponse,
+        }
+        return render(request, "quotes/public_quotation.html", ctx)
+
+
+@require_POST
+def public_quotation_respond(request: HttpRequest, token: str) -> HttpResponse:
+    link = _resolve_link(token)
+    if link is None:
+        return render(request, "quotes/public_quotation_invalid.html")
+    response = request.POST.get("response", "")
+    if response not in CustomerResponse.values:
+        return redirect("public_quotation", token=token)
+    with tenant_context(link.tenant):
+        record_customer_response(
+            link.document,
+            response=response,
+            signed_name=request.POST.get("signed_name", "").strip(),
+            note=request.POST.get("note", "").strip(),
+            ip=request.META.get("REMOTE_ADDR"),
+        )
+        return render(request, "quotes/public_quotation_thanks.html", {"document": link.document})
+
+
+def public_quotation_pdf(request: HttpRequest, token: str) -> HttpResponse:
+    link = _resolve_link(token)
+    if link is None:
+        return render(request, "quotes/public_quotation_invalid.html")
+    with tenant_context(link.tenant):
+        pdf = render_quotation_pdf(link.document)
+    resp = HttpResponse(pdf, content_type="application/pdf")
+    resp["Content-Disposition"] = (
+        f'inline; filename="{link.document.doc_number or "quotation"}.pdf"'
     )
     return resp

@@ -9,10 +9,19 @@
       <h1 class="mt-1 text-xl font-semibold">ใบเสนอราคา {{ document.doc_number }}{% if document.revision %} Rev.{{ document.revision }}{% endif %}</h1>
     </div>
     <div class="flex gap-2">
+      <form method="post" action="{% url 'quotes:quotation_send' document.pk %}">{% csrf_token %}<button type="submit" class="rounded bg-emerald-600 px-3 py-1.5 text-sm text-white hover:bg-emerald-700">ส่งให้ลูกค้า</button></form>
       <a href="{% url 'quotes:quotation_pdf' document.pk %}" target="_blank" class="rounded bg-slate-800 px-3 py-1.5 text-sm text-white hover:bg-slate-700">พิมพ์ / PDF</a>
       <a href="{% url 'quotes:quotation_edit' document.pk %}" class="rounded border px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">แก้ไขหัวเอกสาร</a>
     </div>
   </div>
+
+  {% if document.customer_response %}
+    <div class="mt-3 rounded-lg border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-800">
+      ลูกค้าตอบกลับ: <strong>{{ document.get_customer_response_display }}</strong>{% if document.customer_signed_name %} (โดย {{ document.customer_signed_name }}){% endif %} · {{ document.customer_responded_at|date:"d/m/Y H:i" }}{% if document.customer_response_note %} — {{ document.customer_response_note }}{% endif %}
+    </div>
+  {% elif document.sent_at %}
+    <div class="mt-3 rounded-lg border bg-slate-50 p-3 text-sm text-slate-600">ส่งให้ลูกค้าแล้วเมื่อ {{ document.sent_at|date:"d/m/Y H:i" }} — รอลูกค้าตอบกลับ</div>
+  {% endif %}
 
   <section class="mt-4 grid gap-x-8 gap-y-1 rounded-lg border bg-white p-4 text-sm sm:grid-cols-2">
     <div><span class="text-slate-500">ลูกค้า:</span> {% if document.customer %}<a class="hover:underline" href="{% url 'crm:customer_detail' document.customer.pk %}">{{ document.customer.name }}</a>{% else %}—{% endif %}{% if document.contact %} ({{ document.contact.name }}){% endif %}</div>

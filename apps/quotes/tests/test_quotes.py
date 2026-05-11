@@ -1,18 +1,28 @@
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 
 import pytest
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.catalog.models import TaxType
 from apps.core.current_tenant import tenant_context
-from apps.crm.models import Customer, Deal, PipelineStage, StageKind
-from apps.quotes.models import DocStatus, DocType, LineType, SalesDocLine, SalesDocument
+from apps.crm.models import Contact, Customer, Deal, PipelineStage, StageKind, Task
+from apps.quotes.models import (
+    CustomerResponse,
+    DocStatus,
+    DocType,
+    LineType,
+    QuotationShareLink,
+    SalesDocLine,
+    SalesDocument,
+)
 from apps.quotes.services import (
     compute_document_totals,
     create_quotation_from_deal,
+    get_or_create_share_link,
     next_document_number,
 )
 
@@ -179,6 +189,94 @@ def test_quotation_pdf_renders(client, user, membership, tenant) -> None:
         doc.save()
     client.force_login(user)
     resp = client.get(reverse("quotes:quotation_pdf", args=[doc.pk]))
+    assert resp.status_code == 200
+    assert resp["Content-Type"] == "application/pdf"
+    assert resp.content[:5] == b"%PDF-"
+
+
+# --- sending / public share link ---------------------------------------------
+def _doc_with_contact(tenant) -> tuple[SalesDocument, Contact]:
+    with tenant_context(tenant):
+        customer = Customer.objects.create(name="โรงเรียน บี")
+        contact = Contact.objects.create(customer=customer, name="คุณวิภา", email="wipa@school.test")
+        doc = SalesDocument.objects.create(
+            doc_type=DocType.QUOTATION,
+            customer=customer,
+            contact=contact,
+            issue_date=date.today(),
+            doc_number="QT-2569-0007",
+        )
+        return doc, contact
+
+
+def test_quotation_send_creates_link_marks_sent_and_follow_up(
+    client, user, membership, tenant
+) -> None:
+    doc, _contact = _doc_with_contact(tenant)
+    client.force_login(user)
+    resp = client.post(reverse("quotes:quotation_send", args=[doc.pk]))
+    assert resp.status_code == 302
+    with tenant_context(tenant):
+        doc.refresh_from_db()
+        assert doc.status == DocStatus.SENT
+        assert doc.sent_at is not None
+        link = QuotationShareLink.objects.get(document=doc)
+        assert link.is_valid()
+        assert Task.objects.filter(customer=doc.customer, kind="follow_up").exists()
+
+
+def test_public_quotation_view_anonymous(client, tenant) -> None:
+    doc, _ = _doc_with_contact(tenant)
+    with tenant_context(tenant):
+        link = get_or_create_share_link(doc, created_by=None)
+    resp = client.get(reverse("public_quotation", args=[link.token]))
+    assert resp.status_code == 200
+    assert "QT-2569-0007" in resp.content.decode()
+
+
+def test_public_quotation_respond_accept(client, tenant) -> None:
+    doc, _ = _doc_with_contact(tenant)
+    with tenant_context(tenant):
+        link = get_or_create_share_link(doc, created_by=None)
+    resp = client.post(
+        reverse("public_quotation_respond", args=[link.token]),
+        {"response": CustomerResponse.ACCEPTED, "signed_name": "วิภา ผู้ซื้อ", "note": ""},
+    )
+    assert resp.status_code == 200
+    assert "ได้รับคำตอบ" in resp.content.decode()
+    with tenant_context(tenant):
+        doc.refresh_from_db()
+        assert doc.customer_response == CustomerResponse.ACCEPTED
+        assert doc.status == DocStatus.ACCEPTED
+        assert doc.customer_signed_name == "วิภา ผู้ซื้อ"
+
+
+def test_public_quotation_invalid_token(client) -> None:
+    resp = client.get(reverse("public_quotation", args=["no-such-token"]))
+    assert resp.status_code == 200
+    assert "หมดอายุ" in resp.content.decode()
+
+
+def test_public_quotation_expired_link(client, tenant) -> None:
+    doc, _ = _doc_with_contact(tenant)
+    with tenant_context(tenant):
+        QuotationShareLink.objects.create(
+            tenant_id=doc.tenant_id,
+            document=doc,
+            token="expired-tok",
+            expires_at=timezone.now() - timedelta(days=1),
+        )
+    resp = client.get(reverse("public_quotation", args=["expired-tok"]))
+    assert resp.status_code == 200
+    assert "หมดอายุ" in resp.content.decode()
+
+
+def test_public_quotation_pdf_anonymous(client, tenant) -> None:
+    doc, _ = _doc_with_contact(tenant)
+    _line(tenant, doc, description="โต๊ะ", quantity=Decimal("1"), unit_price=Decimal("1000"))
+    with tenant_context(tenant):
+        link = get_or_create_share_link(doc, created_by=None)
+    resp = client.get(reverse("public_quotation_pdf", args=[link.token]))
     assert resp.status_code == 200
     assert resp["Content-Type"] == "application/pdf"
     assert resp.content[:5] == b"%PDF-"

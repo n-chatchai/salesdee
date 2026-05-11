@@ -13,7 +13,7 @@ from django.conf import settings
 from django.db import models
 
 from apps.catalog.models import TaxType
-from apps.core.models import TenantScopedModel
+from apps.core.models import BaseModel, TenantScopedModel
 
 
 class DocType(models.TextChoices):
@@ -46,6 +46,12 @@ class LineType(models.TextChoices):
     ITEM = "item", "รายการ"
     HEADING = "heading", "หัวข้อ/กลุ่ม"
     NOTE = "note", "ข้อความ"
+
+
+class CustomerResponse(models.TextChoices):
+    ACCEPTED = "accepted", "ยอมรับ"
+    CHANGES = "changes", "ขอแก้ไข"
+    REJECTED = "rejected", "ปฏิเสธ"
 
 
 class DocumentNumberSequence(TenantScopedModel):
@@ -115,6 +121,15 @@ class SalesDocument(TenantScopedModel):
     bank_account = models.ForeignKey(
         "tenants.BankAccount", on_delete=models.SET_NULL, related_name="+", null=True, blank=True
     )
+    sent_at = models.DateTimeField("ส่งให้ลูกค้าเมื่อ", null=True, blank=True)
+    # Customer response captured via the public share link
+    customer_response = models.CharField(
+        "การตอบกลับของลูกค้า", max_length=10, choices=CustomerResponse.choices, blank=True
+    )
+    customer_signed_name = models.CharField("ลงชื่อโดย", max_length=200, blank=True)
+    customer_response_note = models.TextField("ข้อความจากลูกค้า", blank=True)
+    customer_responded_at = models.DateTimeField("ตอบกลับเมื่อ", null=True, blank=True)
+    customer_response_ip = models.GenericIPAddressField("IP ที่ตอบกลับ", null=True, blank=True)
 
     class Meta:
         ordering = ("-created_at",)
@@ -174,3 +189,33 @@ class SalesDocLine(TenantScopedModel):
     def amount(self) -> Decimal:
         """Net line amount (qty × price − discount). Ignored in totals for HEADING/NOTE lines."""
         return Decimal(self.quantity) * Decimal(self.unit_price) - self.line_discount
+
+
+class QuotationShareLink(BaseModel):
+    """A tokenized public link to view/accept a quotation (no login). Global model — it resolves
+    the tenant from the token, so it's looked up before any tenant context (no RLS), like TenantDomain."""
+
+    tenant = models.ForeignKey(
+        "tenants.Tenant", on_delete=models.CASCADE, related_name="quote_share_links"
+    )
+    document = models.ForeignKey(
+        SalesDocument, on_delete=models.CASCADE, related_name="share_links"
+    )
+    token = models.CharField(max_length=64, unique=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+    revoked = models.BooleanField(default=False)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name="+", null=True, blank=True
+    )
+
+    class Meta:
+        verbose_name = "ลิงก์แชร์ใบเสนอราคา"
+        verbose_name_plural = "ลิงก์แชร์ใบเสนอราคา"
+
+    def __str__(self) -> str:
+        return f"link {self.token[:8]}… -> {self.document}"
+
+    def is_valid(self) -> bool:
+        from django.utils import timezone
+
+        return not self.revoked and (self.expires_at is None or self.expires_at > timezone.now())

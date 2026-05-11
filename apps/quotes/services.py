@@ -3,22 +3,26 @@ See CLAUDE.md §4 (decimal money, transactional doc numbers, snapshot rates)."""
 
 from __future__ import annotations
 
+import secrets
 from dataclasses import dataclass
 from datetime import date, timedelta
 from decimal import ROUND_HALF_UP, Decimal
 
 from django.db import transaction
+from django.utils import timezone
 
 from apps.catalog.models import TaxType
 from apps.core.utils import baht_text
 from apps.core.utils.thai_dates import to_be_year
 
 from .models import (
+    CustomerResponse,
     DiscountKind,
     DocStatus,
     DocType,
     DocumentNumberSequence,
     LineType,
+    QuotationShareLink,
     SalesDocument,
 )
 
@@ -65,6 +69,57 @@ def create_quotation_from_deal(deal, *, salesperson=None) -> SalesDocument:
     doc.doc_number = next_document_number(DocType.QUOTATION, prefix="QT")
     doc.save()
     return doc
+
+
+# --- Sharing / customer response ---------------------------------------------
+def get_or_create_share_link(
+    document: SalesDocument, *, created_by=None, days: int = 30
+) -> QuotationShareLink:
+    """Return the document's current valid share link, creating one if there isn't one."""
+    link = (
+        QuotationShareLink.objects.filter(document=document, revoked=False)
+        .order_by("-created_at")
+        .first()
+    )
+    if link is not None and link.is_valid():
+        return link
+    return QuotationShareLink.objects.create(
+        tenant_id=document.tenant_id,
+        document=document,
+        token=secrets.token_urlsafe(24),
+        expires_at=timezone.now() + timedelta(days=days),
+        created_by=created_by,
+    )
+
+
+def mark_sent(document: SalesDocument) -> None:
+    """Move a draft/pending quotation to SENT and stamp ``sent_at`` (idempotent on the timestamp)."""
+    if document.status in (DocStatus.DRAFT, DocStatus.PENDING_APPROVAL, DocStatus.READY):
+        document.status = DocStatus.SENT
+    document.sent_at = document.sent_at or timezone.now()
+    document.save()
+
+
+def record_customer_response(
+    document: SalesDocument,
+    *,
+    response: str,
+    signed_name: str = "",
+    note: str = "",
+    ip: str | None = None,
+) -> None:
+    """Record the customer's accept / request-changes / reject from the public share link."""
+    document.customer_response = response
+    document.customer_signed_name = signed_name
+    document.customer_response_note = note
+    document.customer_responded_at = timezone.now()
+    document.customer_response_ip = ip
+    if response == CustomerResponse.ACCEPTED:
+        document.status = DocStatus.ACCEPTED
+    elif response == CustomerResponse.REJECTED:
+        document.status = DocStatus.REJECTED
+    # CHANGES -> stays SENT; the note tells the salesperson what to revise
+    document.save()
 
 
 # --- Totals engine ------------------------------------------------------------
