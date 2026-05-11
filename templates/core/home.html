@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}หน้าหลัก · ระบบงานขาย & ใบเสนอราคา{% endblock %}
+
+{% block content %}
+  <h1 class="text-2xl font-semibold">ยินดีต้อนรับ</h1>
+  {% if current_tenant %}
+    <p class="mt-1 text-slate-600">Workspace: <strong>{{ current_tenant.name }}</strong> (แพ็ก {{ current_tenant.get_plan_display }})</p>
+  {% else %}
+    <p class="mt-1 text-amber-700">ยังไม่ได้ผูกผู้ใช้นี้กับ workspace ใด — สร้าง Tenant และ Membership ใน <a class="underline" href="/admin/">/admin</a></p>
+  {% endif %}
+
+  <div class="mt-8 grid gap-4 sm:grid-cols-3">
+    <div class="rounded-lg border bg-white p-4">
+      <h2 class="font-medium">Pipeline การขาย</h2>
+      <p class="mt-1 text-sm text-slate-500">เฟส 1 — กำลังพัฒนา</p>
+    </div>
+    <div class="rounded-lg border bg-white p-4">
+      <h2 class="font-medium">ใบเสนอราคา</h2>
+      <p class="mt-1 text-sm text-slate-500">เฟส 1 — กำลังพัฒนา</p>
+    </div>
+    <div class="rounded-lg border bg-white p-4">
+      <h2 class="font-medium">แคตตาล็อกสินค้า</h2>
+      <p class="mt-1 text-sm text-slate-500">เฟส 1 — กำลังพัฒนา</p>
+    </div>
+  </div>
+
+  <p class="mt-8 text-sm text-slate-400">ดูสเปกเต็มที่ <code>REQUIREMENTS.md</code> · แนวทางการพัฒนาที่ <code>CLAUDE.md</code></p>
+{% endblock %}

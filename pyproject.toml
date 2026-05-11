@@ -1,0 +1,61 @@
+[project]
+name = "quotation"
+version = "0.1.0"
+description = "Presale + CRM SaaS for Thai SMEs (furniture-first)"
+requires-python = ">=3.12"
+dependencies = [
+    "django>=6.0,<7.0",
+    "psycopg[binary]>=3.2",
+    "django-environ>=0.12",
+    "redis>=5.2",                 # Django cache backend (optional but recommended)
+    "weasyprint>=63",             # HTML -> PDF (embed Thai fonts)
+    "openpyxl>=3.1",              # Excel import/export
+    "line-bot-sdk>=3.14",         # LINE Messaging API
+    "django-htmx>=1.21",          # request.htmx helpers
+    "pillow>=11.0",               # ImageField support (logos, product images)
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-django>=4.9",
+    "pytest-cov>=6.0",
+    "ruff>=0.8",
+    "mypy>=1.13",
+    "django-stubs[compatible-mypy]>=5.1",
+    "django-debug-toolbar>=4.4",
+    "factory-boy>=3.3",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+extend-exclude = ["migrations"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "DJ", "C4", "SIM"]
+ignore = ["E501"]  # line length handled by formatter
+
+[tool.ruff.lint.per-file-ignores]
+"*/migrations/*" = ["ALL"]
+"*/settings/*" = ["F403", "F405"]
+
+[tool.mypy]
+python_version = "3.12"
+plugins = ["mypy_django_plugin.main"]
+exclude = ['migrations/']
+warn_unused_ignores = true
+warn_redundant_casts = true
+ignore_missing_imports = true
+
+[tool.django-stubs]
+django_settings_module = "config.settings.dev"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.dev"
+python_files = ["test_*.py", "tests.py"]
+addopts = "-ra --strict-markers"
+testpaths = ["apps", "tests"]
+
+[tool.coverage.run]
+omit = ["*/migrations/*", "*/tests/*", "config/*", "manage.py"]
