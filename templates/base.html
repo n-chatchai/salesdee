@@ -28,6 +28,7 @@
         <a href="/" class="font-semibold">{% block brand %}{{ current_tenant.name|default:"ระบบงานขาย & ใบเสนอราคา" }}{% endblock %}</a>
         {% if user.is_authenticated and current_tenant %}
           <nav class="hidden gap-4 text-sm text-slate-600 sm:flex">
+            <a href="{% url 'crm:leads' %}" class="hover:underline">Leads</a>
             <a href="{% url 'crm:pipeline' %}" class="hover:underline">Pipeline</a>
             <a href="{% url 'crm:customers' %}" class="hover:underline">ลูกค้า</a>
             <a href="{% url 'crm:tasks' %}" class="hover:underline">งานของฉัน</a>

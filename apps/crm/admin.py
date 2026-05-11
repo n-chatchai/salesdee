@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from apps.core.admin import TenantScopedAdmin
 
-from .models import Activity, Contact, Customer, Deal, PipelineStage, Task
+from .models import Activity, Contact, Customer, Deal, Lead, PipelineStage, Task
 
 
 class ContactInline(admin.TabularInline):
@@ -80,3 +80,19 @@ class TaskAdmin(TenantScopedAdmin):
     list_filter = ("status", "kind")
     search_fields = ("description", "deal__name", "customer__name")
     autocomplete_fields = ("deal", "customer", "assignee")
+
+
+@admin.register(Lead)
+class LeadAdmin(TenantScopedAdmin):
+    list_display = (
+        "name",
+        "company_name",
+        "channel",
+        "product_interest",
+        "status",
+        "assigned_to",
+        "created_at",
+    )
+    list_filter = ("status", "channel")
+    search_fields = ("name", "company_name", "phone", "email", "product_interest")
+    autocomplete_fields = ("assigned_to", "customer", "deal")

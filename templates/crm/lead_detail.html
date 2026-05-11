@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Lead: {{ lead }} · {{ current_tenant.name }}{% endblock %}
+
+{% block content %}
+  <div class="flex items-center justify-between">
+    <div>
+      <a href="{% url 'crm:leads' %}" class="text-sm text-slate-500 hover:underline">&larr; Leads</a>
+      <h1 class="mt-1 text-xl font-semibold">{{ lead }}</h1>
+    </div>
+    <a href="{% url 'crm:lead_edit' lead.pk %}" class="rounded border px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">แก้ไข</a>
+  </div>
+
+  <div class="mt-4 grid gap-6 md:grid-cols-3">
+    <section class="space-y-1 rounded-lg border bg-white p-4 text-sm md:col-span-2">
+      <div><span class="text-slate-500">บริษัท/หน่วยงาน:</span> {{ lead.company_name|default:"—" }}</div>
+      <div><span class="text-slate-500">โทร:</span> {{ lead.phone|default:"—" }} · <span class="text-slate-500">อีเมล:</span> {{ lead.email|default:"—" }} · <span class="text-slate-500">LINE:</span> {{ lead.line_id|default:"—" }}</div>
+      <div><span class="text-slate-500">ช่องทาง:</span> {{ lead.get_channel_display }} · <span class="text-slate-500">แหล่งที่มา:</span> {{ lead.source|default:"—" }}</div>
+      <div><span class="text-slate-500">สนใจ:</span> {{ lead.product_interest|default:"—" }}{% if lead.budget %} · งบ ~{{ lead.budget|floatformat:0 }} ฿{% endif %}</div>
+      <div><span class="text-slate-500">ผู้รับผิดชอบ:</span> {{ lead.assigned_to.get_full_name|default:"—" }}</div>
+      <div><span class="text-slate-500">สถานะ:</span> {{ lead.get_status_display }} · <span class="text-slate-500">เข้ามาเมื่อ:</span> {{ lead.created_at|date:"d/m/Y H:i" }}</div>
+      {% if lead.message %}<div class="border-t pt-2 text-slate-700">{{ lead.message|linebreaksbr }}</div>{% endif %}
+    </section>
+
+    <section class="space-y-3 rounded-lg border bg-white p-4 text-sm md:col-span-1">
+      {% if lead.deal %}
+        <div class="text-emerald-700">แปลงเป็นดีลแล้ว</div>
+        <a href="{% url 'crm:deal_detail' lead.deal.pk %}" class="block rounded bg-slate-800 px-3 py-2 text-center text-white hover:bg-slate-700">เปิดดีล: {{ lead.deal.name }}</a>
+        {% if lead.customer %}<a href="{% url 'crm:customer_detail' lead.customer.pk %}" class="block text-slate-600 hover:underline">ลูกค้า: {{ lead.customer.name }}</a>{% endif %}
+      {% else %}
+        <form method="post" action="{% url 'crm:lead_convert' lead.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="w-full rounded bg-emerald-600 px-3 py-2 text-white hover:bg-emerald-700">แปลงเป็นดีล</button>
+        </form>
+        <p class="text-xs text-slate-400">จะสร้างลูกค้า + ผู้ติดต่อ + ดีล (ขั้นแรกใน pipeline) จากข้อมูล lead นี้</p>
+      {% endif %}
+    </section>
+  </div>
+{% endblock %}

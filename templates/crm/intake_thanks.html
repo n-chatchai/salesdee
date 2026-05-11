@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ขอบคุณ · {{ tenant.name }}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>:root { font-family: "Sarabun", system-ui, sans-serif; }</style>
+</head>
+<body class="min-h-screen bg-slate-50 py-10">
+  <div class="mx-auto max-w-lg px-4">
+    <div class="rounded-xl border bg-white p-8 text-center shadow-sm">
+      <div class="text-4xl">✅</div>
+      <h1 class="mt-3 text-lg font-semibold">ได้รับข้อมูลแล้ว ขอบคุณครับ</h1>
+      <p class="mt-1 text-sm text-slate-500">ทีมงาน {{ tenant.name }} จะติดต่อกลับโดยเร็วที่สุด</p>
+    </div>
+  </div>
+</body>
+</html>

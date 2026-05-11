@@ -8,7 +8,7 @@ from django.db.models import QuerySet
 
 from apps.core.current_tenant import get_current_tenant
 
-from .models import Activity, Contact, Customer, Deal, PipelineStage, StageKind, Task
+from .models import Activity, Contact, Customer, Deal, Lead, PipelineStage, StageKind, Task
 
 User = get_user_model()
 
@@ -116,3 +116,54 @@ class TaskForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         _set_queryset(self, "assignee", _tenant_users())
         self.fields["assignee"].required = False
+
+
+class LeadForm(forms.ModelForm):
+    """Internal manual lead entry / edit."""
+
+    class Meta:
+        model = Lead
+        fields = [
+            "name",
+            "company_name",
+            "phone",
+            "email",
+            "line_id",
+            "channel",
+            "source",
+            "product_interest",
+            "budget",
+            "message",
+            "status",
+            "assigned_to",
+        ]
+        widgets = {"message": forms.Textarea(attrs={"rows": 3})}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        _set_queryset(self, "assigned_to", _tenant_users())
+        self.fields["assigned_to"].required = False
+        self.fields["budget"].required = False
+
+
+class LeadIntakeForm(forms.ModelForm):
+    """Public-facing 'request a quote / contact us' form. No internal fields."""
+
+    class Meta:
+        model = Lead
+        fields = [
+            "name",
+            "company_name",
+            "phone",
+            "email",
+            "line_id",
+            "product_interest",
+            "budget",
+            "message",
+        ]
+        widgets = {"message": forms.Textarea(attrs={"rows": 4})}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["budget"].required = False
+        self.fields["name"].required = True

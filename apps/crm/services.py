@@ -6,7 +6,16 @@ from typing import TYPE_CHECKING
 
 from apps.core.current_tenant import tenant_context
 
-from .models import Deal, DealStatus, PipelineStage, StageKind
+from .models import (
+    Contact,
+    Customer,
+    Deal,
+    DealStatus,
+    Lead,
+    LeadStatus,
+    PipelineStage,
+    StageKind,
+)
 
 if TYPE_CHECKING:
     from apps.tenants.models import Tenant
@@ -50,3 +59,37 @@ def move_deal_to_stage(deal: Deal, stage: PipelineStage) -> None:
         deal.status = DealStatus.OPEN
         deal.closed_at = None
     deal.save()
+
+
+def convert_lead(lead: Lead, *, owner=None) -> Deal:
+    """Turn a lead into a Customer (+ Contact) and an open Deal. Run inside the lead's tenant."""
+    first_open = PipelineStage.objects.filter(kind=StageKind.OPEN).order_by("order").first()
+    customer = lead.customer or Customer.objects.create(
+        name=lead.company_name or lead.name,
+        billing_address="",
+    )
+    if not Contact.objects.filter(customer=customer, name=lead.name).exists():
+        Contact.objects.create(
+            customer=customer,
+            name=lead.name,
+            phone=lead.phone,
+            email=lead.email,
+            line_id=lead.line_id,
+            is_primary=not customer.contacts.exists(),
+        )
+    deal = Deal.objects.create(
+        name=lead.product_interest or f"ดีลจาก lead: {lead.name}",
+        customer=customer,
+        stage=first_open,
+        owner=owner,
+        estimated_value=lead.budget or 0,
+        probability=first_open.default_probability if first_open else 0,
+        channel=lead.channel,
+        source=lead.source,
+        notes=lead.message,
+    )
+    lead.status = LeadStatus.CONVERTED
+    lead.customer = customer
+    lead.deal = deal
+    lead.save()
+    return deal

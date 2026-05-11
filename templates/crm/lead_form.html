@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}{% if lead %}แก้ไข Lead{% else %}บันทึก Lead{% endif %} · {{ current_tenant.name }}{% endblock %}
+
+{% block content %}
+  <a href="{% if lead %}{% url 'crm:lead_detail' lead.pk %}{% else %}{% url 'crm:leads' %}{% endif %}" class="text-sm text-slate-500 hover:underline">&larr; ยกเลิก</a>
+  <h1 class="mt-1 text-xl font-semibold">{% if lead %}แก้ไข Lead: {{ lead }}{% else %}บันทึก Lead ใหม่{% endif %}</h1>
+
+  <form method="post" class="crm-form mt-4 max-w-xl rounded-lg border bg-white p-5">
+    {% csrf_token %}
+    {% include "crm/_form_fields.html" %}
+    <button type="submit" class="mt-2 rounded bg-slate-800 px-4 py-2 text-sm text-white hover:bg-slate-700">บันทึก</button>
+  </form>
+{% endblock %}

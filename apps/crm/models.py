@@ -243,3 +243,57 @@ class Task(TenantScopedModel):
 
     def __str__(self) -> str:
         return self.description or self.get_kind_display()
+
+
+# --- Leads --------------------------------------------------------------------
+class LeadStatus(models.TextChoices):
+    NEW = "new", "ใหม่"
+    QUALIFIED = "qualified", "คัดกรองแล้ว"
+    CONVERTED = "converted", "แปลงเป็นดีลแล้ว"
+    DISQUALIFIED = "disqualified", "ไม่ผ่านคัดกรอง"
+
+
+class Lead(TenantScopedModel):
+    """An inbound enquiry before it becomes a deal. Captured from a web form, LINE, phone, etc."""
+
+    name = models.CharField("ชื่อผู้ติดต่อ", max_length=200)
+    company_name = models.CharField("บริษัท/หน่วยงาน", max_length=255, blank=True)
+    phone = models.CharField("โทรศัพท์", max_length=50, blank=True)
+    email = models.EmailField("อีเมล", blank=True)
+    line_id = models.CharField("LINE", max_length=100, blank=True)
+    channel = models.CharField(
+        "ช่องทาง", max_length=20, choices=LeadChannel.choices, default=LeadChannel.WEB_FORM
+    )
+    source = models.CharField(
+        "แหล่งที่มา", max_length=255, blank=True, help_text="เช่น ชื่อแคมเปญ / ผู้แนะนำ"
+    )
+    product_interest = models.CharField("สินค้าที่สนใจ", max_length=255, blank=True)
+    budget = models.DecimalField(
+        "งบประมาณโดยประมาณ", max_digits=18, decimal_places=2, null=True, blank=True
+    )
+    message = models.TextField("ข้อความ", blank=True)
+    status = models.CharField(
+        "สถานะ", max_length=20, choices=LeadStatus.choices, default=LeadStatus.NEW
+    )
+    assigned_to = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="assigned_leads",
+        null=True,
+        blank=True,
+    )
+    customer = models.ForeignKey(
+        Customer, on_delete=models.SET_NULL, related_name="leads", null=True, blank=True
+    )
+    deal = models.ForeignKey(
+        Deal, on_delete=models.SET_NULL, related_name="leads", null=True, blank=True
+    )
+
+    class Meta:
+        ordering = ("-created_at",)
+        verbose_name = "Lead"
+        verbose_name_plural = "Leads"
+        indexes = [models.Index(fields=["tenant", "status"])]
+
+    def __str__(self) -> str:
+        return f"{self.name}{f' / {self.company_name}' if self.company_name else ''}"

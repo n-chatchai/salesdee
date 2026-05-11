@@ -7,9 +7,19 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from .forms import ActivityForm, CustomerForm, DealForm, TaskForm
-from .models import Customer, Deal, DealStatus, PipelineStage, Task, TaskStatus
-from .services import move_deal_to_stage
+from .forms import ActivityForm, CustomerForm, DealForm, LeadForm, LeadIntakeForm, TaskForm
+from .models import (
+    Customer,
+    Deal,
+    DealStatus,
+    Lead,
+    LeadChannel,
+    LeadStatus,
+    PipelineStage,
+    Task,
+    TaskStatus,
+)
+from .services import convert_lead, move_deal_to_stage
 
 
 # --- Pipeline -----------------------------------------------------------------
@@ -199,3 +209,68 @@ def task_done(request: HttpRequest, pk: int) -> HttpResponse:
     task.completed_at = timezone.now()
     task.save()
     return render(request, "crm/_task_row.html", {"task": task, "now": timezone.now()})
+
+
+# --- Leads --------------------------------------------------------------------
+@login_required
+def lead_list(request: HttpRequest) -> HttpResponse:
+    leads = Lead.objects.select_related("assigned_to").order_by("-created_at")
+    new_count = leads.filter(status=LeadStatus.NEW).count()
+    return render(request, "crm/leads.html", {"leads": leads, "new_count": new_count})
+
+
+@login_required
+def lead_detail(request: HttpRequest, pk: int) -> HttpResponse:
+    lead = get_object_or_404(Lead.objects.select_related("assigned_to", "customer", "deal"), pk=pk)
+    return render(request, "crm/lead_detail.html", {"lead": lead})
+
+
+@login_required
+def lead_create(request: HttpRequest) -> HttpResponse:
+    return _lead_form(request, instance=None)
+
+
+@login_required
+def lead_edit(request: HttpRequest, pk: int) -> HttpResponse:
+    return _lead_form(request, instance=get_object_or_404(Lead, pk=pk))
+
+
+def _lead_form(request: HttpRequest, *, instance: Lead | None) -> HttpResponse:
+    if request.method == "POST":
+        form = LeadForm(request.POST, instance=instance)
+        if form.is_valid():
+            lead = form.save()
+            return redirect("crm:lead_detail", pk=lead.pk)
+    else:
+        form = LeadForm(instance=instance)
+    return render(request, "crm/lead_form.html", {"form": form, "lead": instance})
+
+
+@login_required
+@require_POST
+def lead_convert(request: HttpRequest, pk: int) -> HttpResponse:
+    lead = get_object_or_404(Lead.objects.select_related("deal"), pk=pk)
+    if lead.status == LeadStatus.CONVERTED and lead.deal_id:
+        return redirect("crm:deal_detail", pk=lead.deal_id)
+    deal = convert_lead(lead, owner=request.user)
+    return redirect("crm:deal_detail", pk=deal.pk)
+
+
+def lead_intake(request: HttpRequest, tenant_slug: str) -> HttpResponse:
+    """Public 'request a quote / contact us' form for a tenant. No login. Tenant from the URL."""
+    from apps.core.current_tenant import tenant_context
+    from apps.tenants.models import Tenant
+
+    tenant = get_object_or_404(Tenant, slug=tenant_slug, is_active=True)
+    with tenant_context(tenant):
+        if request.method == "POST":
+            form = LeadIntakeForm(request.POST)
+            if form.is_valid():
+                lead = form.save(commit=False)
+                lead.channel = LeadChannel.WEB_FORM
+                lead.source = "intake form"
+                lead.save()
+                return render(request, "crm/intake_thanks.html", {"tenant": tenant})
+        else:
+            form = LeadIntakeForm()
+        return render(request, "crm/intake.html", {"form": form, "tenant": tenant})

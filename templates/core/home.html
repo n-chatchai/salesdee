@@ -10,8 +10,12 @@
     <p class="mt-1 text-amber-700">ยังไม่ได้ผูกผู้ใช้นี้กับ workspace ใด — สร้าง Tenant และ Membership ใน <a class="underline" href="/admin/">/admin</a></p>
   {% endif %}
 
-  <div class="mt-8 grid gap-4 sm:grid-cols-3">
+  <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
     {% if current_tenant %}
+      <a href="{% url 'crm:leads' %}" class="rounded-lg border bg-white p-4 hover:shadow">
+        <h2 class="font-medium">Leads</h2>
+        <p class="mt-1 text-sm text-slate-500">ลูกค้าที่เข้ามาใหม่</p>
+      </a>
       <a href="{% url 'crm:pipeline' %}" class="rounded-lg border bg-white p-4 hover:shadow">
         <h2 class="font-medium">Pipeline การขาย</h2>
         <p class="mt-1 text-sm text-slate-500">ดูดีลทั้งหมดแบบ Kanban</p>
@@ -20,17 +24,21 @@
         <h2 class="font-medium">ลูกค้า</h2>
         <p class="mt-1 text-sm text-slate-500">รายชื่อลูกค้าและผู้ติดต่อ</p>
       </a>
+      <a href="{% url 'crm:tasks' %}" class="rounded-lg border bg-white p-4 hover:shadow">
+        <h2 class="font-medium">งานของฉัน</h2>
+        <p class="mt-1 text-sm text-slate-500">งานที่ต้องตาม</p>
+      </a>
     {% else %}
-      <div class="rounded-lg border bg-white p-4 sm:col-span-2">
-        <h2 class="font-medium">Pipeline / ลูกค้า</h2>
+      <div class="rounded-lg border bg-white p-4 sm:col-span-2 lg:col-span-4">
+        <h2 class="font-medium">เริ่มต้น</h2>
         <p class="mt-1 text-sm text-slate-500">ผูกผู้ใช้กับ workspace ก่อน (ใน <a class="underline" href="/admin/">/admin</a>)</p>
       </div>
     {% endif %}
-    <div class="rounded-lg border bg-white p-4">
-      <h2 class="font-medium">ใบเสนอราคา / แคตตาล็อก</h2>
-      <p class="mt-1 text-sm text-slate-500">เฟส 1 — กำลังพัฒนา</p>
-    </div>
   </div>
+
+  {% if current_tenant %}
+    <p class="mt-4 text-sm text-slate-400">ฟอร์มรับ lead จากเว็บไซต์: <code>/crm/intake/{{ current_tenant.slug }}/</code> · ใบเสนอราคา/แคตตาล็อก — เฟสถัดไป</p>
+  {% endif %}
 
   <p class="mt-8 text-sm text-slate-400">ดูสเปกเต็มที่ <code>REQUIREMENTS.md</code> · แนวทางการพัฒนาที่ <code>CLAUDE.md</code></p>
 {% endblock %}

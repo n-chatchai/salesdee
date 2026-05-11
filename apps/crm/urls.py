@@ -18,4 +18,11 @@ urlpatterns = [
     path("customers/<int:pk>/edit/", views.customer_edit, name="customer_edit"),
     path("tasks/", views.task_list, name="tasks"),
     path("tasks/<int:pk>/done/", views.task_done, name="task_done"),
+    path("leads/", views.lead_list, name="leads"),
+    path("leads/new/", views.lead_create, name="lead_create"),
+    path("leads/<int:pk>/", views.lead_detail, name="lead_detail"),
+    path("leads/<int:pk>/edit/", views.lead_edit, name="lead_edit"),
+    path("leads/<int:pk>/convert/", views.lead_convert, name="lead_convert"),
+    # Public — no login. Embeddable enquiry form for a tenant.
+    path("intake/<slug:tenant_slug>/", views.lead_intake, name="lead_intake"),
 ]

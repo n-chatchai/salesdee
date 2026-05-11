@@ -30,18 +30,21 @@ Then in Django admin (`/admin`): create a **Workspace (Tenant)** and a **Members
 - ✅ **CRM core models** (`apps/crm`) — `Customer`, `Contact`, `PipelineStage`, `Deal`, `Activity`, `Task` + admin.
 - ✅ **Tenant onboarding** — `post_save` signal seeds a default furniture sales pipeline for each new `Tenant` (`apps/crm/services.py` `seed_default_pipeline`, `signals.py`).
 - ✅ **CRM UI (first cut)** — pipeline **Kanban board** (SortableJS drag → htmx `move_deal` endpoint, tenant-scoped; sets status/closed_at on WON/LOST), **customer list**, **deal detail**. Nav + home wired up.
-- ✅ **CRM UI round 2** — in-app **create/edit deal & customer**, **Customer 360** page, deal detail **quick-log activity** + **add task** (htmx), **task list "my work"** + overdue + mark-done (htmx), CompanyProfile auto-shell on Tenant create. Forms re-bind tenant-scoped FK querysets per request (see CLAUDE.md §5 footgun note). `make check` green (50 tests).
+- ✅ **CRM UI round 2** — in-app **create/edit deal & customer**, **Customer 360** page, deal detail **quick-log activity** + **add task** (htmx), **task list "my work"** + overdue + mark-done (htmx), CompanyProfile auto-shell on Tenant create. Forms re-bind tenant-scoped FK querysets per request (see CLAUDE.md §5 footgun note).
+- ✅ **Lead capture** — `Lead` model (+ RLS); leads list / manual entry / detail; **convert lead → Customer + Contact + Deal** (`convert_lead` service); **public embeddable enquiry form** at `/crm/intake/<tenant-slug>/` (no login, tenant from URL). `make check` green (56 tests).
 
 ## Phase 1 backlog (next, suggested order — see REQUIREMENTS.md §4)
 
-1. **CRM polish** (optional, can defer): make `Deal.stage` required (+ default chosen on create; data migration for stage-less deals); pipeline column counts refresh after a drag (HX-Trigger / OOB swap); add/edit `Contact` in-app; company-settings page; deal lost-reason picker on the Kanban "ปิดไม่ได้" drop.
-2. **Lead capture** (`apps/crm` + `apps/integrations`) — embeddable web form, manual lead entry, LINE inbound (basic), assignment. §4.2
-3. **Catalog** (`apps/catalog`) — `ProductCategory`, `Product` (+ images, W×D×H/material/color fields), `ProductVariant`, `ProductOption`, `BundleItem`; Excel import. §4.6
-4. **Quotation** (`apps/quotes`) — `SalesDocument`(docType=QUOTATION) + `SalesDocLine` (room grouping, per-line images/options), totals engine (subtotal → end discount → VAT bases → VAT → grand total + withholding estimate + BahtText + rounding), document-number sequence (transactional), revisions, discount-approval workflow, statuses. §4.7
-5. **PDF + sending** — WeasyPrint HTML template with embedded Sarabun, share link, send via LINE/email, public accept/sign view, auto follow-up tasks. §4.8
-6. **Reports/dashboard** — pipeline value, win/loss + lost reasons, sales targets vs actual. §4.9
-7. **Roles & permissions** — enforce role-based access + approval caps from `Membership`. §4.15
-8. **Seed/import command** — load the anchor customer's catalog & customers from their Excel files (collected in discovery).
+1. **Catalog** (`apps/catalog`) — `ProductCategory`, `Product` (+ images, W×D×H/material/color fields), `ProductVariant`, `ProductOption`, `BundleItem`; Excel import. §4.6
+2. **Quotation** (`apps/quotes`) — `SalesDocument`(docType=QUOTATION) + `SalesDocLine` (room grouping, per-line images/options), totals engine (subtotal → end discount → VAT bases → VAT → grand total + withholding estimate + BahtText + rounding), document-number sequence (transactional), revisions, discount-approval workflow, statuses. §4.7
+3. **PDF + sending** — WeasyPrint HTML template with embedded Sarabun, share link, send via LINE/email, public accept/sign view, auto follow-up tasks. §4.8
+4. **Reports/dashboard** — pipeline value, win/loss + lost reasons, sales targets vs actual. §4.9
+5. **Roles & permissions** — enforce role-based access + approval caps from `Membership`. §4.15
+6. **Seed/import command** — load the anchor customer's catalog & customers from their Excel files (collected in discovery).
+
+### Smaller follow-ups (optional, can defer)
+- LINE inbound (Messaging API webhook → create/link Lead) — currently only the public web form + manual entry exist.
+- Make `Deal.stage` required (+ data migration for stage-less deals); pipeline column counts refresh after a drag (HX-Trigger / OOB swap); add/edit `Contact` in-app; company-settings page; lost-reason picker when dropping a card on "ปิดไม่ได้".
 
 ## Open product questions still to resolve (REQUIREMENTS.md §10)
 MVP boundary for the anchor customer (does phase 1 need tax invoice?), target furniture sub-segment, LINE integration depth, hosting region, pricing, product name, IP/ownership arrangement with วันดีดี. Use [discovery/wandeedee-interview-short.md](discovery/wandeedee-interview-short.md).
