@@ -96,3 +96,82 @@ def test_import_catalog_unknown_tenant_raises(tenant, tmp_path) -> None:
     path = _make_xlsx(tmp_path)
     with pytest.raises(CommandError):
         call_command("import_catalog", path, tenant_slug="no-such-tenant")
+
+
+# --- Public, login-free catalog / showroom -----------------------------------
+def test_public_catalog_renders(client, tenant) -> None:
+    with tenant_context(tenant):
+        Product.objects.create(name="โต๊ะประชุม 8 ที่นั่ง", default_price=Decimal("18000"))
+        Product.objects.create(name="ตู้เอกสาร 4 ลิ้นชัก", default_price=Decimal("7500"))
+    resp = client.get(reverse("public_catalog", args=[tenant.slug]))
+    assert resp.status_code == 200
+    body = resp.content.decode()
+    assert "โต๊ะประชุม 8 ที่นั่ง" in body
+    assert "ตู้เอกสาร 4 ลิ้นชัก" in body
+
+
+def test_public_catalog_hides_inactive_product(client, tenant) -> None:
+    with tenant_context(tenant):
+        Product.objects.create(name="สินค้าเปิดขาย", default_price=Decimal("1000"))
+        Product.objects.create(name="สินค้าปิดขายแล้ว", default_price=Decimal("1000"), is_active=False)
+    resp = client.get(reverse("public_catalog", args=[tenant.slug]))
+    assert resp.status_code == 200
+    body = resp.content.decode()
+    assert "สินค้าเปิดขาย" in body
+    assert "สินค้าปิดขายแล้ว" not in body
+
+
+def test_public_product_renders(client, tenant) -> None:
+    with tenant_context(tenant):
+        p = Product.objects.create(
+            name="เก้าอี้ผู้บริหารหนังแท้", code="EXE-CH", default_price=Decimal("9900")
+        )
+    resp = client.get(reverse("public_product", args=[tenant.slug, p.pk]))
+    assert resp.status_code == 200
+    body = resp.content.decode()
+    assert "เก้าอี้ผู้บริหารหนังแท้" in body
+    assert "EXE-CH" in body
+
+
+def test_public_product_inactive_404(client, tenant) -> None:
+    with tenant_context(tenant):
+        p = Product.objects.create(name="ของเลิกขาย", default_price=Decimal("1"), is_active=False)
+    resp = client.get(reverse("public_product", args=[tenant.slug, p.pk]))
+    assert resp.status_code == 404
+
+
+def test_public_catalog_unknown_tenant_404(client) -> None:
+    resp = client.get(reverse("public_catalog", args=["no-such-shop"]))
+    assert resp.status_code == 404
+
+
+def test_public_catalog_inactive_tenant_404(client, tenant) -> None:
+    tenant.is_active = False
+    tenant.save()
+    resp = client.get(reverse("public_catalog", args=[tenant.slug]))
+    assert resp.status_code == 404
+
+
+def test_root_on_tenant_host_shows_public_catalog(client, tenant) -> None:
+    """On the tenant's own host, ``/`` (anonymous) renders that tenant's public catalog."""
+    with tenant_context(tenant):
+        Product.objects.create(name="โซฟารับแขก 3 ที่นั่ง", default_price=Decimal("25000"))
+    resp = client.get("/", HTTP_HOST=f"{tenant.slug}.localhost")
+    assert resp.status_code == 200
+    body = resp.content.decode()
+    assert "โซฟารับแขก 3 ที่นั่ง" in body
+    assert "แคตตาล็อกสินค้า" in body
+
+
+def test_root_on_platform_host_redirects_to_login(client) -> None:
+    resp = client.get("/", HTTP_HOST="localhost")
+    assert resp.status_code == 302
+    assert "/accounts/login/" in resp.url
+
+
+def test_lead_intake_prefills_product(client, tenant) -> None:
+    resp = client.get(
+        reverse("crm:lead_intake", args=[tenant.slug]), {"product": "โต๊ะทำงาน L-shape"}
+    )
+    assert resp.status_code == 200
+    assert 'value="โต๊ะทำงาน L-shape"' in resp.content.decode()

@@ -272,5 +272,6 @@ def lead_intake(request: HttpRequest, tenant_slug: str) -> HttpResponse:
                 lead.save()
                 return render(request, "crm/intake_thanks.html", {"tenant": tenant})
         else:
-            form = LeadIntakeForm()
+            product = request.GET.get("product", "").strip()[:255]
+            form = LeadIntakeForm(initial={"product_interest": product} if product else None)
         return render(request, "crm/intake.html", {"form": form, "tenant": tenant})

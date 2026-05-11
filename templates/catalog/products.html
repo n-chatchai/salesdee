@@ -3,13 +3,14 @@
 {% block title %}แคตตาล็อกสินค้า · {{ current_tenant.name }}{% endblock %}
 
 {% block content %}
-  <div class="mb-4 flex items-center justify-between gap-3">
+  <div class="mb-2 flex items-center justify-between gap-3">
     <h1 class="text-xl font-semibold">แคตตาล็อกสินค้า</h1>
     <form method="get" class="flex-1">
       <input type="search" name="q" value="{{ q }}" placeholder="ค้นหาชื่อ/รหัส…" class="w-full max-w-sm rounded border px-3 py-1.5 text-sm">
     </form>
     <a href="{% url 'catalog:product_create' %}" class="rounded bg-slate-800 px-3 py-1.5 text-sm text-white hover:bg-slate-700">+ เพิ่มสินค้า</a>
   </div>
+  <p class="mb-4 text-sm text-slate-500">หน้าแคตตาล็อกสาธารณะ (ลูกค้าเปิดดูได้ ไม่ต้องล็อกอิน): <a href="{% url 'public_catalog' current_tenant.slug %}" target="_blank" class="text-slate-700 underline">{% url 'public_catalog' current_tenant.slug %}</a> — บนโดเมนของคุณเอง หน้าแรก (<code>/</code>) ก็แสดงแคตตาล็อกนี้</p>
 
   <div class="overflow-hidden rounded-lg border bg-white">
     <table class="w-full text-sm">

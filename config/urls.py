@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
 
+from apps.catalog import views as catalog_views
 from apps.quotes import views as quote_views
 
 urlpatterns = [
@@ -18,6 +19,9 @@ urlpatterns = [
         name="public_quotation_respond",
     ),
     path("q/<str:token>/pdf/", quote_views.public_quotation_pdf, name="public_quotation_pdf"),
+    # Public, login-free catalog / showroom (tenant resolved from the URL slug).
+    path("c/<slug:tenant_slug>/", catalog_views.public_catalog, name="public_catalog"),
+    path("c/<slug:tenant_slug>/p/<int:pk>/", catalog_views.public_product, name="public_product"),
     path("", include("apps.core.urls")),
 ]
 
