@@ -31,7 +31,9 @@ Then in Django admin (`/admin`): create a **Workspace (Tenant)** and a **Members
 - ✅ **Tenant onboarding** — `post_save` signal seeds a default furniture sales pipeline for each new `Tenant` (`apps/crm/services.py` `seed_default_pipeline`, `signals.py`).
 - ✅ **CRM UI (first cut)** — pipeline **Kanban board** (SortableJS drag → htmx `move_deal` endpoint, tenant-scoped; sets status/closed_at on WON/LOST), **customer list**, **deal detail**. Nav + home wired up.
 - ✅ **CRM UI round 2** — in-app **create/edit deal & customer**, **Customer 360** page, deal detail **quick-log activity** + **add task** (htmx), **task list "my work"** + overdue + mark-done (htmx), CompanyProfile auto-shell on Tenant create. Forms re-bind tenant-scoped FK querysets per request (see CLAUDE.md §5 footgun note).
-- ✅ **Lead capture** — `Lead` model (+ RLS); leads list / manual entry / detail; **convert lead → Customer + Contact + Deal** (`convert_lead` service); **public embeddable enquiry form** at `/crm/intake/<tenant-slug>/` (no login, tenant from URL). `make check` green (56 tests).
+- ✅ **Lead capture** — `Lead` model (+ RLS); leads list / manual entry / detail; **convert lead → Customer + Contact + Deal** (`convert_lead` service); **public embeddable enquiry form** at `/crm/intake/<tenant-slug>/` (no login, tenant from URL).
+- ✅ **Custom domains (Django side)** — `tenants.TenantDomain` model; host-based tenant resolution in the middleware (verified custom domain → tenant, `<slug>.<APP_DOMAIN>` subdomain → tenant, `PLATFORM_HOSTS` → no tenant; 403 if a logged-in user hits a tenant host they don't belong to). Infra (DNS/CNAME, on-demand TLS, prod `ALLOWED_HOSTS`) still to do at deploy time.
+- ✅ **Rebrand → `salesdee`** (working name; product display name in templates/docs).
 
 ## Phase 1 backlog (next, suggested order — see REQUIREMENTS.md §4)
 
@@ -44,7 +46,9 @@ Then in Django admin (`/admin`): create a **Workspace (Tenant)** and a **Members
 
 ### Smaller follow-ups (optional, can defer)
 - LINE inbound (Messaging API webhook → create/link Lead) — currently only the public web form + manual entry exist.
+- **Custom-domain deployment**: pick the TLS approach (Caddy on-demand TLS / CDN / ALB+ACM), set prod `ALLOWED_HOSTS`/`CSRF_TRUSTED_ORIGINS` strategy, domain-verification flow (TXT record) before flipping `TenantDomain.verified=True`, tenant self-serve "add your domain" UI.
 - Make `Deal.stage` required (+ data migration for stage-less deals); pipeline column counts refresh after a drag (HX-Trigger / OOB swap); add/edit `Contact` in-app; company-settings page; lost-reason picker when dropping a card on "ปิดไม่ได้".
+- Confirm the `salesdee` name (domain/trademark) and, if changing, rename the repo dir / `config` package.
 
 ## Open product questions still to resolve (REQUIREMENTS.md §10)
 MVP boundary for the anchor customer (does phase 1 need tax invoice?), target furniture sub-segment, LINE integration depth, hosting region, pricing, product name, IP/ownership arrangement with วันดีดี. Use [discovery/wandeedee-interview-short.md](discovery/wandeedee-interview-short.md).

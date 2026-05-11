@@ -142,6 +142,18 @@ DOCUMENT_ERA = "BE"  # "BE" (พ.ศ.) | "CE" (ค.ศ.)
 RLS_ENABLED = env.bool("RLS_ENABLED", default=False)
 # Dev convenience: fall back to this tenant slug when no authenticated user.
 DEV_DEFAULT_TENANT_SLUG = env("DEV_DEFAULT_TENANT_SLUG", default="")
+# Base domain for built-in tenant subdomains: <tenant.slug>.<APP_DOMAIN>.
+APP_DOMAIN = env("APP_DOMAIN", default="localhost")
+# Hostnames that are the platform itself (marketing / app dashboard, not a tenant).
+# A request to one of these does NOT resolve a tenant from the host.
+PLATFORM_HOSTS = env.list(
+    "PLATFORM_HOSTS",
+    default=["localhost", "127.0.0.1", APP_DOMAIN, f"app.{APP_DOMAIN}", f"www.{APP_DOMAIN}"],
+)
+# NOTE: with custom domains, ALLOWED_HOSTS can't be a fixed list in production. Either set
+# ALLOWED_HOSTS=["*"] and rely on CurrentTenantMiddleware to reject hosts that don't map to a
+# known platform host or verified TenantDomain, or front the app with a proxy that does it.
+# DNS (CNAME) + on-demand TLS for tenant custom domains is a deployment concern.
 
 # --- Static / media -----------------------------------------------------------
 STATIC_URL = "static/"

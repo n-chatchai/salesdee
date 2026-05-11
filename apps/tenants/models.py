@@ -22,7 +22,7 @@ class Tenant(BaseModel):
 
     name = models.CharField("ชื่อธุรกิจ", max_length=200)
     slug = models.SlugField(
-        max_length=63, unique=True, help_text="ตัวระบุ workspace (ใช้เป็น subdomain ในอนาคต)"
+        max_length=63, unique=True, help_text="ใช้เป็น subdomain: <slug>.<APP_DOMAIN>"
     )
     is_active = models.BooleanField("เปิดใช้งาน", default=True)
     plan = models.CharField("แพ็กเกจ", max_length=20, choices=Plan.choices, default=Plan.TRIAL)
@@ -38,6 +38,35 @@ class Tenant(BaseModel):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)[:63] or "tenant"
+        super().save(*args, **kwargs)
+
+
+class TenantDomain(BaseModel):
+    """A hostname that maps to a tenant. Used for custom domains (e.g. crm.wandeedee.com)
+    in addition to the built-in `<slug>.<APP_DOMAIN>` subdomain.
+
+    Global model — it's the thing that *resolves* the tenant from the request host, so it's
+    looked up before any tenant context exists. Not RLS-protected (it's routing metadata).
+    DNS + on-demand TLS for the domain are a deployment concern (see CLAUDE.md §5 / NEXT_STEPS).
+    """
+
+    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, related_name="domains")
+    domain = models.CharField(
+        "โดเมน", max_length=253, unique=True, help_text="เช่น crm.example.com (ไม่ใส่ http://)"
+    )
+    is_primary = models.BooleanField("โดเมนหลัก", default=False)
+    verified = models.BooleanField("ยืนยันความเป็นเจ้าของแล้ว", default=False)
+
+    class Meta:
+        verbose_name = "Custom domain"
+        verbose_name_plural = "Custom domains"
+        ordering = ("-is_primary", "domain")
+
+    def __str__(self) -> str:
+        return self.domain
+
+    def save(self, *args, **kwargs):
+        self.domain = self.domain.strip().lower()
         super().save(*args, **kwargs)
 
 

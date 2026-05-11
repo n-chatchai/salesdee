@@ -12,13 +12,14 @@ def test_django_check_passes() -> None:
     call_command("check")  # raises SystemCheckError on problems
 
 
-def test_home_redirects_anonymous_to_login(client) -> None:
+def test_home_redirects_anonymous_to_login(client, db) -> None:
+    # CurrentTenantMiddleware queries TenantDomain on every request -> needs the DB.
     resp = client.get("/")
     assert resp.status_code == 302
     assert reverse("accounts:login") in resp.url
 
 
-def test_login_page_renders(client) -> None:
+def test_login_page_renders(client, db) -> None:
     resp = client.get(reverse("accounts:login"))
     assert resp.status_code == 200
     assert "เข้าสู่ระบบ" in resp.content.decode()
