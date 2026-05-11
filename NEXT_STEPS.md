@@ -25,21 +25,22 @@ Then in Django admin (`/admin`): create a **Workspace (Tenant)** and a **Members
 - Tests: `baht_text`, current-tenant machinery, smoke tests (`check` passes, login renders, home redirects/renders).
 
 ## Done so far (beyond the base scaffold)
-- ✅ **RLS plumbing**: `enable_tenant_rls()` helper (`apps/core/migrations_utils.py`) + RLS migrations for the tenant tables; `TenantScopedAdmin` base; per-model tenant-isolation test pattern (`apps/crm/tests/test_tenant_isolation.py`). (Enforcement needs the prod two-role setup + `RLS_ENABLED=true` — see CLAUDE.md §5.)
+- ✅ **RLS plumbing**: `enable_tenant_rls()` helper (`apps/core/migrations_utils.py`) + RLS migrations for the tenant tables; `TenantScopedAdmin` base; per-model tenant-isolation test pattern. (Enforcement needs the prod two-role setup + `RLS_ENABLED=true` — see CLAUDE.md §5.)
 - ✅ **CompanyProfile + BankAccount** (`apps/tenants`) — company header data for documents + admin.
-- ✅ **CRM core models** (`apps/crm`) — `Customer`, `Contact`, `PipelineStage`, `Deal`, `Activity`, `Task` + admin (with inlines). Migrations applied, `make check` green (35 tests).
+- ✅ **CRM core models** (`apps/crm`) — `Customer`, `Contact`, `PipelineStage`, `Deal`, `Activity`, `Task` + admin.
+- ✅ **Tenant onboarding** — `post_save` signal seeds a default furniture sales pipeline for each new `Tenant` (`apps/crm/services.py` `seed_default_pipeline`, `signals.py`).
+- ✅ **CRM UI (first cut)** — pipeline **Kanban board** (SortableJS drag → htmx `move_deal` endpoint, tenant-scoped; sets status/closed_at on WON/LOST), **customer list**, **deal detail** (info + activity/task timelines, read-only). Nav + home wired up. `make check` green (44 tests).
 
 ## Phase 1 backlog (next, suggested order — see REQUIREMENTS.md §4)
 
-1. **Tenant onboarding** — when a `Tenant` is created, seed a default `PipelineStage` set + a `CompanyProfile` shell (signal or a `create_tenant` service); then make `Deal.stage` required again.
-2. **CRM UI** (`apps/crm`) — pipeline **Kanban board** (htmx + SortableJS drag → POST stage change), deal detail with activity timeline + quick-log, customer list / Customer 360, task list "my work" + reminders. §4.3–4.5
-3. **Lead capture** (`apps/crm` + `apps/integrations`) — embeddable web form, manual lead entry, LINE inbound (basic), assignment. §4.2
-4. **Catalog** (`apps/catalog`) — `ProductCategory`, `Product` (+ images, W×D×H/material/color fields), `ProductVariant`, `ProductOption`, `BundleItem`; Excel import. §4.6
-5. **Quotation** (`apps/quotes`) — `SalesDocument`(docType=QUOTATION) + `SalesDocLine` (room grouping, per-line images/options), totals engine (subtotal → end discount → VAT bases → VAT → grand total + withholding estimate + BahtText + rounding), document-number sequence (transactional), revisions, discount-approval workflow, statuses. §4.7
-6. **PDF + sending** — WeasyPrint HTML template with embedded Sarabun, share link, send via LINE/email, public accept/sign view, auto follow-up tasks. §4.8
-7. **Reports/dashboard** — pipeline value, win/loss + lost reasons, sales targets vs actual. §4.9
-8. **Roles & permissions** — enforce role-based access + approval caps from `Membership`. §4.15
-9. **Seed/import command** — load the anchor customer's catalog & customers from their Excel files (collected in discovery).
+1. **CRM UI — round 2**: create/edit deal & customer in-app (not just admin); deal detail **quick-log activity** + **add task** (htmx); **task list "my work"** + overdue; **Customer 360** page; pipeline column counts refresh after move; make `Deal.stage` required (+ default `PipelineStage` chosen on create); CompanyProfile auto-shell or a company-settings page. §4.3–4.5
+2. **Lead capture** (`apps/crm` + `apps/integrations`) — embeddable web form, manual lead entry, LINE inbound (basic), assignment. §4.2
+3. **Catalog** (`apps/catalog`) — `ProductCategory`, `Product` (+ images, W×D×H/material/color fields), `ProductVariant`, `ProductOption`, `BundleItem`; Excel import. §4.6
+4. **Quotation** (`apps/quotes`) — `SalesDocument`(docType=QUOTATION) + `SalesDocLine` (room grouping, per-line images/options), totals engine (subtotal → end discount → VAT bases → VAT → grand total + withholding estimate + BahtText + rounding), document-number sequence (transactional), revisions, discount-approval workflow, statuses. §4.7
+5. **PDF + sending** — WeasyPrint HTML template with embedded Sarabun, share link, send via LINE/email, public accept/sign view, auto follow-up tasks. §4.8
+6. **Reports/dashboard** — pipeline value, win/loss + lost reasons, sales targets vs actual. §4.9
+7. **Roles & permissions** — enforce role-based access + approval caps from `Membership`. §4.15
+8. **Seed/import command** — load the anchor customer's catalog & customers from their Excel files (collected in discovery).
 
 ## Open product questions still to resolve (REQUIREMENTS.md §10)
 MVP boundary for the anchor customer (does phase 1 need tax invoice?), target furniture sub-segment, LINE integration depth, hosting region, pricing, product name, IP/ownership arrangement with วันดีดี. Use [discovery/wandeedee-interview-short.md](discovery/wandeedee-interview-short.md).
