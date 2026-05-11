@@ -27,6 +27,9 @@ makemigrations: ## Create migrations
 superuser: ## Create a Django superuser
 	$(UV) python manage.py createsuperuser
 
+seed: ## Seed demo data into the 'wandeedee' tenant (use --force to re-run)
+	$(UV) python manage.py seed_demo --tenant wandeedee
+
 test: ## Run tests
 	$(UV) pytest
 

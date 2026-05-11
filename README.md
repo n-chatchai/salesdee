@@ -21,17 +21,20 @@ uv sync
 cp .env.example .env          # then edit
 createdb quotation            # or set DATABASE_URL to your db
 make migrate
-make superuser
-make run                      # http://localhost:8000  (admin at /admin)
+make superuser                # email-as-login (no username)
+make seed                     # optional: demo data into the 'wandeedee' tenant
+make run                      # http://localhost:8000  (login at /accounts/login/, admin at /admin)
 # in another terminal (background tasks):
 make worker
 ```
+After creating a superuser, in `/admin` create a **Workspace (Tenant)** and a **Membership** linking the user to it (or run `make seed`, which creates the `wandeedee` tenant + data).
 
 ## Common commands
 
 ```bash
 make run            # dev server
-make worker         # celery worker
+make worker         # background-task worker (django.tasks db_worker)
+make seed           # demo data (Thai office-furniture: customers, products, deals, a quotation)
 make test           # pytest
 make check          # lint + typecheck + test  ← run before considering work done
 make fmt            # auto-fix lint + format
