@@ -1,23 +1,10 @@
 from __future__ import annotations
 
 from django import forms
-from django.contrib.auth import get_user_model
-from django.db.models import QuerySet
 
-from apps.core.current_tenant import get_current_tenant
-from apps.core.forms import set_queryset
+from apps.core.forms import set_queryset, tenant_users
 
 from .models import Activity, Contact, Customer, Deal, Lead, PipelineStage, StageKind, Task
-
-User = get_user_model()
-
-
-def _tenant_users() -> QuerySet:
-    tenant = get_current_tenant()
-    qs = User.objects.filter(is_active=True)
-    if tenant is not None:
-        qs = qs.filter(memberships__tenant=tenant, memberships__is_active=True)
-    return qs.distinct()
 
 
 class CustomerForm(forms.ModelForm):
@@ -68,7 +55,7 @@ class DealForm(forms.ModelForm):
         set_queryset(self, "stage", PipelineStage.objects.all())
         set_queryset(self, "customer", Customer.objects.all())
         set_queryset(self, "contact", Contact.objects.all())
-        set_queryset(self, "owner", _tenant_users())
+        set_queryset(self, "owner", tenant_users())
         for name in ("owner", "contact", "customer", "estimated_value"):
             self.fields[name].required = False
         self.fields["stage"].required = True
@@ -108,7 +95,7 @@ class TaskForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        set_queryset(self, "assignee", _tenant_users())
+        set_queryset(self, "assignee", tenant_users())
         self.fields["assignee"].required = False
 
 
@@ -135,7 +122,7 @@ class LeadForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        set_queryset(self, "assigned_to", _tenant_users())
+        set_queryset(self, "assigned_to", tenant_users())
         self.fields["assigned_to"].required = False
         self.fields["budget"].required = False
 

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}{% if document %}แก้ไขหัวใบเสนอราคา{% else %}ใบเสนอราคาใหม่{% endif %} · {{ current_tenant.name }}{% endblock %}
+
+{% block content %}
+  <a href="{% if document %}{% url 'quotes:quotation_detail' document.pk %}{% else %}{% url 'quotes:quotations' %}{% endif %}" class="text-sm text-slate-500 hover:underline">&larr; ยกเลิก</a>
+  <h1 class="mt-1 text-xl font-semibold">{% if document %}แก้ไขหัวใบเสนอราคา: {{ document.doc_number }}{% else %}สร้างใบเสนอราคาใหม่{% endif %}</h1>
+
+  <form method="post" class="crm-form mt-4 max-w-2xl rounded-lg border bg-white p-5">
+    {% csrf_token %}
+    {% include "crm/_form_fields.html" %}
+    <button type="submit" class="mt-2 rounded bg-slate-800 px-4 py-2 text-sm text-white hover:bg-slate-700">บันทึก</button>
+    {% if not document %}<p class="mt-3 text-xs text-slate-400">บันทึกแล้วจะได้เลขที่เอกสารอัตโนมัติ แล้วค่อยเพิ่มรายการในหน้าถัดไป</p>{% endif %}
+  </form>
+{% endblock %}

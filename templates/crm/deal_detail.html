@@ -24,6 +24,13 @@
       <div><span class="text-slate-500">ช่องทาง:</span> {{ deal.get_channel_display|default:"—" }}</div>
       <div><span class="text-slate-500">เจ้าของ:</span> {{ deal.owner.get_full_name|default:"—" }}</div>
       {% if deal.notes %}<div class="border-t pt-2 text-slate-600">{{ deal.notes|linebreaksbr }}</div>{% endif %}
+      <div class="border-t pt-2">
+        <div class="mb-1 text-slate-500">ใบเสนอราคา</div>
+        {% for doc in deal.documents.all %}
+          <div><a class="hover:underline" href="{% url 'quotes:quotation_detail' doc.pk %}">{{ doc.doc_number|default:"(ร่าง)" }}</a> · {{ doc.get_status_display }}</div>
+        {% empty %}<div class="text-slate-400">— ยังไม่มี —</div>{% endfor %}
+        <form method="post" action="{% url 'quotes:quotation_from_deal' deal.pk %}" class="mt-2">{% csrf_token %}<button type="submit" class="rounded bg-slate-800 px-3 py-1.5 text-xs text-white hover:bg-slate-700">+ สร้างใบเสนอราคาจากดีลนี้</button></form>
+      </div>
     </section>
 
     <section class="space-y-6 md:col-span-2">

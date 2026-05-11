@@ -34,15 +34,16 @@ Then in Django admin (`/admin`): create a **Workspace (Tenant)** and a **Members
 - ✅ **Lead capture** — `Lead` model (+ RLS); leads list / manual entry / detail; **convert lead → Customer + Contact + Deal** (`convert_lead` service); **public embeddable enquiry form** at `/crm/intake/<tenant-slug>/` (no login, tenant from URL).
 - ✅ **Custom domains (Django side)** — `tenants.TenantDomain` model; host-based tenant resolution in the middleware (verified custom domain → tenant, `<slug>.<APP_DOMAIN>` subdomain → tenant, `PLATFORM_HOSTS` → no tenant; 403 if a logged-in user hits a tenant host they don't belong to). Infra (DNS/CNAME, on-demand TLS, prod `ALLOWED_HOSTS`) still to do at deploy time.
 - ✅ **Rebrand → `salesdee`** (working name; product display name in templates/docs).
-- ✅ **Catalog** (`apps/catalog`) — `ProductCategory`, `Product` (furniture fields: W×D×H, material/finish/color/hardware/standard, tax type), `ProductImage`, `ProductVariant`, `ProductOption`, `BundleItem` (+ RLS; product code unique per tenant); admin with inlines; product list/detail/create/edit UI; **`import_catalog` management command** (xlsx → products, header-mapped, update by code). *(Web import wizard with preview/error report = later.)*
+- ✅ **Catalog** (`apps/catalog`) — `ProductCategory`, `Product` (furniture fields), `ProductImage`, `ProductVariant`, `ProductOption`, `BundleItem` (+ RLS); admin with inlines; product list/detail/create/edit UI; **`import_catalog` management command** (xlsx → products).
+- ✅ **Quotation — round 1** (`apps/quotes`) — `DocumentNumberSequence` (per tenant/doc-type/year, `select_for_update`, gap-free), `SalesDocument`(QUOTATION) + `SalesDocLine` (room/zone grouping, per-line image, free-text or catalog-linked), **totals engine** (`compute_document_totals`: subtotal → end-of-bill discount allocated proportionally → VAT bases per rate → VAT 7% → grand total + withholding estimate + net expected + **BahtText** + rounding; EXCLUSIVE pricing only for now), admin with line inline, quotation list/detail (groups, lines, totals)/create/edit UI, non-htmx add/delete line, **create-quotation-from-deal** action on the deal page. `make check` green (77 tests).
 
 ## Phase 1 backlog (next, suggested order — see REQUIREMENTS.md §4)
 
-1. **Quotation** (`apps/quotes`) — `SalesDocument`(docType=QUOTATION) + `SalesDocLine` (room/zone grouping, per-line images/options, pull from catalog or free text), totals engine (subtotal → end-of-bill discount → VAT bases per rate → VAT → grand total + withholding estimate + BahtText + rounding), **document-number sequence** (transactional, gap-free), revisions (snapshot + diff), discount-approval workflow, statuses, generate-from-deal. §4.7
-2. **PDF + sending** — WeasyPrint HTML template with embedded Sarabun, share link, send via LINE/email, public accept/sign view, auto follow-up tasks. §4.8
-3. **Reports/dashboard** — pipeline value, win/loss + lost reasons, sales targets vs actual. §4.9
+1. **Quotation — round 2** — htmx line editor (add/edit/reorder lines, live totals; pick from catalog auto-fills price/desc/tax/image); document statuses + transitions; **revisions** (snapshot on send + diff); **discount-approval workflow** (using `Membership` caps); INCLUSIVE-VAT pricing; rounding-diff line. §4.7
+2. **PDF + sending** — WeasyPrint HTML template (A4, embedded Sarabun, company header from `CompanyProfile`, room groups, totals box, BahtText, signature blocks); share link (token, expiry); send via LINE/email; public accept/sign view; auto follow-up tasks. §4.8
+3. **Reports/dashboard** — pipeline value, win/loss + lost reasons, sales targets vs actual, quotation conversion rate. §4.9
 4. **Roles & permissions** — enforce role-based access + approval caps from `Membership`. §4.15
-5. **Customer import** — a `import_customers` command / web import (catalog import command already exists).
+5. **Customer import** — `import_customers` command / web import (catalog import command exists).
 
 ### Smaller follow-ups (optional, can defer)
 - LINE inbound (Messaging API webhook → create/link Lead) — currently only the public web form + manual entry exist.

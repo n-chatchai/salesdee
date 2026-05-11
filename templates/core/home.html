@@ -24,6 +24,10 @@
         <h2 class="font-medium">ลูกค้า</h2>
         <p class="mt-1 text-sm text-slate-500">รายชื่อลูกค้าและผู้ติดต่อ</p>
       </a>
+      <a href="{% url 'quotes:quotations' %}" class="rounded-lg border bg-white p-4 hover:shadow">
+        <h2 class="font-medium">ใบเสนอราคา</h2>
+        <p class="mt-1 text-sm text-slate-500">ออก/แก้ไขใบเสนอราคา</p>
+      </a>
       <a href="{% url 'catalog:products' %}" class="rounded-lg border bg-white p-4 hover:shadow">
         <h2 class="font-medium">แคตตาล็อกสินค้า</h2>
         <p class="mt-1 text-sm text-slate-500">สินค้า/รุ่นย่อย/ออปชัน</p>
@@ -32,10 +36,6 @@
         <h2 class="font-medium">งานของฉัน</h2>
         <p class="mt-1 text-sm text-slate-500">งานที่ต้องตาม</p>
       </a>
-      <div class="rounded-lg border border-dashed bg-white p-4">
-        <h2 class="font-medium text-slate-400">ใบเสนอราคา</h2>
-        <p class="mt-1 text-sm text-slate-400">เฟส 1 — ถัดไป</p>
-      </div>
     {% else %}
       <div class="rounded-lg border bg-white p-4 sm:col-span-2 lg:col-span-3">
         <h2 class="font-medium">เริ่มต้น</h2>
