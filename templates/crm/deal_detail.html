@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}{{ deal.name }} · {{ current_tenant.name }}{% endblock %}
+
+{% block content %}
+  <a href="{% url 'crm:pipeline' %}" class="text-sm text-slate-500 hover:underline">&larr; กลับไป Pipeline</a>
+  <h1 class="mt-1 text-xl font-semibold">{{ deal.name }}</h1>
+
+  <div class="mt-4 grid gap-6 md:grid-cols-3">
+    <section class="md:col-span-1 space-y-2 rounded-lg border bg-white p-4 text-sm">
+      <div><span class="text-slate-500">ลูกค้า:</span> {{ deal.customer.name|default:"—" }}</div>
+      <div><span class="text-slate-500">ผู้ติดต่อ:</span> {{ deal.contact.name|default:"—" }}</div>
+      <div><span class="text-slate-500">ขั้น:</span> {{ deal.stage.name|default:"—" }}</div>
+      <div><span class="text-slate-500">สถานะ:</span> {{ deal.get_status_display }}</div>
+      <div><span class="text-slate-500">มูลค่าโดยประมาณ:</span> {{ deal.estimated_value|floatformat:2 }} ฿</div>
+      <div><span class="text-slate-500">โอกาสปิด:</span> {{ deal.probability }}%</div>
+      <div><span class="text-slate-500">คาดปิด:</span> {{ deal.expected_close_date|default:"—" }}</div>
+      <div><span class="text-slate-500">ช่องทาง:</span> {{ deal.get_channel_display|default:"—" }}</div>
+      <div><span class="text-slate-500">เจ้าของ:</span> {{ deal.owner.get_full_name|default:"—" }}</div>
+      {% if deal.notes %}<div class="border-t pt-2 text-slate-600">{{ deal.notes|linebreaksbr }}</div>{% endif %}
+      <a href="/admin/crm/deal/{{ deal.pk }}/change/" class="inline-block pt-2 text-slate-500 underline">แก้ไขในหน้า admin</a>
+    </section>
+
+    <section class="md:col-span-2 space-y-6">
+      <div>
+        <h2 class="mb-2 font-medium">กิจกรรม</h2>
+        <ul class="space-y-2">
+          {% for a in activities %}
+            <li class="rounded border bg-white p-3 text-sm">
+              <div class="flex items-center justify-between text-xs text-slate-500">
+                <span>{{ a.get_kind_display }}{% if a.created_by %} · {{ a.created_by.get_short_name }}{% endif %}</span>
+                <span>{{ a.occurred_at|date:"d/m/Y H:i" }}</span>
+              </div>
+              {% if a.body %}<div class="mt-1 text-slate-700">{{ a.body|linebreaksbr }}</div>{% endif %}
+            </li>
+          {% empty %}
+            <li class="text-sm text-slate-400">ยังไม่มีกิจกรรม</li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="mb-2 font-medium">งาน</h2>
+        <ul class="space-y-2">
+          {% for t in tasks %}
+            <li class="flex items-center justify-between rounded border bg-white p-3 text-sm">
+              <span>{{ t.description|default:t.get_kind_display }}</span>
+              <span class="text-xs text-slate-500">{{ t.get_status_display }}{% if t.due_at %} · {{ t.due_at|date:"d/m/Y" }}{% endif %}</span>
+            </li>
+          {% empty %}
+            <li class="text-sm text-slate-400">ยังไม่มีงาน</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </section>
+  </div>
+{% endblock %}

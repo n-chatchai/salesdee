@@ -11,16 +11,23 @@
   {% endif %}
 
   <div class="mt-8 grid gap-4 sm:grid-cols-3">
+    {% if current_tenant %}
+      <a href="{% url 'crm:pipeline' %}" class="rounded-lg border bg-white p-4 hover:shadow">
+        <h2 class="font-medium">Pipeline การขาย</h2>
+        <p class="mt-1 text-sm text-slate-500">ดูดีลทั้งหมดแบบ Kanban</p>
+      </a>
+      <a href="{% url 'crm:customers' %}" class="rounded-lg border bg-white p-4 hover:shadow">
+        <h2 class="font-medium">ลูกค้า</h2>
+        <p class="mt-1 text-sm text-slate-500">รายชื่อลูกค้าและผู้ติดต่อ</p>
+      </a>
+    {% else %}
+      <div class="rounded-lg border bg-white p-4 sm:col-span-2">
+        <h2 class="font-medium">Pipeline / ลูกค้า</h2>
+        <p class="mt-1 text-sm text-slate-500">ผูกผู้ใช้กับ workspace ก่อน (ใน <a class="underline" href="/admin/">/admin</a>)</p>
+      </div>
+    {% endif %}
     <div class="rounded-lg border bg-white p-4">
-      <h2 class="font-medium">Pipeline การขาย</h2>
-      <p class="mt-1 text-sm text-slate-500">เฟส 1 — กำลังพัฒนา</p>
-    </div>
-    <div class="rounded-lg border bg-white p-4">
-      <h2 class="font-medium">ใบเสนอราคา</h2>
-      <p class="mt-1 text-sm text-slate-500">เฟส 1 — กำลังพัฒนา</p>
-    </div>
-    <div class="rounded-lg border bg-white p-4">
-      <h2 class="font-medium">แคตตาล็อกสินค้า</h2>
+      <h2 class="font-medium">ใบเสนอราคา / แคตตาล็อก</h2>
       <p class="mt-1 text-sm text-slate-500">เฟส 1 — กำลังพัฒนา</p>
     </div>
   </div>

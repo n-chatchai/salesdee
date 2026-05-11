@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Pipeline · {{ current_tenant.name }}{% endblock %}
+
+{% block extra_head %}
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js" defer></script>
+{% endblock %}
+
+{% block content %}
+  <div class="mb-4 flex items-center justify-between">
+    <h1 class="text-xl font-semibold">Pipeline การขาย</h1>
+    {% if unassigned_count %}
+      <span class="text-xs text-amber-700">มีดีล {{ unassigned_count }} รายการที่ยังไม่ได้จัดขั้น (จัดได้ในหน้า admin)</span>
+    {% endif %}
+  </div>
+
+  {% if not columns %}
+    <p class="text-slate-600">ยังไม่มีขั้นใน pipeline — สร้าง Tenant ใหม่จะมีชุดเริ่มต้นให้อัตโนมัติ หรือเพิ่มได้ที่ <a class="underline" href="/admin/crm/pipelinestage/">/admin</a></p>
+  {% else %}
+  <div class="flex gap-4 overflow-x-auto pb-4">
+    {% for stage, deals in columns %}
+      <div class="w-72 shrink-0 rounded-lg bg-slate-100 p-2" data-stage-id="{{ stage.pk }}">
+        <div class="mb-2 flex items-center justify-between px-1 text-sm font-medium text-slate-600">
+          <span>{{ stage.name }}</span>
+          <span class="rounded-full bg-slate-200 px-2 text-xs">{{ deals|length }}</span>
+        </div>
+        <div class="space-y-2"
+             x-data
+             x-init="new Sortable($el, {
+               group: 'deals', animation: 150, ghostClass: 'opacity-40',
+               onEnd(evt) {
+                 htmx.ajax('POST', '{% url 'crm:move_deal' %}', { swap: 'none', values: {
+                   deal_id: evt.item.dataset.dealId,
+                   stage_id: evt.to.closest('[data-stage-id]').dataset.stageId
+                 }});
+               }
+             })">
+          {% for deal in deals %}
+            {% include "crm/_deal_card.html" %}
+          {% empty %}
+            <p class="px-1 py-4 text-center text-xs text-slate-400">— ว่าง —</p>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+{% endblock %}

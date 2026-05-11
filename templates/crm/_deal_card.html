@@ -1,0 +1,11 @@
+{# A single deal card on the Kanban board. Context: `deal`. #}
+<a href="{% url 'crm:deal_detail' deal.pk %}"
+   class="block rounded-md border bg-white p-3 shadow-sm hover:shadow"
+   data-deal-id="{{ deal.pk }}">
+  <div class="font-medium text-slate-800">{{ deal.name }}</div>
+  {% if deal.customer %}<div class="mt-0.5 text-xs text-slate-500">{{ deal.customer.name }}</div>{% endif %}
+  <div class="mt-2 flex items-center justify-between text-xs text-slate-500">
+    <span>{{ deal.estimated_value|floatformat:0 }} ฿</span>
+    {% if deal.owner %}<span>{{ deal.owner.get_short_name }}</span>{% endif %}
+  </div>
+</a>

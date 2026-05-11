@@ -1,5 +1,12 @@
-from django.urls import path  # noqa: F401  (use when adding views)
+from django.urls import path
+
+from . import views
 
 app_name = "crm"
 
-urlpatterns: list = []  # pipeline / leads / deals views — phase 1
+urlpatterns = [
+    path("", views.pipeline, name="pipeline"),
+    path("deals/move/", views.move_deal, name="move_deal"),
+    path("deals/<int:pk>/", views.deal_detail, name="deal_detail"),
+    path("customers/", views.customer_list, name="customers"),
+]
