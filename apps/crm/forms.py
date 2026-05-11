@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-from typing import cast
-
 from django import forms
 from django.contrib.auth import get_user_model
 from django.db.models import QuerySet
 
 from apps.core.current_tenant import get_current_tenant
+from apps.core.forms import set_queryset
 
 from .models import Activity, Contact, Customer, Deal, Lead, PipelineStage, StageKind, Task
 
@@ -19,11 +18,6 @@ def _tenant_users() -> QuerySet:
     if tenant is not None:
         qs = qs.filter(memberships__tenant=tenant, memberships__is_active=True)
     return qs.distinct()
-
-
-def _set_queryset(form: forms.BaseForm, name: str, queryset: QuerySet) -> None:
-    """Set the queryset on a ModelChoiceField (django-stubs types form.fields[...] as plain Field)."""
-    cast("forms.ModelChoiceField", form.fields[name]).queryset = queryset
 
 
 class CustomerForm(forms.ModelForm):
@@ -71,10 +65,10 @@ class DealForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # ModelForm binds FK querysets at *class* definition time, which for a context-aware
         # TenantManager means "no tenant active" -> empty. Re-bind them per request.
-        _set_queryset(self, "stage", PipelineStage.objects.all())
-        _set_queryset(self, "customer", Customer.objects.all())
-        _set_queryset(self, "contact", Contact.objects.all())
-        _set_queryset(self, "owner", _tenant_users())
+        set_queryset(self, "stage", PipelineStage.objects.all())
+        set_queryset(self, "customer", Customer.objects.all())
+        set_queryset(self, "contact", Contact.objects.all())
+        set_queryset(self, "owner", _tenant_users())
         for name in ("owner", "contact", "customer", "estimated_value"):
             self.fields[name].required = False
         self.fields["stage"].required = True
@@ -97,7 +91,7 @@ class ActivityForm(forms.ModelForm):
     def __init__(self, *args, customer: Customer | None = None, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["contact"].required = False
-        _set_queryset(
+        set_queryset(
             self,
             "contact",
             Contact.objects.filter(customer=customer)
@@ -114,7 +108,7 @@ class TaskForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        _set_queryset(self, "assignee", _tenant_users())
+        set_queryset(self, "assignee", _tenant_users())
         self.fields["assignee"].required = False
 
 
@@ -141,7 +135,7 @@ class LeadForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        _set_queryset(self, "assigned_to", _tenant_users())
+        set_queryset(self, "assigned_to", _tenant_users())
         self.fields["assigned_to"].required = False
         self.fields["budget"].required = False
 

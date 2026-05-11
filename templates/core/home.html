@@ -10,7 +10,7 @@
     <p class="mt-1 text-amber-700">ยังไม่ได้ผูกผู้ใช้นี้กับ workspace ใด — สร้าง Tenant และ Membership ใน <a class="underline" href="/admin/">/admin</a></p>
   {% endif %}
 
-  <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+  <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
     {% if current_tenant %}
       <a href="{% url 'crm:leads' %}" class="rounded-lg border bg-white p-4 hover:shadow">
         <h2 class="font-medium">Leads</h2>
@@ -24,12 +24,20 @@
         <h2 class="font-medium">ลูกค้า</h2>
         <p class="mt-1 text-sm text-slate-500">รายชื่อลูกค้าและผู้ติดต่อ</p>
       </a>
+      <a href="{% url 'catalog:products' %}" class="rounded-lg border bg-white p-4 hover:shadow">
+        <h2 class="font-medium">แคตตาล็อกสินค้า</h2>
+        <p class="mt-1 text-sm text-slate-500">สินค้า/รุ่นย่อย/ออปชัน</p>
+      </a>
       <a href="{% url 'crm:tasks' %}" class="rounded-lg border bg-white p-4 hover:shadow">
         <h2 class="font-medium">งานของฉัน</h2>
         <p class="mt-1 text-sm text-slate-500">งานที่ต้องตาม</p>
       </a>
+      <div class="rounded-lg border border-dashed bg-white p-4">
+        <h2 class="font-medium text-slate-400">ใบเสนอราคา</h2>
+        <p class="mt-1 text-sm text-slate-400">เฟส 1 — ถัดไป</p>
+      </div>
     {% else %}
-      <div class="rounded-lg border bg-white p-4 sm:col-span-2 lg:col-span-4">
+      <div class="rounded-lg border bg-white p-4 sm:col-span-2 lg:col-span-3">
         <h2 class="font-medium">เริ่มต้น</h2>
         <p class="mt-1 text-sm text-slate-500">ผูกผู้ใช้กับ workspace ก่อน (ใน <a class="underline" href="/admin/">/admin</a>)</p>
       </div>
@@ -37,7 +45,7 @@
   </div>
 
   {% if current_tenant %}
-    <p class="mt-4 text-sm text-slate-400">ฟอร์มรับ lead จากเว็บไซต์: <code>/crm/intake/{{ current_tenant.slug }}/</code> · ใบเสนอราคา/แคตตาล็อก — เฟสถัดไป</p>
+    <p class="mt-4 text-sm text-slate-400">ฟอร์มรับ lead จากเว็บไซต์: <code>/crm/intake/{{ current_tenant.slug }}/</code> · นำเข้าแคตตาล็อก: <code>manage.py import_catalog &lt;file.xlsx&gt; --tenant {{ current_tenant.slug }}</code></p>
   {% endif %}
 
   <p class="mt-8 text-sm text-slate-400">salesdee · ดูสเปกเต็มที่ <code>REQUIREMENTS.md</code> · แนวทางการพัฒนาที่ <code>CLAUDE.md</code></p>

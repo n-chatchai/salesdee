@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}แคตตาล็อกสินค้า · {{ current_tenant.name }}{% endblock %}
+
+{% block content %}
+  <div class="mb-4 flex items-center justify-between gap-3">
+    <h1 class="text-xl font-semibold">แคตตาล็อกสินค้า</h1>
+    <form method="get" class="flex-1">
+      <input type="search" name="q" value="{{ q }}" placeholder="ค้นหาชื่อ/รหัส…" class="w-full max-w-sm rounded border px-3 py-1.5 text-sm">
+    </form>
+    <a href="{% url 'catalog:product_create' %}" class="rounded bg-slate-800 px-3 py-1.5 text-sm text-white hover:bg-slate-700">+ เพิ่มสินค้า</a>
+  </div>
+
+  <div class="overflow-hidden rounded-lg border bg-white">
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 text-left text-slate-500">
+        <tr>
+          <th class="px-3 py-2">รหัส</th>
+          <th class="px-3 py-2">ชื่อ</th>
+          <th class="px-3 py-2">หมวด</th>
+          <th class="px-3 py-2">ขนาด</th>
+          <th class="px-3 py-2 text-right">ราคา</th>
+          <th class="px-3 py-2">ภาษี</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y">
+        {% for p in products %}
+          <tr class="hover:bg-slate-50">
+            <td class="px-3 py-2 text-slate-500">{{ p.code|default:"—" }}</td>
+            <td class="px-3 py-2 font-medium"><a class="hover:underline" href="{% url 'catalog:product_detail' p.pk %}">{{ p.name }}</a>{% if p.is_bundle %} <span class="rounded bg-slate-100 px-1 text-xs">ชุด</span>{% endif %}{% if not p.is_active %} <span class="text-xs text-amber-600">(ปิดขาย)</span>{% endif %}</td>
+            <td class="px-3 py-2 text-slate-500">{{ p.category|default:"—" }}</td>
+            <td class="px-3 py-2 text-slate-400">{{ p.dimensions|default:"—" }}</td>
+            <td class="px-3 py-2 text-right">{{ p.default_price|floatformat:2 }}</td>
+            <td class="px-3 py-2 text-slate-500">{{ p.get_tax_type_display }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="px-3 py-8 text-center text-slate-400">ยังไม่มีสินค้า — เพิ่มเอง หรือ <code>manage.py import_catalog &lt;file.xlsx&gt; --tenant {{ current_tenant.slug }}</code></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
