@@ -1,4 +1,4 @@
-# CLAUDE.md — Quotation / Presale + CRM (Thai furniture SME SaaS)
+# CLAUDE.md — salesdee (Presale + CRM SaaS for Thai furniture SMEs)
 
 This file is read by Claude Code at the start of every session in this repo. It is the **source of truth for how we work here**. Follow it exactly.
 
@@ -6,7 +6,7 @@ This file is read by Claude Code at the start of every session in this repo. It 
 
 ## 1. What this project is
 
-A **multi-tenant SaaS "Presale + CRM"** for Thai SMEs, starting with the **furniture industry** as the beachhead vertical (the first/anchor customer is a furniture-sales business, "วัน.ดี.ดี."). Core flow: capture leads (LINE / web form / email / phone) → CRM pipeline → furniture-aware quotation → send via LINE/email → close → (phase 2) after-sales: order/production/delivery/installation/warranty + tax invoice/receipt/AR → (phase 3) basic accounting.
+**salesdee** ("ขายดี" — working name) is a **multi-tenant SaaS "Presale + CRM"** for Thai SMEs, starting with the **furniture industry** as the beachhead vertical (the first/anchor customer is a furniture-sales business, "วัน.ดี.ดี."). Core flow: capture leads (LINE / web form / email / phone) → CRM pipeline → furniture-aware quotation → send via LINE/email → close → (phase 2) after-sales: order/production/delivery/installation/warranty + tax invoice/receipt/AR → (phase 3) basic accounting.
 
 - **Full spec**: [REQUIREMENTS.md](REQUIREMENTS.md) — this is the PRD. Read the relevant section before building a feature.
 - **Discovery / customer interview material**: [discovery/](discovery/)

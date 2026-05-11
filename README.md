@@ -1,6 +1,8 @@
-# Quotation — Presale + CRM for Thai SMEs (furniture-first)
+# salesdee — Presale + CRM for Thai SMEs (furniture-first)
 
-Multi-tenant SaaS for Thai SMEs: lead capture (LINE / web form / email / phone) → CRM pipeline → furniture-aware quotation → send via LINE/email → close → (phase 2) after-sales + tax invoice/receipt/AR → (phase 3) basic accounting.
+> "ขายดี" — a multi-tenant SaaS for Thai SMEs (codename/working name `salesdee`).
+
+Lead capture (LINE / web form / email / phone) → CRM pipeline → furniture-aware quotation → send via LINE/email → close → (phase 2) after-sales + tax invoice/receipt/AR → (phase 3) basic accounting.
 
 - **Product spec / PRD**: [REQUIREMENTS.md](REQUIREMENTS.md)
 - **How we work (read this if you're contributing, human or AI)**: [CLAUDE.md](CLAUDE.md)
