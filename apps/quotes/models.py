@@ -122,6 +122,12 @@ class SalesDocument(TenantScopedModel):
         "tenants.BankAccount", on_delete=models.SET_NULL, related_name="+", null=True, blank=True
     )
     sent_at = models.DateTimeField("ส่งให้ลูกค้าเมื่อ", null=True, blank=True)
+    # Discount approval (REQUIREMENTS.md §4.7) — set when a manager/owner approves a quotation
+    # whose discount exceeds the salesperson's cap (apps.quotes.services.submit_quotation).
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name="+", null=True, blank=True
+    )
+    approved_at = models.DateTimeField("อนุมัติเมื่อ", null=True, blank=True)
     # Customer response captured via the public share link
     customer_response = models.CharField(
         "การตอบกลับของลูกค้า", max_length=10, choices=CustomerResponse.choices, blank=True
@@ -131,6 +137,17 @@ class SalesDocument(TenantScopedModel):
     customer_responded_at = models.DateTimeField("ตอบกลับเมื่อ", null=True, blank=True)
     customer_response_ip = models.GenericIPAddressField("IP ที่ตอบกลับ", null=True, blank=True)
 
+    # Statuses in which the document content (header + lines) may still be edited. Once SENT it's
+    # locked; changing it means reopening to a new revision (apps.quotes.services.reopen_quotation).
+    EDITABLE_STATUSES = (DocStatus.DRAFT, DocStatus.PENDING_APPROVAL, DocStatus.READY)
+    # Terminal-ish statuses from which "reopen for changes" makes sense.
+    REOPENABLE_STATUSES = (
+        DocStatus.SENT,
+        DocStatus.ACCEPTED,
+        DocStatus.REJECTED,
+        DocStatus.EXPIRED,
+    )
+
     class Meta:
         ordering = ("-created_at",)
         verbose_name = "เอกสารขาย"
@@ -139,6 +156,10 @@ class SalesDocument(TenantScopedModel):
 
     def __str__(self) -> str:
         return self.doc_number or f"(ร่าง) {self.get_doc_type_display()} #{self.pk}"
+
+    @property
+    def is_editable(self) -> bool:
+        return self.status in self.EDITABLE_STATUSES
 
 
 class SalesDocLine(TenantScopedModel):

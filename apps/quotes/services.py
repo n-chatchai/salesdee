@@ -26,6 +26,11 @@ from .models import (
     SalesDocument,
 )
 
+
+class WorkflowError(Exception):
+    """A document status transition was attempted that isn't allowed from the current state."""
+
+
 VAT_RATE = Decimal("0.07")
 _Q2 = Decimal("0.01")
 
@@ -120,8 +125,9 @@ def get_or_create_share_link(
 
 
 def mark_sent(document: SalesDocument) -> None:
-    """Move a draft/pending quotation to SENT and stamp ``sent_at`` (idempotent on the timestamp)."""
-    if document.status in (DocStatus.DRAFT, DocStatus.PENDING_APPROVAL, DocStatus.READY):
+    """Stamp a quotation as sent (READY → SENT) and set ``sent_at``. Idempotent for a resend.
+    The caller (quotes.views.quotation_send) is responsible for getting it to READY first."""
+    if document.status == DocStatus.READY:
         document.status = DocStatus.SENT
     document.sent_at = document.sent_at or timezone.now()
     document.save()
@@ -147,6 +153,131 @@ def record_customer_response(
         document.status = DocStatus.REJECTED
     # CHANGES -> stays SENT; the note tells the salesperson what to revise
     document.save()
+
+
+# --- Document lifecycle: submit / approve / cancel / reopen / expire ----------
+def _membership(user, tenant_id):
+    if user is None or not getattr(user, "is_authenticated", False):
+        return None
+    from apps.accounts.models import Membership
+
+    return Membership.objects.filter(user=user, tenant_id=tenant_id, is_active=True).first()
+
+
+def can_approve(user, tenant_id) -> bool:
+    """Owners and managers may approve over-cap discounts (REQUIREMENTS.md §4.15)."""
+    from apps.accounts.models import Role
+
+    m = _membership(user, tenant_id)
+    return m is not None and m.role in (Role.OWNER, Role.MANAGER)
+
+
+def _line_discount_percent(line) -> Decimal:
+    if line.discount_kind == DiscountKind.PERCENT:
+        return Decimal(line.discount_value)
+    base = Decimal(line.quantity) * Decimal(line.unit_price)
+    return (Decimal(line.discount_value) / base * 100) if base > 0 else Decimal(0)
+
+
+def discount_exceeds_cap(document: SalesDocument, *, user) -> bool:
+    """True if this quotation needs manager approval given ``user``'s authority — i.e. any line or
+    end-of-bill discount exceeds their ``max_discount_percent``, or the grand total exceeds their
+    ``approval_limit``. Owners/managers (and users with no membership on record) never need it."""
+    from apps.accounts.models import Role
+
+    m = _membership(user, document.tenant_id)
+    if m is None or m.role in (Role.OWNER, Role.MANAGER):
+        return False
+    item_lines = [ln for ln in document.lines.all() if ln.line_type == LineType.ITEM]
+    worst_pct = max((_line_discount_percent(ln) for ln in item_lines), default=Decimal(0))
+    subtotal = sum((ln.amount for ln in item_lines), Decimal(0))
+    if document.end_discount_kind == DiscountKind.PERCENT:
+        end_pct = Decimal(document.end_discount_value)
+    elif subtotal > 0:
+        end_pct = Decimal(document.end_discount_value) / subtotal * 100
+    else:
+        end_pct = Decimal(0)
+    worst_pct = max(worst_pct, end_pct)
+    if m.max_discount_percent is not None and worst_pct > m.max_discount_percent:
+        return True
+    if m.approval_limit is not None:
+        return compute_document_totals(document).grand_total > m.approval_limit
+    return False
+
+
+def submit_quotation(document: SalesDocument, *, user) -> str:
+    """DRAFT/PENDING → READY, or → PENDING_APPROVAL when the discount exceeds ``user``'s cap.
+    Returns the resulting status."""
+    if document.status not in (DocStatus.DRAFT, DocStatus.PENDING_APPROVAL):
+        raise WorkflowError(
+            f"ส่งขออนุมัติ/เตรียมส่งได้เฉพาะเอกสารร่าง (สถานะปัจจุบัน: {document.get_status_display()})"
+        )
+    document.status = (
+        DocStatus.PENDING_APPROVAL if discount_exceeds_cap(document, user=user) else DocStatus.READY
+    )
+    document.save()
+    return document.status
+
+
+def approve_quotation(document: SalesDocument, *, user) -> None:
+    """PENDING_APPROVAL → READY, stamping who approved. Caller must check ``can_approve``."""
+    if document.status != DocStatus.PENDING_APPROVAL:
+        raise WorkflowError("อนุมัติได้เฉพาะเอกสารที่รออนุมัติ")
+    document.status = DocStatus.READY
+    document.approved_by = user if getattr(user, "is_authenticated", False) else None
+    document.approved_at = timezone.now()
+    document.save()
+
+
+def reject_approval(document: SalesDocument, *, user=None, note: str = "") -> None:
+    """PENDING_APPROVAL → DRAFT (the salesperson revises and resubmits)."""
+    if document.status != DocStatus.PENDING_APPROVAL:
+        raise WorkflowError("ตีกลับได้เฉพาะเอกสารที่รออนุมัติ")
+    document.status = DocStatus.DRAFT
+    document.save()
+
+
+def cancel_quotation(document: SalesDocument) -> None:
+    """Cancel a quotation (any non-cancelled state → CANCELLED). Idempotent."""
+    if document.status == DocStatus.CANCELLED:
+        return
+    document.status = DocStatus.CANCELLED
+    document.save()
+
+
+def reopen_quotation(document: SalesDocument) -> SalesDocument:
+    """Reopen a sent/accepted/rejected/expired quotation for changes: bump the revision counter,
+    back to DRAFT, clear the customer response & approval stamp. (Full revision snapshots: TODO.)"""
+    if document.status not in document.REOPENABLE_STATUSES:
+        raise WorkflowError(f"เอกสารในสถานะ “{document.get_status_display()}” เปิดแก้ไขใหม่ไม่ได้")
+    document.revision += 1
+    document.status = DocStatus.DRAFT
+    document.sent_at = None
+    document.customer_response = ""
+    document.customer_signed_name = ""
+    document.customer_response_note = ""
+    document.customer_responded_at = None
+    document.customer_response_ip = None
+    document.approved_by = None
+    document.approved_at = None
+    document.save()
+    return document
+
+
+def expire_overdue_quotations() -> int:
+    """Move every READY/SENT quotation in the current tenant whose ``valid_until`` has passed to
+    EXPIRED. Returns how many changed. (Run from the ``expire_quotations`` management command.)"""
+    qs = SalesDocument.objects.filter(
+        doc_type=DocType.QUOTATION,
+        status__in=[DocStatus.READY, DocStatus.SENT],
+        valid_until__lt=date.today(),
+    )
+    count = 0
+    for doc in qs:
+        doc.status = DocStatus.EXPIRED
+        doc.save()
+        count += 1
+    return count
 
 
 # --- Totals engine ------------------------------------------------------------

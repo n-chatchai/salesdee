@@ -62,6 +62,7 @@
     </div>
   </div>
 
+  {% if editable %}
   <div class="mt-6 rounded-lg border bg-white p-4">
     <h2 class="mb-2 font-medium">เพิ่มรายการ</h2>
     <form class="crm-form grid gap-3 sm:grid-cols-2" hx-post="{% url 'quotes:quotation_add_line' document.pk %}" hx-target="#quote-lines" hx-swap="outerHTML">
@@ -71,4 +72,7 @@
     </form>
     <p class="mt-2 text-xs text-slate-400">"หัวข้อ/กลุ่ม" = บรรทัดชื่อห้อง/หัวข้อในตาราง · "ห้อง/โซน" = ใช้จัดกลุ่ม · เลือกสินค้าจากแคตตาล็อกแล้วเว้นราคาว่างไว้ ระบบจะเติมราคา/รายละเอียด/ภาษีให้</p>
   </div>
+  {% else %}
+  <p class="mt-6 text-sm text-slate-400">เอกสารถูกล็อกในสถานะ “{{ document.get_status_display }}” — แก้ไขรายการไม่ได้</p>
+  {% endif %}
 </div>

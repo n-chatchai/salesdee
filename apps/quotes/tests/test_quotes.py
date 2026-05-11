@@ -12,6 +12,7 @@ from apps.core.current_tenant import tenant_context
 from apps.crm.models import Contact, Customer, Deal, PipelineStage, StageKind, Task
 from apps.quotes.models import (
     CustomerResponse,
+    DiscountKind,
     DocStatus,
     DocType,
     LineType,
@@ -20,10 +21,17 @@ from apps.quotes.models import (
     SalesDocument,
 )
 from apps.quotes.services import (
+    WorkflowError,
+    approve_quotation,
+    can_approve,
     compute_document_totals,
     create_quotation_from_deal,
+    expire_overdue_quotations,
     get_or_create_share_link,
     next_document_number,
+    reject_approval,
+    reopen_quotation,
+    submit_quotation,
 )
 
 pytestmark = pytest.mark.django_db
@@ -333,3 +341,194 @@ def test_public_quotation_pdf_anonymous(client, tenant) -> None:
     assert resp.status_code == 200
     assert resp["Content-Type"] == "application/pdf"
     assert resp.content[:5] == b"%PDF-"
+
+
+# --- document lifecycle / discount-approval workflow -------------------------
+def _manager(tenant):
+    from django.contrib.auth import get_user_model
+
+    from apps.accounts.models import Membership, Role
+
+    u = get_user_model().objects.create_user(
+        email="mgr@wandeedee.test", password="testpass-12345", full_name="ผู้จัดการ ทดสอบ"
+    )
+    Membership.objects.create(user=u, tenant=tenant, role=Role.MANAGER)
+    return u
+
+
+def test_submit_without_excess_discount_goes_ready(tenant, user, membership) -> None:
+    doc = _doc(tenant)
+    _line(tenant, doc, quantity=Decimal("1"), unit_price=Decimal("1000"))
+    with tenant_context(tenant):
+        assert submit_quotation(doc, user=user) == DocStatus.READY
+    assert doc.status == DocStatus.READY
+
+
+def test_submit_with_excess_discount_needs_approval(tenant, user, membership) -> None:
+    with tenant_context(tenant):
+        membership.max_discount_percent = Decimal("5")
+        membership.save()
+    doc = _doc(tenant)
+    _line(
+        tenant,
+        doc,
+        quantity=Decimal("1"),
+        unit_price=Decimal("1000"),
+        discount_kind=DiscountKind.PERCENT,
+        discount_value=Decimal("20"),
+    )
+    with tenant_context(tenant):
+        assert submit_quotation(doc, user=user) == DocStatus.PENDING_APPROVAL
+
+
+def test_manager_can_approve_salesperson_cannot(tenant, user, membership) -> None:
+    mgr = _manager(tenant)
+    with tenant_context(tenant):
+        membership.max_discount_percent = Decimal("0")
+        membership.save()
+    doc = _doc(tenant)
+    _line(
+        tenant,
+        doc,
+        unit_price=Decimal("1000"),
+        discount_kind=DiscountKind.PERCENT,
+        discount_value=Decimal("10"),
+    )
+    with tenant_context(tenant):
+        assert submit_quotation(doc, user=user) == DocStatus.PENDING_APPROVAL
+        assert can_approve(mgr, tenant.pk) is True
+        assert can_approve(user, tenant.pk) is False
+        approve_quotation(doc, user=mgr)
+    assert doc.status == DocStatus.READY
+    assert doc.approved_by_id == mgr.pk
+    assert doc.approved_at is not None
+
+
+def test_reject_approval_returns_to_draft(tenant, user, membership) -> None:
+    with tenant_context(tenant):
+        membership.max_discount_percent = Decimal("0")
+        membership.save()
+    doc = _doc(tenant)
+    _line(
+        tenant,
+        doc,
+        unit_price=Decimal("100"),
+        discount_kind=DiscountKind.PERCENT,
+        discount_value=Decimal("5"),
+    )
+    with tenant_context(tenant):
+        submit_quotation(doc, user=user)
+        reject_approval(doc, user=user)
+    assert doc.status == DocStatus.DRAFT
+
+
+def test_cannot_submit_a_sent_quotation(tenant) -> None:
+    doc = _doc(tenant, status=DocStatus.SENT)
+    with tenant_context(tenant), pytest.raises(WorkflowError):
+        submit_quotation(doc, user=None)
+
+
+def test_reopen_bumps_revision_and_clears_response(tenant) -> None:
+    doc = _doc(
+        tenant,
+        status=DocStatus.ACCEPTED,
+        sent_at=timezone.now(),
+        customer_response=CustomerResponse.ACCEPTED,
+        customer_signed_name="ลูกค้า",
+    )
+    with tenant_context(tenant):
+        reopen_quotation(doc)
+    assert doc.status == DocStatus.DRAFT
+    assert doc.revision == 1
+    assert doc.sent_at is None
+    assert doc.customer_response == ""
+    assert doc.customer_signed_name == ""
+
+
+def test_reopen_rejected_when_still_draft(tenant) -> None:
+    doc = _doc(tenant)  # DRAFT
+    with tenant_context(tenant), pytest.raises(WorkflowError):
+        reopen_quotation(doc)
+
+
+def test_expire_overdue_quotations(tenant) -> None:
+    overdue = _doc(tenant, status=DocStatus.SENT, valid_until=date.today() - timedelta(days=1))
+    fresh = _doc(tenant, status=DocStatus.SENT, valid_until=date.today() + timedelta(days=5))
+    draft_overdue = _doc(
+        tenant, status=DocStatus.DRAFT, valid_until=date.today() - timedelta(days=9)
+    )
+    with tenant_context(tenant):
+        n = expire_overdue_quotations()
+        overdue.refresh_from_db()
+        fresh.refresh_from_db()
+        draft_overdue.refresh_from_db()
+    assert n == 1
+    assert overdue.status == DocStatus.EXPIRED
+    assert fresh.status == DocStatus.SENT
+    assert draft_overdue.status == DocStatus.DRAFT  # only READY/SENT expire
+
+
+def test_editing_a_sent_quotation_is_blocked(client, user, membership, tenant) -> None:
+    doc = _doc(tenant, status=DocStatus.SENT)
+    client.force_login(user)
+    # editing the header redirects back to detail with an error message
+    resp = client.get(reverse("quotes:quotation_edit", args=[doc.pk]))
+    assert resp.status_code == 302
+    assert resp.url == reverse("quotes:quotation_detail", args=[doc.pk])
+    # adding a line is forbidden
+    resp = client.post(
+        reverse("quotes:quotation_add_line", args=[doc.pk]),
+        {"line_type": "item", "description": "x", "quantity": "1", "unit_price": "1"},
+    )
+    assert resp.status_code == 403
+
+
+def test_submit_and_approve_views(client, user, membership, tenant) -> None:
+    mgr = _manager(tenant)
+    with tenant_context(tenant):
+        membership.max_discount_percent = Decimal("0")
+        membership.save()
+    doc = _doc(tenant)
+    _line(
+        tenant,
+        doc,
+        unit_price=Decimal("1000"),
+        discount_kind=DiscountKind.PERCENT,
+        discount_value=Decimal("10"),
+    )
+    client.force_login(user)
+    client.post(reverse("quotes:quotation_submit", args=[doc.pk]))
+    with tenant_context(tenant):
+        doc.refresh_from_db()
+    assert doc.status == DocStatus.PENDING_APPROVAL
+    # the salesperson cannot approve
+    assert client.post(reverse("quotes:quotation_approve", args=[doc.pk])).status_code == 403
+    # the manager can
+    client.force_login(mgr)
+    resp = client.post(reverse("quotes:quotation_approve", args=[doc.pk]))
+    assert resp.status_code == 302
+    with tenant_context(tenant):
+        doc.refresh_from_db()
+    assert doc.status == DocStatus.READY
+    assert doc.approved_by_id == mgr.pk
+
+
+def test_reopen_view(client, user, membership, tenant) -> None:
+    doc = _doc(tenant, status=DocStatus.REJECTED)
+    client.force_login(user)
+    resp = client.post(reverse("quotes:quotation_reopen", args=[doc.pk]))
+    assert resp.status_code == 302
+    with tenant_context(tenant):
+        doc.refresh_from_db()
+    assert doc.status == DocStatus.DRAFT
+    assert doc.revision == 1
+
+
+def test_expire_quotations_command(tenant) -> None:
+    from django.core.management import call_command
+
+    overdue = _doc(tenant, status=DocStatus.SENT, valid_until=date.today() - timedelta(days=2))
+    call_command("expire_quotations")
+    with tenant_context(tenant):
+        overdue.refresh_from_db()
+    assert overdue.status == DocStatus.EXPIRED
