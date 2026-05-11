@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}งานของฉัน · {{ current_tenant.name }}{% endblock %}
+
+{% block content %}
+  <h1 class="mb-4 text-xl font-semibold">งานของฉัน</h1>
+  <div class="overflow-hidden rounded-lg border bg-white">
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 text-left text-slate-500">
+        <tr>
+          <th class="px-3 py-2">งาน</th>
+          <th class="px-3 py-2">เกี่ยวกับ</th>
+          <th class="px-3 py-2">กำหนดเสร็จ</th>
+          <th class="px-3 py-2 text-right"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y">
+        {% for task in tasks %}
+          {% include "crm/_task_row.html" %}
+        {% empty %}
+          <tr><td colspan="4" class="px-3 py-8 text-center text-slate-400">ไม่มีงานค้าง 🎉</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

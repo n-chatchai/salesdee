@@ -1,0 +1,23 @@
+{# One row in the "my work" task list. Context: `task`, `now`. Swapped on mark-done. #}
+<tr id="task-row-{{ task.pk }}" class="{% if task.status == 'done' %}opacity-50{% endif %}">
+  <td class="px-3 py-2 {% if task.status == 'done' %}line-through{% endif %}">
+    {{ task.description|default:task.get_kind_display }}
+  </td>
+  <td class="px-3 py-2 text-slate-500">
+    {% if task.deal %}<a class="hover:underline" href="{% url 'crm:deal_detail' task.deal.pk %}">{{ task.deal.name }}</a>
+    {% elif task.customer %}<a class="hover:underline" href="{% url 'crm:customer_detail' task.customer.pk %}">{{ task.customer.name }}</a>
+    {% else %}—{% endif %}
+  </td>
+  <td class="px-3 py-2 text-sm {% if task.due_at and task.due_at < now and task.status != 'done' %}font-medium text-red-600{% else %}text-slate-500{% endif %}">
+    {{ task.due_at|date:"d/m/Y H:i"|default:"—" }}
+  </td>
+  <td class="px-3 py-2 text-right">
+    {% if task.status == 'done' %}
+      <span class="text-xs text-emerald-600">เสร็จแล้ว</span>
+    {% else %}
+      <button hx-post="{% url 'crm:task_done' task.pk %}"
+              hx-target="#task-row-{{ task.pk }}" hx-swap="outerHTML"
+              class="rounded bg-emerald-600 px-2 py-1 text-xs text-white hover:bg-emerald-700">เสร็จ</button>
+    {% endif %}
+  </td>
+</tr>

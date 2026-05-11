@@ -13,6 +13,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root { font-family: "Sarabun", system-ui, sans-serif; }
+    .crm-form input:not([type=checkbox]):not([type=radio]),
+    .crm-form select, .crm-form textarea {
+      display:block; width:100%; border:1px solid #cbd5e1; border-radius:0.375rem;
+      padding:0.4rem 0.6rem; font-size:0.875rem; background:#fff;
+    }
   </style>
   {% block extra_head %}{% endblock %}
 </head>
@@ -25,6 +30,7 @@
           <nav class="hidden gap-4 text-sm text-slate-600 sm:flex">
             <a href="{% url 'crm:pipeline' %}" class="hover:underline">Pipeline</a>
             <a href="{% url 'crm:customers' %}" class="hover:underline">ลูกค้า</a>
+            <a href="{% url 'crm:tasks' %}" class="hover:underline">งานของฉัน</a>
           </nav>
         {% endif %}
       </div>

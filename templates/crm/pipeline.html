@@ -8,10 +8,13 @@
 
 {% block content %}
   <div class="mb-4 flex items-center justify-between">
-    <h1 class="text-xl font-semibold">Pipeline การขาย</h1>
-    {% if unassigned_count %}
-      <span class="text-xs text-amber-700">มีดีล {{ unassigned_count }} รายการที่ยังไม่ได้จัดขั้น (จัดได้ในหน้า admin)</span>
-    {% endif %}
+    <div class="flex items-baseline gap-3">
+      <h1 class="text-xl font-semibold">Pipeline การขาย</h1>
+      {% if unassigned_count %}
+        <span class="text-xs text-amber-700">ดีล {{ unassigned_count }} รายการยังไม่ได้จัดขั้น</span>
+      {% endif %}
+    </div>
+    <a href="{% url 'crm:deal_create' %}" class="rounded bg-slate-800 px-3 py-1.5 text-sm text-white hover:bg-slate-700">+ ดีลใหม่</a>
   </div>
 
   {% if not columns %}

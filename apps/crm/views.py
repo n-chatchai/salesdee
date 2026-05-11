@@ -3,13 +3,16 @@ from __future__ import annotations
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from .models import Customer, Deal, DealStatus, PipelineStage
+from .forms import ActivityForm, CustomerForm, DealForm, TaskForm
+from .models import Customer, Deal, DealStatus, PipelineStage, Task, TaskStatus
 from .services import move_deal_to_stage
 
 
+# --- Pipeline -----------------------------------------------------------------
 @login_required
 def pipeline(request: HttpRequest) -> HttpResponse:
     """Kanban board: a column per pipeline stage, cards = open deals in that stage."""
@@ -27,9 +30,7 @@ def pipeline(request: HttpRequest) -> HttpResponse:
     columns = [(s, by_stage.get(s.pk, [])) for s in stages]
     unassigned = Deal.objects.filter(status=DealStatus.OPEN, stage__isnull=True).count()
     return render(
-        request,
-        "crm/pipeline.html",
-        {"columns": columns, "unassigned_count": unassigned},
+        request, "crm/pipeline.html", {"columns": columns, "unassigned_count": unassigned}
     )
 
 
@@ -47,6 +48,86 @@ def move_deal(request: HttpRequest) -> HttpResponse:
     return HttpResponse(status=204)
 
 
+# --- Deals --------------------------------------------------------------------
+@login_required
+def deal_detail(request: HttpRequest, pk: int) -> HttpResponse:
+    deal = get_object_or_404(
+        Deal.objects.select_related("customer", "contact", "stage", "owner"), pk=pk
+    )
+    return render(
+        request,
+        "crm/deal_detail.html",
+        {
+            "deal": deal,
+            "activities": _deal_activities(deal),
+            "tasks": _deal_tasks(deal),
+            "activity_form": ActivityForm(customer=deal.customer),
+            "task_form": TaskForm(initial={"assignee": request.user}),
+        },
+    )
+
+
+@login_required
+def deal_create(request: HttpRequest) -> HttpResponse:
+    return _deal_form(request, instance=None)
+
+
+@login_required
+def deal_edit(request: HttpRequest, pk: int) -> HttpResponse:
+    return _deal_form(request, instance=get_object_or_404(Deal, pk=pk))
+
+
+def _deal_form(request: HttpRequest, *, instance: Deal | None) -> HttpResponse:
+    if request.method == "POST":
+        form = DealForm(request.POST, instance=instance)
+        if form.is_valid():
+            deal = form.save(commit=False)
+            if deal.stage is not None:
+                deal.probability = deal.stage.default_probability
+            deal.save()
+            return redirect("crm:deal_detail", pk=deal.pk)
+    else:
+        form = DealForm(instance=instance)
+    return render(request, "crm/deal_form.html", {"form": form, "deal": instance})
+
+
+@login_required
+@require_POST
+def deal_log_activity(request: HttpRequest, pk: int) -> HttpResponse:
+    deal = get_object_or_404(Deal.objects.select_related("customer"), pk=pk)
+    form = ActivityForm(request.POST, customer=deal.customer)
+    if form.is_valid():
+        activity = form.save(commit=False)
+        activity.deal = deal
+        activity.customer = deal.customer
+        activity.created_by = request.user
+        activity.occurred_at = timezone.now()
+        activity.save()
+    return render(request, "crm/_activity_list.html", {"activities": _deal_activities(deal)})
+
+
+@login_required
+@require_POST
+def deal_add_task(request: HttpRequest, pk: int) -> HttpResponse:
+    deal = get_object_or_404(Deal.objects.select_related("customer"), pk=pk)
+    form = TaskForm(request.POST)
+    if form.is_valid():
+        task = form.save(commit=False)
+        task.deal = deal
+        task.customer = deal.customer
+        task.save()
+    return render(request, "crm/_task_list.html", {"tasks": _deal_tasks(deal)})
+
+
+def _deal_activities(deal: Deal):
+    return deal.activities.select_related("contact", "created_by").order_by("-occurred_at")
+
+
+def _deal_tasks(deal: Deal):
+    return deal.tasks.select_related("assignee").order_by("status", "due_at")
+
+
+# --- Customers ----------------------------------------------------------------
 @login_required
 def customer_list(request: HttpRequest) -> HttpResponse:
     customers = (
@@ -58,14 +139,63 @@ def customer_list(request: HttpRequest) -> HttpResponse:
 
 
 @login_required
-def deal_detail(request: HttpRequest, pk: int) -> HttpResponse:
-    deal = get_object_or_404(
-        Deal.objects.select_related("customer", "contact", "stage", "owner"), pk=pk
-    )
-    activities = deal.activities.select_related("contact", "created_by").order_by("-occurred_at")
-    tasks = deal.tasks.select_related("assignee").order_by("status", "due_at")
+def customer_detail(request: HttpRequest, pk: int) -> HttpResponse:
+    customer = get_object_or_404(Customer, pk=pk)
     return render(
         request,
-        "crm/deal_detail.html",
-        {"deal": deal, "activities": activities, "tasks": tasks},
+        "crm/customer_detail.html",
+        {
+            "customer": customer,
+            "contacts": customer.contacts.all(),
+            "deals": customer.deals.select_related("stage").order_by("-created_at"),
+            "activities": customer.activities.select_related("created_by", "deal").order_by(
+                "-occurred_at"
+            )[:30],
+            "tasks": customer.tasks.select_related("assignee")
+            .filter(status=TaskStatus.OPEN)
+            .order_by("due_at"),
+        },
     )
+
+
+@login_required
+def customer_create(request: HttpRequest) -> HttpResponse:
+    return _customer_form(request, instance=None)
+
+
+@login_required
+def customer_edit(request: HttpRequest, pk: int) -> HttpResponse:
+    return _customer_form(request, instance=get_object_or_404(Customer, pk=pk))
+
+
+def _customer_form(request: HttpRequest, *, instance: Customer | None) -> HttpResponse:
+    if request.method == "POST":
+        form = CustomerForm(request.POST, instance=instance)
+        if form.is_valid():
+            customer = form.save()
+            return redirect("crm:customer_detail", pk=customer.pk)
+    else:
+        form = CustomerForm(instance=instance)
+    return render(request, "crm/customer_form.html", {"form": form, "customer": instance})
+
+
+# --- Tasks ("my work") --------------------------------------------------------
+@login_required
+def task_list(request: HttpRequest) -> HttpResponse:
+    now = timezone.now()
+    tasks = (
+        Task.objects.filter(assignee_id=request.user.pk, status=TaskStatus.OPEN)
+        .select_related("deal", "customer")
+        .order_by("due_at")
+    )
+    return render(request, "crm/tasks.html", {"tasks": tasks, "now": now})
+
+
+@login_required
+@require_POST
+def task_done(request: HttpRequest, pk: int) -> HttpResponse:
+    task = get_object_or_404(Task.objects.select_related("deal", "customer"), pk=pk)
+    task.status = TaskStatus.DONE
+    task.completed_at = timezone.now()
+    task.save()
+    return render(request, "crm/_task_row.html", {"task": task, "now": timezone.now()})

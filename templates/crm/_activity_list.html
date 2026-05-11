@@ -1,0 +1,14 @@
+{# Activity timeline for a deal. Context: `activities`. Swapped into #activity-list by htmx. #}
+<ul id="activity-list" class="space-y-2">
+  {% for a in activities %}
+    <li class="rounded border bg-white p-3 text-sm">
+      <div class="flex items-center justify-between text-xs text-slate-500">
+        <span>{{ a.get_kind_display }}{% if a.created_by %} · {{ a.created_by.get_short_name }}{% endif %}{% if a.contact %} · {{ a.contact.name }}{% endif %}</span>
+        <span>{{ a.occurred_at|date:"d/m/Y H:i" }}</span>
+      </div>
+      {% if a.body %}<div class="mt-1 text-slate-700">{{ a.body|linebreaksbr }}</div>{% endif %}
+    </li>
+  {% empty %}
+    <li class="text-sm text-slate-400">ยังไม่มีกิจกรรม</li>
+  {% endfor %}
+</ul>

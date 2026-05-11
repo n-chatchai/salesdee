@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}{{ customer.name }} · {{ current_tenant.name }}{% endblock %}
+
+{% block content %}
+  <div class="flex items-center justify-between">
+    <div>
+      <a href="{% url 'crm:customers' %}" class="text-sm text-slate-500 hover:underline">&larr; ลูกค้าทั้งหมด</a>
+      <h1 class="mt-1 text-xl font-semibold">{{ customer.name }}</h1>
+    </div>
+    <a href="{% url 'crm:customer_edit' customer.pk %}" class="rounded border px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">แก้ไข</a>
+  </div>
+
+  <div class="mt-4 grid gap-6 md:grid-cols-3">
+    <section class="space-y-1 rounded-lg border bg-white p-4 text-sm md:col-span-1">
+      <div><span class="text-slate-500">ประเภท:</span> {{ customer.get_kind_display }}</div>
+      <div><span class="text-slate-500">เลขผู้เสียภาษี:</span> {{ customer.tax_id|default:"—" }} {{ customer.branch_label }}</div>
+      <div><span class="text-slate-500">เครดิต:</span> {{ customer.default_credit_days }} วัน</div>
+      {% if customer.billing_address %}<div class="border-t pt-2"><span class="text-slate-500">ที่อยู่ออกบิล:</span><br>{{ customer.billing_address|linebreaksbr }}</div>{% endif %}
+      {% if customer.shipping_address %}<div class="border-t pt-2"><span class="text-slate-500">ที่อยู่จัดส่ง/หน้างาน:</span><br>{{ customer.shipping_address|linebreaksbr }}</div>{% endif %}
+      <div class="border-t pt-2">
+        <div class="mb-1 text-slate-500">ผู้ติดต่อ</div>
+        {% for c in contacts %}
+          <div>{{ c.name }}{% if c.title %} ({{ c.title }}){% endif %}{% if c.phone %} · {{ c.phone }}{% endif %}{% if c.is_primary %} ⭐{% endif %}</div>
+        {% empty %}<div class="text-slate-400">— ยังไม่มี (เพิ่มได้ในหน้า admin) —</div>{% endfor %}
+      </div>
+    </section>
+
+    <section class="space-y-6 md:col-span-2">
+      <div>
+        <div class="mb-2 flex items-center justify-between">
+          <h2 class="font-medium">ดีล</h2>
+          <a href="{% url 'crm:deal_create' %}" class="text-sm text-slate-600 hover:underline">+ ดีลใหม่</a>
+        </div>
+        <ul class="space-y-2">
+          {% for d in deals %}
+            <li class="flex items-center justify-between rounded border bg-white p-3 text-sm">
+              <a class="font-medium hover:underline" href="{% url 'crm:deal_detail' d.pk %}">{{ d.name }}</a>
+              <span class="text-xs text-slate-500">{{ d.stage.name|default:"—" }} · {{ d.get_status_display }} · {{ d.estimated_value|floatformat:0 }} ฿</span>
+            </li>
+          {% empty %}<li class="text-sm text-slate-400">ยังไม่มีดีล</li>{% endfor %}
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="mb-2 font-medium">งานค้าง</h2>
+        <ul class="space-y-2">
+          {% for t in tasks %}
+            <li class="flex items-center justify-between rounded border bg-white p-3 text-sm">
+              <span>{{ t.description|default:t.get_kind_display }}</span>
+              <span class="text-xs text-slate-500">{{ t.due_at|date:"d/m/Y"|default:"—" }}</span>
+            </li>
+          {% empty %}<li class="text-sm text-slate-400">ไม่มีงานค้าง</li>{% endfor %}
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="mb-2 font-medium">กิจกรรมล่าสุด</h2>
+        <ul class="space-y-2">
+          {% for a in activities %}
+            <li class="rounded border bg-white p-3 text-sm">
+              <div class="flex items-center justify-between text-xs text-slate-500">
+                <span>{{ a.get_kind_display }}{% if a.deal %} · {{ a.deal.name }}{% endif %}{% if a.created_by %} · {{ a.created_by.get_short_name }}{% endif %}</span>
+                <span>{{ a.occurred_at|date:"d/m/Y H:i" }}</span>
+              </div>
+              {% if a.body %}<div class="mt-1 text-slate-700">{{ a.body|linebreaksbr }}</div>{% endif %}
+            </li>
+          {% empty %}<li class="text-sm text-slate-400">ยังไม่มีกิจกรรม</li>{% endfor %}
+        </ul>
+      </div>
+    </section>
+  </div>
+{% endblock %}
