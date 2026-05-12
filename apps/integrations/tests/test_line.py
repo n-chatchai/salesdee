@@ -133,3 +133,36 @@ def test_line_webhook_unknown_tenant_404(client) -> None:
         content_type="application/json",
     )
     assert resp.status_code == 404
+
+
+def test_push_text_calls_sdk(tenant, monkeypatch) -> None:
+    from linebot.v3.messaging import PushMessageRequest
+
+    sent: dict = {}
+
+    class _FakeApiClient:
+        def __init__(self, configuration: object) -> None:
+            self.configuration = configuration
+
+        def __enter__(self) -> _FakeApiClient:
+            return self
+
+        def __exit__(self, *exc: object) -> None:
+            return None
+
+    class _FakeMessagingApi:
+        def __init__(self, api_client: object) -> None:
+            self.api_client = api_client
+
+        def push_message(self, request: PushMessageRequest) -> None:
+            sent["to"] = request.to
+            sent["text"] = request.messages[0].text
+
+    import linebot.v3.messaging as messaging
+
+    monkeypatch.setattr(messaging, "ApiClient", _FakeApiClient)
+    monkeypatch.setattr(messaging, "MessagingApi", _FakeMessagingApi)
+    with tenant_context(tenant):
+        LineIntegration.objects.create(channel_access_token="tok", is_active=True)
+        push_text("Uabc123", "สวัสดีครับ")
+    assert sent == {"to": "Uabc123", "text": "สวัสดีครับ"}
