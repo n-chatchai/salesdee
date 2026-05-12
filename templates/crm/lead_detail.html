@@ -20,6 +20,21 @@
       <div><span class="text-slate-500">ผู้รับผิดชอบ:</span> {{ lead.assigned_to.get_full_name|default:"—" }}</div>
       <div><span class="text-slate-500">สถานะ:</span> {{ lead.get_status_display }} · <span class="text-slate-500">เข้ามาเมื่อ:</span> {{ lead.created_at|date:"d/m/Y H:i" }}</div>
       {% if lead.message %}<div class="border-t pt-2 text-slate-700">{{ lead.message|linebreaksbr }}</div>{% endif %}
+
+      {% if activities %}
+        <div class="mt-3 border-t pt-2">
+          <div class="mb-1 font-medium text-slate-600">ประวัติการติดต่อ</div>
+          <ul class="space-y-1.5">
+            {% for a in activities %}
+              <li class="flex gap-2">
+                <span class="shrink-0 rounded bg-slate-100 px-1.5 text-xs text-slate-500">{{ a.get_kind_display }}</span>
+                <span class="text-slate-700">{{ a.body|linebreaksbr }}</span>
+                <span class="ml-auto shrink-0 text-xs text-slate-400">{{ a.occurred_at|date:"d/m/Y H:i" }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
     </section>
 
     <section class="space-y-3 rounded-lg border bg-white p-4 text-sm md:col-span-1">

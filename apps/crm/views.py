@@ -222,7 +222,8 @@ def lead_list(request: HttpRequest) -> HttpResponse:
 @login_required
 def lead_detail(request: HttpRequest, pk: int) -> HttpResponse:
     lead = get_object_or_404(Lead.objects.select_related("assigned_to", "customer", "deal"), pk=pk)
-    return render(request, "crm/lead_detail.html", {"lead": lead})
+    activities = lead.activities.select_related("created_by").order_by("-occurred_at")[:50]
+    return render(request, "crm/lead_detail.html", {"lead": lead, "activities": activities})
 
 
 @login_required

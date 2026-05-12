@@ -163,8 +163,14 @@ class ActivityKind(models.TextChoices):
 
 
 class Activity(TenantScopedModel):
-    """A logged interaction; linked to a deal and/or a customer/contact (all optional)."""
+    """A logged interaction; linked to a lead and/or a deal and/or a customer/contact (all optional).
 
+    Inbound LINE messages land here (kind=LINE) attached to the lead — see apps.integrations.line.
+    """
+
+    lead = models.ForeignKey(
+        "Lead", on_delete=models.CASCADE, related_name="activities", null=True, blank=True
+    )
     deal = models.ForeignKey(
         Deal, on_delete=models.CASCADE, related_name="activities", null=True, blank=True
     )
