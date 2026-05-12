@@ -9,6 +9,12 @@ urlpatterns = [
     path("new/", views.quotation_create, name="quotation_create"),
     path("<int:pk>/", views.quotation_detail, name="quotation_detail"),
     path("<int:pk>/pdf/", views.quotation_pdf, name="quotation_pdf"),
+    path("<int:pk>/revisions/", views.quotation_revisions, name="quotation_revisions"),
+    path(
+        "<int:pk>/revisions/<int:revision>/",
+        views.quotation_revision_detail,
+        name="quotation_revision_detail",
+    ),
     path("<int:pk>/edit/", views.quotation_edit, name="quotation_edit"),
     path("<int:pk>/submit/", views.quotation_submit, name="quotation_submit"),
     path("<int:pk>/approve/", views.quotation_approve, name="quotation_approve"),

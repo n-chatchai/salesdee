@@ -123,8 +123,40 @@ def _lines_ctx(doc: SalesDocument, *, add_form=None, editing_line_id=None, edit_
 @login_required
 def quotation_detail(request: HttpRequest, pk: int) -> HttpResponse:
     doc = _quote_for_edit(pk)
-    ctx = {**_lines_ctx(doc), "can_approve": can_approve(request.user, doc.tenant_id)}
+    ctx = {
+        **_lines_ctx(doc),
+        "can_approve": can_approve(request.user, doc.tenant_id),
+        "revisions": list(doc.revisions.all()),
+    }
     return render(request, "quotes/quotation_detail.html", ctx)
+
+
+@login_required
+def quotation_revisions(request: HttpRequest, pk: int) -> HttpResponse:
+    doc = get_object_or_404(
+        SalesDocument.objects.prefetch_related("revisions__changed_by"),
+        pk=pk,
+        doc_type=DocType.QUOTATION,
+    )
+    return render(
+        request,
+        "quotes/quotation_revisions.html",
+        {"document": doc, "revisions": list(doc.revisions.all())},
+    )
+
+
+@login_required
+def quotation_revision_detail(request: HttpRequest, pk: int, revision: int) -> HttpResponse:
+    doc = get_object_or_404(
+        SalesDocument.objects.prefetch_related("lines"), pk=pk, doc_type=DocType.QUOTATION
+    )
+    rev = get_object_or_404(doc.revisions, revision=revision)
+    current = compute_document_totals(doc)
+    return render(
+        request,
+        "quotes/quotation_revision_detail.html",
+        {"document": doc, "rev": rev, "snap": rev.snapshot, "current_totals": current},
+    )
 
 
 @login_required
@@ -276,7 +308,7 @@ def quotation_cancel(request: HttpRequest, pk: int) -> HttpResponse:
 def quotation_reopen(request: HttpRequest, pk: int) -> HttpResponse:
     doc = get_object_or_404(SalesDocument, pk=pk, doc_type=DocType.QUOTATION)
     try:
-        reopen_quotation(doc)
+        reopen_quotation(doc, reason=request.POST.get("reason", "").strip())
     except WorkflowError as exc:
         messages.error(request, str(exc))
     else:
@@ -308,7 +340,7 @@ def quotation_send(request: HttpRequest, pk: int) -> HttpResponse:
         messages.error(request, f"ส่งเอกสารในสถานะ “{doc.get_status_display()}” ไม่ได้")
         return redirect("quotes:quotation_detail", pk=doc.pk)
     link = get_or_create_share_link(doc, created_by=request.user)
-    mark_sent(doc)
+    mark_sent(doc, user=request.user)
     # auto follow-up task (to the salesperson, or unassigned if none)
     Task.objects.create(
         deal=doc.deal,

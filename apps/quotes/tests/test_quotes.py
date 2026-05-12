@@ -16,6 +16,7 @@ from apps.quotes.models import (
     DocStatus,
     DocType,
     LineType,
+    QuotationRevision,
     QuotationShareLink,
     SalesDocLine,
     SalesDocument,
@@ -28,6 +29,7 @@ from apps.quotes.services import (
     create_quotation_from_deal,
     expire_overdue_quotations,
     get_or_create_share_link,
+    mark_sent,
     next_document_number,
     reject_approval,
     reopen_quotation,
@@ -532,3 +534,73 @@ def test_expire_quotations_command(tenant) -> None:
     with tenant_context(tenant):
         overdue.refresh_from_db()
     assert overdue.status == DocStatus.EXPIRED
+
+
+# --- revisions (snapshot on send) --------------------------------------------
+def test_sending_records_a_revision_snapshot(tenant, user, membership) -> None:
+    doc = _doc(tenant, status=DocStatus.READY, doc_number="QT-2569-0100")
+    _line(tenant, doc, quantity=Decimal("2"), unit_price=Decimal("1000"), tax_type=TaxType.VAT7)
+    with tenant_context(tenant):
+        mark_sent(doc, user=user)
+        assert doc.status == DocStatus.SENT
+        rev = QuotationRevision.objects.get(document=doc, revision=0)
+    assert rev.snapshot["doc_number"] == "QT-2569-0100"
+    assert rev.snapshot["totals"]["grand_total"] == "2140.00"
+    assert len(rev.snapshot["lines"]) == 1
+    assert rev.changed_by_id == user.pk
+
+
+def test_reopen_with_reason_then_resend_records_second_revision(tenant, user, membership) -> None:
+    doc = _doc(tenant, status=DocStatus.READY)
+    _line(tenant, doc, quantity=Decimal("1"), unit_price=Decimal("1000"))
+    with tenant_context(tenant):
+        mark_sent(doc, user=user)
+        reopen_quotation(doc, reason="ลูกค้าขอเปลี่ยนสี")
+        assert doc.status == DocStatus.DRAFT and doc.revision == 1
+        line = doc.lines.get()
+        line.unit_price = Decimal("1200")
+        line.save()
+        submit_quotation(doc, user=user)
+        mark_sent(doc, user=user)
+        assert doc.revisions.count() == 2
+        rev1 = doc.revisions.get(revision=1)
+    assert rev1.reason == "ลูกค้าขอเปลี่ยนสี"
+    assert rev1.snapshot["totals"]["grand_total"] == "1284.00"
+
+
+def test_resend_does_not_create_a_second_revision(tenant, user, membership) -> None:
+    doc = _doc(tenant, status=DocStatus.READY)
+    _line(tenant, doc, unit_price=Decimal("500"))
+    with tenant_context(tenant):
+        mark_sent(doc, user=user)
+        mark_sent(doc, user=user)  # resend — status is already SENT
+        assert doc.revisions.count() == 1
+
+
+def test_quotation_revisions_views(client, user, membership, tenant) -> None:
+    doc = _doc(tenant, status=DocStatus.READY, doc_number="QT-2569-0200")
+    _line(tenant, doc, quantity=Decimal("1"), unit_price=Decimal("3000"))
+    with tenant_context(tenant):
+        mark_sent(doc, user=user)
+    client.force_login(user)
+    assert (
+        "Rev.0" in client.get(reverse("quotes:quotation_revisions", args=[doc.pk])).content.decode()
+    )
+    body = client.get(
+        reverse("quotes:quotation_revision_detail", args=[doc.pk, 0])
+    ).content.decode()
+    assert "QT-2569-0200" in body
+    assert (
+        "ประวัติเวอร์ชัน"
+        in client.get(reverse("quotes:quotation_detail", args=[doc.pk])).content.decode()
+    )
+
+
+def test_quotation_revision_tenant_isolation(tenant, other_tenant, user, membership) -> None:
+    doc = _doc(tenant, status=DocStatus.READY)
+    _line(tenant, doc, unit_price=Decimal("100"))
+    with tenant_context(tenant):
+        mark_sent(doc, user=user)
+        assert QuotationRevision.objects.count() == 1
+    with tenant_context(other_tenant):
+        assert QuotationRevision.objects.count() == 0

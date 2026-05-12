@@ -23,9 +23,9 @@
         <a href="{% url 'quotes:quotation_edit' document.pk %}" class="rounded border px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">แก้ไขหัวเอกสาร</a>
       {% elif document.status == 'sent' %}
         <form method="post" action="{% url 'quotes:quotation_send' document.pk %}">{% csrf_token %}<button type="submit" class="rounded border px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">ส่งซ้ำ</button></form>
-        <form method="post" action="{% url 'quotes:quotation_reopen' document.pk %}">{% csrf_token %}<button type="submit" class="rounded border px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">เปิดแก้ไขใหม่ (Rev.)</button></form>
+        <form method="post" action="{% url 'quotes:quotation_reopen' document.pk %}" class="inline-flex gap-1">{% csrf_token %}<input type="text" name="reason" placeholder="เหตุผล (ไม่บังคับ)" class="rounded border px-2 py-1 text-sm"><button type="submit" class="rounded border px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">เปิดแก้ไขใหม่ (Rev.)</button></form>
       {% elif document.status == 'accepted' or document.status == 'rejected' or document.status == 'expired' %}
-        <form method="post" action="{% url 'quotes:quotation_reopen' document.pk %}">{% csrf_token %}<button type="submit" class="rounded border px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">เปิดแก้ไขใหม่ (Rev.)</button></form>
+        <form method="post" action="{% url 'quotes:quotation_reopen' document.pk %}" class="inline-flex gap-1">{% csrf_token %}<input type="text" name="reason" placeholder="เหตุผล (ไม่บังคับ)" class="rounded border px-2 py-1 text-sm"><button type="submit" class="rounded border px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">เปิดแก้ไขใหม่ (Rev.)</button></form>
       {% endif %}
       <a href="{% url 'quotes:quotation_pdf' document.pk %}" target="_blank" class="rounded bg-slate-800 px-3 py-1.5 text-sm text-white hover:bg-slate-700">พิมพ์ / PDF</a>
       {% if document.status != 'cancelled' and document.status != 'accepted' %}
@@ -61,6 +61,23 @@
   </section>
 
   {% include "quotes/_quote_lines.html" %}
+
+  {% if revisions %}
+  <div class="mt-4 rounded-lg border bg-white p-4 text-sm">
+    <div class="mb-1 flex items-center justify-between">
+      <span class="font-medium">ประวัติเวอร์ชันที่ส่งให้ลูกค้า</span>
+      <a href="{% url 'quotes:quotation_revisions' document.pk %}" class="text-slate-500 hover:underline">ดูทั้งหมด</a>
+    </div>
+    <ul class="divide-y">
+      {% for r in revisions %}
+        <li class="flex items-center justify-between py-1">
+          <span>Rev.{{ r.revision }}{% if r.reason %} — {{ r.reason }}{% endif %}{% if r.snapshot.sent_at %} · ส่งเมื่อ {{ r.snapshot.sent_at|slice:":10" }}{% endif %}{% if r.snapshot.totals.grand_total %} · {{ r.snapshot.totals.grand_total }} บาท{% endif %}</span>
+          <a href="{% url 'quotes:quotation_revision_detail' document.pk r.revision %}" class="text-slate-600 hover:underline">ดู</a>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
 
   {% if document.payment_terms or document.lead_time or document.warranty or document.notes or document.bank_account %}
   <div class="mt-4 space-y-1 rounded-lg border bg-white p-4 text-sm">

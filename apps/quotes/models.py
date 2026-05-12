@@ -80,6 +80,12 @@ class SalesDocument(TenantScopedModel):
     )
     doc_number = models.CharField("เลขที่เอกสาร", max_length=40, blank=True, db_index=True)
     revision = models.PositiveIntegerField("เลขที่แก้ไข (Rev.)", default=0)
+    revision_note = models.CharField(
+        "เหตุผลของการแก้ไขล่าสุด",
+        max_length=255,
+        blank=True,
+        help_text="ใส่ตอนกด “เปิดแก้ไขใหม่”; จะถูกบันทึกลงในเวอร์ชันถัดไปที่ส่ง",
+    )
     deal = models.ForeignKey(
         "crm.Deal", on_delete=models.SET_NULL, related_name="documents", null=True, blank=True
     )
@@ -240,3 +246,33 @@ class QuotationShareLink(BaseModel):
         from django.utils import timezone
 
         return not self.revoked and (self.expires_at is None or self.expires_at > timezone.now())
+
+
+class QuotationRevision(TenantScopedModel):
+    """A frozen snapshot of a quotation as it was sent (REQUIREMENTS.md §4.7 FR-7.20).
+
+    Taken when the document moves READY → SENT. ``snapshot`` is a self-contained JSON copy of the
+    header + lines + computed totals at that moment; old revisions stay viewable/diff-able even after
+    the live document is reopened and changed.
+    """
+
+    document = models.ForeignKey(SalesDocument, on_delete=models.CASCADE, related_name="revisions")
+    revision = models.PositiveIntegerField("เลขที่แก้ไข (Rev.)")
+    snapshot = models.JSONField("ข้อมูล ณ ตอนส่ง")
+    reason = models.CharField("เหตุผลที่แก้ไข", max_length=255, blank=True)
+    changed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name="+", null=True, blank=True
+    )
+
+    class Meta:
+        ordering = ("document", "revision")
+        verbose_name = "เวอร์ชันใบเสนอราคา"
+        verbose_name_plural = "เวอร์ชันใบเสนอราคา"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["document", "revision"], name="uniq_quote_revision_per_doc"
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.document} Rev.{self.revision}"

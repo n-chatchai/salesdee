@@ -2,7 +2,13 @@ from django.contrib import admin
 
 from apps.core.admin import TenantScopedAdmin
 
-from .models import DocumentNumberSequence, QuotationShareLink, SalesDocLine, SalesDocument
+from .models import (
+    DocumentNumberSequence,
+    QuotationRevision,
+    QuotationShareLink,
+    SalesDocLine,
+    SalesDocument,
+)
 
 
 class SalesDocLineInline(admin.TabularInline):
@@ -36,3 +42,10 @@ class QuotationShareLinkAdmin(admin.ModelAdmin):
     list_display = ("token", "document", "tenant", "expires_at", "revoked", "created_at")
     list_filter = ("revoked", "tenant")
     search_fields = ("token", "document__doc_number")
+
+
+@admin.register(QuotationRevision)
+class QuotationRevisionAdmin(TenantScopedAdmin):
+    list_display = ("document", "revision", "reason", "changed_by", "created_at")
+    search_fields = ("document__doc_number", "reason")
+    readonly_fields = ("document", "revision", "snapshot", "reason", "changed_by")

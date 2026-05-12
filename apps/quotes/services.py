@@ -124,13 +124,17 @@ def get_or_create_share_link(
     )
 
 
-def mark_sent(document: SalesDocument) -> None:
+def mark_sent(document: SalesDocument, *, user=None) -> None:
     """Stamp a quotation as sent (READY → SENT) and set ``sent_at``. Idempotent for a resend.
+    On the actual READY → SENT transition, freeze a revision snapshot (REQUIREMENTS.md §4.7).
     The caller (quotes.views.quotation_send) is responsible for getting it to READY first."""
-    if document.status == DocStatus.READY:
+    first_send = document.status == DocStatus.READY
+    if first_send:
         document.status = DocStatus.SENT
     document.sent_at = document.sent_at or timezone.now()
     document.save()
+    if first_send:
+        record_revision(document, user=user)
 
 
 def record_customer_response(
@@ -153,6 +157,78 @@ def record_customer_response(
         document.status = DocStatus.REJECTED
     # CHANGES -> stays SENT; the note tells the salesperson what to revise
     document.save()
+
+
+# --- Revisions ---------------------------------------------------------------
+def snapshot_document(document: SalesDocument) -> dict:
+    """A self-contained JSON copy of a quotation (header + lines + computed totals) — what gets
+    frozen into a ``QuotationRevision`` so old versions stay viewable after the live doc changes."""
+    totals = compute_document_totals(document)
+    customer = document.customer
+    contact = document.contact
+    salesperson = document.salesperson
+    return {
+        "doc_number": document.doc_number,
+        "revision": document.revision,
+        "issue_date": document.issue_date.isoformat() if document.issue_date else None,
+        "valid_until": document.valid_until.isoformat() if document.valid_until else None,
+        "sent_at": document.sent_at.isoformat() if document.sent_at else None,
+        "customer": customer.name if customer else "",
+        "contact": contact.name if contact else "",
+        "reference": document.reference,
+        "salesperson": salesperson.get_full_name() if salesperson else "",
+        "price_mode": document.price_mode,
+        "end_discount_kind": document.end_discount_kind,
+        "end_discount_value": str(document.end_discount_value),
+        "payment_terms": document.payment_terms,
+        "lead_time": document.lead_time,
+        "warranty": document.warranty,
+        "notes": document.notes,
+        "lines": [
+            {
+                "group_label": ln.group_label,
+                "line_type": ln.line_type,
+                "code": ln.product.code if ln.product else "",
+                "description": ln.description,
+                "dimensions": ln.dimensions,
+                "material": ln.material,
+                "quantity": str(ln.quantity),
+                "unit": ln.unit,
+                "unit_price": str(ln.unit_price),
+                "discount_kind": ln.discount_kind,
+                "discount_value": str(ln.discount_value),
+                "tax_type": ln.tax_type,
+                "withholding_rate": str(ln.withholding_rate),
+                "amount": str(ln.amount),
+            }
+            for ln in document.lines.all()
+        ],
+        "totals": {
+            "subtotal": str(totals.subtotal),
+            "end_discount": str(totals.end_discount),
+            "after_discount": str(totals.after_discount),
+            "vat_amount": str(totals.vat_amount),
+            "grand_total": str(totals.grand_total),
+            "withholding_estimate": str(totals.withholding_estimate),
+            "net_expected": str(totals.net_expected),
+            "amount_in_words": totals.amount_in_words,
+        },
+    }
+
+
+def record_revision(document: SalesDocument, *, user=None) -> None:
+    """Freeze a snapshot of ``document`` at its current revision number (no-op-safe to re-run)."""
+    from .models import QuotationRevision
+
+    QuotationRevision.objects.update_or_create(
+        document=document,
+        revision=document.revision,
+        defaults={
+            "snapshot": snapshot_document(document),
+            "reason": document.revision_note,
+            "changed_by": user if getattr(user, "is_authenticated", False) else None,
+        },
+    )
 
 
 # --- Document lifecycle: submit / approve / cancel / reopen / expire ----------
@@ -245,12 +321,15 @@ def cancel_quotation(document: SalesDocument) -> None:
     document.save()
 
 
-def reopen_quotation(document: SalesDocument) -> SalesDocument:
+def reopen_quotation(document: SalesDocument, *, reason: str = "") -> SalesDocument:
     """Reopen a sent/accepted/rejected/expired quotation for changes: bump the revision counter,
-    back to DRAFT, clear the customer response & approval stamp. (Full revision snapshots: TODO.)"""
+    back to DRAFT, clear the customer response & approval stamp. ``reason`` is remembered on the
+    document and ends up on the next revision snapshot (taken when it's re-sent). The version that
+    was sent is already frozen in a ``QuotationRevision``, so reopening doesn't lose it."""
     if document.status not in document.REOPENABLE_STATUSES:
         raise WorkflowError(f"เอกสารในสถานะ “{document.get_status_display()}” เปิดแก้ไขใหม่ไม่ได้")
     document.revision += 1
+    document.revision_note = reason
     document.status = DocStatus.DRAFT
     document.sent_at = None
     document.customer_response = ""
