@@ -18,4 +18,9 @@ def home(request: HttpRequest) -> HttpResponse:
 
             return public_catalog(request, tenant.slug)
         return redirect_to_login(request.get_full_path())
-    return render(request, "core/home.html")
+    ctx: dict = {}
+    if getattr(request, "tenant", None) is not None:
+        from apps.crm.dashboard import build_dashboard
+
+        ctx = build_dashboard(request.user)
+    return render(request, "core/home.html", ctx)

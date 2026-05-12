@@ -1,52 +1,144 @@
 {% extends "base.html" %}
 
-{% block title %}หน้าหลัก · salesdee{% endblock %}
+{% block title %}แดชบอร์ด · {{ current_tenant.name|default:"salesdee" }}{% endblock %}
 
 {% block content %}
-  <h1 class="text-2xl font-semibold">ยินดีต้อนรับ</h1>
-  {% if current_tenant %}
-    <p class="mt-1 text-slate-600">Workspace: <strong>{{ current_tenant.name }}</strong> (แพ็ก {{ current_tenant.get_plan_display }})</p>
+  {% if not dash %}
+    <h1 class="text-2xl font-semibold">ยินดีต้อนรับ</h1>
+    <p class="mt-2 text-amber-700">ยังไม่ได้ผูกผู้ใช้นี้กับ workspace ใด — สร้าง Tenant และ Membership ใน <a class="underline" href="/admin/">/admin</a></p>
   {% else %}
-    <p class="mt-1 text-amber-700">ยังไม่ได้ผูกผู้ใช้นี้กับ workspace ใด — สร้าง Tenant และ Membership ใน <a class="underline" href="/admin/">/admin</a></p>
-  {% endif %}
-
-  <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-    {% if current_tenant %}
-      <a href="{% url 'crm:leads' %}" class="rounded-lg border bg-white p-4 hover:shadow">
-        <h2 class="font-medium">Leads</h2>
-        <p class="mt-1 text-sm text-slate-500">ลูกค้าที่เข้ามาใหม่</p>
-      </a>
-      <a href="{% url 'crm:pipeline' %}" class="rounded-lg border bg-white p-4 hover:shadow">
-        <h2 class="font-medium">Pipeline การขาย</h2>
-        <p class="mt-1 text-sm text-slate-500">ดูดีลทั้งหมดแบบ Kanban</p>
-      </a>
-      <a href="{% url 'crm:customers' %}" class="rounded-lg border bg-white p-4 hover:shadow">
-        <h2 class="font-medium">ลูกค้า</h2>
-        <p class="mt-1 text-sm text-slate-500">รายชื่อลูกค้าและผู้ติดต่อ</p>
-      </a>
-      <a href="{% url 'quotes:quotations' %}" class="rounded-lg border bg-white p-4 hover:shadow">
-        <h2 class="font-medium">ใบเสนอราคา</h2>
-        <p class="mt-1 text-sm text-slate-500">ออก/แก้ไขใบเสนอราคา</p>
-      </a>
-      <a href="{% url 'catalog:products' %}" class="rounded-lg border bg-white p-4 hover:shadow">
-        <h2 class="font-medium">แคตตาล็อกสินค้า</h2>
-        <p class="mt-1 text-sm text-slate-500">สินค้า/รุ่นย่อย/ออปชัน</p>
-      </a>
-      <a href="{% url 'crm:tasks' %}" class="rounded-lg border bg-white p-4 hover:shadow">
-        <h2 class="font-medium">งานของฉัน</h2>
-        <p class="mt-1 text-sm text-slate-500">งานที่ต้องตาม</p>
-      </a>
-    {% else %}
-      <div class="rounded-lg border bg-white p-4 sm:col-span-2 lg:col-span-3">
-        <h2 class="font-medium">เริ่มต้น</h2>
-        <p class="mt-1 text-sm text-slate-500">ผูกผู้ใช้กับ workspace ก่อน (ใน <a class="underline" href="/admin/">/admin</a>)</p>
-      </div>
-    {% endif %}
+  <div class="flex items-baseline justify-between">
+    <h1 class="text-2xl font-semibold">แดชบอร์ด</h1>
+    <span class="text-sm text-slate-500">{{ current_tenant.name }}</span>
   </div>
 
-  {% if current_tenant %}
-    <p class="mt-4 text-sm text-slate-400">ฟอร์มรับ lead จากเว็บไซต์: <code>/crm/intake/{{ current_tenant.slug }}/</code> · นำเข้าแคตตาล็อก: <code>manage.py import_catalog &lt;file.xlsx&gt; --tenant {{ current_tenant.slug }}</code></p>
-  {% endif %}
+  {# KPI cards #}
+  <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <a href="{% url 'crm:pipeline' %}" class="rounded-lg border bg-white p-4 hover:shadow">
+      <div class="text-sm text-slate-500">มูลค่า pipeline ที่เปิดอยู่</div>
+      <div class="mt-1 text-2xl font-semibold">{{ open_value|floatformat:0 }} ฿</div>
+      <div class="mt-0.5 text-xs text-slate-400">{{ open_count }} ดีล · ถ่วงน้ำหนัก ~{{ weighted_forecast|floatformat:0 }} ฿</div>
+    </a>
+    <div class="rounded-lg border bg-white p-4">
+      <div class="text-sm text-slate-500">ปิดได้เดือนนี้</div>
+      <div class="mt-1 text-2xl font-semibold">{{ won_value|floatformat:0 }} ฿</div>
+      <div class="mt-0.5 text-xs text-slate-400">ชนะ {{ won_count }} · แพ้ {{ lost_count }}{% if win_rate is not None %} · อัตราปิด {{ win_rate }}%{% endif %}</div>
+    </div>
+    <a href="{% url 'crm:tasks' %}" class="rounded-lg border bg-white p-4 hover:shadow">
+      <div class="text-sm text-slate-500">งานของฉัน</div>
+      <div class="mt-1 text-2xl font-semibold">{{ due_today_tasks }} <span class="text-base font-normal text-slate-400">วันนี้</span></div>
+      <div class="mt-0.5 text-xs {% if overdue_tasks %}text-amber-700{% else %}text-slate-400{% endif %}">เกินกำหนด {{ overdue_tasks }}</div>
+    </a>
+    <a href="{% url 'crm:leads' %}" class="rounded-lg border bg-white p-4 hover:shadow">
+      <div class="text-sm text-slate-500">Lead ใหม่</div>
+      <div class="mt-1 text-2xl font-semibold">{{ new_leads_count }}</div>
+      <div class="mt-0.5 text-xs text-slate-400">ยังไม่ได้คัดกรอง</div>
+    </a>
+  </div>
 
-  <p class="mt-8 text-sm text-slate-400">salesdee · ดูสเปกเต็มที่ <code>REQUIREMENTS.md</code> · แนวทางการพัฒนาที่ <code>CLAUDE.md</code></p>
+  <div class="mt-6 grid gap-6 lg:grid-cols-2">
+    {# Pipeline by stage #}
+    <section class="rounded-lg border bg-white p-4">
+      <div class="mb-2 flex items-center justify-between"><h2 class="font-medium">Pipeline ตามขั้น</h2><a href="{% url 'crm:pipeline' %}" class="text-sm text-slate-500 hover:underline">เปิด Kanban</a></div>
+      <table class="w-full text-sm">
+        <tbody class="divide-y">
+          {% for stage, n, v in stage_rows %}
+            <tr><td class="py-1.5">{{ stage.name }}</td><td class="py-1.5 text-right text-slate-500">{{ n }} ดีล</td><td class="py-1.5 text-right">{{ v|floatformat:0 }} ฿</td></tr>
+          {% empty %}
+            <tr><td class="py-2 text-slate-400">ยังไม่มีขั้นใน pipeline</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    {# Quotes awaiting a response #}
+    <section class="rounded-lg border bg-white p-4">
+      <div class="mb-2 flex items-center justify-between"><h2 class="font-medium">ใบเสนอราคา: ส่งแล้วยังไม่ตอบ ({{ awaiting_count }})</h2><a href="{% url 'quotes:quotations' %}" class="text-sm text-slate-500 hover:underline">ทั้งหมด</a></div>
+      <ul class="divide-y text-sm">
+        {% for d in awaiting_list %}
+          <li class="flex items-center justify-between py-1.5">
+            <a href="{% url 'quotes:quotation_detail' d.pk %}" class="hover:underline">{{ d.doc_number }} · {{ d.customer.name|default:"—" }}</a>
+            <span class="text-xs text-slate-400">ส่ง {{ d.sent_at|date:"d/m/Y" }}</span>
+          </li>
+        {% empty %}
+          <li class="py-2 text-slate-400">ไม่มี</li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    {# Quotes expiring soon #}
+    <section class="rounded-lg border bg-white p-4">
+      <h2 class="mb-2 font-medium">ใบเสนอราคาใกล้หมดอายุ (7 วัน) ({{ expiring_count }})</h2>
+      <ul class="divide-y text-sm">
+        {% for d in expiring_list %}
+          <li class="flex items-center justify-between py-1.5">
+            <a href="{% url 'quotes:quotation_detail' d.pk %}" class="hover:underline">{{ d.doc_number }} · {{ d.customer.name|default:"—" }}</a>
+            <span class="text-xs text-amber-700">หมด {{ d.valid_until|date:"d/m/Y" }}</span>
+          </li>
+        {% empty %}
+          <li class="py-2 text-slate-400">ไม่มี</li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    {# Tasks #}
+    <section class="rounded-lg border bg-white p-4">
+      <div class="mb-2 flex items-center justify-between"><h2 class="font-medium">งานที่ต้องตาม</h2><a href="{% url 'crm:tasks' %}" class="text-sm text-slate-500 hover:underline">ทั้งหมด</a></div>
+      <ul class="divide-y text-sm">
+        {% for t in upcoming_tasks %}
+          <li class="flex items-center justify-between py-1.5">
+            <span>{{ t.description|default:t.get_kind_display }}{% if t.customer %} <span class="text-slate-400">· {{ t.customer.name }}</span>{% endif %}</span>
+            <span class="text-xs {% if t.due_at and t.due_at < now %}text-amber-700{% else %}text-slate-400{% endif %}">{{ t.due_at|date:"d/m/Y"|default:"—" }}</span>
+          </li>
+        {% empty %}
+          <li class="py-2 text-slate-400">ไม่มีงานค้าง</li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    {# Stale deals #}
+    <section class="rounded-lg border bg-white p-4">
+      <h2 class="mb-2 font-medium">ดีลค้างนาน (ไม่อัปเดต &gt; 3 สัปดาห์)</h2>
+      <ul class="divide-y text-sm">
+        {% for d in stale_deals %}
+          <li class="flex items-center justify-between py-1.5">
+            <a href="{% url 'crm:deal_detail' d.pk %}" class="hover:underline">{{ d.name }}{% if d.customer %} <span class="text-slate-400">· {{ d.customer.name }}</span>{% endif %}</a>
+            <span class="text-xs text-slate-400">อัปเดต {{ d.updated_at|date:"d/m/Y" }}</span>
+          </li>
+        {% empty %}
+          <li class="py-2 text-slate-400">ไม่มี</li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    {# Lost reasons #}
+    <section class="rounded-lg border bg-white p-4">
+      <h2 class="mb-2 font-medium">เหตุผลที่แพ้ (90 วันล่าสุด)</h2>
+      <ul class="divide-y text-sm">
+        {% for r in lost_reasons %}
+          <li class="flex items-center justify-between py-1.5"><span>{{ r.lost_reason }}</span><span class="text-slate-500">{{ r.n }}</span></li>
+        {% empty %}
+          <li class="py-2 text-slate-400">ยังไม่มีข้อมูล</li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    {# New leads #}
+    <section class="rounded-lg border bg-white p-4">
+      <div class="mb-2 flex items-center justify-between"><h2 class="font-medium">Lead ใหม่ล่าสุด</h2><a href="{% url 'crm:leads' %}" class="text-sm text-slate-500 hover:underline">ทั้งหมด</a></div>
+      <ul class="divide-y text-sm">
+        {% for l in new_leads_recent %}
+          <li class="flex items-center justify-between py-1.5">
+            <a href="{% url 'crm:lead_detail' l.pk %}" class="hover:underline">{{ l }}</a>
+            <span class="text-xs text-slate-400">{{ l.get_channel_display }} · {{ l.created_at|date:"d/m/Y" }}</span>
+          </li>
+        {% empty %}
+          <li class="py-2 text-slate-400">ไม่มี</li>
+        {% endfor %}
+      </ul>
+    </section>
+  </div>
+
+  <p class="mt-6 text-xs text-slate-400">ฟอร์มรับ lead จากเว็บไซต์: <code>/crm/intake/{{ current_tenant.slug }}/</code> · LINE webhook: <code>/integrations/line/webhook/{{ current_tenant.slug }}/</code></p>
+  {% endif %}
 {% endblock %}

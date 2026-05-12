@@ -1,0 +1,146 @@
+"""The logged-in home dashboard (REQUIREMENTS.md §4.9 FR-9.1, plus win-rate / lost-reason bits).
+
+``build_dashboard(user)`` returns a plain dict the ``core/home.html`` template renders. Every query
+is tenant-scoped (the request middleware has the tenant active by the time this runs).
+"""
+
+from __future__ import annotations
+
+from datetime import date, timedelta
+
+from django.db.models import Count, DecimalField, ExpressionWrapper, F, Sum
+from django.utils import timezone
+
+
+def _money(value) -> object:
+    return value or 0
+
+
+def build_dashboard(user) -> dict:
+    from apps.quotes.models import DocStatus, DocType, SalesDocument
+
+    from .models import (
+        Deal,
+        DealStatus,
+        Lead,
+        LeadStatus,
+        PipelineStage,
+        StageKind,
+        Task,
+        TaskStatus,
+    )
+
+    today = date.today()
+    now = timezone.now()
+    month_start = today.replace(day=1)
+    soon = today + timedelta(days=7)
+    since_90d = today - timedelta(days=90)
+
+    # --- pipeline (open deals) ------------------------------------------------
+    open_deals = Deal.objects.filter(status=DealStatus.OPEN)
+    open_value = _money(open_deals.aggregate(s=Sum("estimated_value"))["s"])
+    open_count = open_deals.count()
+    weighted = _money(
+        open_deals.aggregate(
+            s=Sum(
+                ExpressionWrapper(
+                    F("estimated_value") * F("probability") / 100.0,
+                    output_field=DecimalField(max_digits=20, decimal_places=2),
+                )
+            )
+        )["s"]
+    )
+    stage_counts = {
+        row["stage"]: row
+        for row in open_deals.values("stage").annotate(n=Count("id"), v=Sum("estimated_value"))
+    }
+    stage_rows = [
+        (
+            stage,
+            stage_counts.get(stage.pk, {}).get("n") or 0,
+            _money(stage_counts.get(stage.pk, {}).get("v")),
+        )
+        for stage in PipelineStage.objects.filter(kind=StageKind.OPEN).order_by("order", "id")
+    ]
+    stale_deals = list(
+        open_deals.filter(updated_at__lt=now - timedelta(days=21))
+        .select_related("customer", "owner")
+        .order_by("updated_at")[:8]
+    )
+
+    # --- this month: won / lost / win rate -----------------------------------
+    closed_this_month = Deal.objects.filter(
+        status__in=[DealStatus.WON, DealStatus.LOST], closed_at__date__gte=month_start
+    )
+    won_qs = closed_this_month.filter(status=DealStatus.WON)
+    won_count = won_qs.count()
+    won_value = _money(won_qs.aggregate(s=Sum("estimated_value"))["s"])
+    lost_count = closed_this_month.filter(status=DealStatus.LOST).count()
+    closed_count = won_count + lost_count
+    win_rate = round(won_count * 100 / closed_count) if closed_count else None
+    lost_reasons = list(
+        Deal.objects.filter(status=DealStatus.LOST, closed_at__date__gte=since_90d)
+        .exclude(lost_reason="")
+        .values("lost_reason")
+        .annotate(n=Count("id"))
+        .order_by("-n")[:5]
+    )
+
+    # --- my tasks -------------------------------------------------------------
+    my_open_tasks = Task.objects.filter(assignee=user, status=TaskStatus.OPEN)
+    overdue_tasks = my_open_tasks.filter(due_at__lt=now).count()
+    due_today_tasks = my_open_tasks.filter(due_at__date=today).count()
+    upcoming_tasks = list(
+        my_open_tasks.select_related("deal", "customer")
+        .filter(due_at__date__lte=today + timedelta(days=2))
+        .order_by("due_at")[:8]
+    )
+
+    # --- quotations -----------------------------------------------------------
+    quotes = SalesDocument.objects.filter(doc_type=DocType.QUOTATION)
+    awaiting = quotes.filter(status=DocStatus.SENT, customer_response="")
+    awaiting_count = awaiting.count()
+    awaiting_list = list(
+        awaiting.select_related("customer", "salesperson").order_by("-sent_at")[:8]
+    )
+    expiring = (
+        quotes.filter(
+            status__in=[DocStatus.READY, DocStatus.SENT],
+            valid_until__isnull=False,
+            valid_until__gte=today,
+            valid_until__lte=soon,
+        )
+        .select_related("customer")
+        .order_by("valid_until")
+    )
+    expiring_count = expiring.count()
+    expiring_list = list(expiring[:8])
+
+    # --- new leads ------------------------------------------------------------
+    new_leads = Lead.objects.filter(status=LeadStatus.NEW)
+    new_leads_count = new_leads.count()
+    new_leads_recent = list(new_leads.order_by("-created_at")[:8])
+
+    return {
+        "dash": True,
+        "open_value": open_value,
+        "open_count": open_count,
+        "weighted_forecast": weighted,
+        "stage_rows": stage_rows,
+        "stale_deals": stale_deals,
+        "won_count": won_count,
+        "won_value": won_value,
+        "lost_count": lost_count,
+        "win_rate": win_rate,
+        "lost_reasons": lost_reasons,
+        "overdue_tasks": overdue_tasks,
+        "due_today_tasks": due_today_tasks,
+        "upcoming_tasks": upcoming_tasks,
+        "awaiting_count": awaiting_count,
+        "awaiting_list": awaiting_list,
+        "expiring_count": expiring_count,
+        "expiring_list": expiring_list,
+        "new_leads_count": new_leads_count,
+        "new_leads_recent": new_leads_recent,
+        "now": now,
+    }
