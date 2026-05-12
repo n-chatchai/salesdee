@@ -12,10 +12,25 @@ from apps.core.current_tenant import tenant_context
 pytestmark = pytest.mark.django_db
 
 
+def _make_manager(membership) -> None:
+    from apps.accounts.models import Role
+
+    membership.role = Role.MANAGER
+    membership.save()
+
+
+def test_reports_requires_a_manager(client, user, membership, tenant) -> None:
+    client.force_login(user)  # membership is SALES by default
+    assert client.get(reverse("crm:reports")).status_code == 403
+    _make_manager(membership)
+    assert client.get(reverse("crm:reports")).status_code == 200
+
+
 def test_reports_page(client, user, membership, tenant) -> None:
     from apps.crm.models import Deal, DealStatus, Lead, LeadChannel, SalesTarget
     from apps.quotes.models import DocStatus, DocType, SalesDocument
 
+    _make_manager(membership)
     today = date.today()
     with tenant_context(tenant):
         Deal.objects.create(
@@ -65,6 +80,7 @@ def test_reports_page(client, user, membership, tenant) -> None:
 def test_reports_xlsx_export(client, user, membership, tenant) -> None:
     from apps.crm.models import Deal, DealStatus
 
+    _make_manager(membership)
     with tenant_context(tenant):
         Deal.objects.create(
             name="w",

@@ -16,7 +16,8 @@ def _money(value) -> object:
     return value or 0
 
 
-def build_dashboard(user) -> dict:
+def build_dashboard(request) -> dict:
+    from apps.core.permissions import own_q
     from apps.quotes.models import DocStatus, DocType, SalesDocument
 
     from .models import (
@@ -30,6 +31,10 @@ def build_dashboard(user) -> dict:
         TaskStatus,
     )
 
+    user = request.user
+    own_deals = own_q(request, "owner")
+    own_leads = own_q(request, "assigned_to")
+    own_quotes = own_q(request, "salesperson")
     today = date.today()
     now = timezone.now()
     month_start = today.replace(day=1)
@@ -37,7 +42,7 @@ def build_dashboard(user) -> dict:
     since_90d = today - timedelta(days=90)
 
     # --- pipeline (open deals) ------------------------------------------------
-    open_deals = Deal.objects.filter(status=DealStatus.OPEN)
+    open_deals = Deal.objects.filter(own_deals, status=DealStatus.OPEN)
     open_value = _money(open_deals.aggregate(s=Sum("estimated_value"))["s"])
     open_count = open_deals.count()
     weighted = _money(
@@ -70,7 +75,7 @@ def build_dashboard(user) -> dict:
 
     # --- this month: won / lost / win rate -----------------------------------
     closed_this_month = Deal.objects.filter(
-        status__in=[DealStatus.WON, DealStatus.LOST], closed_at__date__gte=month_start
+        own_deals, status__in=[DealStatus.WON, DealStatus.LOST], closed_at__date__gte=month_start
     )
     won_qs = closed_this_month.filter(status=DealStatus.WON)
     won_count = won_qs.count()
@@ -79,7 +84,7 @@ def build_dashboard(user) -> dict:
     closed_count = won_count + lost_count
     win_rate = round(won_count * 100 / closed_count) if closed_count else None
     lost_reasons = list(
-        Deal.objects.filter(status=DealStatus.LOST, closed_at__date__gte=since_90d)
+        Deal.objects.filter(own_deals, status=DealStatus.LOST, closed_at__date__gte=since_90d)
         .exclude(lost_reason="")
         .values("lost_reason")
         .annotate(n=Count("id"))
@@ -97,7 +102,7 @@ def build_dashboard(user) -> dict:
     )
 
     # --- quotations -----------------------------------------------------------
-    quotes = SalesDocument.objects.filter(doc_type=DocType.QUOTATION)
+    quotes = SalesDocument.objects.filter(own_quotes, doc_type=DocType.QUOTATION)
     awaiting = quotes.filter(status=DocStatus.SENT, customer_response="")
     awaiting_count = awaiting.count()
     awaiting_list = list(
@@ -117,7 +122,7 @@ def build_dashboard(user) -> dict:
     expiring_list = list(expiring[:8])
 
     # --- new leads ------------------------------------------------------------
-    new_leads = Lead.objects.filter(status=LeadStatus.NEW)
+    new_leads = Lead.objects.filter(own_leads, status=LeadStatus.NEW)
     new_leads_count = new_leads.count()
     new_leads_recent = list(new_leads.order_by("-created_at")[:8])
 

@@ -3,11 +3,14 @@ from __future__ import annotations
 from datetime import date, timedelta
 
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.db.models import Count
 from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+
+from apps.core.permissions import can_view_reports, own_q
 
 from .forms import ActivityForm, CustomerForm, DealForm, LeadForm, LeadIntakeForm, TaskForm
 from .models import (
@@ -29,9 +32,10 @@ from .services import convert_lead, move_deal_to_stage
 @login_required
 def pipeline(request: HttpRequest) -> HttpResponse:
     """Kanban board: a column per pipeline stage, cards = open deals in that stage."""
+    mine = own_q(request, "owner")
     stages = list(PipelineStage.objects.order_by("order"))
     open_deals = (
-        Deal.objects.filter(status=DealStatus.OPEN, stage__isnull=False)
+        Deal.objects.filter(mine, status=DealStatus.OPEN, stage__isnull=False)
         .select_related("customer", "owner", "stage")
         .order_by("-created_at")
     )
@@ -41,7 +45,7 @@ def pipeline(request: HttpRequest) -> HttpResponse:
         if sid is not None:
             by_stage.setdefault(sid, []).append(deal)
     columns = [(s, by_stage.get(s.pk, [])) for s in stages]
-    unassigned = Deal.objects.filter(status=DealStatus.OPEN, stage__isnull=True).count()
+    unassigned = Deal.objects.filter(mine, status=DealStatus.OPEN, stage__isnull=True).count()
     return render(
         request, "crm/pipeline.html", {"columns": columns, "unassigned_count": unassigned}
     )
@@ -55,7 +59,7 @@ def move_deal(request: HttpRequest) -> HttpResponse:
     stage_id = request.POST.get("stage_id")
     if not deal_id or not stage_id:
         return HttpResponseBadRequest("deal_id and stage_id required")
-    deal = get_object_or_404(Deal, pk=deal_id)
+    deal = get_object_or_404(Deal.objects.filter(own_q(request, "owner")), pk=deal_id)
     stage = get_object_or_404(PipelineStage, pk=stage_id)
     move_deal_to_stage(deal, stage)
     return HttpResponse(status=204)
@@ -65,7 +69,10 @@ def move_deal(request: HttpRequest) -> HttpResponse:
 @login_required
 def deal_detail(request: HttpRequest, pk: int) -> HttpResponse:
     deal = get_object_or_404(
-        Deal.objects.select_related("customer", "contact", "stage", "owner"), pk=pk
+        Deal.objects.filter(own_q(request, "owner")).select_related(
+            "customer", "contact", "stage", "owner"
+        ),
+        pk=pk,
     )
     return render(
         request,
@@ -87,7 +94,9 @@ def deal_create(request: HttpRequest) -> HttpResponse:
 
 @login_required
 def deal_edit(request: HttpRequest, pk: int) -> HttpResponse:
-    return _deal_form(request, instance=get_object_or_404(Deal, pk=pk))
+    return _deal_form(
+        request, instance=get_object_or_404(Deal.objects.filter(own_q(request, "owner")), pk=pk)
+    )
 
 
 def _deal_form(request: HttpRequest, *, instance: Deal | None) -> HttpResponse:
@@ -107,7 +116,9 @@ def _deal_form(request: HttpRequest, *, instance: Deal | None) -> HttpResponse:
 @login_required
 @require_POST
 def deal_log_activity(request: HttpRequest, pk: int) -> HttpResponse:
-    deal = get_object_or_404(Deal.objects.select_related("customer"), pk=pk)
+    deal = get_object_or_404(
+        Deal.objects.filter(own_q(request, "owner")).select_related("customer"), pk=pk
+    )
     form = ActivityForm(request.POST, customer=deal.customer)
     if form.is_valid():
         activity = form.save(commit=False)
@@ -122,7 +133,9 @@ def deal_log_activity(request: HttpRequest, pk: int) -> HttpResponse:
 @login_required
 @require_POST
 def deal_add_task(request: HttpRequest, pk: int) -> HttpResponse:
-    deal = get_object_or_404(Deal.objects.select_related("customer"), pk=pk)
+    deal = get_object_or_404(
+        Deal.objects.filter(own_q(request, "owner")).select_related("customer"), pk=pk
+    )
     form = TaskForm(request.POST)
     if form.is_valid():
         task = form.save(commit=False)
@@ -160,7 +173,9 @@ def customer_detail(request: HttpRequest, pk: int) -> HttpResponse:
         {
             "customer": customer,
             "contacts": customer.contacts.all(),
-            "deals": customer.deals.select_related("stage").order_by("-created_at"),
+            "deals": customer.deals.filter(own_q(request, "owner"))
+            .select_related("stage")
+            .order_by("-created_at"),
             "activities": customer.activities.select_related("created_by", "deal").order_by(
                 "-occurred_at"
             )[:30],
@@ -217,14 +232,23 @@ def task_done(request: HttpRequest, pk: int) -> HttpResponse:
 # --- Leads --------------------------------------------------------------------
 @login_required
 def lead_list(request: HttpRequest) -> HttpResponse:
-    leads = Lead.objects.select_related("assigned_to").order_by("-created_at")
+    leads = (
+        Lead.objects.filter(own_q(request, "assigned_to"))
+        .select_related("assigned_to")
+        .order_by("-created_at")
+    )
     new_count = leads.filter(status=LeadStatus.NEW).count()
     return render(request, "crm/leads.html", {"leads": leads, "new_count": new_count})
 
 
 @login_required
 def lead_detail(request: HttpRequest, pk: int) -> HttpResponse:
-    lead = get_object_or_404(Lead.objects.select_related("assigned_to", "customer", "deal"), pk=pk)
+    lead = get_object_or_404(
+        Lead.objects.filter(own_q(request, "assigned_to")).select_related(
+            "assigned_to", "customer", "deal"
+        ),
+        pk=pk,
+    )
     activities = lead.activities.select_related("created_by").order_by("-occurred_at")[:50]
     return render(request, "crm/lead_detail.html", {"lead": lead, "activities": activities})
 
@@ -236,7 +260,10 @@ def lead_create(request: HttpRequest) -> HttpResponse:
 
 @login_required
 def lead_edit(request: HttpRequest, pk: int) -> HttpResponse:
-    return _lead_form(request, instance=get_object_or_404(Lead, pk=pk))
+    return _lead_form(
+        request,
+        instance=get_object_or_404(Lead.objects.filter(own_q(request, "assigned_to")), pk=pk),
+    )
 
 
 def _lead_form(request: HttpRequest, *, instance: Lead | None) -> HttpResponse:
@@ -253,7 +280,9 @@ def _lead_form(request: HttpRequest, *, instance: Lead | None) -> HttpResponse:
 @login_required
 @require_POST
 def lead_convert(request: HttpRequest, pk: int) -> HttpResponse:
-    lead = get_object_or_404(Lead.objects.select_related("deal"), pk=pk)
+    lead = get_object_or_404(
+        Lead.objects.filter(own_q(request, "assigned_to")).select_related("deal"), pk=pk
+    )
     if lead.status == LeadStatus.CONVERTED and lead.deal_id:
         return redirect("crm:deal_detail", pk=lead.deal_id)
     deal = convert_lead(lead, owner=request.user)
@@ -273,6 +302,8 @@ def _reports_period(request: HttpRequest) -> tuple[str, date, date]:
 
 @login_required
 def reports(request: HttpRequest) -> HttpResponse:
+    if not can_view_reports(request):
+        raise PermissionDenied("รายงานเปิดให้เฉพาะเจ้าของ / ผู้จัดการ / ฝ่ายบัญชี")
     period, start, end = _reports_period(request)
     data = build_reports(start, end)
     if request.GET.get("export") == "xlsx":

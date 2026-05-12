@@ -62,6 +62,13 @@ class Membership(BaseModel):
     )
     role = models.CharField("บทบาท", max_length=20, choices=Role.choices, default=Role.SALES)
     is_active = models.BooleanField("เปิดใช้งาน", default=True)
+    # Visibility scope (REQUIREMENTS.md §4.15 FR-15.3). Off ⇒ this member only sees leads / deals /
+    # quotations they're assigned to or own. On (default) ⇒ they see everything in the workspace.
+    can_see_all_records = models.BooleanField(
+        "เห็นข้อมูลของทุกคน",
+        default=True,
+        help_text="ปิด = เห็นเฉพาะ lead / ดีล / ใบเสนอราคา ที่ตนรับผิดชอบ",
+    )
     # Used by the discount-approval workflow (REQUIREMENTS.md §4.7 / §4.15).
     max_discount_percent = models.DecimalField(
         "ส่วนลดสูงสุดที่อนุมัติได้ (%)", max_digits=5, decimal_places=2, null=True, blank=True

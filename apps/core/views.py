@@ -22,5 +22,5 @@ def home(request: HttpRequest) -> HttpResponse:
     if getattr(request, "tenant", None) is not None:
         from apps.crm.dashboard import build_dashboard
 
-        ctx = build_dashboard(request.user)
+        ctx = build_dashboard(request)
     return render(request, "core/home.html", ctx)

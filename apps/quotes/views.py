@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from apps.core.current_tenant import tenant_context
+from apps.core.permissions import own_q
 from apps.crm.models import Deal, Task, TaskKind
 from apps.integrations.line import LineNotConfigured, push_text
 
@@ -44,10 +45,16 @@ from .services import (
 )
 
 
+def _visible_quotes(request: HttpRequest):
+    """Quotations the requester may see — all of them, or only their own when their membership has
+    ``can_see_all_records`` turned off (REQUIREMENTS.md §4.15)."""
+    return SalesDocument.objects.filter(own_q(request, "salesperson"), doc_type=DocType.QUOTATION)
+
+
 @login_required
 def quotation_list(request: HttpRequest) -> HttpResponse:
     docs = (
-        SalesDocument.objects.filter(doc_type=DocType.QUOTATION)
+        _visible_quotes(request)
         .select_related("customer", "salesperson")
         .prefetch_related("lines")
         .order_by("-created_at")
@@ -64,6 +71,8 @@ def quotation_create(request: HttpRequest) -> HttpResponse:
             doc = form.save(commit=False)
             doc.doc_type = DocType.QUOTATION
             doc.status = DocStatus.DRAFT
+            if doc.salesperson_id is None:
+                doc.salesperson = request.user
             doc.doc_number = next_document_number(DocType.QUOTATION, prefix="QT")
             doc.save()
             return redirect("quotes:quotation_detail", pk=doc.pk)
@@ -81,7 +90,7 @@ def quotation_create(request: HttpRequest) -> HttpResponse:
 
 @login_required
 def quotation_edit(request: HttpRequest, pk: int) -> HttpResponse:
-    doc = get_object_or_404(SalesDocument, pk=pk, doc_type=DocType.QUOTATION)
+    doc = get_object_or_404(_visible_quotes(request), pk=pk)
     if not doc.is_editable:
         messages.error(request, "เอกสารนี้ถูกล็อกแล้ว — กด “เปิดแก้ไขใหม่ (Rev.)” ก่อนจึงจะแก้ไขได้")
         return redirect("quotes:quotation_detail", pk=doc.pk)
@@ -100,13 +109,12 @@ def _assert_lines_editable(doc: SalesDocument) -> None:
         raise PermissionDenied("เอกสารนี้ถูกล็อกแล้ว แก้ไขรายการไม่ได้")
 
 
-def _quote_for_edit(pk: int) -> SalesDocument:
+def _quote_for_edit(request: HttpRequest, pk: int) -> SalesDocument:
     return get_object_or_404(
-        SalesDocument.objects.select_related(
-            "customer", "contact", "salesperson", "deal", "bank_account"
-        ).prefetch_related("lines__product", "lines__variant"),
+        _visible_quotes(request)
+        .select_related("customer", "contact", "salesperson", "deal", "bank_account")
+        .prefetch_related("lines__product", "lines__variant"),
         pk=pk,
-        doc_type=DocType.QUOTATION,
     )
 
 
@@ -123,7 +131,7 @@ def _lines_ctx(doc: SalesDocument, *, add_form=None, editing_line_id=None, edit_
 
 @login_required
 def quotation_detail(request: HttpRequest, pk: int) -> HttpResponse:
-    doc = _quote_for_edit(pk)
+    doc = _quote_for_edit(request, pk)
     ctx = {
         **_lines_ctx(doc),
         "can_approve": can_approve(request.user, doc.tenant_id),
@@ -135,9 +143,7 @@ def quotation_detail(request: HttpRequest, pk: int) -> HttpResponse:
 @login_required
 def quotation_revisions(request: HttpRequest, pk: int) -> HttpResponse:
     doc = get_object_or_404(
-        SalesDocument.objects.prefetch_related("revisions__changed_by"),
-        pk=pk,
-        doc_type=DocType.QUOTATION,
+        _visible_quotes(request).prefetch_related("revisions__changed_by"), pk=pk
     )
     return render(
         request,
@@ -148,9 +154,7 @@ def quotation_revisions(request: HttpRequest, pk: int) -> HttpResponse:
 
 @login_required
 def quotation_revision_detail(request: HttpRequest, pk: int, revision: int) -> HttpResponse:
-    doc = get_object_or_404(
-        SalesDocument.objects.prefetch_related("lines"), pk=pk, doc_type=DocType.QUOTATION
-    )
+    doc = get_object_or_404(_visible_quotes(request).prefetch_related("lines"), pk=pk)
     rev = get_object_or_404(doc.revisions, revision=revision)
     current = compute_document_totals(doc)
     return render(
@@ -162,13 +166,13 @@ def quotation_revision_detail(request: HttpRequest, pk: int, revision: int) -> H
 
 @login_required
 def quotation_lines_partial(request: HttpRequest, pk: int) -> HttpResponse:
-    return render(request, "quotes/_quote_lines.html", _lines_ctx(_quote_for_edit(pk)))
+    return render(request, "quotes/_quote_lines.html", _lines_ctx(_quote_for_edit(request, pk)))
 
 
 @login_required
 @require_POST
 def quotation_add_line(request: HttpRequest, pk: int) -> HttpResponse:
-    doc = _quote_for_edit(pk)
+    doc = _quote_for_edit(request, pk)
     _assert_lines_editable(doc)
     form = SalesDocLineForm(request.POST, request.FILES)
     if form.is_valid():
@@ -177,17 +181,17 @@ def quotation_add_line(request: HttpRequest, pk: int) -> HttpResponse:
         line.position = (doc.lines.aggregate(m=Max("position"))["m"] or 0) + 1
         apply_catalog_defaults(line)
         line.save()
-        return render(request, "quotes/_quote_lines.html", _lines_ctx(_quote_for_edit(pk)))
+        return render(request, "quotes/_quote_lines.html", _lines_ctx(_quote_for_edit(request, pk)))
     return render(request, "quotes/_quote_lines.html", _lines_ctx(doc, add_form=form))
 
 
 @login_required
 @require_POST
 def quotation_delete_line(request: HttpRequest, pk: int, line_pk: int) -> HttpResponse:
-    doc = _quote_for_edit(pk)
+    doc = _quote_for_edit(request, pk)
     _assert_lines_editable(doc)
     get_object_or_404(SalesDocLine, pk=line_pk, document=doc).delete()
-    return render(request, "quotes/_quote_lines.html", _lines_ctx(_quote_for_edit(pk)))
+    return render(request, "quotes/_quote_lines.html", _lines_ctx(_quote_for_edit(request, pk)))
 
 
 @login_required
@@ -196,7 +200,7 @@ def quotation_reorder_lines(request: HttpRequest, pk: int) -> HttpResponse:
     """htmx/SortableJS: reassign ``position`` for a set of lines given as ``line=<pk>`` (repeated)
     in their new visual order. Only shuffles the position slots those lines already occupy, so
     dragging within one room/group leaves the rest of the document alone."""
-    doc = _quote_for_edit(pk)
+    doc = _quote_for_edit(request, pk)
     _assert_lines_editable(doc)
     ids = [int(x) for x in request.POST.getlist("line") if x.isdigit()]
     lines = {ln.pk: ln for ln in doc.lines.filter(pk__in=ids)}
@@ -207,12 +211,12 @@ def quotation_reorder_lines(request: HttpRequest, pk: int) -> HttpResponse:
         if line.position != slot:
             line.position = slot
             line.save(update_fields=["position"])
-    return render(request, "quotes/_quote_lines.html", _lines_ctx(_quote_for_edit(pk)))
+    return render(request, "quotes/_quote_lines.html", _lines_ctx(_quote_for_edit(request, pk)))
 
 
 @login_required
 def quotation_line_edit(request: HttpRequest, pk: int, line_pk: int) -> HttpResponse:
-    doc = _quote_for_edit(pk)
+    doc = _quote_for_edit(request, pk)
     _assert_lines_editable(doc)
     line = get_object_or_404(SalesDocLine, pk=line_pk, document=doc)
     if request.method == "POST":
@@ -221,7 +225,9 @@ def quotation_line_edit(request: HttpRequest, pk: int, line_pk: int) -> HttpResp
             obj = form.save(commit=False)
             apply_catalog_defaults(obj)
             obj.save()
-            return render(request, "quotes/_quote_lines.html", _lines_ctx(_quote_for_edit(pk)))
+            return render(
+                request, "quotes/_quote_lines.html", _lines_ctx(_quote_for_edit(request, pk))
+            )
         return render(
             request,
             "quotes/_quote_lines.html",
@@ -237,7 +243,7 @@ def quotation_line_edit(request: HttpRequest, pk: int, line_pk: int) -> HttpResp
 @login_required
 @require_POST
 def quotation_from_deal(request: HttpRequest, deal_pk: int) -> HttpResponse:
-    deal = get_object_or_404(Deal, pk=deal_pk)
+    deal = get_object_or_404(Deal.objects.filter(own_q(request, "owner")), pk=deal_pk)
     doc = create_quotation_from_deal(deal, salesperson=request.user)
     return redirect("quotes:quotation_detail", pk=doc.pk)
 
@@ -245,11 +251,10 @@ def quotation_from_deal(request: HttpRequest, deal_pk: int) -> HttpResponse:
 @login_required
 def quotation_pdf(request: HttpRequest, pk: int) -> HttpResponse:
     doc = get_object_or_404(
-        SalesDocument.objects.select_related(
-            "customer", "contact", "salesperson", "bank_account"
-        ).prefetch_related("lines"),
+        _visible_quotes(request)
+        .select_related("customer", "contact", "salesperson", "bank_account")
+        .prefetch_related("lines"),
         pk=pk,
-        doc_type=DocType.QUOTATION,
     )
     pdf = render_quotation_pdf(doc)
     resp = HttpResponse(pdf, content_type="application/pdf")
@@ -270,9 +275,7 @@ def _public_quote_url(request: HttpRequest, token: str) -> str:
 @login_required
 @require_POST
 def quotation_submit(request: HttpRequest, pk: int) -> HttpResponse:
-    doc = get_object_or_404(
-        SalesDocument.objects.prefetch_related("lines"), pk=pk, doc_type=DocType.QUOTATION
-    )
+    doc = get_object_or_404(_visible_quotes(request).prefetch_related("lines"), pk=pk)
     try:
         new_status = submit_quotation(doc, user=request.user)
     except WorkflowError as exc:
@@ -288,7 +291,7 @@ def quotation_submit(request: HttpRequest, pk: int) -> HttpResponse:
 @login_required
 @require_POST
 def quotation_approve(request: HttpRequest, pk: int) -> HttpResponse:
-    doc = get_object_or_404(SalesDocument, pk=pk, doc_type=DocType.QUOTATION)
+    doc = get_object_or_404(_visible_quotes(request), pk=pk)
     if not can_approve(request.user, doc.tenant_id):
         raise PermissionDenied("คุณไม่มีสิทธิ์อนุมัติส่วนลด")
     try:
@@ -303,7 +306,7 @@ def quotation_approve(request: HttpRequest, pk: int) -> HttpResponse:
 @login_required
 @require_POST
 def quotation_reject_approval(request: HttpRequest, pk: int) -> HttpResponse:
-    doc = get_object_or_404(SalesDocument, pk=pk, doc_type=DocType.QUOTATION)
+    doc = get_object_or_404(_visible_quotes(request), pk=pk)
     if not can_approve(request.user, doc.tenant_id):
         raise PermissionDenied("คุณไม่มีสิทธิ์ตีกลับคำขออนุมัติ")
     try:
@@ -318,7 +321,7 @@ def quotation_reject_approval(request: HttpRequest, pk: int) -> HttpResponse:
 @login_required
 @require_POST
 def quotation_cancel(request: HttpRequest, pk: int) -> HttpResponse:
-    doc = get_object_or_404(SalesDocument, pk=pk, doc_type=DocType.QUOTATION)
+    doc = get_object_or_404(_visible_quotes(request), pk=pk)
     cancel_quotation(doc)
     messages.warning(request, "ยกเลิกเอกสารแล้ว")
     return redirect("quotes:quotation_detail", pk=doc.pk)
@@ -327,7 +330,7 @@ def quotation_cancel(request: HttpRequest, pk: int) -> HttpResponse:
 @login_required
 @require_POST
 def quotation_reopen(request: HttpRequest, pk: int) -> HttpResponse:
-    doc = get_object_or_404(SalesDocument, pk=pk, doc_type=DocType.QUOTATION)
+    doc = get_object_or_404(_visible_quotes(request), pk=pk)
     try:
         reopen_quotation(doc, reason=request.POST.get("reason", "").strip())
     except WorkflowError as exc:
@@ -337,13 +340,12 @@ def quotation_reopen(request: HttpRequest, pk: int) -> HttpResponse:
     return redirect("quotes:quotation_detail", pk=doc.pk)
 
 
-def _quote_for_send(pk: int) -> SalesDocument:
+def _quote_for_send(request: HttpRequest, pk: int) -> SalesDocument:
     return get_object_or_404(
-        SalesDocument.objects.select_related(
-            "contact", "deal", "customer", "salesperson"
-        ).prefetch_related("lines"),
+        _visible_quotes(request)
+        .select_related("contact", "deal", "customer", "salesperson")
+        .prefetch_related("lines"),
         pk=pk,
-        doc_type=DocType.QUOTATION,
     )
 
 
@@ -378,7 +380,7 @@ def _finalize_sent(request: HttpRequest, doc: SalesDocument) -> None:
 @login_required
 @require_POST
 def quotation_send(request: HttpRequest, pk: int) -> HttpResponse:
-    doc = _quote_for_send(pk)
+    doc = _quote_for_send(request, pk)
     err = _ensure_sendable(request, doc)
     if err:
         messages.error(request, err)
@@ -404,7 +406,7 @@ def quotation_send(request: HttpRequest, pk: int) -> HttpResponse:
 @require_POST
 def quotation_send_line(request: HttpRequest, pk: int) -> HttpResponse:
     """Send the quotation's share link to the contact via the tenant's LINE OA."""
-    doc = _quote_for_send(pk)
+    doc = _quote_for_send(request, pk)
     if not (doc.contact and doc.contact.line_id):
         messages.error(request, "ผู้ติดต่อยังไม่มี LINE user ID — เพิ่มในข้อมูลผู้ติดต่อก่อน")
         return redirect("quotes:quotation_detail", pk=doc.pk)
