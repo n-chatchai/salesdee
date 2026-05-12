@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import date, timedelta
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count
@@ -298,6 +299,75 @@ def lead_convert(request: HttpRequest, pk: int) -> HttpResponse:
         return redirect("crm:deal_detail", pk=lead.deal_id)
     deal = convert_lead(lead, owner=request.user)
     return redirect("crm:deal_detail", pk=deal.pk)
+
+
+# --- AI assistant on a lead ---------------------------------------------------
+def _company_name(request: HttpRequest) -> str:
+    tenant = getattr(request, "tenant", None)
+    if tenant is None:
+        return ""
+    from apps.tenants.models import CompanyProfile
+
+    profile = CompanyProfile.objects.filter(tenant=tenant).first()
+    return profile.name_th if profile else tenant.name
+
+
+@login_required
+@require_POST
+def lead_suggest_reply(request: HttpRequest, pk: int) -> HttpResponse:
+    """htmx: Claude drafts the next reply to the customer based on this lead's conversation."""
+    from apps.integrations.ai import AINotConfigured, draft_reply_from_text
+    from apps.integrations.line import line_is_configured
+
+    lead = get_object_or_404(Lead.objects.filter(own_q(request, "assigned_to")), pk=pk)
+    conversation = lead.conversation_text()
+    if not conversation:
+        return render(
+            request, "crm/_ai_reply.html", {"lead": lead, "error": "ยังไม่มีบทสนทนาให้ AI ใช้"}
+        )
+    try:
+        text = draft_reply_from_text(conversation, company_name=_company_name(request))
+    except AINotConfigured as exc:
+        return render(request, "crm/_ai_reply.html", {"lead": lead, "error": str(exc)})
+    except Exception as exc:  # noqa: BLE001 — surface API/network errors instead of 500
+        return render(
+            request, "crm/_ai_reply.html", {"lead": lead, "error": f"AI ร่างข้อความไม่สำเร็จ: {exc}"}
+        )
+    return render(
+        request,
+        "crm/_ai_reply.html",
+        {"lead": lead, "text": text, "can_send_line": bool(lead.line_id) and line_is_configured()},
+    )
+
+
+@login_required
+@require_POST
+def lead_send_line_reply(request: HttpRequest, pk: int) -> HttpResponse:
+    """Send a (possibly AI-drafted, possibly edited) reply to the lead's LINE user."""
+    from apps.integrations.line import LineNotConfigured, push_text
+
+    from .models import Activity, ActivityKind
+
+    lead = get_object_or_404(Lead.objects.filter(own_q(request, "assigned_to")), pk=pk)
+    text = (request.POST.get("text") or "").strip()
+    if not text:
+        messages.error(request, "ไม่มีข้อความให้ส่ง")
+        return redirect("crm:lead_detail", pk=lead.pk)
+    if not lead.line_id:
+        messages.error(request, "Lead นี้ยังไม่มี LINE user ID")
+        return redirect("crm:lead_detail", pk=lead.pk)
+    try:
+        push_text(lead.line_id, text)
+    except LineNotConfigured as exc:
+        messages.error(request, str(exc))
+        return redirect("crm:lead_detail", pk=lead.pk)
+    except Exception as exc:  # noqa: BLE001 — surface SDK/network errors instead of 500
+        messages.error(request, f"ส่งทาง LINE ไม่สำเร็จ: {exc}")
+        return redirect("crm:lead_detail", pk=lead.pk)
+    assert request.user.is_authenticated  # @login_required guarantees this; narrows the type
+    Activity.objects.create(lead=lead, kind=ActivityKind.LINE, body=text, created_by=request.user)
+    messages.success(request, "ส่งข้อความทาง LINE แล้ว")
+    return redirect("crm:lead_detail", pk=lead.pk)
 
 
 # --- Reports ------------------------------------------------------------------

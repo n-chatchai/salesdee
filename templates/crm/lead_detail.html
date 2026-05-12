@@ -39,11 +39,17 @@
 
     <section class="space-y-3 rounded-lg border bg-white p-4 text-sm md:col-span-1">
       {% if ai_enabled %}
-        <form method="post" action="{% url 'quotes:quotation_from_lead_ai' lead.pk %}">
-          {% csrf_token %}
-          <button type="submit" class="w-full rounded bg-violet-600 px-3 py-2 text-white hover:bg-violet-700">✨ ร่างใบเสนอราคาด้วย AI</button>
-        </form>
-        <p class="text-xs text-slate-400">AI จะอ่านบทสนทนา จับคู่กับแคตตาล็อก แล้วสร้างใบเสนอราคาฉบับร่างให้คุณตรวจสอบ/แก้ไข</p>
+        <div class="space-y-2 rounded-lg border border-violet-200 bg-violet-50 p-3">
+          <div class="text-sm font-medium text-violet-800">ผู้ช่วย AI</div>
+          <form method="post" action="{% url 'quotes:quotation_from_lead_ai' lead.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="w-full rounded bg-violet-600 px-3 py-2 text-sm text-white hover:bg-violet-700">✨ ร่างใบเสนอราคาด้วย AI</button>
+          </form>
+          <button type="button" class="w-full rounded border border-violet-300 px-3 py-2 text-sm text-violet-700 hover:bg-violet-100"
+                  hx-post="{% url 'crm:lead_suggest_reply' lead.pk %}" hx-target="#ai-reply" hx-swap="outerHTML">✨ ช่วยร่างข้อความตอบลูกค้า</button>
+          <div id="ai-reply"></div>
+          <p class="text-xs text-violet-700/70">AI จะอ่านบทสนทนา จับคู่กับแคตตาล็อก/บริบท แล้วช่วยร่างให้ — โปรดตรวจสอบก่อนใช้งาน</p>
+        </div>
       {% endif %}
       {% if lead.deal %}
         <div class="text-emerald-700">แปลงเป็นดีลแล้ว</div>

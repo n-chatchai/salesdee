@@ -260,13 +260,7 @@ def quotation_from_lead_ai(request: HttpRequest, lead_pk: int) -> HttpResponse:
     from .services import create_quotation_from_ai_draft
 
     lead = get_object_or_404(Lead.objects.filter(own_q(request, "assigned_to")), pk=lead_pk)
-    parts: list[str] = []
-    if lead.message:
-        parts.append(f"[ข้อความแรก] {lead.message}")
-    for activity in lead.activities.order_by("occurred_at"):
-        if activity.body:
-            parts.append(f"[{activity.get_kind_display()}] {activity.body}")
-    conversation = "\n".join(parts).strip()
+    conversation = lead.conversation_text()
     if not conversation:
         messages.error(request, "Lead นี้ยังไม่มีบทสนทนาให้ AI ใช้ร่างใบเสนอราคา")
         return redirect("crm:lead_detail", pk=lead.pk)

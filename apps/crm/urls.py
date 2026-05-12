@@ -24,6 +24,8 @@ urlpatterns = [
     path("leads/<int:pk>/", views.lead_detail, name="lead_detail"),
     path("leads/<int:pk>/edit/", views.lead_edit, name="lead_edit"),
     path("leads/<int:pk>/convert/", views.lead_convert, name="lead_convert"),
+    path("leads/<int:pk>/ai-reply/", views.lead_suggest_reply, name="lead_suggest_reply"),
+    path("leads/<int:pk>/send-line/", views.lead_send_line_reply, name="lead_send_line_reply"),
     # Public — no login. Embeddable enquiry form for a tenant.
     path("intake/<slug:tenant_slug>/", views.lead_intake, name="lead_intake"),
 ]

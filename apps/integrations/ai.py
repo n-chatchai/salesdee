@@ -102,3 +102,29 @@ def draft_quotation_from_text(conversation: str, *, catalog: list[dict]) -> dict
         ):
             return dict(block.input)
     return {"lines": []}
+
+
+def draft_reply_from_text(conversation: str, *, company_name: str = "") -> str:
+    """Ask Claude to draft the next reply to the customer from the conversation. Returns plain Thai
+    text (the salesperson edits before sending). Raises ``AINotConfigured`` or the SDK's errors."""
+    key = getattr(settings, "ANTHROPIC_API_KEY", "")
+    if not key:
+        raise AINotConfigured("ยังไม่ได้ตั้งค่า ANTHROPIC_API_KEY — ใช้ฟีเจอร์ AI ไม่ได้")
+    import anthropic
+
+    on_behalf = f"ในนามของ {company_name} " if company_name else ""
+    client = anthropic.Anthropic(api_key=key)
+    response = client.messages.create(
+        model=getattr(settings, "ANTHROPIC_MODEL", "claude-sonnet-4-6"),
+        max_tokens=1024,
+        system=(
+            f"คุณเป็นพนักงานขายเฟอร์นิเจอร์ในไทย {on_behalf}ช่วยร่างข้อความตอบกลับลูกค้าจากบทสนทนาที่ให้มา "
+            "น้ำเสียงสุภาพ เป็นกันเอง กระชับ ตอบคำถามที่ลูกค้าค้างไว้ และเสนอขั้นถัดไปเมื่อเหมาะสม "
+            "(เช่น ส่งใบเสนอราคา นัดดูหน้างาน) ตอบเป็นข้อความล้วน ไม่ต้องใส่หัวข้อหรือสัญลักษณ์ markdown"
+        ),
+        messages=[
+            {"role": "user", "content": f"บทสนทนากับลูกค้า:\n{conversation}\n\nร่างข้อความตอบกลับถัดไป"}
+        ],
+    )
+    text_parts = [b.text for b in response.content if isinstance(b, anthropic.types.TextBlock)]
+    return "\n".join(text_parts).strip()

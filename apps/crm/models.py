@@ -304,6 +304,17 @@ class Lead(TenantScopedModel):
     def __str__(self) -> str:
         return f"{self.name}{f' / {self.company_name}' if self.company_name else ''}"
 
+    def conversation_text(self) -> str:
+        """The lead's conversation as a plain-text transcript — the first message plus every logged
+        activity body, oldest first. Fed to the AI helpers (apps.integrations.ai)."""
+        parts: list[str] = []
+        if self.message:
+            parts.append(f"[ข้อความแรก] {self.message}")
+        for activity in self.activities.order_by("occurred_at"):
+            if activity.body:
+                parts.append(f"[{activity.get_kind_display()}] {activity.body}")
+        return "\n".join(parts).strip()
+
 
 # --- Sales targets (reports — REQUIREMENTS.md §4.9 FR-9.5) --------------------
 class SalesTarget(TenantScopedModel):
