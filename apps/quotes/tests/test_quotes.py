@@ -233,6 +233,42 @@ def test_quotation_add_and_delete_line_htmx(client, user, membership, tenant) ->
         assert doc.lines.count() == 0
 
 
+def test_quotation_reorder_lines(client, user, membership, tenant) -> None:
+    doc = _doc(tenant)
+    with tenant_context(tenant):
+        a = SalesDocLine.objects.create(
+            document=doc, line_type=LineType.ITEM, description="A", position=1
+        )
+        b = SalesDocLine.objects.create(
+            document=doc, line_type=LineType.ITEM, description="B", position=2
+        )
+        c = SalesDocLine.objects.create(
+            document=doc, line_type=LineType.ITEM, description="C", position=3
+        )
+    client.force_login(user)
+    resp = client.post(
+        reverse("quotes:quotation_reorder_lines", args=[doc.pk]), {"line": [c.pk, a.pk, b.pk]}
+    )
+    assert resp.status_code == 200
+    with tenant_context(tenant):
+        a.refresh_from_db()
+        b.refresh_from_db()
+        c.refresh_from_db()
+        assert [c.position, a.position, b.position] == [1, 2, 3]
+        assert [ln.description for ln in doc.lines.all()] == ["C", "A", "B"]
+
+
+def test_reorder_lines_blocked_when_sent(client, user, membership, tenant) -> None:
+    doc = _doc(tenant, status=DocStatus.SENT)
+    with tenant_context(tenant):
+        a = SalesDocLine.objects.create(
+            document=doc, line_type=LineType.ITEM, description="A", position=1
+        )
+    client.force_login(user)
+    resp = client.post(reverse("quotes:quotation_reorder_lines", args=[doc.pk]), {"line": [a.pk]})
+    assert resp.status_code == 403
+
+
 def test_quotation_lines_partial_renders(client, user, membership, tenant) -> None:
     doc = _doc(tenant)
     client.force_login(user)

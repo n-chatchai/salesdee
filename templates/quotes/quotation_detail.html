@@ -2,6 +2,32 @@
 
 {% block title %}{{ document.doc_number|default:"ใบเสนอราคา" }} · {{ current_tenant.name }}{% endblock %}
 
+{% block extra_head %}
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+  <script nonce="{{ csp_nonce }}">
+    document.addEventListener("DOMContentLoaded", function () {
+      function initLineReorder(root) {
+        root.querySelectorAll("tbody[data-reorder-url]").forEach(function (tb) {
+          if (tb._sortable) return;
+          tb._sortable = new Sortable(tb, {
+            animation: 150, ghostClass: "bg-amber-50", handle: "[data-drag-handle]",
+            onEnd: function () {
+              var ids = Array.prototype.map.call(
+                tb.querySelectorAll("tr[data-line-id]"), function (r) { return r.dataset.lineId; }
+              );
+              htmx.ajax("POST", tb.dataset.reorderUrl, {
+                target: "#quote-lines", swap: "outerHTML", values: { line: ids },
+              });
+            },
+          });
+        });
+      }
+      initLineReorder(document);
+      htmx.onLoad(initLineReorder);
+    });
+  </script>
+{% endblock %}
+
 {% block content %}
   <div class="flex items-center justify-between">
     <div>

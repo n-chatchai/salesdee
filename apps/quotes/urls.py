@@ -28,6 +28,7 @@ urlpatterns = [
     path("<int:pk>/send/", views.quotation_send, name="quotation_send"),
     path("<int:pk>/lines/", views.quotation_lines_partial, name="quotation_lines_partial"),
     path("<int:pk>/lines/add/", views.quotation_add_line, name="quotation_add_line"),
+    path("<int:pk>/lines/reorder/", views.quotation_reorder_lines, name="quotation_reorder_lines"),
     path(
         "<int:pk>/lines/<int:line_pk>/edit/",
         views.quotation_line_edit,

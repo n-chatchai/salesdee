@@ -190,6 +190,26 @@ def quotation_delete_line(request: HttpRequest, pk: int, line_pk: int) -> HttpRe
 
 
 @login_required
+@require_POST
+def quotation_reorder_lines(request: HttpRequest, pk: int) -> HttpResponse:
+    """htmx/SortableJS: reassign ``position`` for a set of lines given as ``line=<pk>`` (repeated)
+    in their new visual order. Only shuffles the position slots those lines already occupy, so
+    dragging within one room/group leaves the rest of the document alone."""
+    doc = _quote_for_edit(pk)
+    _assert_lines_editable(doc)
+    ids = [int(x) for x in request.POST.getlist("line") if x.isdigit()]
+    lines = {ln.pk: ln for ln in doc.lines.filter(pk__in=ids)}
+    ordered = [i for i in ids if i in lines]
+    slots = sorted(lines[i].position for i in ordered)
+    for slot, line_pk in zip(slots, ordered, strict=True):
+        line = lines[line_pk]
+        if line.position != slot:
+            line.position = slot
+            line.save(update_fields=["position"])
+    return render(request, "quotes/_quote_lines.html", _lines_ctx(_quote_for_edit(pk)))
+
+
+@login_required
 def quotation_line_edit(request: HttpRequest, pk: int, line_pk: int) -> HttpResponse:
     doc = _quote_for_edit(pk)
     _assert_lines_editable(doc)

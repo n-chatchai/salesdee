@@ -11,7 +11,7 @@
             <th class="px-3 py-2 text-right">จำนวน</th><th class="px-3 py-2 text-right">ราคา/หน่วย</th>
             <th class="px-3 py-2 text-right">ส่วนลด</th><th class="px-3 py-2 text-right">จำนวนเงิน</th><th class="w-16"></th>
           </tr></thead>
-          <tbody class="divide-y">
+          <tbody class="divide-y"{% if editable %} data-reorder-url="{% url 'quotes:quotation_reorder_lines' document.pk %}"{% endif %}>
             {% for ln in g.lines %}
               {% if editing_line_id == ln.pk %}
                 <tr><td colspan="7" class="bg-amber-50 p-3">
@@ -24,12 +24,12 @@
                   </form>
                 </td></tr>
               {% elif ln.line_type == 'heading' %}
-                <tr class="bg-slate-50"><td colspan="6" class="px-3 py-1.5 font-medium">{{ ln.description }}</td><td class="px-2 py-1.5">{% include "quotes/_line_actions.html" %}</td></tr>
+                <tr class="bg-slate-50" data-line-id="{{ ln.pk }}"><td colspan="6" class="px-3 py-1.5 font-medium">{% if editable %}<span data-drag-handle class="mr-1 cursor-move select-none text-slate-300" title="ลากเพื่อจัดลำดับ">⠿</span>{% endif %}{{ ln.description }}</td><td class="px-2 py-1.5">{% include "quotes/_line_actions.html" %}</td></tr>
               {% elif ln.line_type == 'note' %}
-                <tr><td colspan="6" class="px-3 py-1.5 text-slate-500">{{ ln.description|linebreaksbr }}</td><td class="px-2 py-1.5">{% include "quotes/_line_actions.html" %}</td></tr>
+                <tr data-line-id="{{ ln.pk }}"><td colspan="6" class="px-3 py-1.5 text-slate-500">{% if editable %}<span data-drag-handle class="mr-1 cursor-move select-none text-slate-300" title="ลากเพื่อจัดลำดับ">⠿</span>{% endif %}{{ ln.description|linebreaksbr }}</td><td class="px-2 py-1.5">{% include "quotes/_line_actions.html" %}</td></tr>
               {% else %}
-                <tr>
-                  <td class="px-3 py-2 align-top text-slate-400">{{ forloop.counter }}</td>
+                <tr data-line-id="{{ ln.pk }}">
+                  <td class="px-3 py-2 align-top text-slate-400">{% if editable %}<span data-drag-handle class="mr-1 cursor-move select-none text-slate-300" title="ลากเพื่อจัดลำดับ">⠿</span>{% endif %}{{ forloop.counter }}</td>
                   <td class="px-3 py-2">{{ ln.description|linebreaksbr }}{% if ln.dimensions or ln.material %}<div class="text-xs text-slate-500">{{ ln.dimensions }}{% if ln.dimensions and ln.material %} · {% endif %}{{ ln.material }}</div>{% endif %}</td>
                   <td class="px-3 py-2 text-right align-top">{{ ln.quantity|floatformat:"-2" }} {{ ln.unit }}</td>
                   <td class="px-3 py-2 text-right align-top">{{ ln.unit_price|floatformat:2 }}</td>
@@ -71,7 +71,7 @@
       {% include "crm/_form_fields.html" with form=line_form %}
       <div class="sm:col-span-2"><button type="submit" class="rounded bg-slate-800 px-4 py-2 text-sm text-white hover:bg-slate-700">เพิ่มรายการ</button></div>
     </form>
-    <p class="mt-2 text-xs text-slate-400">"หัวข้อ/กลุ่ม" = บรรทัดชื่อห้อง/หัวข้อในตาราง · "ห้อง/โซน" = ใช้จัดกลุ่ม · เลือกสินค้าจากแคตตาล็อกแล้วเว้นราคาว่างไว้ ระบบจะเติมราคา/รายละเอียด/ภาษีให้</p>
+    <p class="mt-2 text-xs text-slate-400">"หัวข้อ/กลุ่ม" = บรรทัดชื่อห้อง/หัวข้อในตาราง · "ห้อง/โซน" = ใช้จัดกลุ่ม · เลือกสินค้าจากแคตตาล็อกแล้วเว้นราคาว่างไว้ ระบบจะเติมราคา/รายละเอียด/ภาษีให้ · ลากไอคอน ⠿ เพื่อจัดลำดับรายการในกลุ่มเดียวกัน</p>
   </div>
   {% else %}
   <p class="mt-6 text-sm text-slate-400">เอกสารถูกล็อกในสถานะ “{{ document.get_status_display }}” — แก้ไขรายการไม่ได้</p>
