@@ -48,7 +48,7 @@
             {% elif ln.line_type == 'note' %}<tr><td colspan="5" class="border px-2 py-1 text-slate-500">{{ ln.description|linebreaksbr }}</td></tr>
             {% else %}<tr>
               <td class="border px-2 py-1 align-top text-slate-400">{{ forloop.counter }}</td>
-              <td class="border px-2 py-1">{{ ln.description|linebreaksbr }}{% if ln.dimensions or ln.material %}<div class="text-xs text-slate-500">{{ ln.dimensions }}{% if ln.dimensions and ln.material %} · {% endif %}{{ ln.material }}</div>{% endif %}</td>
+              <td class="border px-2 py-1">{% if ln.image %}<img src="{{ ln.image.url }}" alt="" class="mb-1 h-14 w-14 rounded border object-cover">{% endif %}{{ ln.description|linebreaksbr }}{% if ln.dimensions or ln.material %}<div class="text-xs text-slate-500">{{ ln.dimensions }}{% if ln.dimensions and ln.material %} · {% endif %}{{ ln.material }}</div>{% endif %}</td>
               <td class="border px-2 py-1 text-right align-top">{{ ln.quantity|floatformat:"-2" }} {{ ln.unit }}</td>
               <td class="border px-2 py-1 text-right align-top">{{ ln.unit_price|floatformat:2 }}</td>
               <td class="border px-2 py-1 text-right align-top">{{ ln.amount|floatformat:2 }}</td>

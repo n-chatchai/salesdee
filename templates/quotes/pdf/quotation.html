@@ -82,7 +82,7 @@
           {% else %}
             <tr>
               <td>{{ forloop.counter }}</td>
-              <td>{{ ln.description|linebreaksbr }}{% if ln.dimensions or ln.material %}<div class="muted">{{ ln.dimensions }}{% if ln.dimensions and ln.material %} · {% endif %}{{ ln.material }}</div>{% endif %}</td>
+              <td>{% if ln.image %}<img src="file://{{ ln.image.path }}" alt="" style="height:48px;margin-bottom:2px">{% endif %}{{ ln.description|linebreaksbr }}{% if ln.dimensions or ln.material %}<div class="muted">{{ ln.dimensions }}{% if ln.dimensions and ln.material %} · {% endif %}{{ ln.material }}</div>{% endif %}</td>
               <td class="r">{{ ln.quantity|floatformat:"-2" }} {{ ln.unit }}</td>
               <td class="r">{{ ln.unit_price|floatformat:2 }}</td>
               <td class="r">{% if ln.discount_value %}{{ ln.discount_value|floatformat:"-2" }}{% if ln.discount_kind == 'percent' %}%{% endif %}{% else %}—{% endif %}</td>

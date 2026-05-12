@@ -39,6 +39,13 @@ from apps.quotes.services import (
 
 pytestmark = pytest.mark.django_db
 
+# A valid 1×1 PNG, small enough to inline — ImageField validates it through Pillow.
+_PNG = (
+    b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00"
+    b"\x1f\x15\xc4\x89\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xb4\x00\x00"
+    b"\x00\x00IEND\xaeB`\x82"
+)
+
 
 def _doc(tenant, **kwargs) -> SalesDocument:
     with tenant_context(tenant):
@@ -231,6 +238,49 @@ def test_quotation_add_and_delete_line_htmx(client, user, membership, tenant) ->
     assert resp.status_code == 200
     with tenant_context(tenant):
         assert doc.lines.count() == 0
+
+
+def test_add_line_with_image(client, user, membership, tenant, settings, tmp_path) -> None:
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    settings.MEDIA_ROOT = str(tmp_path)
+    doc = _doc(tenant)
+    client.force_login(user)
+    resp = client.post(
+        reverse("quotes:quotation_add_line", args=[doc.pk]),
+        {
+            "line_type": "item",
+            "description": "เก้าอี้มีรูป",
+            "quantity": "1",
+            "unit_price": "500",
+            "image": SimpleUploadedFile("chair.png", _PNG, content_type="image/png"),
+        },
+    )
+    assert resp.status_code == 200
+    with tenant_context(tenant):
+        line = doc.lines.get()
+        assert bool(line.image)
+        assert "chair" in (line.image.name or "")
+
+
+def test_pdf_with_line_image_renders(client, user, membership, tenant, settings, tmp_path) -> None:
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    settings.MEDIA_ROOT = str(tmp_path)
+    doc = _doc(tenant, doc_number="QT-2569-0500")
+    with tenant_context(tenant):
+        SalesDocLine.objects.create(
+            document=doc,
+            line_type=LineType.ITEM,
+            description="โต๊ะมีรูป",
+            quantity=Decimal("1"),
+            unit_price=Decimal("1000"),
+            image=SimpleUploadedFile("table.png", _PNG, content_type="image/png"),
+        )
+    client.force_login(user)
+    resp = client.get(reverse("quotes:quotation_pdf", args=[doc.pk]))
+    assert resp.status_code == 200
+    assert resp.content[:5] == b"%PDF-"
 
 
 def test_quotation_reorder_lines(client, user, membership, tenant) -> None:

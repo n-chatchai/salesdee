@@ -15,7 +15,7 @@
             {% for ln in g.lines %}
               {% if editing_line_id == ln.pk %}
                 <tr><td colspan="7" class="bg-amber-50 p-3">
-                  <form class="crm-form space-y-2" hx-post="{% url 'quotes:quotation_line_edit' document.pk ln.pk %}" hx-target="#quote-lines" hx-swap="outerHTML">
+                  <form class="crm-form space-y-2" hx-post="{% url 'quotes:quotation_line_edit' document.pk ln.pk %}" hx-target="#quote-lines" hx-swap="outerHTML" hx-encoding="multipart/form-data">
                     {% csrf_token %}
                     {% include "crm/_form_fields.html" with form=line_edit_form %}
                     <button type="submit" class="rounded bg-slate-800 px-3 py-1.5 text-sm text-white hover:bg-slate-700">บันทึก</button>
@@ -30,7 +30,7 @@
               {% else %}
                 <tr data-line-id="{{ ln.pk }}">
                   <td class="px-3 py-2 align-top text-slate-400">{% if editable %}<span data-drag-handle class="mr-1 cursor-move select-none text-slate-300" title="ลากเพื่อจัดลำดับ">⠿</span>{% endif %}{{ forloop.counter }}</td>
-                  <td class="px-3 py-2">{{ ln.description|linebreaksbr }}{% if ln.dimensions or ln.material %}<div class="text-xs text-slate-500">{{ ln.dimensions }}{% if ln.dimensions and ln.material %} · {% endif %}{{ ln.material }}</div>{% endif %}</td>
+                  <td class="px-3 py-2">{% if ln.image %}<img src="{{ ln.image.url }}" alt="" class="mb-1 h-16 w-16 rounded border object-cover">{% endif %}{{ ln.description|linebreaksbr }}{% if ln.dimensions or ln.material %}<div class="text-xs text-slate-500">{{ ln.dimensions }}{% if ln.dimensions and ln.material %} · {% endif %}{{ ln.material }}</div>{% endif %}</td>
                   <td class="px-3 py-2 text-right align-top">{{ ln.quantity|floatformat:"-2" }} {{ ln.unit }}</td>
                   <td class="px-3 py-2 text-right align-top">{{ ln.unit_price|floatformat:2 }}</td>
                   <td class="px-3 py-2 text-right align-top text-slate-500">{% if ln.discount_value %}{{ ln.discount_value|floatformat:"-2" }}{% if ln.discount_kind == 'percent' %}%{% endif %}{% else %}—{% endif %}</td>
@@ -66,7 +66,7 @@
   {% if editable %}
   <div class="mt-6 rounded-lg border bg-white p-4">
     <h2 class="mb-2 font-medium">เพิ่มรายการ</h2>
-    <form class="crm-form grid gap-3 sm:grid-cols-2" hx-post="{% url 'quotes:quotation_add_line' document.pk %}" hx-target="#quote-lines" hx-swap="outerHTML">
+    <form class="crm-form grid gap-3 sm:grid-cols-2" hx-post="{% url 'quotes:quotation_add_line' document.pk %}" hx-target="#quote-lines" hx-swap="outerHTML" hx-encoding="multipart/form-data">
       {% csrf_token %}
       {% include "crm/_form_fields.html" with form=line_form %}
       <div class="sm:col-span-2"><button type="submit" class="rounded bg-slate-800 px-4 py-2 text-sm text-white hover:bg-slate-700">เพิ่มรายการ</button></div>

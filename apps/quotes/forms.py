@@ -67,6 +67,7 @@ class SalesDocLineForm(forms.ModelForm):
             "description",
             "dimensions",
             "material",
+            "image",
             "quantity",
             "unit",
             "unit_price",

@@ -169,7 +169,7 @@ def quotation_lines_partial(request: HttpRequest, pk: int) -> HttpResponse:
 def quotation_add_line(request: HttpRequest, pk: int) -> HttpResponse:
     doc = _quote_for_edit(pk)
     _assert_lines_editable(doc)
-    form = SalesDocLineForm(request.POST)
+    form = SalesDocLineForm(request.POST, request.FILES)
     if form.is_valid():
         line = form.save(commit=False)
         line.document = doc
@@ -215,7 +215,7 @@ def quotation_line_edit(request: HttpRequest, pk: int, line_pk: int) -> HttpResp
     _assert_lines_editable(doc)
     line = get_object_or_404(SalesDocLine, pk=line_pk, document=doc)
     if request.method == "POST":
-        form = SalesDocLineForm(request.POST, instance=line)
+        form = SalesDocLineForm(request.POST, request.FILES, instance=line)
         if form.is_valid():
             obj = form.save(commit=False)
             apply_catalog_defaults(obj)
