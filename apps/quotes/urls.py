@@ -41,4 +41,7 @@ urlpatterns = [
         name="quotation_delete_line",
     ),
     path("from-deal/<int:deal_pk>/", views.quotation_from_deal, name="quotation_from_deal"),
+    path(
+        "from-lead-ai/<int:lead_pk>/", views.quotation_from_lead_ai, name="quotation_from_lead_ai"
+    ),
 ]

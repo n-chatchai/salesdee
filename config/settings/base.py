@@ -170,6 +170,10 @@ STORAGES = {
 vars().update(env.email_url("EMAIL_URL", default="consolemail://"))
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="no-reply@localhost")
 
+# --- AI (Anthropic / Claude) — optional; AI features are disabled when the key is blank -------
+ANTHROPIC_API_KEY = env("ANTHROPIC_API_KEY", default="")
+ANTHROPIC_MODEL = env("ANTHROPIC_MODEL", default="claude-sonnet-4-6")
+
 # --- Security headers (CSP, Django 6 built-in) --------------------------------
 # Plain-string values are used to avoid depending on the exact `django.utils.csp` API.
 # `'nonce-{nonce}'` is replaced per-response by the CSP middleware; use `{{ csp_nonce }}`

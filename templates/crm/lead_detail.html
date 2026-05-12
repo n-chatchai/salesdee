@@ -38,6 +38,13 @@
     </section>
 
     <section class="space-y-3 rounded-lg border bg-white p-4 text-sm md:col-span-1">
+      {% if ai_enabled %}
+        <form method="post" action="{% url 'quotes:quotation_from_lead_ai' lead.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="w-full rounded bg-violet-600 px-3 py-2 text-white hover:bg-violet-700">✨ ร่างใบเสนอราคาด้วย AI</button>
+        </form>
+        <p class="text-xs text-slate-400">AI จะอ่านบทสนทนา จับคู่กับแคตตาล็อก แล้วสร้างใบเสนอราคาฉบับร่างให้คุณตรวจสอบ/แก้ไข</p>
+      {% endif %}
       {% if lead.deal %}
         <div class="text-emerald-700">แปลงเป็นดีลแล้ว</div>
         <a href="{% url 'crm:deal_detail' lead.deal.pk %}" class="block rounded bg-slate-800 px-3 py-2 text-center text-white hover:bg-slate-700">เปิดดีล: {{ lead.deal.name }}</a>

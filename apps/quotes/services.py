@@ -24,6 +24,7 @@ from .models import (
     LineType,
     PriceMode,
     QuotationShareLink,
+    SalesDocLine,
     SalesDocument,
 )
 
@@ -74,6 +75,59 @@ def create_quotation_from_deal(deal, *, salesperson=None) -> SalesDocument:
     )
     doc.doc_number = next_document_number(DocType.QUOTATION, prefix="QT")
     doc.save()
+    return doc
+
+
+def create_quotation_from_ai_draft(
+    draft: dict, *, salesperson=None, reference: str = "", deal=None
+) -> SalesDocument:
+    """Build a DRAFT quotation from an AI-extracted draft (see apps.integrations.ai). ``draft`` is
+    ``{customer_name?, notes?, lines: [{product_code?, description, quantity, unit_price?}]}``.
+    Lines that name a catalog code get linked (tax/unit/price filled from the product); the
+    salesperson reviews & adjusts everything afterwards. Caller must be in the tenant's context."""
+    from apps.catalog.models import Product
+
+    today = date.today()
+    doc = SalesDocument.objects.create(
+        doc_type=DocType.QUOTATION,
+        deal=deal,
+        customer=deal.customer if deal is not None else None,
+        contact=deal.contact if deal is not None else None,
+        salesperson=salesperson,
+        issue_date=today,
+        valid_until=today + timedelta(days=30),
+        reference=reference or (draft.get("customer_name") or "").strip(),
+        notes=(draft.get("notes") or "").strip(),
+        status=DocStatus.DRAFT,
+    )
+    doc.doc_number = next_document_number(DocType.QUOTATION, prefix="QT")
+    doc.save()
+    products = {p.code: p for p in Product.objects.filter(is_active=True).exclude(code="")}
+    position = 0
+    for item in draft.get("lines") or []:
+        description = (item.get("description") or "").strip()
+        product = products.get((item.get("product_code") or "").strip()) or None
+        if not description and product is None:
+            continue
+        position += 1
+        try:
+            quantity = Decimal(str(item.get("quantity") or 1))
+            unit_price = Decimal(str(item.get("unit_price") or 0))
+        except (ArithmeticError, ValueError, TypeError):
+            quantity, unit_price = Decimal(1), Decimal(0)
+        line = SalesDocLine(
+            document=doc,
+            position=position,
+            line_type=LineType.ITEM,
+            description=description,
+            quantity=quantity if quantity > 0 else Decimal(1),
+            unit_price=unit_price if unit_price >= 0 else Decimal(0),
+            product=product,
+        )
+        apply_catalog_defaults(
+            line
+        )  # fills tax/unit (always) + price/desc/dims/material (if blank)
+        line.save()
     return doc
 
 

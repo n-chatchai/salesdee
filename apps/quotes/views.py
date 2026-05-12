@@ -249,6 +249,47 @@ def quotation_from_deal(request: HttpRequest, deal_pk: int) -> HttpResponse:
 
 
 @login_required
+@require_POST
+def quotation_from_lead_ai(request: HttpRequest, lead_pk: int) -> HttpResponse:
+    """Draft a quotation from a lead's conversation using Claude (apps.integrations.ai), then open
+    the editor for the salesperson to review. Needs ``settings.ANTHROPIC_API_KEY``."""
+    from apps.catalog.models import Product
+    from apps.crm.models import Lead
+    from apps.integrations.ai import AINotConfigured, draft_quotation_from_text
+
+    from .services import create_quotation_from_ai_draft
+
+    lead = get_object_or_404(Lead.objects.filter(own_q(request, "assigned_to")), pk=lead_pk)
+    parts: list[str] = []
+    if lead.message:
+        parts.append(f"[ข้อความแรก] {lead.message}")
+    for activity in lead.activities.order_by("occurred_at"):
+        if activity.body:
+            parts.append(f"[{activity.get_kind_display()}] {activity.body}")
+    conversation = "\n".join(parts).strip()
+    if not conversation:
+        messages.error(request, "Lead นี้ยังไม่มีบทสนทนาให้ AI ใช้ร่างใบเสนอราคา")
+        return redirect("crm:lead_detail", pk=lead.pk)
+    catalog = [
+        {"code": p.code, "name": p.name, "unit": p.unit, "price": str(p.default_price)}
+        for p in Product.objects.filter(is_active=True).order_by("name")[:300]
+    ]
+    try:
+        draft = draft_quotation_from_text(conversation, catalog=catalog)
+    except AINotConfigured as exc:
+        messages.error(request, str(exc))
+        return redirect("crm:lead_detail", pk=lead.pk)
+    except Exception as exc:  # noqa: BLE001 — surface API/network/parse errors, don't 500
+        messages.error(request, f"AI ร่างใบเสนอราคาไม่สำเร็จ: {exc}")
+        return redirect("crm:lead_detail", pk=lead.pk)
+    doc = create_quotation_from_ai_draft(
+        draft, salesperson=request.user, reference=lead.name, deal=lead.deal
+    )
+    messages.success(request, f"AI ร่างใบเสนอราคา {doc.doc_number} ให้แล้ว — โปรดตรวจสอบและแก้ไขก่อนส่ง")
+    return redirect("quotes:quotation_detail", pk=doc.pk)
+
+
+@login_required
 def quotation_pdf(request: HttpRequest, pk: int) -> HttpResponse:
     doc = get_object_or_404(
         _visible_quotes(request)

@@ -243,14 +243,25 @@ def lead_list(request: HttpRequest) -> HttpResponse:
 
 @login_required
 def lead_detail(request: HttpRequest, pk: int) -> HttpResponse:
+    from apps.integrations.ai import ai_is_configured
+
     lead = get_object_or_404(
         Lead.objects.filter(own_q(request, "assigned_to")).select_related(
             "assigned_to", "customer", "deal"
         ),
         pk=pk,
     )
-    activities = lead.activities.select_related("created_by").order_by("-occurred_at")[:50]
-    return render(request, "crm/lead_detail.html", {"lead": lead, "activities": activities})
+    activities = list(lead.activities.select_related("created_by").order_by("-occurred_at")[:50])
+    has_conversation = bool(lead.message) or any(a.body for a in activities)
+    return render(
+        request,
+        "crm/lead_detail.html",
+        {
+            "lead": lead,
+            "activities": activities,
+            "ai_enabled": ai_is_configured() and has_conversation,
+        },
+    )
 
 
 @login_required
