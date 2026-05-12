@@ -96,12 +96,13 @@
   {% endfor %}
 
   <table class="totals">
-    <tr><td class="muted">รวมเป็นเงิน</td><td class="r">{{ totals.subtotal|floatformat:2 }}</td></tr>
+    <tr><td class="muted">รวมเป็นเงิน{% if totals.inclusive %} (รวม VAT){% endif %}</td><td class="r">{{ totals.subtotal|floatformat:2 }}</td></tr>
     {% if totals.end_discount %}<tr><td class="muted">หักส่วนลดท้ายบิล</td><td class="r">-{{ totals.end_discount|floatformat:2 }}</td></tr>
     <tr><td class="muted">มูลค่าหลังหักส่วนลด</td><td class="r">{{ totals.after_discount|floatformat:2 }}</td></tr>{% endif %}
-    {% if totals.has_zero_rated %}<tr><td class="muted">มูลค่าที่เสีย VAT 7%</td><td class="r">{{ totals.base_vat7|floatformat:2 }}</td></tr>
-    <tr><td class="muted">มูลค่ายกเว้น / VAT 0%</td><td class="r">{{ totals.base_vat0|add:totals.base_exempt|add:totals.base_none|floatformat:2 }}</td></tr>{% endif %}
+    {% if totals.inclusive or totals.has_zero_rated %}<tr><td class="muted">มูลค่าที่เสีย VAT 7% (ก่อนภาษี)</td><td class="r">{{ totals.base_vat7|floatformat:2 }}</td></tr>{% endif %}
+    {% if totals.has_zero_rated %}<tr><td class="muted">มูลค่ายกเว้น / VAT 0%</td><td class="r">{{ totals.base_vat0|add:totals.base_exempt|add:totals.base_none|floatformat:2 }}</td></tr>{% endif %}
     <tr><td class="muted">ภาษีมูลค่าเพิ่ม 7%</td><td class="r">{{ totals.vat_amount|floatformat:2 }}</td></tr>
+    {% if totals.rounding %}<tr><td class="muted">ปัดเศษ</td><td class="r">{{ totals.rounding|floatformat:2 }}</td></tr>{% endif %}
     <tr class="grand"><td>ยอดรวมทั้งสิ้น</td><td class="r">{{ totals.grand_total|floatformat:2 }} บาท</td></tr>
   </table>
   <div class="words">({{ totals.amount_in_words }})</div>

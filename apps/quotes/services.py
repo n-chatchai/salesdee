@@ -22,6 +22,7 @@ from .models import (
     DocType,
     DocumentNumberSequence,
     LineType,
+    PriceMode,
     QuotationShareLink,
     SalesDocument,
 )
@@ -370,14 +371,16 @@ class GroupTotal:
 @dataclass
 class DocumentTotals:
     groups: list  # of GroupTotal
-    subtotal: Decimal
+    inclusive: bool  # True if line prices already include VAT
+    subtotal: Decimal  # sum of line amounts (gross if inclusive, net if exclusive)
     end_discount: Decimal
     after_discount: Decimal
-    base_vat7: Decimal
+    base_vat7: Decimal  # the ex-VAT base that 7% applies to
     base_vat0: Decimal
     base_exempt: Decimal
     base_none: Decimal
     vat_amount: Decimal
+    rounding: Decimal  # reconciliation residual shown as a "ปัดเศษ" line if non-zero
     grand_total: Decimal
     withholding_estimate: Decimal
     net_expected: Decimal
@@ -385,13 +388,19 @@ class DocumentTotals:
     has_zero_rated: bool
 
 
+_ONE_PLUS_VAT = Decimal(1) + VAT_RATE
+
+
 def compute_document_totals(document: SalesDocument) -> DocumentTotals:
     """Subtotal → end-of-bill discount (allocated proportionally) → VAT bases per rate → VAT →
-    grand total + withholding estimate + BahtText. EXCLUSIVE pricing only for now (TODO: inclusive)."""
+    grand total + withholding estimate + BahtText. Supports both exclusive and inclusive pricing
+    (``document.price_mode``): in inclusive mode the line amounts already contain VAT, so the 7%
+    base is backed out (``amount / 1.07``) and the grand total equals the gross after discount."""
+    inclusive = document.price_mode == PriceMode.INCLUSIVE
     lines = list(document.lines.all())
     item_lines = [ln for ln in lines if ln.line_type == LineType.ITEM]
-    nets: dict[int, Decimal] = {ln.pk: ln.amount for ln in item_lines}
-    subtotal = sum(nets.values(), Decimal(0))
+    amounts: dict[int, Decimal] = {ln.pk: ln.amount for ln in item_lines}
+    subtotal = sum(amounts.values(), Decimal(0))
 
     if document.end_discount_kind == DiscountKind.PERCENT:
         end_discount = subtotal * Decimal(document.end_discount_value) / 100
@@ -400,21 +409,32 @@ def compute_document_totals(document: SalesDocument) -> DocumentTotals:
     end_discount = min(end_discount, subtotal) if subtotal > 0 else Decimal(0)
     after_discount = subtotal - end_discount
 
-    buckets: dict[str, Decimal] = {
+    bases: dict[str, Decimal] = {
         t: Decimal(0) for t in (TaxType.VAT7, TaxType.VAT0, TaxType.EXEMPT, TaxType.NONE)
     }
+    vat_amount = Decimal(0)
     withholding = Decimal(0)
     for ln in item_lines:
-        net = nets[ln.pk]
-        alloc = (net / subtotal * end_discount) if subtotal > 0 else Decimal(0)
-        post = net - alloc
-        buckets[ln.tax_type] = buckets.get(ln.tax_type, Decimal(0)) + post
-        withholding += post * Decimal(ln.withholding_rate) / 100
+        amt = amounts[ln.pk]
+        alloc = (amt / subtotal * end_discount) if subtotal > 0 else Decimal(0)
+        post = amt - alloc  # this line's value after its share of the end-of-bill discount
+        if ln.tax_type == TaxType.VAT7:
+            base = post / _ONE_PLUS_VAT if inclusive else post
+            vat_amount += (post - base) if inclusive else post * VAT_RATE
+        else:
+            base = post
+        bases[ln.tax_type] = bases.get(ln.tax_type, Decimal(0)) + base
+        withholding += base * Decimal(ln.withholding_rate) / 100
 
-    vat_amount = buckets[TaxType.VAT7] * VAT_RATE
-    grand_total = _q2(after_discount + vat_amount)
-    withholding = _q2(withholding)
-    net_expected = grand_total - withholding
+    base_vat7 = _q2(bases[TaxType.VAT7])
+    base_vat0 = _q2(bases[TaxType.VAT0])
+    base_exempt = _q2(bases[TaxType.EXEMPT])
+    base_none = _q2(bases[TaxType.NONE])
+    vat_amount_d = _q2(vat_amount)
+    grand_total = _q2(after_discount if inclusive else after_discount + vat_amount)
+    rounding = grand_total - (base_vat7 + base_vat0 + base_exempt + base_none + vat_amount_d)
+    withholding_d = _q2(withholding)
+    net_expected = grand_total - withholding_d
 
     # groups for display (first-seen order)
     order: list[str] = []
@@ -432,7 +452,7 @@ def compute_document_totals(document: SalesDocument) -> DocumentTotals:
             subtotal=_q2(
                 sum(
                     (
-                        nets.get(ln.pk, Decimal(0))
+                        amounts.get(ln.pk, Decimal(0))
                         for ln in grouped[label]
                         if ln.line_type == LineType.ITEM
                     ),
@@ -445,19 +465,19 @@ def compute_document_totals(document: SalesDocument) -> DocumentTotals:
 
     return DocumentTotals(
         groups=groups,
+        inclusive=inclusive,
         subtotal=_q2(subtotal),
         end_discount=_q2(end_discount),
         after_discount=_q2(after_discount),
-        base_vat7=_q2(buckets[TaxType.VAT7]),
-        base_vat0=_q2(buckets[TaxType.VAT0]),
-        base_exempt=_q2(buckets[TaxType.EXEMPT]),
-        base_none=_q2(buckets[TaxType.NONE]),
-        vat_amount=_q2(vat_amount),
+        base_vat7=base_vat7,
+        base_vat0=base_vat0,
+        base_exempt=base_exempt,
+        base_none=base_none,
+        vat_amount=vat_amount_d,
+        rounding=rounding,
         grand_total=grand_total,
-        withholding_estimate=withholding,
+        withholding_estimate=withholding_d,
         net_expected=_q2(net_expected),
         amount_in_words=baht_text(grand_total),
-        has_zero_rated=bool(
-            buckets[TaxType.VAT0] or buckets[TaxType.EXEMPT] or buckets[TaxType.NONE]
-        ),
+        has_zero_rated=bool(base_vat0 or base_exempt or base_none),
     )

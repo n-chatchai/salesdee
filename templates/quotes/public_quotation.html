@@ -61,9 +61,10 @@
 
     <div class="mt-4 flex justify-end">
       <table class="w-full max-w-xs text-sm">
-        <tr><td class="py-0.5 text-slate-500">รวมเป็นเงิน</td><td class="py-0.5 text-right">{{ totals.subtotal|floatformat:2 }}</td></tr>
+        <tr><td class="py-0.5 text-slate-500">รวมเป็นเงิน{% if totals.inclusive %} (รวม VAT){% endif %}</td><td class="py-0.5 text-right">{{ totals.subtotal|floatformat:2 }}</td></tr>
         {% if totals.end_discount %}<tr><td class="py-0.5 text-slate-500">หักส่วนลดท้ายบิล</td><td class="py-0.5 text-right">-{{ totals.end_discount|floatformat:2 }}</td></tr>{% endif %}
         <tr><td class="py-0.5 text-slate-500">ภาษีมูลค่าเพิ่ม 7%</td><td class="py-0.5 text-right">{{ totals.vat_amount|floatformat:2 }}</td></tr>
+        {% if totals.rounding %}<tr><td class="py-0.5 text-slate-500">ปัดเศษ</td><td class="py-0.5 text-right">{{ totals.rounding|floatformat:2 }}</td></tr>{% endif %}
         <tr class="border-t font-semibold"><td class="py-1">ยอดรวมทั้งสิ้น</td><td class="py-1 text-right">{{ totals.grand_total|floatformat:2 }} บาท</td></tr>
       </table>
     </div>

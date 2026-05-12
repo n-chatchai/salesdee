@@ -7,7 +7,7 @@ from apps.core.forms import set_queryset, tenant_users
 from apps.crm.models import Contact, Customer
 from apps.tenants.models import BankAccount
 
-from .models import SalesDocLine, SalesDocument
+from .models import PriceMode, SalesDocLine, SalesDocument
 
 
 class QuotationForm(forms.ModelForm):
@@ -20,6 +20,7 @@ class QuotationForm(forms.ModelForm):
             "salesperson",
             "issue_date",
             "valid_until",
+            "price_mode",
             "end_discount_kind",
             "end_discount_value",
             "payment_terms",
@@ -28,7 +29,6 @@ class QuotationForm(forms.ModelForm):
             "notes",
             "bank_account",
         ]
-        # price_mode is omitted for now — the totals engine only does EXCLUSIVE pricing (TODO).
         widgets = {
             "issue_date": forms.DateInput(attrs={"type": "date"}),
             "valid_until": forms.DateInput(attrs={"type": "date"}),
@@ -42,12 +42,18 @@ class QuotationForm(forms.ModelForm):
         set_queryset(self, "contact", Contact.objects.all())
         set_queryset(self, "salesperson", tenant_users())
         set_queryset(self, "bank_account", BankAccount.objects.all())
-        for name in ("customer", "contact", "salesperson", "bank_account", "end_discount_value"):
+        for name in (
+            "customer", "contact", "salesperson", "bank_account", "end_discount_value", "price_mode",
+        ):  # fmt: skip
             self.fields[name].required = False
         self.fields["end_discount_value"].initial = 0
+        self.fields["price_mode"].initial = PriceMode.EXCLUSIVE
 
     def clean_end_discount_value(self):
         return self.cleaned_data.get("end_discount_value") or 0
+
+    def clean_price_mode(self):
+        return self.cleaned_data.get("price_mode") or PriceMode.EXCLUSIVE
 
 
 class SalesDocLineForm(forms.ModelForm):

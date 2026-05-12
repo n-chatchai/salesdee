@@ -16,6 +16,7 @@ from apps.quotes.models import (
     DocStatus,
     DocType,
     LineType,
+    PriceMode,
     QuotationRevision,
     QuotationShareLink,
     SalesDocLine,
@@ -92,6 +93,58 @@ def test_compute_totals_basic(tenant) -> None:
     assert t.amount_in_words == "สองพันห้าร้อยสามสิบสี่บาทสี่สิบสตางค์"
 
 
+def test_compute_totals_inclusive_vat(tenant) -> None:
+    doc = _doc(tenant, price_mode=PriceMode.INCLUSIVE)
+    _line(tenant, doc, quantity=Decimal("1"), unit_price=Decimal("1070"), tax_type=TaxType.VAT7)
+    with tenant_context(tenant):
+        t = compute_document_totals(doc)
+    assert t.inclusive is True
+    assert t.subtotal == Decimal("1070.00")
+    assert t.base_vat7 == Decimal("1000.00")
+    assert t.vat_amount == Decimal("70.00")
+    assert t.grand_total == Decimal("1070.00")
+    assert t.rounding == Decimal("0.00")
+
+
+def test_compute_totals_inclusive_vat_with_end_discount(tenant) -> None:
+    doc = _doc(
+        tenant,
+        price_mode=PriceMode.INCLUSIVE,
+        end_discount_kind=DiscountKind.PERCENT,
+        end_discount_value=Decimal("10"),
+    )
+    _line(tenant, doc, quantity=Decimal("1"), unit_price=Decimal("1070"), tax_type=TaxType.VAT7)
+    with tenant_context(tenant):
+        t = compute_document_totals(doc)
+    assert t.after_discount == Decimal("963.00")
+    assert t.base_vat7 == Decimal("900.00")
+    assert t.vat_amount == Decimal("63.00")
+    assert t.grand_total == Decimal("963.00")
+
+
+def test_compute_totals_exclusive_is_unchanged(tenant) -> None:
+    """Exclusive mode (the default) must behave exactly as before the inclusive refactor."""
+    doc = _doc(tenant, end_discount_value=Decimal("100"))
+    _line(
+        tenant,
+        doc,
+        quantity=Decimal("2"),
+        unit_price=Decimal("1000"),
+        tax_type=TaxType.VAT7,
+        withholding_rate=Decimal("3"),
+    )
+    with tenant_context(tenant):
+        t = compute_document_totals(doc)
+    assert t.inclusive is False
+    assert t.subtotal == Decimal("2000.00")
+    assert t.after_discount == Decimal("1900.00")
+    assert t.base_vat7 == Decimal("1900.00")
+    assert t.vat_amount == Decimal("133.00")
+    assert t.grand_total == Decimal("2033.00")
+    assert t.withholding_estimate == Decimal("57.00")
+    assert t.rounding == Decimal("0.00")
+
+
 def test_compute_totals_ignores_heading_and_note_lines(tenant) -> None:
     doc = _doc(tenant)
     _line(tenant, doc, line_type=LineType.HEADING, description="ห้องประชุม")
@@ -135,6 +188,25 @@ def test_quotation_create_view(client, user, membership, tenant) -> None:
         doc = SalesDocument.objects.latest("created_at")
         assert doc.doc_number.startswith("QT-")
     assert resp.url == reverse("quotes:quotation_detail", args=[doc.pk])
+
+
+def test_quotation_create_view_with_inclusive_price_mode(client, user, membership, tenant) -> None:
+    with tenant_context(tenant):
+        customer = Customer.objects.create(name="ลูกค้า Incl")
+    client.force_login(user)
+    resp = client.post(
+        reverse("quotes:quotation_create"),
+        {
+            "customer": customer.pk,
+            "issue_date": date.today().isoformat(),
+            "price_mode": PriceMode.INCLUSIVE,
+            "end_discount_kind": "amount",
+        },
+    )
+    assert resp.status_code == 302
+    with tenant_context(tenant):
+        doc = SalesDocument.objects.latest("created_at")
+    assert doc.price_mode == PriceMode.INCLUSIVE
 
 
 def test_quotation_add_and_delete_line_htmx(client, user, membership, tenant) -> None:
