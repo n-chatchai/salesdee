@@ -303,3 +303,35 @@ class Lead(TenantScopedModel):
 
     def __str__(self) -> str:
         return f"{self.name}{f' / {self.company_name}' if self.company_name else ''}"
+
+
+# --- Sales targets (reports — REQUIREMENTS.md §4.9 FR-9.5) --------------------
+class SalesTarget(TenantScopedModel):
+    """A monthly sales target — per salesperson, or team-wide when ``salesperson`` is null."""
+
+    salesperson = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="sales_targets",
+        null=True,
+        blank=True,
+        help_text="เว้นว่าง = เป้าของทั้งทีม",
+    )
+    year = models.PositiveIntegerField("ปี (ค.ศ.)")
+    month = models.PositiveSmallIntegerField("เดือน (1–12)")
+    amount = models.DecimalField("เป้ายอดขาย (บาท)", max_digits=18, decimal_places=2, default=0)
+
+    class Meta:
+        ordering = ("-year", "-month")
+        verbose_name = "เป้ายอดขาย"
+        verbose_name_plural = "เป้ายอดขาย"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["tenant", "salesperson", "year", "month"], name="uniq_sales_target"
+            )
+        ]
+
+    def __str__(self) -> str:
+        sp = self.salesperson
+        who = sp.get_full_name() if sp else "ทั้งทีม"
+        return f"{self.year}-{self.month:02d} · {who}: {self.amount}"

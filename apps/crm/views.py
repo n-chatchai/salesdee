@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import date, timedelta
+
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest
@@ -19,6 +21,7 @@ from .models import (
     Task,
     TaskStatus,
 )
+from .reports import build_reports
 from .services import convert_lead, move_deal_to_stage
 
 
@@ -255,6 +258,65 @@ def lead_convert(request: HttpRequest, pk: int) -> HttpResponse:
         return redirect("crm:deal_detail", pk=lead.deal_id)
     deal = convert_lead(lead, owner=request.user)
     return redirect("crm:deal_detail", pk=deal.pk)
+
+
+# --- Reports ------------------------------------------------------------------
+def _reports_period(request: HttpRequest) -> tuple[str, date, date]:
+    today = date.today()
+    period = request.GET.get("period", "month")
+    if period == "year":
+        return "year", today.replace(month=1, day=1), today
+    if period == "90d":
+        return "90d", today - timedelta(days=90), today
+    return "month", today.replace(day=1), today
+
+
+@login_required
+def reports(request: HttpRequest) -> HttpResponse:
+    period, start, end = _reports_period(request)
+    data = build_reports(start, end)
+    if request.GET.get("export") == "xlsx":
+        return _reports_xlsx(data)
+    return render(request, "crm/reports.html", {**data, "period": period})
+
+
+def _reports_xlsx(data: dict) -> HttpResponse:
+    from io import BytesIO
+
+    from openpyxl import Workbook
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "ยอดขายตามเซลส์"
+    ws.append(
+        ["พนักงานขาย", "ดีลที่ปิดได้", "มูลค่าที่ปิดได้", "ใบเสนอราคาที่ส่ง", "ลูกค้าตอบรับ", "อัตราปิด %", "เป้าเดือนนี้"]
+    )
+    for r in data["by_salesperson"]:
+        ws.append(
+            [
+                r["name"],
+                r["won_count"],
+                float(r["won_value"] or 0),
+                r["quotes_sent"],
+                r["quotes_accepted"],
+                r["conv_rate"] if r["conv_rate"] is not None else "",
+                float(r["target"]) if r["target"] is not None else "",
+            ]
+        )
+    ws2 = wb.create_sheet("ตามช่องทาง")
+    ws2.append(["ช่องทาง", "Lead ใหม่", "ดีลที่ปิดได้", "มูลค่าที่ปิดได้"])
+    for r in data["by_channel"]:
+        ws2.append([r["label"], r["leads"], r["won_deals"], float(r["won_value"] or 0)])
+    buf = BytesIO()
+    wb.save(buf)
+    resp = HttpResponse(
+        buf.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+    resp["Content-Disposition"] = (
+        f'attachment; filename="sales-report-{data["start"]}-{data["end"]}.xlsx"'
+    )
+    return resp
 
 
 def lead_intake(request: HttpRequest, tenant_slug: str) -> HttpResponse:
