@@ -446,6 +446,66 @@ def test_quotation_send_creates_link_marks_sent_and_follow_up(
         assert Task.objects.filter(customer=doc.customer, kind="follow_up").exists()
 
 
+def test_quotation_send_line(client, user, membership, tenant, monkeypatch) -> None:
+    from apps.crm.models import Contact
+
+    sent: dict = {}
+    monkeypatch.setattr(
+        "apps.quotes.views.push_text", lambda to, text: sent.update(to=to, text=text)
+    )
+    with tenant_context(tenant):
+        customer = Customer.objects.create(name="ลูกค้า LINE")
+        contact = Contact.objects.create(customer=customer, name="คุณเอ", line_id="Uabc123")
+        doc = SalesDocument.objects.create(
+            doc_type=DocType.QUOTATION,
+            customer=customer,
+            contact=contact,
+            issue_date=date.today(),
+            doc_number="QT-2569-0700",
+            status=DocStatus.READY,
+        )
+    client.force_login(user)
+    resp = client.post(reverse("quotes:quotation_send_line", args=[doc.pk]))
+    assert resp.status_code == 302
+    assert sent["to"] == "Uabc123"
+    assert "QT-2569-0700" in sent["text"]
+    with tenant_context(tenant):
+        doc.refresh_from_db()
+        assert doc.status == DocStatus.SENT
+        assert Task.objects.filter(customer=doc.customer, kind="follow_up").exists()
+
+
+def test_quotation_send_line_needs_a_line_id(client, user, membership, tenant) -> None:
+    doc = _doc(tenant, status=DocStatus.READY)  # no contact
+    client.force_login(user)
+    resp = client.post(reverse("quotes:quotation_send_line", args=[doc.pk]))
+    assert resp.status_code == 302
+    with tenant_context(tenant):
+        doc.refresh_from_db()
+        assert doc.status == DocStatus.READY  # not marked sent
+
+
+def test_quotation_send_line_without_integration(client, user, membership, tenant) -> None:
+    from apps.crm.models import Contact
+
+    with tenant_context(tenant):
+        customer = Customer.objects.create(name="C")
+        contact = Contact.objects.create(customer=customer, name="x", line_id="Uxyz")
+        doc = SalesDocument.objects.create(
+            doc_type=DocType.QUOTATION,
+            customer=customer,
+            contact=contact,
+            issue_date=date.today(),
+            status=DocStatus.READY,
+        )
+    client.force_login(user)
+    resp = client.post(reverse("quotes:quotation_send_line", args=[doc.pk]))
+    assert resp.status_code == 302  # LineNotConfigured surfaced as a message
+    with tenant_context(tenant):
+        doc.refresh_from_db()
+        assert doc.status == DocStatus.READY
+
+
 def test_public_quotation_view_anonymous(client, tenant) -> None:
     doc, _ = _doc_with_contact(tenant)
     with tenant_context(tenant):

@@ -14,6 +14,7 @@ from django.views.decorators.http import require_POST
 
 from apps.core.current_tenant import tenant_context
 from apps.crm.models import Deal, Task, TaskKind
+from apps.integrations.line import LineNotConfigured, push_text
 
 from .forms import QuotationForm, SalesDocLineForm
 from .models import (
@@ -336,32 +337,34 @@ def quotation_reopen(request: HttpRequest, pk: int) -> HttpResponse:
     return redirect("quotes:quotation_detail", pk=doc.pk)
 
 
-@login_required
-@require_POST
-def quotation_send(request: HttpRequest, pk: int) -> HttpResponse:
-    doc = get_object_or_404(
+def _quote_for_send(pk: int) -> SalesDocument:
+    return get_object_or_404(
         SalesDocument.objects.select_related(
             "contact", "deal", "customer", "salesperson"
         ).prefetch_related("lines"),
         pk=pk,
         doc_type=DocType.QUOTATION,
     )
+
+
+def _ensure_sendable(request: HttpRequest, doc: SalesDocument) -> str | None:
+    """Get the quotation to a sendable state, or return a user-facing reason it can't be sent.
+    A draft is auto-submitted first; if that needs approval, sending is blocked."""
     if doc.status in (DocStatus.DRAFT, DocStatus.PENDING_APPROVAL):
-        # Convenience: sending a draft submits it first; if it needs approval, stop and say so.
         try:
             new_status = submit_quotation(doc, user=request.user)
         except WorkflowError as exc:
-            messages.error(request, str(exc))
-            return redirect("quotes:quotation_detail", pk=doc.pk)
+            return str(exc)
         if new_status == DocStatus.PENDING_APPROVAL:
-            messages.error(request, "ใบเสนอราคานี้มีส่วนลดเกินสิทธิ์ของคุณ — ต้องให้ผู้จัดการอนุมัติก่อนจึงจะส่งได้")
-            return redirect("quotes:quotation_detail", pk=doc.pk)
+            return "ใบเสนอราคานี้มีส่วนลดเกินสิทธิ์ของคุณ — ต้องให้ผู้จัดการอนุมัติก่อนจึงจะส่งได้"
     elif doc.status not in (DocStatus.READY, DocStatus.SENT):
-        messages.error(request, f"ส่งเอกสารในสถานะ “{doc.get_status_display()}” ไม่ได้")
-        return redirect("quotes:quotation_detail", pk=doc.pk)
-    link = get_or_create_share_link(doc, created_by=request.user)
+        return f"ส่งเอกสารในสถานะ “{doc.get_status_display()}” ไม่ได้"
+    return None
+
+
+def _finalize_sent(request: HttpRequest, doc: SalesDocument) -> None:
+    """Mark the quotation SENT (snapshots a revision on the READY→SENT step) + drop a follow-up task."""
     mark_sent(doc, user=request.user)
-    # auto follow-up task (to the salesperson, or unassigned if none)
     Task.objects.create(
         deal=doc.deal,
         customer=doc.customer,
@@ -370,7 +373,19 @@ def quotation_send(request: HttpRequest, pk: int) -> HttpResponse:
         due_at=timezone.now() + timedelta(days=7),
         assignee=doc.salesperson,
     )
+
+
+@login_required
+@require_POST
+def quotation_send(request: HttpRequest, pk: int) -> HttpResponse:
+    doc = _quote_for_send(pk)
+    err = _ensure_sendable(request, doc)
+    if err:
+        messages.error(request, err)
+        return redirect("quotes:quotation_detail", pk=doc.pk)
+    link = get_or_create_share_link(doc, created_by=request.user)
     url = _public_quote_url(request, link.token)
+    _finalize_sent(request, doc)
     if doc.contact and doc.contact.email:
         send_mail(
             subject=f"ใบเสนอราคา {doc.doc_number}",
@@ -382,6 +397,33 @@ def quotation_send(request: HttpRequest, pk: int) -> HttpResponse:
         messages.success(request, f"ส่งอีเมลถึง {doc.contact.email} แล้ว · ลิงก์: {url}")
     else:
         messages.success(request, f"สร้างลิงก์แชร์แล้ว · {url}")
+    return redirect("quotes:quotation_detail", pk=doc.pk)
+
+
+@login_required
+@require_POST
+def quotation_send_line(request: HttpRequest, pk: int) -> HttpResponse:
+    """Send the quotation's share link to the contact via the tenant's LINE OA."""
+    doc = _quote_for_send(pk)
+    if not (doc.contact and doc.contact.line_id):
+        messages.error(request, "ผู้ติดต่อยังไม่มี LINE user ID — เพิ่มในข้อมูลผู้ติดต่อก่อน")
+        return redirect("quotes:quotation_detail", pk=doc.pk)
+    err = _ensure_sendable(request, doc)
+    if err:
+        messages.error(request, err)
+        return redirect("quotes:quotation_detail", pk=doc.pk)
+    link = get_or_create_share_link(doc, created_by=request.user)
+    url = _public_quote_url(request, link.token)
+    try:
+        push_text(doc.contact.line_id, f"ใบเสนอราคา {doc.doc_number}\nดูได้ที่: {url}")
+    except LineNotConfigured as exc:
+        messages.error(request, str(exc))
+        return redirect("quotes:quotation_detail", pk=doc.pk)
+    except Exception as exc:  # noqa: BLE001 — SDK/network error; surface it rather than 500
+        messages.error(request, f"ส่งทาง LINE ไม่สำเร็จ: {exc}")
+        return redirect("quotes:quotation_detail", pk=doc.pk)
+    _finalize_sent(request, doc)
+    messages.success(request, f"ส่งใบเสนอราคาทาง LINE ถึง {doc.contact.name} แล้ว · ลิงก์: {url}")
     return redirect("quotes:quotation_detail", pk=doc.pk)
 
 
