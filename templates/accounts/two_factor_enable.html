@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}เปิดใช้งาน 2FA · ความปลอดภัย{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/settings.css' %}">{% endblock %}
+{% block content %}
+<div class="set-page-head"><div class="eyebrow">บัญชีของคุณ · ความปลอดภัย</div><h1>เปิดใช้งาน 2FA</h1></div>
+<div class="set-layout">
+  {% include "tenants/_settings_nav.html" %}
+  <div class="set-main" style="max-width:680px">
+    <div class="card">
+      <h3 style="margin-top:0">ขั้นตอนที่ 1 — เพิ่มบัญชีในแอป Authenticator</h3>
+      <p class="muted">ใช้ Google Authenticator, Authy, 1Password, หรือแอปที่รองรับ TOTP สแกน QR หรือ <em>กดวาง</em> URI ด้านล่าง</p>
+      <p>คีย์ลับ (พิมพ์เองได้): <code class="mono">{{ device.secret }}</code></p>
+      <details><summary class="muted" style="cursor:pointer">URI สำหรับวางในแอป (otpauth://)</summary>
+        <p class="mono" style="word-break:break-all;font-size:13px">{{ otpauth_uri }}</p>
+      </details>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3 style="margin-top:0">ขั้นตอนที่ 2 — ยืนยันด้วยรหัส 6 หลัก</h3>
+      {% if error %}<div class="messages messages-error">{{ error }}</div>{% endif %}
+      <form method="post" autocomplete="off">{% csrf_token %}
+        <div class="field"><label class="field-label" for="code">รหัสที่แอปแสดงตอนนี้</label>
+          <input id="code" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required autofocus></div>
+        <button class="btn btn-primary">ยืนยันและเปิดใช้งาน</button>
+        <a class="btn btn-ghost" href="{% url 'accounts:two_factor_settings' %}">ยกเลิก</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

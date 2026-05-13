@@ -86,3 +86,22 @@ class Membership(BaseModel):
 
     def __str__(self) -> str:
         return f"{self.user} @ {self.tenant} ({self.get_role_display()})"
+
+
+class TwoFactorDevice(BaseModel):
+    """Per-user TOTP device (FR-15.1, optional). Confirmed only after the user enters a working
+    code once. We store the shared secret base32 — protect it with disk encryption / KMS in prod."""
+
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name="totp_device", verbose_name="ผู้ใช้"
+    )
+    secret = models.CharField("Secret (base32)", max_length=64)
+    confirmed = models.BooleanField("ยืนยันแล้ว", default=False)
+    confirmed_at = models.DateTimeField("ยืนยันเมื่อ", null=True, blank=True)
+
+    class Meta:
+        verbose_name = "อุปกรณ์ 2FA (TOTP)"
+        verbose_name_plural = "อุปกรณ์ 2FA (TOTP)"
+
+    def __str__(self) -> str:
+        return f"2FA · {self.user.email}"

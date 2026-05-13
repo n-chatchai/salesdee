@@ -6,7 +6,11 @@ from . import views
 app_name = "accounts"
 
 urlpatterns = [
-    path("login/", auth_views.LoginView.as_view(template_name="accounts/login.html"), name="login"),
+    path("login/", views.TwoFactorLoginView.as_view(), name="login"),
+    path("login/2fa/", views.two_factor_verify, name="two_factor_verify"),
+    path("security/", views.two_factor_settings, name="two_factor_settings"),
+    path("security/enable/", views.two_factor_enable, name="two_factor_enable"),
+    path("security/disable/", views.two_factor_disable, name="two_factor_disable"),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
     path("signup/", views.signup, name="signup"),
     # Password change (logged in)

@@ -14,5 +14,7 @@
   <a class="set-sub-item {% if un == 'settings_billing' %}active{% endif %}" href="{% url 'workspace:settings_billing' %}"><svg class="ico ico-sm"><use href="#i-card"/></svg> แพ็กเกจ</a>
   <a class="set-sub-item {% if un == 'system_status' %}active{% endif %}" href="{% url 'workspace:system_status' %}"><svg class="ico ico-sm"><use href="#i-shield"/></svg> สถานะระบบ</a>
   <a class="set-sub-item {% if un == 'log' %}active{% endif %}" href="{% url 'audit:log' %}"><svg class="ico ico-sm"><use href="#i-file-text"/></svg> บันทึกตรวจสอบ</a>
+  <div class="set-sub-section">บัญชีของคุณ</div>
+  <a class="set-sub-item {% if 'two_factor' in un %}active{% endif %}" href="{% url 'accounts:two_factor_settings' %}"><svg class="ico ico-sm"><use href="#i-shield"/></svg> ความปลอดภัย (2FA)</a>
 </nav>
 {% endwith %}
