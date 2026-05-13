@@ -19,3 +19,12 @@
 .ph-footer { background: var(--ink, #2a2620); color: #d8d1c2; }
 .ph-footer-inner { max-width: 1100px; margin: 0 auto; padding: 36px 20px; }
 .ph-footer a { color: #f1eadb; }
+
+@media (max-width: 720px) {
+  .ph-hero-inner { padding: 28px 16px; gap: 18px; }
+  .ph-hero h1 { font-size: 30px; }
+  .ph-hero .tagline { font-size: 15px; }
+  .ph-logo { width: 80px; height: 80px; border-radius: 14px; }
+  .ph-section { padding: 28px 16px; }
+  .ph-section h2 { font-size: 22px; }
+}

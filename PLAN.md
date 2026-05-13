@@ -206,3 +206,62 @@ Billing / tax invoices / receipts / AR (Phase 2), accounting (Phase 3), email in
 - A real async worker backend (still `ImmediateBackend` — `.enqueue()` runs synchronously today; switching to django-tasks DB / Celery / RQ is a `TASKS` setting change).
 - Deposit (มัดจำ) / retention / cheque-lifecycle invoicing; partial-line credit-/debit-note forms (services accept a `lines` list but no UI).
 - Account-level email-prefs toggle for the daily digest (currently all members are opted in).
+
+---
+
+## M11 — Quote-speed + showroom funnel  *(done)*
+
+The hero metrics of the PRD are "30 sec from LINE chat → quote sent back" and "<5 min per
+quotation"; this batch is about closing the speed gap on both ends of the funnel — the inbox
+side (turning a LINE chat into a sent quote in one focused screen) and the showroom side
+(turning a public-page visitor into a lead).
+
+- [x] **Quote-from-Chat one-click send** (commit `034b1cb`). Replace the two-screen
+  draft-then-edit flow with a focused review surface (`templates/quotes/quotation_review.html`)
+  showing the AI's draft lines + totals + a single primary CTA "ตรวจแล้วส่งทาง LINE". One POST
+  to `quotes:quotation_review_send_line` submits + (auto-approves if within cap) + marks SENT +
+  generates the share link + pushes the Flex card back into the source conversation + logs the
+  send on that thread + records an audit event. New service `auto_submit_and_approve`. Falls
+  back to the full editor (`quotation_detail`) via "ตรวจในเต็มหน้า".
+- [x] **Type-ahead product picker** (commit `32a8725`). The line editor used a plain
+  `ModelChoiceField` `<select>` — slow and unusable past a handful of products. Now an htmx
+  `keyup changed delay:200ms` input hits `quotes:product_search` (top-8 active products,
+  tenant-scoped, name-or-code), renders a small dropdown, and on click writes into the
+  existing form fields (product/description/unit/unit_price/tax_type/dimensions/material). The
+  server still validates and `apply_catalog_defaults` finalises on save (single source of
+  truth). Up/down/Enter/Esc keyboard nav.
+- [x] **Live line-amount preview** (commit `1d9df56`). Alpine block on the line form mirrors the
+  server formula (qty × price, minus discount, with a VAT-7% note) and updates the line amount
+  as the user types — no extra round-trip per keystroke. The server still re-renders the
+  canonical `.qb-summary` totals from `compute_document_totals` on submit (htmx swap).
+- [x] **Showroom → intake funnel** (commit `6fb5abe`). Sticky mobile CTA bar across
+  `public_home`/`public_catalog`/`public_product` ("ขอใบเสนอราคา" + LINE); hero CTA on
+  `public_home` is now intake (not "browse catalog" as the goal). `public_product` got a
+  proper gallery (Alpine thumbnail switcher, hero preload, thumbs lazy-loaded), a related-
+  products row, and a `?product_id=<pk>` deep-link to intake. `public_catalog` got a keyword +
+  category + price-band filter (shareable URL: `?q=&cat=&price=`). `crm.lead_intake` pre-fills
+  the product, records `source="showroom · product=<pk>"`, and enqueues
+  `apps.core.notifications.notify_new_lead` (emails workspace owners/managers — best-effort).
+- [x] **Tests added** (266 green at close-out; `make check` clean):
+  `apps/quotes/tests/test_review_send.py` (3), `apps/quotes/tests/test_product_search.py` (3),
+  `apps/crm/tests/test_intake_funnel.py` (4), `apps/catalog/tests/test_public_catalog_filters.py` (4).
+  Existing make-quote / AI-from-lead tests retargeted to the review URL.
+
+### Still deferred (post-M11)
+- **One-page quote builder** (everything-on-one-screen draft → preview → send, including
+  bulk-add from catalog and grouped-room editor in the deck) — current quote detail page is
+  still the standard editor + a separate review surface for the Chat path. A unified
+  single-page builder is a bigger UX project.
+- **Duplicate-quote** ("clone this quotation as a new draft" — would compose
+  `create_quotation_from_deal` + line-copy). Easy follow-up.
+- **Mobile-first quote-editor deep pass** (the editor table on phones is still cramped — the
+  cards-instead-of-rows treatment from the deck isn't built yet).
+- **Speed metrics / showroom analytics** (no `Lead.first_response_minutes`, no funnel events
+  on the public pages, no time-to-quote KPI on `/crm/reports/`). The PRD calls these out as
+  hero metrics — we should instrument them next.
+- **Programmatic SEO / structured data** on showroom pages (`schema.org/Product` JSON-LD,
+  per-product OG tags, sitemap.xml). The public pages are functional but discoverability and
+  rich snippets aren't wired.
+- **Image upload UX on the line picker** — picking a product fills text fields but not the
+  per-line `image` (the catalog product's first image isn't piped through; the line form keeps
+  the file-upload field for ad-hoc images).
