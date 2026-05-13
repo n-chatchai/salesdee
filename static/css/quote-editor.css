@@ -106,3 +106,16 @@
 .product-search-results .ps-meta { font-size:11px; color:var(--mid); }
 .product-search-empty { padding:10px 12px; font-size:12px; }
 [x-cloak] { display:none !important; }
+
+/* Live amount preview on the line editor (Alpine, mobile-friendly) */
+.line-live-preview {
+  margin-top:10px; padding:10px 12px; background:var(--ai-bg, var(--paper-3));
+  border-left:3px solid var(--ai-deep, var(--accent)); border-radius:4px;
+  display:flex; gap:10px; align-items:baseline; flex-wrap:wrap;
+}
+.line-live-preview .label {
+  font-family:var(--font-mono); font-size:10px; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--mid);
+}
+.line-live-preview .mono { font-size:16px; font-weight:600; color:var(--ink); }
+.line-live-preview .muted { font-size:11px; color:var(--mid); }

@@ -38,4 +38,41 @@
   </div>
   {# the actual form fields (the picker writes into product/description/unit/unit_price/tax_type) #}
   {% include "partials/_form.html" with form=form %}
+
+  {# Live preview: this line's amount + VAT impact. Computes in the browser as the user types
+     qty / unit_price / discount; the server is the source of truth on submit + htmx-swap. #}
+  <div class="line-live-preview"
+       x-data="{
+         amount: 0, taxLabel: '', hasInput: false,
+         read(){
+           var f = $root.querySelector('form'); if(!f) return;
+           function num(name){ var v = f.querySelector('[name=&quot;'+name+'&quot;]'); return v ? parseFloat(v.value || '0') || 0 : 0; }
+           function sel(name){ var v = f.querySelector('[name=&quot;'+name+'&quot;]'); return v ? (v.value || '') : ''; }
+           var q = num('quantity'), p = num('unit_price'), d = num('discount_value');
+           var dk = sel('discount_kind') || 'amount';
+           var tt = sel('tax_type') || 'vat7';
+           var gross = q * p;
+           var disc = dk === 'percent' ? gross * d / 100 : d;
+           if (disc > gross) disc = gross;
+           this.amount = gross - disc;
+           this.hasInput = q > 0 || p > 0;
+           this.taxLabel = tt === 'vat7' ? '(รวม VAT 7% แล้ว ' + ((gross - disc) * 1.07).toFixed(2) + ')'
+                          : tt === 'vat0' ? '(VAT 0%)'
+                          : tt === 'exempt' ? '(ยกเว้น VAT)' : '';
+         },
+         bind(){
+           var f = $root.querySelector('form'); if(!f) return;
+           ['quantity','unit_price','discount_value','discount_kind','tax_type'].forEach(function(n){
+             var el = f.querySelector('[name=&quot;'+n+'&quot;]');
+             if(el){ el.addEventListener('input', () => this.read()); el.addEventListener('change', () => this.read()); }
+           }, this);
+           this.read();
+         }
+       }"
+       x-init="bind()"
+       x-show="hasInput">
+    <span class="label">จำนวนเงินบรรทัดนี้ (พรีวิว)</span>
+    <span class="mono" x-text="amount.toFixed(2)"></span>
+    <span class="muted" x-text="taxLabel"></span>
+  </div>
 </div>
