@@ -179,7 +179,7 @@ make makemigrations              # uv run python manage.py makemigrations
 - Forms: use Django forms / ModelForms for validation; don't hand-roll form parsing.
 
 ### Git
-- This may not be a git repo yet; if asked to commit, branch first if on the default branch. **Don't commit or push unless the user asks.** End commit messages with the Co-Authored-By trailer.
+- **Trunk-based development.** Commit straight to `main` — it is the trunk; keep it always green (`make check` passes on every commit). Don't create long-lived feature branches; if you need a branch at all (e.g. a risky spike), keep it short-lived and merge it back fast-forward. Commit in small, coherent steps rather than one giant drop. **Don't commit or push unless the user asks** (the user may still want to review staged changes first). End commit messages with the Co-Authored-By trailer.
 
 ---
 
