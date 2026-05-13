@@ -10,7 +10,7 @@ from decimal import Decimal
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.http import HttpRequest, HttpResponse
+from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
@@ -310,6 +310,94 @@ def debit_note_create(request: HttpRequest, tax_pk: int) -> HttpResponse:
         messages.success(request, f"ออกใบเพิ่มหนี้ {dn.doc_number}")
         return redirect("billing:debit_note_detail", pk=dn.pk)
     return render(request, "billing/debit_note_create.html", {"tax_invoice": tax})
+
+
+_DOC_TYPE_BY_KIND = {
+    "tax_invoice": DocType.TAX_INVOICE,
+    "receipt": DocType.RECEIPT,
+    "credit_note": DocType.CREDIT_NOTE,
+    "debit_note": DocType.DEBIT_NOTE,
+}
+
+_DOC_KIND_REDIRECT = {
+    "tax_invoice": "billing:tax_invoice_detail",
+    "receipt": "billing:receipt_detail",
+    "credit_note": "billing:credit_note_detail",
+    "debit_note": "billing:debit_note_detail",
+}
+
+_DOC_KIND_PDF_URL = {
+    "tax_invoice": "billing:tax_invoice_pdf",
+    "receipt": "billing:receipt_pdf",
+    "credit_note": "billing:credit_note_pdf",
+    "debit_note": "billing:debit_note_pdf",
+}
+
+
+def _doc_for_send(request: HttpRequest, kind: str, pk: int):
+    if kind not in _DOC_TYPE_BY_KIND:
+        raise Http404("ชนิดเอกสารไม่รองรับ")
+    return get_object_or_404(_docs(_DOC_TYPE_BY_KIND[kind]).select_related("customer"), pk=pk)
+
+
+@login_required
+@require_POST
+def billing_doc_send_email(request: HttpRequest, kind: str, pk: int) -> HttpResponse:
+    from .tasks import send_billing_doc_email
+
+    doc = _doc_for_send(request, kind, pk)
+    contact = doc.customer.contacts.exclude(email="").first() if doc.customer else None
+    if contact is None:
+        messages.error(request, "ยังไม่มีอีเมลของผู้ติดต่อสำหรับลูกค้ารายนี้")
+        return redirect(_DOC_KIND_REDIRECT[kind], pk=doc.pk)
+    send_billing_doc_email.enqueue(doc.pk, doc.tenant_id, recipient_email=contact.email, kind=kind)
+    from apps.audit.services import record as audit_record
+
+    audit_record(
+        request.user,
+        action=f"{kind}.sent",
+        obj=doc,
+        object_repr=doc.doc_number or str(doc),
+        changes={"channel": "email", "to": contact.email},
+        ip=request.META.get("REMOTE_ADDR"),
+    )
+    messages.success(request, f"กำลังส่ง{doc.get_doc_type_display()} ทางอีเมลถึง {contact.email} …")
+    return redirect(_DOC_KIND_REDIRECT[kind], pk=doc.pk)
+
+
+@login_required
+@require_POST
+def billing_doc_send_line(request: HttpRequest, kind: str, pk: int) -> HttpResponse:
+    from apps.integrations.line import line_is_configured
+
+    from .tasks import send_billing_doc_line
+
+    doc = _doc_for_send(request, kind, pk)
+    if not line_is_configured():
+        messages.error(request, "ยังไม่ได้ตั้งค่าการเชื่อม LINE OA สำหรับ workspace นี้")
+        return redirect(_DOC_KIND_REDIRECT[kind], pk=doc.pk)
+    contact = doc.customer.contacts.exclude(line_id="").first() if doc.customer else None
+    if contact is None:
+        messages.error(request, "ยังไม่มี LINE ID ของผู้ติดต่อ")
+        return redirect(_DOC_KIND_REDIRECT[kind], pk=doc.pk)
+    from django.urls import reverse
+
+    pdf_url = request.build_absolute_uri(reverse(_DOC_KIND_PDF_URL[kind], args=[doc.pk]))
+    send_billing_doc_line.enqueue(
+        doc.pk, doc.tenant_id, recipient=contact.line_id, kind=kind, pdf_url=pdf_url
+    )
+    from apps.audit.services import record as audit_record
+
+    audit_record(
+        request.user,
+        action=f"{kind}.sent",
+        obj=doc,
+        object_repr=doc.doc_number or str(doc),
+        changes={"channel": "line", "to": contact.line_id},
+        ip=request.META.get("REMOTE_ADDR"),
+    )
+    messages.success(request, f"กำลังส่ง{doc.get_doc_type_display()} ทาง LINE …")
+    return redirect(_DOC_KIND_REDIRECT[kind], pk=doc.pk)
 
 
 @login_required

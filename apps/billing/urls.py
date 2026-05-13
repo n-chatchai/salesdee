@@ -51,6 +51,16 @@ urlpatterns = [
         views.customer_statement_send,
         name="customer_statement_send",
     ),
+    path(
+        "doc/<str:kind>/<int:pk>/send-email/",
+        views.billing_doc_send_email,
+        name="doc_send_email",
+    ),
+    path(
+        "doc/<str:kind>/<int:pk>/send-line/",
+        views.billing_doc_send_line,
+        name="doc_send_line",
+    ),
     path("reports/ar-aging/", views.ar_aging, name="ar_aging"),
     path("reports/sales-tax/", views.sales_tax_report, name="sales_tax_report"),
 ]

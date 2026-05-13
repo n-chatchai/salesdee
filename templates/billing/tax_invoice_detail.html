@@ -2,6 +2,10 @@
 {% block actions %}
 <a class="btn btn-sm btn-ghost" href="{% url 'billing:tax_invoice_pdf' document.pk %}" target="_blank">พิมพ์ใบกำกับภาษี</a>
 <a class="btn btn-sm btn-ghost" href="{% url 'billing:tax_invoice_pdf' document.pk %}?copy=1" target="_blank">สำเนา</a>
+{% if document.status != 'cancelled' %}
+<form method="post" action="{% url 'billing:doc_send_email' 'tax_invoice' document.pk %}" style="display:inline">{% csrf_token %}<button class="btn btn-sm">ส่งทางอีเมล</button></form>
+<form method="post" action="{% url 'billing:doc_send_line' 'tax_invoice' document.pk %}" style="display:inline">{% csrf_token %}<button class="btn btn-sm">ส่งทาง LINE</button></form>
+{% endif %}
 {% if can_write and document.status != 'cancelled' %}
 <a class="btn btn-sm" href="{% url 'billing:credit_note_create' document.pk %}">ออกใบลดหนี้</a>
 <a class="btn btn-sm" href="{% url 'billing:debit_note_create' document.pk %}">ออกใบเพิ่มหนี้</a>
