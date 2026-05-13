@@ -1,0 +1,2 @@
+{% extends "billing/_doc_detail.html" %}
+{% block actions %}<a class="btn btn-sm btn-ghost" href="{% url 'billing:receipt_pdf' document.pk %}" target="_blank">พิมพ์ใบเสร็จ</a>{% endblock %}

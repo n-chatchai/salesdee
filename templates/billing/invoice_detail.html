@@ -1,0 +1,9 @@
+{% extends "billing/_doc_detail.html" %}
+{% block actions %}
+{% if can_write %}
+  {% if not tax_invoice and document.status != 'cancelled' %}<form method="post" action="{% url 'billing:invoice_issue_tax' document.pk %}" style="display:inline">{% csrf_token %}<button class="btn btn-sm btn-primary">ออกใบกำกับภาษี</button></form>{% endif %}
+  {% if outstanding > 0 %}<a class="btn btn-sm" href="{% url 'billing:payment_create' %}?customer={{ document.customer_id }}">บันทึกรับชำระ</a>{% endif %}
+  {% if document.status != 'cancelled' %}<form method="post" action="{% url 'billing:invoice_cancel' document.pk %}" style="display:inline">{% csrf_token %}<input type="hidden" name="reason" value="ยกเลิกตามคำขอ"><button class="btn btn-sm btn-ghost" hx-confirm="ยกเลิกใบแจ้งหนี้นี้?">ยกเลิก</button></form>{% endif %}
+{% endif %}
+{% endblock %}
+{% block grand_extra %}<div class="delta">ค้างชำระ {{ outstanding|floatformat:2 }}</div>{% if tax_invoice %}<div class="delta"><a href="{% url 'billing:tax_invoice_detail' tax_invoice.pk %}">ใบกำกับภาษี {{ tax_invoice.doc_number }}</a></div>{% endif %}{% endblock %}

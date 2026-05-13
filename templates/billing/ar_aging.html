@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}ลูกหนี้ค้างชำระ · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/lists.css' %}">{% endblock %}
+{% block content %}
+<div class="list-head"><div class="eyebrow">บัญชี / การเงิน · รายงาน</div><h1>ลูกหนี้ค้างชำระ (AR Aging)</h1><span class="muted">ณ {{ data.as_of|date:"d/m/Y" }}</span></div>
+<div class="card" style="padding:0;overflow:hidden">
+  <table class="tbl">
+    <thead><tr><th>ลูกค้า</th><th class="num">ยังไม่ครบกำหนด</th><th class="num">1-30 วัน</th><th class="num">31-60 วัน</th><th class="num">61-90 วัน</th><th class="num">เกิน 90 วัน</th><th class="num">รวม</th></tr></thead>
+    <tbody>
+    {% for r in data.rows %}
+      <tr><td>{{ r.customer }}</td><td class="num">{{ r.not_due|floatformat:2 }}</td><td class="num">{{ r.1_30|floatformat:2 }}</td><td class="num">{{ r.31_60|floatformat:2 }}</td><td class="num">{{ r.61_90|floatformat:2 }}</td><td class="num">{{ r.over_90|floatformat:2 }}</td><td class="num"><strong>{{ r.total|floatformat:2 }}</strong></td></tr>
+    {% empty %}<tr><td colspan="7" class="muted" style="padding:24px;text-align:center">ไม่มีลูกหนี้ค้างชำระ</td></tr>{% endfor %}
+    </tbody>
+    {% if data.rows %}<tfoot><tr><th>รวมทั้งสิ้น</th><th class="num">{{ data.totals.not_due|floatformat:2 }}</th><th class="num">{{ data.totals.1_30|floatformat:2 }}</th><th class="num">{{ data.totals.31_60|floatformat:2 }}</th><th class="num">{{ data.totals.61_90|floatformat:2 }}</th><th class="num">{{ data.totals.over_90|floatformat:2 }}</th><th class="num">{{ data.totals.total|floatformat:2 }}</th></tr></tfoot>{% endif %}
+  </table>
+</div>
+{% endblock %}

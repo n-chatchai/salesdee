@@ -64,6 +64,26 @@
       <span class="icon"><svg><use href="#i-tag"/></svg></span> หมวดสินค้า
     </a>
 
+    <div class="sb-section-label">บัญชี / การเงิน</div>
+    <a class="sb-item {% if un == 'invoices' or un == 'invoice_detail' %}active{% endif %}" href="{% url 'billing:invoices' %}">
+      <span class="icon"><svg><use href="#i-package"/></svg></span> ใบแจ้งหนี้
+    </a>
+    <a class="sb-item {% if 'tax_invoice' in un %}active{% endif %}" href="{% url 'billing:tax_invoices' %}">
+      <span class="icon"><svg><use href="#i-package"/></svg></span> ใบกำกับภาษี
+    </a>
+    <a class="sb-item {% if 'receipt' in un %}active{% endif %}" href="{% url 'billing:receipts' %}">
+      <span class="icon"><svg><use href="#i-package"/></svg></span> ใบเสร็จ
+    </a>
+    <a class="sb-item {% if 'payment' in un %}active{% endif %}" href="{% url 'billing:payments' %}">
+      <span class="icon"><svg><use href="#i-package"/></svg></span> รับชำระ
+    </a>
+    <a class="sb-item {% if un == 'ar_aging' %}active{% endif %}" href="{% url 'billing:ar_aging' %}">
+      <span class="icon"><svg><use href="#i-chart"/></svg></span> ลูกหนี้ค้าง
+    </a>
+    <a class="sb-item {% if un == 'sales_tax_report' %}active{% endif %}" href="{% url 'billing:sales_tax_report' %}">
+      <span class="icon"><svg><use href="#i-chart"/></svg></span> รายงานภาษีขาย
+    </a>
+
     <div class="sb-section-label">ภาพรวม</div>
     <a class="sb-item {% if un == 'reports' %}active{% endif %}" href="{% url 'crm:reports' %}">
       <span class="icon"><svg><use href="#i-chart"/></svg></span> รายงาน

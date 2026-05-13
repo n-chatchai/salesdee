@@ -11,6 +11,7 @@ urlpatterns = [
     path("crm/", include("apps.crm.urls")),
     path("catalog/", include("apps.catalog.urls")),
     path("quotes/", include("apps.quotes.urls")),
+    path("billing/", include("apps.billing.urls")),
     path("integrations/", include("apps.integrations.urls")),
     path("settings/", include("apps.tenants.urls")),
     # Public, login-free quotation share links (tenant resolved from the token).

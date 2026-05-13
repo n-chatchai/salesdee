@@ -1,0 +1,10 @@
+{% extends "billing/_doc_detail.html" %}
+{% block actions %}
+<a class="btn btn-sm btn-ghost" href="{% url 'billing:tax_invoice_pdf' document.pk %}" target="_blank">พิมพ์ใบกำกับภาษี</a>
+<a class="btn btn-sm btn-ghost" href="{% url 'billing:tax_invoice_pdf' document.pk %}?copy=1" target="_blank">สำเนา</a>
+{% if can_write and document.status != 'cancelled' %}
+<a class="btn btn-sm" href="{% url 'billing:credit_note_create' document.pk %}">ออกใบลดหนี้</a>
+<form method="post" action="{% url 'billing:tax_invoice_cancel' document.pk %}" style="display:inline">{% csrf_token %}<input type="hidden" name="reason" value="ยกเลิกตามคำขอ"><button class="btn btn-sm btn-ghost" hx-confirm="ยกเลิกใบกำกับภาษีนี้? (เลขที่จะถูกเก็บไว้)">ยกเลิก</button></form>
+{% endif %}
+{% endblock %}
+{% block extra %}{% if credit_notes %}<div class="qb-extra-note">ใบลดหนี้: {% for cn in credit_notes %}<a href="{% url 'billing:credit_note_detail' cn.pk %}">{{ cn.doc_number }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</div>{% endif %}{% endblock %}

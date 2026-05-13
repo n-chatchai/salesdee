@@ -18,7 +18,20 @@ from apps.core.models import BaseModel, TenantScopedModel
 
 class DocType(models.TextChoices):
     QUOTATION = "quotation", "ใบเสนอราคา"
-    # phase 2: SALES_ORDER, DELIVERY_NOTE, INVOICE, TAX_INVOICE, RECEIPT, CREDIT_NOTE, DEBIT_NOTE, DEPOSIT
+    SALES_ORDER = "sales_order", "ใบสั่งขาย"
+    DELIVERY_NOTE = "delivery_note", "ใบส่งของ"
+    INVOICE = "invoice", "ใบแจ้งหนี้/ใบวางบิล"
+    TAX_INVOICE = "tax_invoice", "ใบกำกับภาษี"
+    RECEIPT = "receipt", "ใบเสร็จรับเงิน"
+    CREDIT_NOTE = "credit_note", "ใบลดหนี้"
+    DEBIT_NOTE = "debit_note", "ใบเพิ่มหนี้"
+    DEPOSIT = "deposit", "ใบรับเงินมัดจำ"
+
+
+# Doc types that, once they carry a number, are immutable tax/legal documents (CLAUDE.md §4.3/§4.4).
+LOCKED_DOC_TYPES = frozenset(
+    {DocType.TAX_INVOICE, DocType.CREDIT_NOTE, DocType.DEBIT_NOTE, DocType.RECEIPT}
+)
 
 
 class DocStatus(models.TextChoices):
@@ -97,6 +110,25 @@ class SalesDocument(TenantScopedModel):
     )
     issue_date = models.DateField("วันที่ออก")
     valid_until = models.DateField("ยืนราคาถึง", null=True, blank=True)
+    due_date = models.DateField("ครบกำหนดชำระ", null=True, blank=True)
+    issued_at = models.DateTimeField("ออกเอกสารเมื่อ", null=True, blank=True)
+    # What this document was converted/derived from (quotation → invoice → tax invoice → receipt).
+    source_document = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        related_name="derived_documents",
+        null=True,
+        blank=True,
+    )
+    # For a credit/debit note: the tax invoice it adjusts (Revenue Code §86/9–86/10).
+    references_document = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        related_name="referencing_documents",
+        null=True,
+        blank=True,
+    )
+    cancelled_reason = models.CharField("เหตุผลการยกเลิก", max_length=255, blank=True)
     reference = models.CharField(
         "อ้างอิง", max_length=255, blank=True, help_text="เช่น ชื่อโครงการ / RFQ ของลูกค้า"
     )
@@ -177,8 +209,30 @@ class SalesDocument(TenantScopedModel):
         return self.doc_number or f"(ร่าง) {self.get_doc_type_display()} #{self.pk}"
 
     @property
+    def is_locked_tax_document(self) -> bool:
+        """A tax/legal document (tax invoice, credit/debit note, receipt) that has been issued —
+        i.e. carries a number. Such documents are immutable (CLAUDE.md §4.4)."""
+        return self.doc_type in LOCKED_DOC_TYPES and bool(self.doc_number)
+
+    @property
     def is_editable(self) -> bool:
+        if self.is_locked_tax_document:
+            return False
         return self.status in self.EDITABLE_STATUSES
+
+    def save(self, *args, **kwargs):
+        if self.pk is not None and self.doc_type in LOCKED_DOC_TYPES:
+            # An already-issued tax doc (has a number persisted) is immutable except for the
+            # cancellation fields (CLAUDE.md §4.4).
+            issued = type(self).all_tenants.filter(pk=self.pk).exclude(doc_number="").exists()
+            if issued:
+                update_fields = kwargs.get("update_fields")
+                allowed = {"status", "cancelled_reason", "updated_at"}
+                if update_fields is None or not set(update_fields).issubset(allowed):
+                    from apps.quotes.services import WorkflowError
+
+                    raise WorkflowError("เอกสารภาษีที่ออกแล้วแก้ไขไม่ได้ — ต้องออกใบลดหนี้/ใบเพิ่มหนี้แทน")
+        super().save(*args, **kwargs)
 
 
 class SalesDocLine(TenantScopedModel):
