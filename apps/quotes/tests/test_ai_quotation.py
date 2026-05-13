@@ -93,7 +93,7 @@ def test_quotation_from_lead_ai_view(client, user, membership, tenant, monkeypat
     assert resp.status_code == 302
     with tenant_context(tenant):
         doc = SalesDocument.objects.latest("created_at")
-        assert resp.url == reverse("quotes:quotation_detail", args=[doc.pk])
+        assert resp.url == reverse("quotes:quotation_review", args=[doc.pk])
         assert doc.salesperson_id == user.pk
         assert doc.notes == "ส่งภายใน 30 วัน"
         line = doc.lines.get()

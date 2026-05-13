@@ -27,6 +27,13 @@ urlpatterns = [
     path("<int:pk>/reopen/", views.quotation_reopen, name="quotation_reopen"),
     path("<int:pk>/send/", views.quotation_send, name="quotation_send"),
     path("<int:pk>/send/line/", views.quotation_send_line, name="quotation_send_line"),
+    path("<int:pk>/review/", views.quotation_review, name="quotation_review"),
+    path(
+        "<int:pk>/review/send-line/",
+        views.quotation_review_send_line,
+        name="quotation_review_send_line",
+    ),
+    path("product-search/", views.product_search, name="product_search"),
     path("<int:pk>/lines/", views.quotation_lines_partial, name="quotation_lines_partial"),
     path("<int:pk>/lines/add/", views.quotation_add_line, name="quotation_add_line"),
     path("<int:pk>/lines/reorder/", views.quotation_reorder_lines, name="quotation_reorder_lines"),

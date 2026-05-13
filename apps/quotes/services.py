@@ -179,6 +179,23 @@ def get_or_create_share_link(
     )
 
 
+def auto_submit_and_approve(document: SalesDocument, *, user) -> str:
+    """Compose ``submit_quotation`` + (if eligible) ``approve_quotation`` so the one-click
+    "ตรวจแล้วส่งทาง LINE" flow can take a fresh DRAFT all the way to READY when the user's own
+    discount cap covers it. Returns the resulting status. Raises ``WorkflowError`` if it can't
+    auto-clear approval (caller surfaces a friendly message)."""
+    if document.status in (DocStatus.DRAFT, DocStatus.PENDING_APPROVAL):
+        new_status = submit_quotation(document, user=user)
+        if new_status == DocStatus.PENDING_APPROVAL:
+            if can_approve(user, document.tenant_id):
+                approve_quotation(document, user=user)
+            else:
+                raise WorkflowError("ใบเสนอราคานี้มีส่วนลดเกินสิทธิ์ของคุณ — ให้ผู้จัดการอนุมัติก่อนจึงจะส่งได้")
+    elif document.status not in (DocStatus.READY, DocStatus.SENT):
+        raise WorkflowError(f"ส่งเอกสารในสถานะ “{document.get_status_display()}” ไม่ได้")
+    return document.status
+
+
 def mark_sent(document: SalesDocument, *, user=None) -> None:
     """Stamp a quotation as sent (READY → SENT) and set ``sent_at``. Idempotent for a resend.
     On the actual READY → SENT transition, freeze a revision snapshot (REQUIREMENTS.md §4.7).

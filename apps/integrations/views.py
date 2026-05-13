@@ -228,9 +228,9 @@ def conversation_make_quote(request: HttpRequest, pk: int) -> HttpResponse:
         doc.customer = conv.customer
     doc.save(update_fields=["source_conversation", "customer"])
     messages.success(
-        request, f"AI ร่างใบเสนอราคา {doc.doc_number} ให้แล้ว — ตรวจสอบและแก้ไขก่อนส่งผ่าน LINE"
+        request, f"AI ร่างใบเสนอราคา {doc.doc_number} ให้แล้ว — ตรวจและกดส่งทาง LINE ในหน้านี้"
     )
-    return redirect("quotes:quotation_detail", pk=doc.pk)
+    return redirect("quotes:quotation_review", pk=doc.pk)
 
 
 @csrf_exempt

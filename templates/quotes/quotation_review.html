@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}ตรวจใบเสนอราคา {{ document.doc_number|default:"" }} · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/quote-editor.css' %}">{% endblock %}
+{% block topbar_actions %}
+  <a class="btn btn-sm btn-ghost" href="{% url 'quotes:quotation_detail' document.pk %}"><svg class="ico ico-sm"><use href="#i-edit"/></svg> ตรวจในเต็มหน้า</a>
+{% endblock %}
+{% block content %}
+<div class="qd-head">
+  <div>
+    <div class="eyebrow">ตรวจใบเสนอราคา · {{ document.get_status_display }}</div>
+    <h1>{{ document.doc_number|default:"(ร่าง)" }}</h1>
+    <div class="qd-head-meta">
+      <span>{{ document.customer.name|default:document.reference|default:"ลูกค้า" }}</span>
+      <span>·</span>
+      <span>ออก {{ document.issue_date|date:"d/m/Y" }}</span>
+      {% if document.valid_until %}<span>·</span><span>ยืนราคาถึง {{ document.valid_until|date:"d/m/Y" }}</span>{% endif %}
+    </div>
+  </div>
+  <div class="qd-grand">
+    <div class="label">ยอดรวมทั้งสิ้น</div>
+    <div class="value">{{ totals.grand_total|floatformat:2 }}</div>
+  </div>
+</div>
+
+{% if document.source_conversation_id %}
+<div class="qd-ai-banner"><svg class="ico ico-sm"><use href="#i-spark"/></svg> ผู้ช่วยร่างจากบทสนทนาในกล่องข้อความ — โปรดตรวจก่อนกดส่ง</div>
+{% endif %}
+
+<div class="qb-section-label">รายการที่ AI ร่างให้</div>
+<div class="qd-lines">
+<table class="tbl">
+  <thead><tr><th>ห้อง/โซน</th><th>รายการ</th><th class="mono">จำนวน</th><th>หน่วย</th><th class="mono">ราคา/หน่วย</th><th>ภาษี</th><th class="mono">จำนวนเงิน</th></tr></thead>
+  <tbody>
+  {% for line in document.lines.all %}
+    <tr{% if line.line_type == 'heading' %} class="ln-heading"{% elif line.line_type == 'note' %} class="ln-note"{% endif %}>
+      <td>{{ line.group_label }}</td>
+      <td>{% if line.line_type == 'heading' %}<strong>{{ line.description }}</strong>{% elif line.line_type == 'note' %}{{ line.description }}{% else %}<div class="ln-name">{{ line.description }}</div>{% if line.dimensions %}<div class="ln-spec">{{ line.dimensions }}</div>{% endif %}{% endif %}</td>
+      {% if line.line_type == 'item' %}
+      <td class="mono">{{ line.quantity|floatformat:"-2" }}</td>
+      <td>{{ line.unit }}</td>
+      <td class="mono">{{ line.unit_price|floatformat:2 }}</td>
+      <td>{{ line.get_tax_type_display }}</td>
+      <td class="mono">{{ line.amount|floatformat:2 }}</td>
+      {% else %}<td colspan="5"></td>{% endif %}
+    </tr>
+  {% empty %}
+    <tr><td colspan="7" class="muted" style="padding:24px;text-align:center">ยังไม่มีรายการ — เปิดในเต็มหน้าเพื่อเพิ่มก่อน</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+
+<div class="qb-summary">
+  <div class="qb-sum-row"><span class="label">รวมเป็นเงิน</span><span class="val">{{ totals.subtotal|floatformat:2 }}</span></div>
+  {% if totals.end_discount %}<div class="qb-sum-row"><span class="label">ส่วนลดท้ายบิล</span><span class="val">-{{ totals.end_discount|floatformat:2 }}</span></div>{% endif %}
+  {% if totals.vat_amount %}<div class="qb-sum-row"><span class="label">ภาษีมูลค่าเพิ่ม 7%</span><span class="val">{{ totals.vat_amount|floatformat:2 }}</span></div>{% endif %}
+  <div class="qb-sum-row total"><span class="label">ยอดรวมทั้งสิ้น</span><span class="val">{{ totals.grand_total|floatformat:2 }}</span></div>
+  <div class="qb-bahttext"><span class="label">จำนวนเงินตัวอักษร</span>{{ totals.amount_in_words }}</div>
+</div>
+
+<div class="qd-review-cta" style="margin-top:24px;display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+  {% if can_send_line %}
+    <form method="post" action="{% url 'quotes:quotation_review_send_line' document.pk %}">{% csrf_token %}
+      <button class="btn btn-primary btn-lg" type="submit"><svg class="ico"><use href="#i-line-app"/></svg> ตรวจแล้วส่งทาง LINE</button>
+    </form>
+    <span class="muted" style="font-size:13px">ส่งถึง <strong>{{ document.contact.name|default:document.customer.name|default:document.source_conversation.display_name|default:"ลูกค้า" }}</strong></span>
+  {% elif recipient_email %}
+    <form method="post" action="{% url 'quotes:quotation_send' document.pk %}">{% csrf_token %}
+      <button class="btn btn-primary btn-lg" type="submit"><svg class="ico"><use href="#i-send"/></svg> ตรวจแล้วส่งอีเมล</button>
+    </form>
+    <span class="muted" style="font-size:13px">ส่งถึง <strong>{{ recipient_email }}</strong></span>
+  {% else %}
+    <span class="chip chip-warn">ยังไม่มี LINE/อีเมลของลูกค้า — เพิ่มในข้อมูลผู้ติดต่อก่อน</span>
+  {% endif %}
+  <a class="btn btn-ghost" href="{% url 'quotes:quotation_detail' document.pk %}">บันทึกร่าง / ตรวจในเต็มหน้า</a>
+  {% if document.source_conversation_id %}
+    <a class="btn btn-ghost" href="{% url 'integrations:conversation' document.source_conversation_id %}">← กลับไปแชต</a>
+  {% endif %}
+</div>
+{% endblock %}

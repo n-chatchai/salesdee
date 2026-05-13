@@ -53,7 +53,7 @@ def test_make_quote_from_conversation(client, user, membership, tenant, monkeypa
     assert resp.status_code == 302
     with tenant_context(tenant):
         doc = SalesDocument.objects.latest("created_at")
-        assert resp.url == reverse("quotes:quotation_detail", args=[doc.pk])
+        assert resp.url == reverse("quotes:quotation_review", args=[doc.pk])
         assert doc.status == DocStatus.DRAFT
         assert doc.source_conversation_id == conv.pk
         assert doc.salesperson_id == user.pk

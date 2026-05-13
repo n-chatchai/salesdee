@@ -31,6 +31,7 @@ from .services import (
     WorkflowError,
     apply_catalog_defaults,
     approve_quotation,
+    auto_submit_and_approve,
     can_approve,
     cancel_quotation,
     compute_document_totals,
@@ -281,8 +282,8 @@ def quotation_from_lead_ai(request: HttpRequest, lead_pk: int) -> HttpResponse:
     doc = create_quotation_from_ai_draft(
         draft, salesperson=request.user, reference=lead.name, deal=lead.deal
     )
-    messages.success(request, f"AI ร่างใบเสนอราคา {doc.doc_number} ให้แล้ว — โปรดตรวจสอบและแก้ไขก่อนส่ง")
-    return redirect("quotes:quotation_detail", pk=doc.pk)
+    messages.success(request, f"AI ร่างใบเสนอราคา {doc.doc_number} ให้แล้ว — โปรดตรวจและกดส่ง")
+    return redirect("quotes:quotation_review", pk=doc.pk)
 
 
 @login_required
@@ -596,3 +597,117 @@ def public_quotation_pdf(request: HttpRequest, token: str) -> HttpResponse:
         f'inline; filename="{link.document.doc_number or "quotation"}.pdf"'
     )
     return resp
+
+
+# --- Quote-from-Chat review + one-click send --------------------------------
+@login_required
+def quotation_review(request: HttpRequest, pk: int) -> HttpResponse:
+    """Focused review surface for an AI-drafted (or any draft) quotation — pre-filled lines + a
+    single "ตรวจแล้วส่งทาง LINE" CTA. Designed to keep the salesperson on the inbox flow.
+
+    Falls back to the full editor (``quotation_detail``) via a "ตรวจในเต็มหน้า" link for edits."""
+    doc = _quote_for_edit(request, pk)
+    totals = compute_document_totals(doc)
+    line_configured = line_is_configured()
+    recipient_line = (doc.contact.line_id if doc.contact else "") or (
+        doc.source_conversation.external_id if doc.source_conversation else ""
+    )
+    recipient_email = doc.contact.email if doc.contact and doc.contact.email else ""
+    ctx = {
+        "document": doc,
+        "totals": totals,
+        "editable": doc.is_editable,
+        "line_configured": line_configured,
+        "recipient_line": recipient_line,
+        "recipient_email": recipient_email,
+        "can_send_line": bool(recipient_line and line_configured),
+    }
+    return render(request, "quotes/quotation_review.html", ctx)
+
+
+@login_required
+@require_POST
+def quotation_review_send_line(request: HttpRequest, pk: int) -> HttpResponse:
+    """One-click "ตรวจแล้วส่งทาง LINE": submit (auto-approve if within cap) → mark SENT → push the
+    Flex card into the source conversation (or contact's LINE id). Atomic from the user's POV."""
+    from apps.core.utils.thai_dates import format_thai_date
+
+    doc = _quote_for_send(request, pk)
+    recipient = (doc.contact.line_id if doc.contact else "") or (
+        doc.source_conversation.external_id if doc.source_conversation else ""
+    )
+    if not recipient:
+        messages.error(
+            request, "ยังไม่รู้ LINE user ID ของลูกค้า — เพิ่มในข้อมูลผู้ติดต่อ หรือสร้างใบเสนอราคาจากแชต"
+        )
+        return redirect("quotes:quotation_review", pk=doc.pk)
+    if not line_is_configured():
+        messages.error(request, "ยังไม่ได้ตั้งค่าการเชื่อม LINE OA สำหรับ workspace นี้")
+        return redirect("quotes:quotation_review", pk=doc.pk)
+    try:
+        auto_submit_and_approve(doc, user=request.user)
+    except WorkflowError as exc:
+        messages.error(request, str(exc))
+        return redirect("quotes:quotation_review", pk=doc.pk)
+    link = get_or_create_share_link(doc, created_by=request.user)
+    url = _public_quote_url(request, link.token)
+    pdf_url = request.build_absolute_uri(reverse("public_quotation_pdf", args=[link.token]))
+    totals = compute_document_totals(doc)
+    from apps.tenants.models import CompanyProfile
+
+    profile = CompanyProfile.objects.filter(tenant_id=doc.tenant_id).first()
+    _finalize_sent(request, doc)
+    send_quotation_via_line.enqueue(
+        doc.pk,
+        doc.tenant_id,
+        recipient=recipient,
+        doc_number=doc.doc_number or "ใบเสนอราคา",
+        customer_name=(doc.customer.name if doc.customer else (doc.reference or "")),
+        total_text=f"{totals.grand_total:,.2f} บาท",
+        valid_text=format_thai_date(doc.valid_until) if doc.valid_until else "—",
+        view_url=url,
+        pdf_url=pdf_url,
+        company_name=profile.name_th if profile else "",
+        log_to_conversation_id=doc.source_conversation_id,
+        sender_user_id=request.user.pk,
+    )
+    who = doc.contact.name if doc.contact else (doc.customer.name if doc.customer else "ลูกค้า")
+    messages.success(request, f"ส่งใบเสนอราคาทาง LINE ถึง {who} แล้ว · {url}")
+    from apps.audit.services import record as audit_record
+
+    audit_record(
+        request.user,
+        action="quotation.sent",
+        obj=doc,
+        object_repr=doc.doc_number or str(doc),
+        changes={"channel": "line", "recipient": recipient, "via": "review"},
+        ip=request.META.get("REMOTE_ADDR"),
+    )
+    if doc.source_conversation_id:
+        return redirect("integrations:conversation", pk=doc.source_conversation_id)
+    return redirect("quotes:quotation_detail", pk=doc.pk)
+
+
+# --- Catalog type-ahead for the line editor ---------------------------------
+@login_required
+def product_search(request: HttpRequest) -> HttpResponse:
+    """htmx type-ahead for the quotation line picker. Returns up to 8 products matching ``?q=`` on
+    name or code, scoped to the current tenant (the manager scopes automatically). Always returns
+    HTML (a small ``<ul>``); empty query → empty list. JSON kept simple for the click target."""
+    from django.db.models import Q
+
+    from apps.catalog.models import Product
+
+    q = (request.GET.get("q") or "").strip()
+    matches: list[Product] = []
+    if q:
+        matches = list(
+            Product.objects.filter(is_active=True)
+            .filter(Q(name__icontains=q) | Q(code__icontains=q))
+            .order_by("name")[:8]
+        )
+    return render(
+        request,
+        "quotes/_product_search_results.html",
+        {"matches": matches, "q": q},
+    )
