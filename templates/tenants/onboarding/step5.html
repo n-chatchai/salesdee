@@ -1,7 +1,7 @@
-<div class="card">
-  <div class="card-head"><span class="title">5 · เชื่อม LINE OA</span></div>
-  <p class="muted" style="margin-top:0">นำ Webhook URL นี้ไปใส่ใน LINE Developers Console แล้วกรอกข้อมูลช่องทาง — หรือข้ามไปก่อนก็ได้</p>
-  <code class="mono" style="display:block;padding:10px;background:var(--surface-2,#f3eee2);border-radius:8px;word-break:break-all;margin-bottom:14px">{{ webhook_url }}</code>
+<div class="form-card">
+  <div class="sec-label">5 · เชื่อม LINE OA</div>
+  <p class="muted" style="margin:-6px 0 14px;font-size:13px">นำ Webhook URL นี้ไปใส่ใน LINE Developers Console แล้วกรอกข้อมูลช่องทาง — หรือข้ามไปก่อนก็ได้</p>
+  <code class="mono" style="display:block;padding:10px;background:var(--paper-3);border:1px solid var(--border);border-radius:8px;word-break:break-all;margin-bottom:14px;font-size:12px">{{ webhook_url }}</code>
   <form method="post">{% csrf_token %}
     {% include "partials/_form.html" %}
     <div class="row between" style="margin-top:14px">

@@ -1,17 +1,22 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}{% if category %}แก้ไขหมวด{% else %}หมวดใหม่{% endif %} · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/forms.css' %}">{% endblock %}
 {% block content %}
-<div style="max-width:520px">
-  <div class="eyebrow">หมวดสินค้า</div><h1 class="h1 serif-it" style="margin-bottom:16px">{% if delete %}ลบหมวดสินค้า{% elif category %}แก้ไขหมวด{% else %}เพิ่มหมวดใหม่{% endif %}</h1>
+<div class="form-page narrow">
+  <div class="form-page-head">
+    <div class="eyebrow">หมวดสินค้า</div>
+    <h1>{% if delete %}ลบหมวดสินค้า{% elif category %}แก้ไขหมวด{% else %}เพิ่มหมวดใหม่{% endif %}</h1>
+  </div>
   {% if delete %}
-  <form method="post" class="card">{% csrf_token %}
+  <form method="post" class="form-card">{% csrf_token %}
     <p>ต้องการลบหมวด <strong>{{ category.name }}</strong> ใช่หรือไม่? สินค้าในหมวดนี้จะไม่ถูกลบ แต่จะไม่มีหมวด</p>
-    <div class="row" style="margin-top:12px"><button class="btn btn-danger">ลบ</button><a class="btn btn-ghost" href="{% url 'catalog:categories' %}">ยกเลิก</a></div>
+    <div class="form-actions"><button class="btn btn-danger">ลบ</button><a class="btn btn-ghost" href="{% url 'catalog:categories' %}">ยกเลิก</a></div>
   </form>
   {% else %}
-  <form method="post" class="card">{% csrf_token %}
+  <form method="post" class="form-card">{% csrf_token %}
     {% include "partials/_form.html" %}
-    <div class="row" style="margin-top:12px"><button class="btn btn-primary">บันทึก</button><a class="btn btn-ghost" href="{% url 'catalog:categories' %}">ยกเลิก</a></div>
+    <div class="form-actions"><button class="btn btn-primary">บันทึก</button><a class="btn btn-ghost" href="{% url 'catalog:categories' %}">ยกเลิก</a></div>
   </form>
   {% endif %}
 </div>

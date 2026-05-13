@@ -2,10 +2,10 @@
 {% for field in form.hidden_fields %}{{ field }}{% endfor %}
 {% if form.non_field_errors %}<ul class="messages">{% for e in form.non_field_errors %}<li class="error">{{ e }}</li>{% endfor %}</ul>{% endif %}
 {% for field in form.visible_fields %}
-<div class="field">
-  <label class="field-label" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+<div class="field{% if field.errors %} has-error{% endif %}">
+  <label class="field-label" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<span class="req">*</span>{% endif %}</label>
   {{ field }}
-  {% if field.help_text %}<div class="muted" style="font-size:12px">{{ field.help_text }}</div>{% endif %}
-  {% for e in field.errors %}<div class="error" style="font-size:12px">{{ e }}</div>{% endfor %}
+  {% if field.help_text %}<div class="field-help muted">{{ field.help_text }}</div>{% endif %}
+  {% for e in field.errors %}<div class="field-error error">{{ e }}</div>{% endfor %}
 </div>
 {% endfor %}

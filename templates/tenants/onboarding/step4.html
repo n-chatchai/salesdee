@@ -1,6 +1,6 @@
-<div class="card">
-  <div class="card-head"><span class="title">4 · ทีมงานและสิทธิ์</span></div>
-  <p class="muted" style="margin-top:0">เชิญเพื่อนร่วมทีมเข้ามาใช้งาน (จะส่งคำเชิญทางอีเมล) — หรือข้ามไปก่อนก็ได้</p>
+<div class="form-card">
+  <div class="sec-label">4 · ทีมงานและสิทธิ์</div>
+  <p class="muted" style="margin:-6px 0 14px;font-size:13px">เชิญเพื่อนร่วมทีมเข้ามาใช้งาน (จะส่งคำเชิญทางอีเมล) — หรือข้ามไปก่อนก็ได้</p>
   {% if members %}
   <ul style="list-style:none;padding:0;margin:0 0 14px">{% for m in members %}<li class="row" style="gap:8px;padding:4px 0"><svg class="ico ico-sm muted"><use href="#i-users"/></svg> {{ m.user.email }} — <span class="muted">{{ m.get_role_display }}</span></li>{% endfor %}</ul>
   {% endif %}

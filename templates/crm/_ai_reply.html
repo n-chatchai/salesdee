@@ -1,15 +1,17 @@
 {% if error %}
-<div class="ai-panel" style="border-style:dashed"><svg class="ico ico-sm"><use href="#i-alert"/></svg> {{ error }}</div>
+<div class="ai-suggest dashed"><div class="ai-suggest-label"><svg class="ico ico-sm"><use href="#i-alert"/></svg> ผู้ช่วย AI</div><div class="ai-suggest-text" style="margin:0">{{ error }}</div></div>
 {% else %}
-<div class="ai-panel">
-  <div class="muted" style="font-size:12px;margin-bottom:6px"><svg class="ico ico-sm"><use href="#i-spark"/></svg> ร่างโดย AI — แก้ไขได้ก่อนส่ง</div>
+<div class="ai-suggest">
+  <div class="ai-suggest-label"><svg class="ico ico-sm"><use href="#i-spark"/></svg> ร่างโดย AI — แก้ไขได้ก่อนส่ง</div>
   <form method="post" action="{% url 'crm:lead_send_line_reply' lead.pk %}">{% csrf_token %}
-    <textarea name="text" rows="5" class="input">{{ text }}</textarea>
-    {% if can_send_line %}
-    <button class="btn btn-ai btn-sm" style="margin-top:8px"><svg class="ico ico-sm"><use href="#i-line-app"/></svg> ส่งทาง LINE</button>
-    {% else %}
-    <p class="muted" style="font-size:12px;margin-top:6px">เปิดใช้งาน LINE และเพิ่ม LINE user ID ของลูกค้าเพื่อส่งข้อความนี้ได้</p>
-    {% endif %}
+    <textarea name="text" rows="5">{{ text }}</textarea>
+    <div class="ai-suggest-actions">
+      {% if can_send_line %}
+      <button class="btn btn-ai btn-sm"><svg class="ico ico-sm"><use href="#i-line-app"/></svg> ส่งทาง LINE</button>
+      {% else %}
+      <span class="note">เปิดใช้งาน LINE และเพิ่ม LINE user ID ของลูกค้าเพื่อส่งข้อความนี้</span>
+      {% endif %}
+    </div>
   </form>
 </div>
 {% endif %}

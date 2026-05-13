@@ -9,20 +9,12 @@
 </head><body class="public">
 {% include "partials/icons.html" %}
 <div class="pub-wrap">
-  <div class="pub-head"><div class="mark">d</div><div><strong>{{ tenant.name }}</strong><div class="muted" style="font-size:13px">ขอใบเสนอราคา / ติดต่อเรา</div></div></div>
+  <div class="pub-head"><div class="mark">{{ tenant.name|slice:":1"|upper }}</div><div><strong>{{ tenant.name }}</strong><div class="muted" style="font-size:13px">ขอใบเสนอราคา / ติดต่อเรา</div></div></div>
   <div class="pub-card">
-    <h1 style="margin-top:0">ขอใบเสนอราคา</h1>
-    <p class="muted">กรอกข้อมูลด้านล่าง ทีมงานของเราจะติดต่อกลับโดยเร็ว</p>
+    <h1 style="margin-top:0">เล่าให้ฟังหน่อย</h1>
+    <p class="muted">บอกสิ่งที่คุณกำลังมองหา กรอกข้อมูลด้านล่าง — ทีมงานของเราจะติดต่อกลับโดยเร็ว</p>
     <form method="post">{% csrf_token %}
-      {% for field in form.hidden_fields %}{{ field }}{% endfor %}
-      {% if form.non_field_errors %}<div style="color:#c0392b">{{ form.non_field_errors }}</div>{% endif %}
-      {% for field in form.visible_fields %}
-      <div class="field">
-        <label class="field-label" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
-        {{ field }}
-        {% for e in field.errors %}<div style="color:#c0392b;font-size:12px">{{ e }}</div>{% endfor %}
-      </div>
-      {% endfor %}
+      {% include "partials/_form.html" %}
       <button class="btn" type="submit">ส่งคำขอ</button>
     </form>
   </div>

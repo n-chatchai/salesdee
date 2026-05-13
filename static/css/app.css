@@ -281,6 +281,32 @@ body::before {
 }
 .ai-action:hover { background: var(--ai); color: var(--paper-2); }
 
+/* AI suggestion card (deck .ai-suggest) — used on lead/deal/inbox AI panels */
+.ai-suggest {
+  border: 1px solid var(--ai);
+  background: var(--ai-soft);
+  border-radius: var(--radius);
+  padding: 12px;
+  color: var(--ai-deep);
+}
+.ai-suggest + .ai-suggest { margin-top: 8px; }
+.ai-suggest.dashed { border-style: dashed; }
+.ai-suggest-label {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ai-deep); opacity: .8; margin-bottom: 6px;
+  display: flex; align-items: center; gap: 5px;
+}
+.ai-suggest-text {
+  font-size: 12.5px; line-height: 1.55; color: var(--ink-2); margin-bottom: 10px;
+}
+.ai-suggest textarea {
+  width: 100%; box-sizing: border-box; font: inherit; font-size: 13px;
+  border: 1px solid var(--ai); border-radius: 6px; padding: 8px 10px;
+  background: var(--paper-2); color: var(--ink); resize: vertical;
+}
+.ai-suggest-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+.ai-suggest .note { font-size: 12px; color: var(--ai-deep); opacity: .85; }
+
 /* ─── Tables ────────────────────────────────────────────── */
 .tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
 .tbl th {

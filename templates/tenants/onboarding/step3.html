@@ -2,8 +2,8 @@
   <strong><svg class="ico ico-sm"><use href="#i-spark"/></svg> ผู้ช่วยนำเข้าสินค้า</strong> — ลากไฟล์ Excel/รูป หรือวางลิงก์เว็บไซต์ แล้วให้ผู้ช่วยช่วยกรอกให้ <span class="muted">(เร็ว ๆ นี้)</span>
   <div style="border:2px dashed var(--border,#ccc);border-radius:10px;padding:18px;text-align:center;margin-top:10px;color:var(--muted,#999)">ลากไฟล์มาวางที่นี่ (ปิดใช้งานชั่วคราว)</div>
 </div>
-<div class="card">
-  <div class="card-head"><span class="title">3 · สินค้าชิ้นแรก</span><span class="muted ml-auto" style="font-size:12px">พิมพ์ข้อมูลเอง</span></div>
+<div class="form-card">
+  <div class="sec-label" style="display:flex;justify-content:space-between;align-items:baseline">3 · สินค้าชิ้นแรก <span class="muted" style="font-size:12px;font-style:normal">พิมพ์ข้อมูลเอง</span></div>
   <form method="post" enctype="multipart/form-data">{% csrf_token %}
     {% include "partials/_form.html" %}
     {% include "tenants/onboarding/_nav.html" with prev=2 skip_to=4 next_label="บันทึกแล้วไปต่อ" %}

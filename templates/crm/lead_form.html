@@ -1,11 +1,17 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}{% if lead %}แก้ไขลีด{% else %}ลีดใหม่{% endif %} · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/forms.css' %}">{% endblock %}
 {% block content %}
-<div style="max-width:560px">
-  <div class="eyebrow">ลีด</div><h1 class="h1 serif-it" style="margin-bottom:16px">{% if lead %}แก้ไขลีด{% else %}เพิ่มลีดใหม่{% endif %}</h1>
-  <form method="post" class="card">{% csrf_token %}
+<div class="form-page narrow">
+  <div class="form-page-head">
+    <div class="eyebrow">ลีด</div>
+    <h1>{% if lead %}แก้ไขลีด{% else %}เพิ่มลีดใหม่{% endif %}</h1>
+    <div class="sub">ข้อมูลผู้ที่สนใจ ช่องทางที่ติดต่อมา และความต้องการเบื้องต้น</div>
+  </div>
+  <form method="post" class="form-card">{% csrf_token %}
     {% include "partials/_form.html" %}
-    <div class="row" style="margin-top:12px"><button class="btn btn-primary">บันทึก</button><a class="btn btn-ghost" href="{% if lead %}{% url 'crm:lead_detail' lead.pk %}{% else %}{% url 'crm:leads' %}{% endif %}">ยกเลิก</a></div>
+    <div class="form-actions"><button class="btn btn-primary">บันทึก</button><a class="btn btn-ghost" href="{% if lead %}{% url 'crm:lead_detail' lead.pk %}{% else %}{% url 'crm:leads' %}{% endif %}">ยกเลิก</a></div>
   </form>
 </div>
 {% endblock %}

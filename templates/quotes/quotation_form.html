@@ -1,11 +1,17 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}{% if document %}แก้ไขใบเสนอราคา{% else %}ใบเสนอราคาใหม่{% endif %} · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/forms.css' %}">{% endblock %}
 {% block content %}
-<div style="max-width:640px">
-  <div class="eyebrow">ใบเสนอราคา</div><h1 class="h1 serif-it" style="margin-bottom:16px">{% if document %}แก้ไขหัวเอกสาร {{ document.doc_number }}{% else %}สร้างใบเสนอราคาใหม่{% endif %}</h1>
-  <form method="post" class="card">{% csrf_token %}
+<div class="form-page">
+  <div class="form-page-head">
+    <div class="eyebrow">ใบเสนอราคา</div>
+    <h1>{% if document %}แก้ไขหัวเอกสาร {{ document.doc_number }}{% else %}สร้างใบเสนอราคาใหม่{% endif %}</h1>
+    <div class="sub">ลูกค้า วันที่ออก/ยืนราคา เงื่อนไขชำระเงิน และข้อมูลหัวเอกสาร — รายการสินค้าแก้ในหน้าเอกสาร</div>
+  </div>
+  <form method="post" class="form-card">{% csrf_token %}
     {% include "partials/_form.html" %}
-    <div class="row" style="margin-top:12px"><button class="btn btn-primary">บันทึก</button><a class="btn btn-ghost" href="{% if document %}{% url 'quotes:quotation_detail' document.pk %}{% else %}{% url 'quotes:quotations' %}{% endif %}">ยกเลิก</a></div>
+    <div class="form-actions"><button class="btn btn-primary">บันทึก</button><a class="btn btn-ghost" href="{% if document %}{% url 'quotes:quotation_detail' document.pk %}{% else %}{% url 'quotes:quotations' %}{% endif %}">ยกเลิก</a></div>
   </form>
 </div>
 {% endblock %}

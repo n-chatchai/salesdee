@@ -9,7 +9,7 @@
 </head><body class="public">
 {% include "partials/icons.html" %}
 <div class="pub-wrap">
-  <div class="pub-head"><div class="mark">d</div><strong>{{ tenant.name }}</strong></div>
+  <div class="pub-head"><div class="mark">{{ tenant.name|slice:":1"|upper }}</div><strong>{{ tenant.name }}</strong></div>
   <div class="pub-card" style="text-align:center">
     <svg class="ico ico-xl" style="color:var(--accent)"><use href="#i-check"/></svg>
     <h1>ขอบคุณสำหรับคำขอ</h1>

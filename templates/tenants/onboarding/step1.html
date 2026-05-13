@@ -1,6 +1,6 @@
-<div class="card">
-  <div class="card-head"><span class="title">1 · ข้อมูลบริษัท</span></div>
-  <p class="muted" style="margin-top:0">ใช้บนหัวเอกสารทุกฉบับ — ใส่อย่างน้อยชื่อบริษัท</p>
+<div class="form-card">
+  <div class="sec-label">1 · ข้อมูลบริษัท</div>
+  <p class="muted" style="margin:-6px 0 14px;font-size:13px">ใช้บนหัวเอกสารทุกฉบับ — ใส่อย่างน้อยชื่อบริษัท</p>
   <form method="post" enctype="multipart/form-data">{% csrf_token %}
     {% include "partials/_form.html" %}
     {% include "tenants/onboarding/_nav.html" with prev=None skip_to=2 next_label="ต่อไป" %}

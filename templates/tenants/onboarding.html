@@ -1,20 +1,36 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}ตั้งค่าครั้งแรก · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/onboarding.css' %}"><link rel="stylesheet" href="{% static 'css/forms.css' %}">{% endblock %}
 {% block content %}
-<div style="margin-bottom:16px"><div class="eyebrow">เริ่มต้นใช้งาน</div><h1 class="h1 serif-it">ตั้งค่าครั้งแรก</h1><p class="muted">{{ tenant.name }} — ตั้งค่าให้ครบเพื่อใช้งานได้เต็มที่ (ข้ามขั้นไหนก็ได้)</p></div>
-<div class="row wrap" style="gap:24px;align-items:flex-start">
-  <div class="card" style="min-width:220px;align-self:flex-start">
-    <div class="card-head"><span class="title">ขั้นตอน</span></div>
-    {% for s in status.steps %}
-      <a class="sb-item {% if s.n == step %}active{% endif %}" href="?step={{ s.n }}">
-        <span class="icon">{% if s.done %}<svg style="color:var(--good,#3a8a4a)"><use href="#i-check"/></svg>{% else %}<svg class="muted"><use href="#i-chevron"/></svg>{% endif %}</span>
+<div class="ob-head">
+  <div class="eyebrow">เริ่มต้นใช้งาน · ขั้น {{ step }} จาก 5</div>
+  <h1>ตั้งค่าครั้งแรก</h1>
+  <div class="sub">{{ tenant.name }} — ตั้งค่าให้ครบเพื่อใช้งานได้เต็มที่ (ข้ามขั้นไหนก็ได้)</div>
+</div>
+
+<div class="ob-progress"><i style="width:{% widthratio step 5 100 %}%"></i></div>
+<div class="ob-pills">
+  {% for s in status.steps %}
+  <a class="pill {% if s.n == step %}active{% elif s.done %}done{% endif %}" href="?step={{ s.n }}">
+    {% if s.done %}<svg class="ico ico-sm"><use href="#i-check"/></svg>{% endif %}{{ s.n }}. {{ s.label }}
+  </a>
+  {% endfor %}
+</div>
+
+<div class="ob-layout">
+  <div>{% include step_template %}</div>
+  <div>
+    <div class="ob-checklist">
+      <div class="head">รายการตั้งค่า</div>
+      {% for s in status.steps %}
+      <a class="{% if s.n == step %}active {% endif %}{% if s.done %}done{% endif %}" href="?step={{ s.n }}">
+        <span class="ic"><svg class="ico ico-sm"><use href="#i-{% if s.done %}check{% else %}chevron{% endif %}"/></svg></span>
         {{ s.n }}. {{ s.label }}
       </a>
-    {% endfor %}
-    {% if status.complete %}<p class="muted" style="font-size:12px;margin:8px 4px 0">ครบทุกขั้นแล้ว 🎉</p>{% endif %}
-  </div>
-  <div class="grow" style="max-width:680px">
-    {% include step_template %}
+      {% endfor %}
+      {% if status.complete %}<div class="complete-note">ครบทุกขั้นแล้ว 🎉</div>{% endif %}
+    </div>
   </div>
 </div>
 {% endblock %}

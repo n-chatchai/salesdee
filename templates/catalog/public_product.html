@@ -9,7 +9,7 @@
 </head><body class="public">
 {% include "partials/icons.html" %}
 <div class="pub-wrap">
-  <div class="pub-head"><div class="mark">d</div><div><a href="{% url 'public_catalog' tenant.slug %}" style="text-decoration:none;color:inherit"><strong>{{ company.name_th|default:tenant.name }}</strong></a><div class="muted" style="font-size:13px"><a href="{% url 'public_catalog' tenant.slug %}" style="color:inherit">← กลับแคตตาล็อก</a></div></div></div>
+  <div class="pub-head"><a class="mark" href="{% url 'public_catalog' tenant.slug %}" style="text-decoration:none">{{ tenant.name|slice:":1"|upper }}</a><div><a href="{% url 'public_catalog' tenant.slug %}" style="text-decoration:none;color:inherit"><strong>{{ company.name_th|default:tenant.name }}</strong></a><div class="muted" style="font-size:13px"><a href="{% url 'public_catalog' tenant.slug %}" style="color:inherit">← กลับแคตตาล็อก</a></div></div></div>
   <div class="pub-card">
     {% if product.images.all %}<div class="pub-grid" style="margin-bottom:16px">{% for im in product.images.all %}<img src="{{ im.image.url }}" alt="{{ im.caption|default:product.name }}" style="width:100%;border-radius:10px">{% endfor %}</div>{% endif %}
     <h1 style="margin-top:0">{{ product.name }}</h1>

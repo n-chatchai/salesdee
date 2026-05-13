@@ -9,7 +9,7 @@
 </head><body class="public">
 {% include "partials/icons.html" %}
 <div class="pub-wrap wide">
-  <div class="pub-head"><div class="mark">d</div><div><strong>{{ company.name_th|default:tenant.name }}</strong><div class="muted" style="font-size:13px">แคตตาล็อกสินค้า</div></div></div>
+  <div class="pub-head"><div class="mark">{{ tenant.name|slice:":1"|upper }}</div><div><strong>{{ company.name_th|default:tenant.name }}</strong><div class="muted" style="font-size:13px">แคตตาล็อกสินค้า</div></div></div>
   {% if categories %}
   <div style="margin-bottom:18px" class="row wrap">
     <a class="chip" href="?" style="{% if not selected_cat %}background:var(--accent);color:#fff{% endif %}">ทั้งหมด</a>
