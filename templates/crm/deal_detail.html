@@ -1,62 +1,46 @@
 {% extends "base.html" %}
-
-{% block title %}{{ deal.name }} · {{ current_tenant.name }}{% endblock %}
-
+{% block title %}{{ deal.name }} · ดีล · salesdee.{% endblock %}
+{% block topbar_actions %}
+<a class="btn btn-sm btn-ghost" href="{% url 'crm:deal_edit' deal.pk %}"><svg class="ico ico-sm"><use href="#i-edit"/></svg> แก้ไข</a>
+<form method="post" action="{% url 'quotes:quotation_from_deal' deal.pk %}" style="display:inline">{% csrf_token %}<button class="btn btn-sm btn-primary"><svg class="ico ico-sm"><use href="#i-file-text"/></svg> สร้างใบเสนอราคา</button></form>
+{% endblock %}
 {% block content %}
-  <div class="flex items-center justify-between">
-    <div>
-      <a href="{% url 'crm:pipeline' %}" class="text-sm text-slate-500 hover:underline">&larr; กลับไป Pipeline</a>
-      <h1 class="mt-1 text-xl font-semibold">{{ deal.name }}</h1>
-    </div>
-    <a href="{% url 'crm:deal_edit' deal.pk %}" class="rounded border px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">แก้ไข</a>
+<div class="row between" style="align-items:flex-end;margin-bottom:16px">
+  <div><div class="eyebrow">ดีล · {{ deal.get_status_display }}{% if deal.stage %} · {{ deal.stage.name }}{% endif %}</div><h1 class="h1 serif-it">{{ deal.name }}</h1></div>
+  <div class="kpi" style="min-width:0"><div class="label">มูลค่า</div><div class="value">{{ deal.estimated_value|floatformat:0 }}</div><div class="delta">โอกาส {{ deal.probability }}%</div></div>
+</div>
+<div class="row wrap" style="align-items:flex-start;gap:16px">
+  <div class="card grow" style="min-width:300px">
+    <div class="card-head"><div class="title">รายละเอียด</div></div>
+    <table class="tbl">
+      <tr><th>ลูกค้า</th><td>{% if deal.customer %}<a href="{% url 'crm:customer_detail' deal.customer.pk %}">{{ deal.customer.name }}</a>{% else %}—{% endif %}</td></tr>
+      <tr><th>ผู้ติดต่อ</th><td>{{ deal.contact.name|default:"—" }}</td></tr>
+      <tr><th>เจ้าของดีล</th><td>{{ deal.owner.get_full_name|default:"—" }}</td></tr>
+      <tr><th>ช่องทาง</th><td>{{ deal.get_channel_display|default:"—" }}</td></tr>
+      <tr><th>คาดปิด</th><td>{{ deal.expected_close_date|date:"d/m/Y"|default:"—" }}</td></tr>
+      {% if deal.status == 'lost' %}<tr><th>เหตุผลที่แพ้</th><td>{{ deal.lost_reason }}</td></tr>{% endif %}
+    </table>
+    {% if deal.notes %}<div class="divider"></div><p class="muted">{{ deal.notes|linebreaksbr }}</p>{% endif %}
   </div>
 
-  <div class="mt-4 grid gap-6 md:grid-cols-3">
-    <section class="space-y-2 rounded-lg border bg-white p-4 text-sm md:col-span-1">
-      <div><span class="text-slate-500">ลูกค้า:</span>
-        {% if deal.customer %}<a class="hover:underline" href="{% url 'crm:customer_detail' deal.customer.pk %}">{{ deal.customer.name }}</a>{% else %}—{% endif %}</div>
-      <div><span class="text-slate-500">ผู้ติดต่อ:</span> {{ deal.contact.name|default:"—" }}</div>
-      <div><span class="text-slate-500">ขั้น:</span> {{ deal.stage.name|default:"—" }}</div>
-      <div><span class="text-slate-500">สถานะ:</span> {{ deal.get_status_display }}</div>
-      <div><span class="text-slate-500">มูลค่าโดยประมาณ:</span> {{ deal.estimated_value|floatformat:2 }} ฿</div>
-      <div><span class="text-slate-500">โอกาสปิด:</span> {{ deal.probability }}%</div>
-      <div><span class="text-slate-500">คาดปิด:</span> {{ deal.expected_close_date|default:"—" }}</div>
-      <div><span class="text-slate-500">ช่องทาง:</span> {{ deal.get_channel_display|default:"—" }}</div>
-      <div><span class="text-slate-500">เจ้าของ:</span> {{ deal.owner.get_full_name|default:"—" }}</div>
-      {% if deal.notes %}<div class="border-t pt-2 text-slate-600">{{ deal.notes|linebreaksbr }}</div>{% endif %}
-      <div class="border-t pt-2">
-        <div class="mb-1 text-slate-500">ใบเสนอราคา</div>
-        {% for doc in deal.documents.all %}
-          <div><a class="hover:underline" href="{% url 'quotes:quotation_detail' doc.pk %}">{{ doc.doc_number|default:"(ร่าง)" }}</a> · {{ doc.get_status_display }}</div>
-        {% empty %}<div class="text-slate-400">— ยังไม่มี —</div>{% endfor %}
-        <form method="post" action="{% url 'quotes:quotation_from_deal' deal.pk %}" class="mt-2">{% csrf_token %}<button type="submit" class="rounded bg-slate-800 px-3 py-1.5 text-xs text-white hover:bg-slate-700">+ สร้างใบเสนอราคาจากดีลนี้</button></form>
-      </div>
-    </section>
-
-    <section class="space-y-6 md:col-span-2">
-      <div>
-        <h2 class="mb-2 font-medium">บันทึกกิจกรรม</h2>
-        <form class="crm-form mb-3 rounded-lg border bg-white p-3" method="post"
-              hx-post="{% url 'crm:deal_log_activity' deal.pk %}" hx-target="#activity-list" hx-swap="outerHTML"
-              hx-on::after-request="this.reset()">
-          {% csrf_token %}
-          {% include "crm/_form_fields.html" with form=activity_form %}
-          <button type="submit" class="rounded bg-slate-800 px-3 py-1.5 text-sm text-white hover:bg-slate-700">บันทึก</button>
-        </form>
-        {% include "crm/_activity_list.html" %}
-      </div>
-
-      <div>
-        <h2 class="mb-2 font-medium">งาน</h2>
-        <form class="crm-form mb-3 rounded-lg border bg-white p-3" method="post"
-              hx-post="{% url 'crm:deal_add_task' deal.pk %}" hx-target="#task-list" hx-swap="outerHTML"
-              hx-on::after-request="this.reset()">
-          {% csrf_token %}
-          {% include "crm/_form_fields.html" with form=task_form %}
-          <button type="submit" class="rounded bg-slate-800 px-3 py-1.5 text-sm text-white hover:bg-slate-700">เพิ่มงาน</button>
-        </form>
-        {% include "crm/_task_list.html" %}
-      </div>
-    </section>
+  <div class="card grow" style="min-width:340px">
+    <div class="card-head"><div class="title">บันทึกกิจกรรม</div></div>
+    <form hx-post="{% url 'crm:deal_log_activity' deal.pk %}" hx-target="#activity-list" hx-swap="innerHTML" hx-on::after-request="this.reset()">{% csrf_token %}
+      {% include "partials/_form.html" with form=activity_form %}
+      <button class="btn btn-sm btn-primary">บันทึก</button>
+    </form>
+    <div class="divider"></div>
+    <div id="activity-list">{% include "crm/_activity_list.html" %}</div>
   </div>
+
+  <div class="card grow" style="min-width:300px">
+    <div class="card-head"><div class="title">งาน</div></div>
+    <form hx-post="{% url 'crm:deal_add_task' deal.pk %}" hx-target="#task-list" hx-swap="innerHTML" hx-on::after-request="this.reset()">{% csrf_token %}
+      {% include "partials/_form.html" with form=task_form %}
+      <button class="btn btn-sm btn-primary">เพิ่มงาน</button>
+    </form>
+    <div class="divider"></div>
+    <div id="task-list">{% include "crm/_task_list.html" %}</div>
+  </div>
+</div>
 {% endblock %}

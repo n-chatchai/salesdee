@@ -1,119 +1,57 @@
 {% extends "base.html" %}
-
-{% block title %}{{ document.doc_number|default:"ใบเสนอราคา" }} · {{ current_tenant.name }}{% endblock %}
-
-{% block extra_head %}
-  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
-  <script nonce="{{ csp_nonce }}">
-    document.addEventListener("DOMContentLoaded", function () {
-      function initLineReorder(root) {
-        root.querySelectorAll("tbody[data-reorder-url]").forEach(function (tb) {
-          if (tb._sortable) return;
-          tb._sortable = new Sortable(tb, {
-            animation: 150, ghostClass: "bg-amber-50", handle: "[data-drag-handle]",
-            onEnd: function () {
-              var ids = Array.prototype.map.call(
-                tb.querySelectorAll("tr[data-line-id]"), function (r) { return r.dataset.lineId; }
-              );
-              htmx.ajax("POST", tb.dataset.reorderUrl, {
-                target: "#quote-lines", swap: "outerHTML", values: { line: ids },
-              });
-            },
-          });
-        });
-      }
-      initLineReorder(document);
-      htmx.onLoad(initLineReorder);
-    });
-  </script>
+{% block title %}{{ document.doc_number|default:"ใบเสนอราคา" }} · salesdee.{% endblock %}
+{% block topbar_actions %}
+<a class="btn btn-sm btn-ghost" href="{% url 'quotes:quotation_pdf' document.pk %}" target="_blank"><svg class="ico ico-sm"><use href="#i-download"/></svg> PDF</a>
+{% if editable %}<a class="btn btn-sm btn-ghost" href="{% url 'quotes:quotation_edit' document.pk %}"><svg class="ico ico-sm"><use href="#i-edit"/></svg> แก้ไขหัวเอกสาร</a>{% endif %}
+{% if document.status == 'draft' or document.status == 'pending' or document.status == 'ready' %}
+<form method="post" action="{% url 'quotes:quotation_send' document.pk %}" style="display:inline">{% csrf_token %}<button class="btn btn-sm btn-primary"><svg class="ico ico-sm"><use href="#i-send"/></svg> ส่งให้ลูกค้า</button></form>
+<form method="post" action="{% url 'quotes:quotation_send_line' document.pk %}" style="display:inline">{% csrf_token %}<button class="btn btn-sm"><svg class="ico ico-sm"><use href="#i-line-app"/></svg> ส่งทาง LINE</button></form>
+{% endif %}
 {% endblock %}
-
 {% block content %}
-  <div class="flex items-center justify-between">
-    <div>
-      <a href="{% url 'quotes:quotations' %}" class="text-sm text-slate-500 hover:underline">&larr; ใบเสนอราคาทั้งหมด</a>
-      <h1 class="mt-1 text-xl font-semibold">ใบเสนอราคา {{ document.doc_number }}{% if document.revision %} Rev.{{ document.revision }}{% endif %}</h1>
-    </div>
-    <div class="flex flex-wrap gap-2">
-      {% if document.status == 'draft' %}
-        <a href="{% url 'quotes:quotation_edit' document.pk %}" class="rounded border px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">แก้ไขหัวเอกสาร</a>
-        <form method="post" action="{% url 'quotes:quotation_submit' document.pk %}">{% csrf_token %}<button type="submit" class="rounded bg-slate-800 px-3 py-1.5 text-sm text-white hover:bg-slate-700">ตรวจสอบ &amp; เตรียมส่ง</button></form>
-      {% elif document.status == 'pending' %}
-        {% if can_approve %}
-          <form method="post" action="{% url 'quotes:quotation_approve' document.pk %}">{% csrf_token %}<button type="submit" class="rounded bg-emerald-600 px-3 py-1.5 text-sm text-white hover:bg-emerald-700">อนุมัติส่วนลด</button></form>
-          <form method="post" action="{% url 'quotes:quotation_reject_approval' document.pk %}">{% csrf_token %}<button type="submit" class="rounded border px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">ตีกลับเป็นร่าง</button></form>
-        {% endif %}
-        <a href="{% url 'quotes:quotation_edit' document.pk %}" class="rounded border px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">แก้ไขหัวเอกสาร</a>
-      {% elif document.status == 'ready' %}
-        <form method="post" action="{% url 'quotes:quotation_send' document.pk %}">{% csrf_token %}<button type="submit" class="rounded bg-emerald-600 px-3 py-1.5 text-sm text-white hover:bg-emerald-700">ส่งทางอีเมล/ลิงก์</button></form>
-        {% if document.contact.line_id %}<form method="post" action="{% url 'quotes:quotation_send_line' document.pk %}">{% csrf_token %}<button type="submit" class="rounded bg-emerald-600 px-3 py-1.5 text-sm text-white hover:bg-emerald-700">ส่งทาง LINE</button></form>{% endif %}
-        <a href="{% url 'quotes:quotation_edit' document.pk %}" class="rounded border px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">แก้ไขหัวเอกสาร</a>
-      {% elif document.status == 'sent' %}
-        <form method="post" action="{% url 'quotes:quotation_send' document.pk %}">{% csrf_token %}<button type="submit" class="rounded border px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">ส่งซ้ำ (อีเมล)</button></form>
-        {% if document.contact.line_id %}<form method="post" action="{% url 'quotes:quotation_send_line' document.pk %}">{% csrf_token %}<button type="submit" class="rounded border px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">ส่งซ้ำ (LINE)</button></form>{% endif %}
-        <form method="post" action="{% url 'quotes:quotation_reopen' document.pk %}" class="inline-flex gap-1">{% csrf_token %}<input type="text" name="reason" placeholder="เหตุผล (ไม่บังคับ)" class="rounded border px-2 py-1 text-sm"><button type="submit" class="rounded border px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">เปิดแก้ไขใหม่ (Rev.)</button></form>
-      {% elif document.status == 'accepted' or document.status == 'rejected' or document.status == 'expired' %}
-        <form method="post" action="{% url 'quotes:quotation_reopen' document.pk %}" class="inline-flex gap-1">{% csrf_token %}<input type="text" name="reason" placeholder="เหตุผล (ไม่บังคับ)" class="rounded border px-2 py-1 text-sm"><button type="submit" class="rounded border px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">เปิดแก้ไขใหม่ (Rev.)</button></form>
-      {% endif %}
-      <a href="{% url 'quotes:quotation_pdf' document.pk %}" target="_blank" class="rounded bg-slate-800 px-3 py-1.5 text-sm text-white hover:bg-slate-700">พิมพ์ / PDF</a>
-      {% if document.status != 'cancelled' and document.status != 'accepted' %}
-        <form method="post" action="{% url 'quotes:quotation_cancel' document.pk %}">{% csrf_token %}<button type="submit" class="rounded px-3 py-1.5 text-sm text-red-600 hover:bg-red-50">ยกเลิก</button></form>
-      {% endif %}
-    </div>
-  </div>
+<div class="row between" style="align-items:flex-end;margin-bottom:8px">
+  <div><div class="eyebrow">ใบเสนอราคา · {{ document.get_status_display }}{% if document.revision %} · Rev.{{ document.revision }}{% endif %}</div><h1 class="h1 serif-it">{{ document.doc_number|default:"(ร่าง)" }}</h1></div>
+  <div class="kpi" style="min-width:0"><div class="label">ยอดรวมทั้งสิ้น</div><div class="value">{{ totals.grand_total|floatformat:2 }}</div>{% if document.view_count %}<div class="delta">ลูกค้าเปิดดู {{ document.view_count }} ครั้ง</div>{% endif %}</div>
+</div>
 
-  {% if document.customer_response %}
-    <div class="mt-3 rounded-lg border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-800">
-      ลูกค้าตอบกลับ: <strong>{{ document.get_customer_response_display }}</strong>{% if document.customer_signed_name %} (โดย {{ document.customer_signed_name }}){% endif %} · {{ document.customer_responded_at|date:"d/m/Y H:i" }}{% if document.customer_response_note %} — {{ document.customer_response_note }}{% endif %}
-    </div>
-  {% elif document.status == 'pending' %}
-    <div class="mt-3 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800">รออนุมัติส่วนลด — ผู้จัดการต้องอนุมัติก่อนจึงจะส่งให้ลูกค้าได้</div>
-  {% elif document.status == 'ready' %}
-    <div class="mt-3 rounded-lg border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-800">พร้อมส่งให้ลูกค้า{% if document.approved_by %} · อนุมัติส่วนลดโดย {{ document.approved_by.get_full_name }} เมื่อ {{ document.approved_at|date:"d/m/Y H:i" }}{% endif %}</div>
-  {% elif document.status == 'sent' and document.sent_at %}
-    <div class="mt-3 rounded-lg border bg-slate-50 p-3 text-sm text-slate-600">ส่งให้ลูกค้าแล้วเมื่อ {{ document.sent_at|date:"d/m/Y H:i" }} — รอลูกค้าตอบกลับ</div>
-  {% elif document.status == 'expired' %}
-    <div class="mt-3 rounded-lg border border-slate-300 bg-slate-50 p-3 text-sm text-slate-600">หมดอายุการยืนราคาแล้ว — กด “เปิดแก้ไขใหม่ (Rev.)” เพื่อเสนอราคาอีกครั้ง</div>
-  {% elif document.status == 'cancelled' %}
-    <div class="mt-3 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">เอกสารนี้ถูกยกเลิก</div>
+{% if document.source_conversation_id %}<div class="ai-panel" style="margin-bottom:12px"><svg class="ico ico-sm"><use href="#i-spark"/></svg> ร่างจากบทสนทนาในกล่องข้อความ — โปรดตรวจสอบทุกบรรทัดก่อนส่ง</div>{% endif %}
+
+{# workflow buttons #}
+<div class="row wrap" style="margin-bottom:14px">
+  {% if document.status == 'draft' %}<form method="post" action="{% url 'quotes:quotation_submit' document.pk %}" style="display:inline">{% csrf_token %}<button class="btn btn-sm">ส่งตรวจ/ขออนุมัติ</button></form>{% endif %}
+  {% if document.status == 'pending' and can_approve %}
+    <form method="post" action="{% url 'quotes:quotation_approve' document.pk %}" style="display:inline">{% csrf_token %}<button class="btn btn-sm btn-primary">อนุมัติส่วนลด</button></form>
+    <form method="post" action="{% url 'quotes:quotation_reject_approval' document.pk %}" style="display:inline">{% csrf_token %}<input type="hidden" name="note" value=""><button class="btn btn-sm btn-danger">ตีกลับ</button></form>
   {% endif %}
+  {% if document.status == 'pending' and not can_approve %}<span class="chip chip-warn">รอผู้จัดการอนุมัติส่วนลด</span>{% endif %}
+  {% if not editable and document.status != 'cancelled' %}<form method="post" action="{% url 'quotes:quotation_reopen' document.pk %}" style="display:inline">{% csrf_token %}<button class="btn btn-sm">เปิดแก้ไขใหม่ (Rev.)</button></form>{% endif %}
+  {% if document.status != 'cancelled' %}<form method="post" action="{% url 'quotes:quotation_cancel' document.pk %}" style="display:inline">{% csrf_token %}<button class="btn btn-sm btn-ghost" hx-confirm="ยกเลิกใบเสนอราคานี้?">ยกเลิกเอกสาร</button></form>{% endif %}
+  {% if revisions %}<a class="btn btn-sm btn-ghost" href="{% url 'quotes:quotation_revisions' document.pk %}">ประวัติเวอร์ชัน ({{ revisions|length }})</a>{% endif %}
+</div>
 
-  <section class="mt-4 grid gap-x-8 gap-y-1 rounded-lg border bg-white p-4 text-sm sm:grid-cols-2">
-    <div><span class="text-slate-500">ลูกค้า:</span> {% if document.customer %}<a class="hover:underline" href="{% url 'crm:customer_detail' document.customer.pk %}">{{ document.customer.name }}</a>{% else %}—{% endif %}{% if document.contact %} ({{ document.contact.name }}){% endif %}</div>
-    <div><span class="text-slate-500">สถานะ:</span> {{ document.get_status_display }}</div>
-    <div><span class="text-slate-500">วันที่ออก:</span> {{ document.issue_date|date:"d/m/Y" }}</div>
-    <div><span class="text-slate-500">ยืนราคาถึง:</span> {{ document.valid_until|date:"d/m/Y"|default:"—" }}</div>
-    <div><span class="text-slate-500">อ้างอิง:</span> {{ document.reference|default:"—" }}</div>
-    <div><span class="text-slate-500">พนักงานขาย:</span> {{ document.salesperson.get_full_name|default:"—" }}</div>
-    {% if document.deal %}<div><span class="text-slate-500">ดีล:</span> <a class="hover:underline" href="{% url 'crm:deal_detail' document.deal.pk %}">{{ document.deal.name }}</a></div>{% endif %}
-  </section>
+<div class="card">
+  <div class="card-head"><div class="title">ข้อมูลเอกสาร</div></div>
+  <div class="row wrap" style="gap:32px">
+    <table class="tbl" style="flex:1;min-width:280px">
+      <tr><th>ลูกค้า</th><td>{{ document.customer.name|default:document.reference|default:"—" }}</td></tr>
+      <tr><th>ผู้ติดต่อ</th><td>{{ document.contact.name|default:"—" }}</td></tr>
+      <tr><th>อ้างอิง</th><td>{{ document.reference|default:"—" }}</td></tr>
+      <tr><th>พนักงานขาย</th><td>{{ document.salesperson.get_full_name|default:"—" }}</td></tr>
+    </table>
+    <table class="tbl" style="flex:1;min-width:280px">
+      <tr><th>วันที่ออก</th><td>{{ document.issue_date|date:"d/m/Y" }}</td></tr>
+      <tr><th>ยืนราคาถึง</th><td>{{ document.valid_until|date:"d/m/Y"|default:"—" }}</td></tr>
+      <tr><th>เงื่อนไขชำระเงิน</th><td>{{ document.payment_terms|linebreaksbr|default:"—" }}</td></tr>
+      <tr><th>กำหนดส่งมอบ/ติดตั้ง</th><td>{{ document.lead_time|default:"—" }}</td></tr>
+      <tr><th>การรับประกัน</th><td>{{ document.warranty|default:"—" }}</td></tr>
+    </table>
+  </div>
+  {% if document.notes %}<div class="divider"></div><p class="muted">{{ document.notes|linebreaksbr }}</p>{% endif %}
+  {% if document.customer_response %}<div class="divider"></div><p>คำตอบจากลูกค้า: <strong>{{ document.get_customer_response_display }}</strong>{% if document.customer_signed_name %} โดย {{ document.customer_signed_name }}{% endif %}{% if document.customer_response_note %} — {{ document.customer_response_note }}{% endif %}</p>{% endif %}
+</div>
 
+<div class="card">
+  <div class="card-head"><div class="title">รายการ</div></div>
   {% include "quotes/_quote_lines.html" %}
-
-  {% if revisions %}
-  <div class="mt-4 rounded-lg border bg-white p-4 text-sm">
-    <div class="mb-1 flex items-center justify-between">
-      <span class="font-medium">ประวัติเวอร์ชันที่ส่งให้ลูกค้า</span>
-      <a href="{% url 'quotes:quotation_revisions' document.pk %}" class="text-slate-500 hover:underline">ดูทั้งหมด</a>
-    </div>
-    <ul class="divide-y">
-      {% for r in revisions %}
-        <li class="flex items-center justify-between py-1">
-          <span>Rev.{{ r.revision }}{% if r.reason %} — {{ r.reason }}{% endif %}{% if r.snapshot.sent_at %} · ส่งเมื่อ {{ r.snapshot.sent_at|slice:":10" }}{% endif %}{% if r.snapshot.totals.grand_total %} · {{ r.snapshot.totals.grand_total }} บาท{% endif %}</span>
-          <a href="{% url 'quotes:quotation_revision_detail' document.pk r.revision %}" class="text-slate-600 hover:underline">ดู</a>
-        </li>
-      {% endfor %}
-    </ul>
-  </div>
-  {% endif %}
-
-  {% if document.payment_terms or document.lead_time or document.warranty or document.notes or document.bank_account %}
-  <div class="mt-4 space-y-1 rounded-lg border bg-white p-4 text-sm">
-    {% if document.payment_terms %}<div><span class="text-slate-500">เงื่อนไขการชำระเงิน:</span> {{ document.payment_terms|linebreaksbr }}</div>{% endif %}
-    {% if document.lead_time %}<div><span class="text-slate-500">กำหนดส่งมอบ/ติดตั้ง:</span> {{ document.lead_time }}</div>{% endif %}
-    {% if document.warranty %}<div><span class="text-slate-500">การรับประกัน:</span> {{ document.warranty }}</div>{% endif %}
-    {% if document.bank_account %}<div><span class="text-slate-500">ชำระเข้าบัญชี:</span> {{ document.bank_account }}</div>{% endif %}
-    {% if document.notes %}<div class="border-t pt-1">{{ document.notes|linebreaksbr }}</div>{% endif %}
-  </div>
-  {% endif %}
+</div>
 {% endblock %}

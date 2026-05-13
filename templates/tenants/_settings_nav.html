@@ -1,0 +1,13 @@
+{# In-page settings nav. #}
+{% with un=request.resolver_match.url_name %}
+<div class="card" style="padding:8px;min-width:210px;align-self:flex-start">
+  <a class="sb-item {% if un == 'settings_hub' %}active{% endif %}" href="{% url 'workspace:settings_hub' %}"><span class="icon"><svg><use href="#i-home"/></svg></span> ภาพรวม</a>
+  <a class="sb-item {% if un == 'settings_company' %}active{% endif %}" href="{% url 'workspace:settings_company' %}"><span class="icon"><svg><use href="#i-building"/></svg></span> ข้อมูลบริษัท</a>
+  <a class="sb-item {% if un == 'settings_line' %}active{% endif %}" href="{% url 'workspace:settings_line' %}"><span class="icon"><svg><use href="#i-line-app"/></svg></span> เชื่อม LINE OA</a>
+  <a class="sb-item {% if un == 'settings_pipeline' %}active{% endif %}" href="{% url 'workspace:settings_pipeline' %}"><span class="icon"><svg><use href="#i-trend"/></svg></span> ขั้นใน Pipeline</a>
+  <a class="sb-item {% if un == 'settings_numbering' %}active{% endif %}" href="{% url 'workspace:settings_numbering' %}"><span class="icon"><svg><use href="#i-file-text"/></svg></span> เลขที่เอกสาร</a>
+  <a class="sb-item {% if un == 'settings_members' %}active{% endif %}" href="{% url 'workspace:settings_members' %}"><span class="icon"><svg><use href="#i-users"/></svg></span> สมาชิกและสิทธิ์</a>
+  <a class="sb-item {% if un == 'settings_billing' %}active{% endif %}" href="{% url 'workspace:settings_billing' %}"><span class="icon"><svg><use href="#i-card"/></svg></span> แพ็กเกจ</a>
+  <a class="sb-item {% if un == 'system_status' %}active{% endif %}" href="{% url 'workspace:system_status' %}"><span class="icon"><svg><use href="#i-shield"/></svg></span> สถานะระบบ</a>
+</div>
+{% endwith %}

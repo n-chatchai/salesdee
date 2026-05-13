@@ -128,6 +128,19 @@ class SalesDocument(TenantScopedModel):
         "tenants.BankAccount", on_delete=models.SET_NULL, related_name="+", null=True, blank=True
     )
     sent_at = models.DateTimeField("ส่งให้ลูกค้าเมื่อ", null=True, blank=True)
+    # If the quotation was drafted from a LINE conversation (Quote-from-Chat), the source thread —
+    # so sending it can post the Flex summary back into that chat and the deal shows the open count.
+    source_conversation = models.ForeignKey(
+        "integrations.Conversation",
+        on_delete=models.SET_NULL,
+        related_name="quotations",
+        null=True,
+        blank=True,
+    )
+    # Customer-opened-the-public-link tracking (REQUIREMENTS.md §4.8; the "เปิด N ครั้ง" signal).
+    first_viewed_at = models.DateTimeField("ลูกค้าเปิดดูครั้งแรก", null=True, blank=True)
+    last_viewed_at = models.DateTimeField("ลูกค้าเปิดดูล่าสุด", null=True, blank=True)
+    view_count = models.PositiveIntegerField("จำนวนครั้งที่เปิดดู", default=0)
     # Discount approval (REQUIREMENTS.md §4.7) — set when a manager/owner approves a quotation
     # whose discount exceeds the salesperson's cap (apps.quotes.services.submit_quotation).
     approved_by = models.ForeignKey(

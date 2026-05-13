@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>salesdee. · PDF + LINE Flex templates</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@200;300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F6F1E7;
+    --paper-2: #FBF7EF;
+    --paper-3: #ECE4D2;
+    --ink: #1B2A3A;
+    --ink-2: #2D3D50;
+    --mid: #6B7785;
+    --mid-2: #A5ACB5;
+    --accent: #C8501F;
+    --accent-deep: #9C3F18;
+    --accent-soft: #F4E2D3;
+    --ai: #7B8F6B;
+    --ai-soft: #E8EEDF;
+    --good: #4A6B40;
+    --good-soft: #E1EAD9;
+    --warn: #B45A3C;
+    --warn-soft: #F4DCD0;
+    --danger: #A8392F;
+    --border: #E5DDC9;
+    --line-green: #06C755;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { background: #393332; }
+  body {
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    color: var(--ink);
+    line-height: 1.5;
+    background: #393332;
+    min-height: 100vh;
+  }
+  .page {
+    max-width: 1400px;
+    margin: 40px auto;
+    background: var(--paper);
+    box-shadow: 0 30px 80px rgba(0,0,0,.4);
+    position: relative;
+  }
+  .page::before {
+    content: '';
+    position: absolute; inset: 0;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='1' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.1 0 0 0 0 0.1 0 0 0 0.06 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    opacity: 0.45;
+    mix-blend-mode: multiply;
+  }
+  .page > * { position: relative; z-index: 1; }
+
+  /* Wordmark + icon (from brand guide) */
+  .wm {
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    text-transform: lowercase;
+    line-height: 1;
+    display: inline-block;
+  }
+  .wm .sales { color: var(--ink); }
+  .wm .dee { color: var(--accent); }
+  .wm .dot {
+    display: inline-block;
+    width: 0.13em; height: 0.13em;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-left: 0.04em;
+    vertical-align: 0.05em;
+  }
+  .ic {
+    display: grid; place-items: center;
+    position: relative; overflow: hidden;
+    background: var(--ink);
+    border-radius: 22.37%;
+  }
+  .ic .d {
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -0.05em;
+    line-height: 0.85;
+  }
+  .ic .dot {
+    position: absolute;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+
+  /* Header */
+  .doc-header {
+    padding: 60px 80px 40px;
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: flex-end;
+  }
+  .doc-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--mid);
+    margin-bottom: 12px;
+  }
+  .doc-title {
+    font-size: 42px;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+    margin-bottom: 14px;
+  }
+  .doc-title em {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-style: italic;
+    color: var(--accent);
+  }
+  .doc-lead {
+    font-size: 14px;
+    color: var(--mid);
+    max-width: 580px;
+    line-height: 1.65;
+  }
+  .doc-meta {
+    text-align: right;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--mid);
+    letter-spacing: 0.08em;
+  }
+  .doc-meta div + div { margin-top: 4px; }
+
+  /* Section */
+  .section {
+    padding: 60px 80px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-head {
+    display: grid;
+    grid-template-columns: 80px 1fr 280px;
+    gap: 24px;
+    align-items: baseline;
+    margin-bottom: 40px;
+  }
+  .section-num {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 56px;
+    color: var(--accent);
+    line-height: 0.85;
+  }
+  .section-title {
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.022em;
+    line-height: 1.15;
+    margin-bottom: 8px;
+  }
+  .section-title em {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    color: var(--accent);
+  }
+  .section-desc {
+    font-size: 13px;
+    color: var(--mid);
+    line-height: 1.6;
+    max-width: 540px;
+  }
+  .section-side {
+    font-size: 12px;
+    color: var(--mid);
+    line-height: 1.6;
+    padding: 14px 16px;
+    background: var(--paper-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .section-side .key {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--mid);
+    margin-bottom: 6px;
+  }
+  .section-side strong { color: var(--ink); font-weight: 600; }
+
+  /* ═════════════════════════════════════════
+     PDF QUOTE LAYOUT (A4 simulation)
+     ═════════════════════════════════════════ */
+  .pdf-stage {
+    background: linear-gradient(180deg, var(--paper-3) 0%, var(--paper-2) 100%);
+    padding: 40px 20px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    display: grid; place-items: center;
+  }
+  /* A4: 210 × 297mm at 72dpi = 595 × 842px; scaled */
+  .pdf-paper {
+    width: 595px;
+    min-height: 842px;
+    background: #FFFFFF;
+    box-shadow: 0 12px 40px rgba(0,0,0,.18);
+    color: #1B2A3A;
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    position: relative;
+    padding: 56px 56px 48px;
+  }
+  /* Page-corner */
+  .pdf-corner {
+    position: absolute;
+    top: 24px; right: 24px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: #8B92A1;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* PDF header */
+  .pdf-head {
+    display: grid;
+    grid-template-columns: 1fr 180px;
+    gap: 24px;
+    padding-bottom: 24px;
+    border-bottom: 2px solid #1B2A3A;
+    margin-bottom: 28px;
+  }
+  .pdf-company-name {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #1B2A3A;
+    margin-bottom: 6px;
+  }
+  .pdf-company-meta {
+    font-size: 10px;
+    color: #6B7785;
+    line-height: 1.7;
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.02em;
+  }
+  .pdf-doc-info {
+    text-align: right;
+  }
+  .pdf-doc-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: #C8501F;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .pdf-doc-title {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 24px;
+    color: #1B2A3A;
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+  .pdf-doc-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: #6B7785;
+    line-height: 1.7;
+  }
+  .pdf-doc-meta strong { color: #1B2A3A; font-weight: 600; }
+
+  /* Customer block */
+  .pdf-customer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+  .pdf-cust-section .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #6B7785;
+    margin-bottom: 4px;
+  }
+  .pdf-cust-section .name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1B2A3A;
+    margin-bottom: 4px;
+  }
+  .pdf-cust-section .detail {
+    font-size: 10px;
+    color: #6B7785;
+    line-height: 1.6;
+  }
+
+  /* Items table */
+  .pdf-items {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+    font-size: 10px;
+  }
+  .pdf-items thead th {
+    background: #F6F1E7;
+    color: #1B2A3A;
+    text-align: left;
+    padding: 8px 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+    border-bottom: 1px solid #1B2A3A;
+  }
+  .pdf-items thead th.num { text-align: center; width: 30px; }
+  .pdf-items thead th.qty { text-align: center; width: 50px; }
+  .pdf-items thead th.unit { width: 70px; }
+  .pdf-items thead th.price { text-align: right; width: 80px; }
+  .pdf-items thead th.total { text-align: right; width: 90px; }
+  .pdf-items tbody td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #ECE4D2;
+    vertical-align: top;
+  }
+  .pdf-items tbody td.num {
+    text-align: center;
+    font-family: 'IBM Plex Mono', monospace;
+    color: #8B92A1;
+  }
+  .pdf-items tbody .item-thumb {
+    width: 40px; height: 40px;
+    border-radius: 4px;
+    background: linear-gradient(135deg, #8B7355, #4A3C2C);
+    margin-bottom: 6px;
+  }
+  .pdf-items tbody .item-name {
+    font-weight: 600;
+    color: #1B2A3A;
+    margin-bottom: 2px;
+  }
+  .pdf-items tbody .item-sku {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8px;
+    color: #6B7785;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+  .pdf-items tbody .item-spec {
+    font-size: 9px;
+    color: #6B7785;
+    line-height: 1.5;
+  }
+  .pdf-items tbody td.qty {
+    text-align: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+  }
+  .pdf-items tbody td.unit {
+    font-size: 9px;
+    color: #6B7785;
+  }
+  .pdf-items tbody td.price,
+  .pdf-items tbody td.total {
+    text-align: right;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .pdf-items tbody td.total {
+    font-weight: 600;
+    color: #1B2A3A;
+  }
+
+  /* Totals */
+  .pdf-totals {
+    margin-left: auto;
+    width: 280px;
+    margin-bottom: 28px;
+  }
+  .pdf-totals-row {
+    display: grid;
+    grid-template-columns: 1fr 110px;
+    padding: 5px 0;
+    font-size: 11px;
+    color: #6B7785;
+  }
+  .pdf-totals-row .value {
+    text-align: right;
+    font-family: 'IBM Plex Mono', monospace;
+    color: #1B2A3A;
+  }
+  .pdf-totals-row.grand {
+    border-top: 2px solid #1B2A3A;
+    border-bottom: 2px solid #1B2A3A;
+    padding: 10px 0;
+    margin-top: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1B2A3A;
+  }
+  .pdf-totals-row.grand .value {
+    font-weight: 600;
+    color: #C8501F;
+    font-size: 16px;
+  }
+  .pdf-totals-row.discount .value { color: #C8501F; }
+
+  /* Terms + footer */
+  .pdf-terms {
+    padding: 14px 16px;
+    background: #FBF7EF;
+    border-left: 3px solid #C8501F;
+    margin-bottom: 28px;
+    font-size: 9px;
+    color: #6B7785;
+    line-height: 1.7;
+  }
+  .pdf-terms .title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: #1B2A3A;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .pdf-terms ol {
+    list-style: none;
+    counter-reset: terms;
+  }
+  .pdf-terms ol li {
+    counter-increment: terms;
+    position: relative;
+    padding-left: 18px;
+    margin-bottom: 3px;
+  }
+  .pdf-terms ol li::before {
+    content: counter(terms);
+    position: absolute;
+    left: 0;
+    font-family: 'IBM Plex Mono', monospace;
+    color: #C8501F;
+    font-weight: 600;
+  }
+
+  /* Signatures */
+  .pdf-signatures {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-bottom: 32px;
+    padding-top: 32px;
+  }
+  .pdf-sig {
+    text-align: center;
+  }
+  .pdf-sig .line {
+    height: 1px;
+    background: #1B2A3A;
+    margin-bottom: 8px;
+  }
+  .pdf-sig .role {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: #6B7785;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+  .pdf-sig .name {
+    font-size: 11px;
+    color: #1B2A3A;
+    font-weight: 600;
+  }
+  .pdf-sig .date {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8px;
+    color: #8B92A1;
+    margin-top: 4px;
+  }
+  /* QR + footer */
+  .pdf-foot {
+    display: grid;
+    grid-template-columns: 60px 1fr 100px;
+    gap: 14px;
+    padding-top: 18px;
+    border-top: 1px solid #ECE4D2;
+    align-items: center;
+  }
+  .pdf-qr {
+    width: 56px; height: 56px;
+    background: #1B2A3A;
+    position: relative;
+    border-radius: 3px;
+  }
+  /* Fake QR pattern */
+  .pdf-qr::before {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    background-image:
+      radial-gradient(circle at 10% 10%, #FFFFFF 1.5px, transparent 1.5px),
+      radial-gradient(circle at 90% 10%, #FFFFFF 1.5px, transparent 1.5px),
+      radial-gradient(circle at 10% 90%, #FFFFFF 1.5px, transparent 1.5px),
+      radial-gradient(circle at 50% 50%, #FFFFFF 2px, transparent 2px),
+      linear-gradient(45deg, transparent 35%, #FFFFFF 35%, #FFFFFF 38%, transparent 38%, transparent 62%, #FFFFFF 62%, #FFFFFF 65%, transparent 65%);
+    background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 8px 8px;
+    opacity: 0.85;
+  }
+  .pdf-foot-text {
+    font-size: 9px;
+    color: #6B7785;
+    line-height: 1.6;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .pdf-foot-text strong { color: #1B2A3A; font-weight: 600; }
+  .pdf-foot-text .link { color: #C8501F; }
+
+  /* Powered-by */
+  .pdf-powered {
+    text-align: right;
+    font-size: 9px;
+    color: #8B92A1;
+    line-height: 1.4;
+  }
+  .pdf-powered .wm {
+    font-size: 13px;
+    margin-top: 2px;
+  }
+
+  /* Stamp seal in corner */
+  .pdf-stamp {
+    position: absolute;
+    bottom: 110px; right: 56px;
+    transform: rotate(-7deg);
+    opacity: 0.85;
+  }
+  .pdf-stamp .seal {
+    width: 84px; height: 84px;
+    border: 2px solid #C8501F;
+    border-radius: 50%;
+    position: relative;
+    display: grid; place-items: center;
+  }
+  .pdf-stamp .seal::after {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    border: 1px dashed #C8501F;
+    border-radius: 50%;
+    opacity: 0.5;
+  }
+  .pdf-stamp .seal .text {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 28px;
+    color: #C8501F;
+    line-height: 0.85;
+  }
+  .pdf-stamp-label {
+    margin-top: 4px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8px;
+    text-align: center;
+    color: #C8501F;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  /* Annotations */
+  .pdf-annot {
+    background: var(--paper-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-top: 20px;
+  }
+  .pdf-annot .title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .pdf-annot ul {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 24px;
+  }
+  .pdf-annot li {
+    font-size: 12px;
+    color: var(--ink-2);
+    padding-left: 20px;
+    position: relative;
+    line-height: 1.5;
+  }
+  .pdf-annot li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+  }
+  .pdf-annot li strong { color: var(--ink); font-weight: 600; }
+  .pdf-annot li code {
+    font-family: 'IBM Plex Mono', monospace;
+    background: var(--paper-3);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    color: var(--accent-deep);
+  }
+
+  /* ═════════════════════════════════════════
+     LINE FLEX MESSAGES
+     ═════════════════════════════════════════ */
+  .line-stage {
+    background: linear-gradient(160deg, #8AABD5 0%, #6A8FB8 100%);
+    padding: 40px 32px;
+    border-radius: 16px;
+  }
+  .line-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .line-msg-wrap {
+    display: flex; flex-direction: column;
+    gap: 8px;
+  }
+  .line-msg-context {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: rgba(255,255,255,0.85);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: left;
+    margin-bottom: 4px;
+  }
+  /* The Flex Message itself */
+  .line-flex {
+    background: #FFFFFF;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0,0,0,.18);
+    max-width: 300px;
+    margin-left: 38px;
+    position: relative;
+  }
+  .line-flex-avatar {
+    position: absolute;
+    left: -38px; top: 0;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+  .line-flex-hero {
+    height: 110px;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 16px 20px;
+    display: flex; flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+  }
+  .line-flex-hero .top {
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(246,241,231,0.7);
+  }
+  .line-flex-hero .top .wm-small {
+    color: var(--paper);
+    font-family: 'IBM Plex Sans Thai';
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: -0.04em;
+    text-transform: lowercase;
+    text-align: right;
+  }
+  .line-flex-hero .top .wm-small em {
+    color: var(--accent);
+    font-style: normal;
+  }
+  .line-flex-hero .title {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 24px;
+    line-height: 1.1;
+    color: var(--paper);
+  }
+  .line-flex-hero .title strong {
+    font-family: 'IBM Plex Sans Thai';
+    font-style: normal;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .line-flex-body {
+    padding: 16px 20px;
+  }
+  .line-flex-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    padding: 5px 0;
+    font-size: 12px;
+    color: var(--ink-2);
+    line-height: 1.5;
+  }
+  .line-flex-row .label {
+    color: var(--mid);
+  }
+  .line-flex-row .value {
+    color: var(--ink);
+    font-weight: 600;
+    text-align: right;
+  }
+  .line-flex-row .value.mono {
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .line-flex-row .value.accent {
+    color: var(--accent);
+  }
+  .line-flex-divider {
+    height: 1px;
+    background: var(--border-2);
+    margin: 8px 0;
+  }
+  .line-flex-total {
+    padding: 12px 0 4px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    border-top: 2px solid var(--ink);
+    margin-top: 8px;
+  }
+  .line-flex-total .label {
+    font-size: 13px;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .line-flex-total .value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+  }
+  .line-flex-meta {
+    padding: 14px 20px;
+    background: var(--paper-2);
+    border-top: 1px solid var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--mid);
+    line-height: 1.5;
+  }
+  .line-flex-meta .row {
+    display: flex; justify-content: space-between;
+    margin-bottom: 3px;
+  }
+  .line-flex-meta .row:last-child { margin-bottom: 0; }
+  .line-flex-meta strong { color: var(--ink); font-weight: 600; }
+  .line-flex-buttons {
+    padding: 12px 16px;
+    background: #FFFFFF;
+    display: flex; flex-direction: column;
+    gap: 6px;
+    border-top: 1px solid var(--border);
+  }
+  .line-flex-btn {
+    padding: 9px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    font-family: inherit;
+    border: none;
+  }
+  .line-flex-btn.primary {
+    background: var(--accent);
+    color: var(--paper);
+  }
+  .line-flex-btn.secondary {
+    background: var(--paper-2);
+    color: var(--ink);
+    border: 1px solid var(--border);
+  }
+
+  /* Tail (message bubble pointer) */
+  .line-flex::after {
+    content: '';
+    position: absolute;
+    left: -8px; top: 14px;
+    width: 0; height: 0;
+    border-style: solid;
+    border-width: 0 12px 8px 0;
+    border-color: transparent #FFFFFF transparent transparent;
+  }
+
+  /* Variant: warn hero */
+  .line-flex-hero.warn { background: var(--warn); }
+  .line-flex-hero.warn .top .wm-small em { color: var(--paper); }
+  .line-flex-hero.warn .title strong { color: var(--paper); }
+  /* Variant: good hero */
+  .line-flex-hero.good { background: var(--good); }
+  .line-flex-hero.good .top .wm-small em { color: var(--paper); }
+  .line-flex-hero.good .title strong { color: var(--paper); }
+  /* Variant: ai sage hero */
+  .line-flex-hero.ai { background: var(--ai); }
+  .line-flex-hero.ai .top .wm-small em { color: var(--paper); }
+  .line-flex-hero.ai .title strong { color: var(--paper); }
+
+  /* Customer preview ribbon */
+  .line-flex-ribbon {
+    padding: 10px 20px;
+    background: var(--ai-soft);
+    color: var(--ai-deep);
+    font-size: 11px;
+    line-height: 1.4;
+    display: flex; gap: 8px; align-items: flex-start;
+  }
+  .line-flex-ribbon .ic-ai {
+    width: 20px; height: 20px;
+    background: var(--ai);
+    color: var(--paper);
+    border-radius: 4px;
+    display: grid; place-items: center;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 0.6;
+    flex-shrink: 0;
+  }
+  .line-flex-ribbon strong { font-weight: 600; }
+
+  /* JSON spec block */
+  .json-block {
+    background: var(--ink);
+    color: #FBF7EF;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-top: 20px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    line-height: 1.6;
+    overflow-x: auto;
+  }
+  .json-block .key { color: #C8501F; }
+  .json-block .str { color: #B8D38A; }
+  .json-block .num { color: #E8BD7E; }
+  .json-block .bool { color: #7B8F6B; }
+  .json-block .comment { color: #6B7785; font-style: italic; }
+
+  /* Footer */
+  .doc-footer {
+    padding: 50px 80px;
+    background: var(--paper-2);
+    text-align: center;
+  }
+  .doc-footer-text {
+    font-size: 14px;
+    color: var(--ink-2);
+    line-height: 1.7;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  .doc-footer-text strong { color: var(--ink); font-weight: 600; }
+  .doc-footer-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--mid);
+    margin-top: 14px;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <header class="doc-header">
+    <div>
+      <div class="doc-eyebrow">salesdee. · External Templates</div>
+      <h1 class="doc-title">PDF + <em>LINE</em><br>ที่ลูกค้าได้รับ</h1>
+      <p class="doc-lead">
+        ทุกครั้งที่ salesdee. "ออกไปข้างนอก" — ส่งให้ลูกค้าผ่าน LINE หรือ download เป็น PDF · เอกสารนี้แสดงทุก template ที่ลูกค้าเห็น
+      </p>
+    </div>
+    <div class="doc-meta">
+      <div>12 พฤษภาคม 2569</div>
+      <div>2 channels · 1 PDF · 4 LINE</div>
+      <div>spec for WeasyPrint + LINE API</div>
+    </div>
+  </header>
+
+  <!-- ═══ PDF QUOTE ═══ -->
+  <section class="section">
+    <div class="section-head">
+      <div class="section-num">01</div>
+      <div>
+        <h2 class="section-title">PDF <em>ใบเสนอราคา</em></h2>
+        <p class="section-desc">เอกสาร A4 ที่ลูกค้า download / email / ส่งให้ผู้บังคับบัญชา · render ผ่าน WeasyPrint จาก template html · ตรากลม "ดี" สีส้มมุมล่างขวาเป็น signature ของแบรนด์</p>
+      </div>
+      <div class="section-side">
+        <div class="key">tech</div>
+        <strong>WeasyPrint</strong> render html → pdf<br>
+        <strong>A4 portrait</strong> (210 × 297 mm)<br>
+        <strong>ฟอนต์ฝัง</strong> ใน pdf (no fallback)<br>
+        <strong>QR</strong> link ไปดูออนไลน์
+      </div>
+    </div>
+
+    <div class="pdf-stage">
+      <div class="pdf-paper">
+
+        <div class="pdf-corner">หน้า 1 / 1</div>
+
+        <!-- Header -->
+        <div class="pdf-head">
+          <div>
+            <div class="pdf-company-name">บริษัท วัน.ดี.ดี.บิสซิเนส จำกัด</div>
+            <div class="pdf-company-meta">
+              เลขที่ 12 ตึก SCB Park ชั้น 14 ถนนรัชดาภิเษก แขวงจตุจักร เขตจตุจักร กรุงเทพมหานคร 10900<br>
+              เลขผู้เสียภาษี 0105563012345 (สำนักงานใหญ่)<br>
+              โทร 02 xxx xxxx · อีเมล hello@wandeedee.co.th · เว็บ wandeedee.co.th
+            </div>
+          </div>
+          <div class="pdf-doc-info">
+            <div class="pdf-doc-label">QUOTATION</div>
+            <div class="pdf-doc-title">ใบเสนอราคา</div>
+            <div class="pdf-doc-meta">
+              <strong>QT-2026-0142</strong><br>
+              ออก 12 พฤษภาคม 2569<br>
+              ยืนราคาถึง 11 มิถุนายน 2569
+            </div>
+          </div>
+        </div>
+
+        <!-- Customer -->
+        <div class="pdf-customer">
+          <div class="pdf-cust-section">
+            <div class="label">เรียน</div>
+            <div class="name">คุณนริศ พรพิพัฒน์</div>
+            <div class="detail">
+              ฝ่ายจัดซื้อ · บริษัท ABC จำกัด<br>
+              99 ตึก ABC Tower ชั้น 7 ถนนสุขุมวิท แขวงคลองตัน เขตคลองเตย กรุงเทพมหานคร 10110<br>
+              โทร 02 xxx xxxx · อีเมล narit@abc.co.th
+            </div>
+          </div>
+          <div class="pdf-cust-section">
+            <div class="label">โครงการ</div>
+            <div class="name">ปรับปรุงออฟฟิศชั้น 7 · เฟส 1</div>
+            <div class="detail">
+              โต๊ะทำงาน 12 ชุด · เก้าอี้ ergonomic · partition acoustic<br>
+              กำหนดส่งและติดตั้ง: 25-30 มิถุนายน 2569<br>
+              ผู้รับผิดชอบ: มะลิ สมิตา · เซลส์อาวุโส
+            </div>
+          </div>
+        </div>
+
+        <!-- Items table -->
+        <table class="pdf-items">
+          <thead>
+            <tr>
+              <th class="num">#</th>
+              <th>รายการ</th>
+              <th class="qty">จำนวน</th>
+              <th class="unit">หน่วย</th>
+              <th class="price">ราคา/หน่วย</th>
+              <th class="total">รวม</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="num">1</td>
+              <td>
+                <div class="item-thumb"></div>
+                <div class="item-name">โต๊ะผู้บริหาร Premium · 180 cm · Walnut</div>
+                <div class="item-sku">TWB-180</div>
+                <div class="item-spec">วัสดุ MDF เคลือบลามิเนต Walnut · ขาเหล็กชุบเทา · 180 × 80 × 75 cm · มาตรฐาน มอก. 1494</div>
+              </td>
+              <td class="qty">2</td>
+              <td class="unit">ชุด</td>
+              <td class="price">85,000.00</td>
+              <td class="total">170,000.00</td>
+            </tr>
+            <tr>
+              <td class="num">2</td>
+              <td>
+                <div class="item-thumb" style="background: linear-gradient(135deg, #6B6B5C, #3F4A3F);"></div>
+                <div class="item-name">Workstation 4 ที่นั่ง + partition acoustic</div>
+                <div class="item-sku">WS-4P · สีเทาเข้ม</div>
+                <div class="item-spec">โครงเหล็กพ่นสี · top เคลือบ HPL · partition ผ้า acoustic 60 cm · รวมราง wiring · ขนาด 280 × 140 × 120 cm</div>
+              </td>
+              <td class="qty">3</td>
+              <td class="unit">ชุด</td>
+              <td class="price">48,500.00</td>
+              <td class="total">145,500.00</td>
+            </tr>
+            <tr>
+              <td class="num">3</td>
+              <td>
+                <div class="item-thumb" style="background: linear-gradient(135deg, #2D3748, #1A202C);"></div>
+                <div class="item-name">เก้าอี้ ergonomic Skyline 5D</div>
+                <div class="item-sku">ERG-S5</div>
+                <div class="item-spec">เบาะตาข่าย · รองรับ ergonomic 5 จุด · ปรับได้ 7 ทิศทาง · รับน้ำหนัก 120 kg · รับประกัน 5 ปี</div>
+              </td>
+              <td class="qty">14</td>
+              <td class="unit">ตัว</td>
+              <td class="price">12,800.00</td>
+              <td class="total">179,200.00</td>
+            </tr>
+            <tr>
+              <td class="num">4</td>
+              <td>
+                <div class="item-thumb" style="background: linear-gradient(135deg, #C0B097, #8A7A65);"></div>
+                <div class="item-name">บริการขนส่งและติดตั้ง</div>
+                <div class="item-sku">SVC-INSTALL</div>
+                <div class="item-spec">ค่าขนส่งภายในกรุงเทพ + ติดตั้งโดยทีมช่างของวัน.ดี.ดี. · พร้อมจัดเก็บกล่องบรรจุภัณฑ์</div>
+              </td>
+              <td class="qty">1</td>
+              <td class="unit">งาน</td>
+              <td class="price">8,500.00</td>
+              <td class="total">8,500.00</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Totals -->
+        <div class="pdf-totals">
+          <div class="pdf-totals-row">
+            <span>ยอดรวม</span>
+            <span class="value">503,200.00</span>
+          </div>
+          <div class="pdf-totals-row discount">
+            <span>ส่วนลด 5% (ลูกค้าใหม่)</span>
+            <span class="value">−25,160.00</span>
+          </div>
+          <div class="pdf-totals-row">
+            <span>ยอดหลังหักส่วนลด</span>
+            <span class="value">478,040.00</span>
+          </div>
+          <div class="pdf-totals-row">
+            <span>ภาษีมูลค่าเพิ่ม 7%</span>
+            <span class="value">33,462.80</span>
+          </div>
+          <div class="pdf-totals-row grand">
+            <span>ยอดสุทธิ</span>
+            <span class="value">฿ 511,502.80</span>
+          </div>
+        </div>
+
+        <!-- Terms -->
+        <div class="pdf-terms">
+          <div class="title">เงื่อนไขและข้อกำหนด</div>
+          <ol>
+            <li>ใบเสนอราคานี้ยืนราคา 30 วันนับจากวันที่ออก</li>
+            <li>ชำระเงิน 50% เมื่อยืนยันคำสั่งซื้อ · ส่วนที่เหลือชำระเมื่อส่งและติดตั้งเสร็จ</li>
+            <li>ระยะเวลาส่งและติดตั้ง 14 วันทำการนับจากวันยืนยันสั่งซื้อ</li>
+            <li>รับประกันสินค้า 1 ปี ครอบคลุมงานช่างและวัสดุ (ไม่รวมการใช้งานผิดประเภท)</li>
+            <li>ราคาดังกล่าวรวมค่าขนส่งและติดตั้งภายในเขตกรุงเทพและปริมณฑลแล้ว</li>
+          </ol>
+        </div>
+
+        <!-- Stamp -->
+        <div class="pdf-stamp">
+          <div class="seal">
+            <div class="text">ดี</div>
+          </div>
+          <div class="pdf-stamp-label">APPROVED</div>
+        </div>
+
+        <!-- Signatures -->
+        <div class="pdf-signatures">
+          <div class="pdf-sig">
+            <div class="line"></div>
+            <div class="role">ผู้เสนอราคา</div>
+            <div class="name">มะลิ สมิตา</div>
+            <div class="date">12 พฤษภาคม 2569</div>
+          </div>
+          <div class="pdf-sig">
+            <div class="line"></div>
+            <div class="role">ผู้ยืนยันสั่งซื้อ</div>
+            <div class="name">.....................................</div>
+            <div class="date">วันที่ ................................</div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="pdf-foot">
+          <div class="pdf-qr"></div>
+          <div class="pdf-foot-text">
+            <strong>ดูออนไลน์ + ยอมรับใบเสนอ</strong><br>
+            สแกน QR หรือไปที่ <span class="link">salesdee.app/q/abc-narit-0142</span><br>
+            กดยืนยันได้ใน 30 วินาที · ไม่ต้องพิมพ์
+          </div>
+          <div class="pdf-powered">
+            powered by<br>
+            <span class="wm"><span class="sales">sales</span><span class="dee">dee</span><span class="dot"></span></span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="pdf-annot">
+      <div class="title">ข้อมูลที่ต้องเปลี่ยนตาม template</div>
+      <ul>
+        <li><strong>Header</strong>: ชื่อ tenant + ที่อยู่ + เลขผู้เสียภาษี · field <code>{{ tenant }}</code></li>
+        <li><strong>Quote ID</strong>: <code>QT-{{ year }}-{{ seq:04d }}</code></li>
+        <li><strong>Customer block</strong>: <code>{{ quote.customer }}</code> + <code>{{ quote.contact }}</code></li>
+        <li><strong>Items loop</strong>: thumb + name + sku + spec + qty + price จาก <code>{{ quote.items }}</code></li>
+        <li><strong>Totals</strong>: คำนวณจาก items + <code>{{ quote.discount_percent }}</code> + ภาษี 7%</li>
+        <li><strong>Terms</strong>: 5 ข้อมาตรฐาน + <code>{{ tenant.custom_terms }}</code> เพิ่มเติม</li>
+        <li><strong>QR</strong>: encode URL ของ <code>{{ quote.public_url }}</code> + signed token</li>
+        <li><strong>Stamp</strong>: แสดงเมื่อ <code>quote.status == 'sent'</code> · ตำแหน่ง absolute</li>
+        <li><strong>Signature</strong>: ฝั่งซ้ายมาจาก <code>{{ quote.created_by }}</code> · ฝั่งขวาเปิดให้กรอกจริง</li>
+        <li><strong>Powered-by</strong>: ทุก pdf ที่ tenant ใช้ free tier แสดง · paid tier ปิดได้</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══ LINE FLEX MESSAGES ═══ -->
+  <section class="section">
+    <div class="section-head">
+      <div class="section-num">02</div>
+      <div>
+        <h2 class="section-title">LINE Flex <em>4 templates</em></h2>
+        <p class="section-desc">เมื่อ salesdee. ส่งกลับเข้า LINE chat — ใช้ Flex Message ตามรูปแบบมาตรฐานของ LINE Messaging API · 4 รูปแบบหลักครอบคลุมการสื่อสารทุกขั้นของดีล</p>
+      </div>
+      <div class="section-side">
+        <div class="key">tech</div>
+        <strong>LINE Messaging API</strong><br>
+        <strong>Flex Message</strong> JSON spec<br>
+        max <strong>10 messages</strong>/min/user<br>
+        <strong>ESM-fallback</strong>: text หากไม่รองรับ
+      </div>
+    </div>
+
+    <div class="line-stage">
+      <div class="line-grid">
+
+        <!-- TEMPLATE 1: ใบเสนอราคาใหม่ -->
+        <div class="line-msg-wrap">
+          <div class="line-msg-context">Template 1 · ใบเสนอใหม่ส่งให้ลูกค้า</div>
+          <div class="line-flex">
+            <div class="line-flex-avatar">
+              <div class="ic" style="width: 32px; height: 32px;">
+                <span class="d" style="font-size: 22px;">d</span>
+              </div>
+            </div>
+            <div class="line-flex-hero">
+              <div class="top">
+                <span>QUOTATION</span>
+                <span class="wm-small">sales<em>dee</em>.</span>
+              </div>
+              <div class="title">ใบเสนอราคา<br><strong>QT-2026-0142</strong></div>
+            </div>
+            <div class="line-flex-body">
+              <div class="line-flex-row">
+                <span class="label">โครงการ</span>
+                <span class="value">ออฟฟิศชั้น 7</span>
+              </div>
+              <div class="line-flex-row">
+                <span class="label">รายการ</span>
+                <span class="value">4 รายการ · 20 หน่วย</span>
+              </div>
+              <div class="line-flex-row">
+                <span class="label">ส่งและติดตั้ง</span>
+                <span class="value mono">25-30 มิ.ย. 69</span>
+              </div>
+              <div class="line-flex-total">
+                <span class="label">ยอดสุทธิ</span>
+                <span class="value">฿ 511,502</span>
+              </div>
+            </div>
+            <div class="line-flex-meta">
+              <div class="row">
+                <span>ยืนราคาถึง</span>
+                <strong>11 มิ.ย. 2569</strong>
+              </div>
+              <div class="row">
+                <span>เซลส์</span>
+                <strong>มะลิ สมิตา</strong>
+              </div>
+            </div>
+            <div class="line-flex-buttons">
+              <button class="line-flex-btn primary">ดูใบเสนอเต็ม · ยอมรับ</button>
+              <button class="line-flex-btn secondary">ขอแก้ไข · แชตต่อ</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TEMPLATE 2: ลูกค้าเปิดดู (notification กลับเซลส์) -->
+        <div class="line-msg-wrap">
+          <div class="line-msg-context">Template 2 · แจ้งเซลส์เมื่อลูกค้าเปิดดู</div>
+          <div class="line-flex">
+            <div class="line-flex-avatar">
+              <div class="ic" style="width: 32px; height: 32px;">
+                <span class="d" style="font-size: 22px;">d</span>
+              </div>
+            </div>
+            <div class="line-flex-hero ai">
+              <div class="top">
+                <span>CUSTOMER ACTIVITY</span>
+                <span class="wm-small">sales<em>dee</em>.</span>
+              </div>
+              <div class="title">คุณนริศเปิดดู<br><strong>4 ครั้ง</strong>แล้ว</div>
+            </div>
+            <div class="line-flex-ribbon">
+              <div class="ic-ai">D</div>
+              <div><strong>ผู้ช่วยวิเคราะห์:</strong> เปิดดูซ้ำหลายครั้งแสดงว่าสนใจแต่ลังเล · มักจะติดเรื่องราคา หรือเงื่อนไขชำระ · ลองทักไปคุย</div>
+            </div>
+            <div class="line-flex-body">
+              <div class="line-flex-row">
+                <span class="label">ใบเสนอ</span>
+                <span class="value mono">QT-2026-0142</span>
+              </div>
+              <div class="line-flex-row">
+                <span class="label">เปิดครั้งแรก</span>
+                <span class="value">เมื่อ 2 วันก่อน</span>
+              </div>
+              <div class="line-flex-row">
+                <span class="label">เปิดล่าสุด</span>
+                <span class="value accent">10 นาทีที่แล้ว</span>
+              </div>
+              <div class="line-flex-row">
+                <span class="label">หน้าที่ดูซ้ำ</span>
+                <span class="value">เงื่อนไขชำระ</span>
+              </div>
+            </div>
+            <div class="line-flex-buttons">
+              <button class="line-flex-btn primary">ส่งข้อความตามอัตโนมัติ</button>
+              <button class="line-flex-btn secondary">เปิดดีลในแอป</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TEMPLATE 3: ใกล้หมดอายุ -->
+        <div class="line-msg-wrap">
+          <div class="line-msg-context">Template 3 · เตือนใบเสนอใกล้หมดอายุ</div>
+          <div class="line-flex">
+            <div class="line-flex-avatar">
+              <div class="ic" style="width: 32px; height: 32px;">
+                <span class="d" style="font-size: 22px;">d</span>
+              </div>
+            </div>
+            <div class="line-flex-hero warn">
+              <div class="top">
+                <span>EXPIRING SOON</span>
+                <span class="wm-small">sales<em>dee</em>.</span>
+              </div>
+              <div class="title">ใบเสนอจะหมด<br>ภายใน <strong>2 วัน</strong></div>
+            </div>
+            <div class="line-flex-body">
+              <div class="line-flex-row">
+                <span class="label">ใบเสนอ</span>
+                <span class="value mono">QT-2026-0142</span>
+              </div>
+              <div class="line-flex-row">
+                <span class="label">หมดอายุ</span>
+                <span class="value accent">11 มิ.ย. 2569 · 23:59</span>
+              </div>
+              <div class="line-flex-row">
+                <span class="label">ยอดสุทธิ</span>
+                <span class="value mono">฿ 511,502</span>
+              </div>
+              <div class="line-flex-row">
+                <span class="label">สถานะ</span>
+                <span class="value">ส่งให้แล้ว · รอตอบ</span>
+              </div>
+              <div class="line-flex-divider"></div>
+              <div style="font-size: 11px; color: var(--mid); line-height: 1.6; padding-top: 4px;">
+                หลังหมดอายุราคาอาจปรับเปลี่ยน เนื่องจาก stock และต้นทุนที่เปลี่ยนแปลง
+              </div>
+            </div>
+            <div class="line-flex-buttons">
+              <button class="line-flex-btn primary">ขยายเวลายืนราคา</button>
+              <button class="line-flex-btn secondary">ดูใบเสนอ + ยอมรับ</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TEMPLATE 4: ปิดดีลได้ -->
+        <div class="line-msg-wrap">
+          <div class="line-msg-context">Template 4 · ลูกค้ายอมรับ · ขอบคุณ</div>
+          <div class="line-flex">
+            <div class="line-flex-avatar">
+              <div class="ic" style="width: 32px; height: 32px;">
+                <span class="d" style="font-size: 22px;">d</span>
+              </div>
+            </div>
+            <div class="line-flex-hero good">
+              <div class="top">
+                <span>DEAL CONFIRMED</span>
+                <span class="wm-small">sales<em>dee</em>.</span>
+              </div>
+              <div class="title">ขอบคุณค่ะ<br>ดีล<strong>ปิดแล้ว</strong></div>
+            </div>
+            <div class="line-flex-body">
+              <div class="line-flex-row">
+                <span class="label">ใบเสนอ</span>
+                <span class="value mono">QT-2026-0142</span>
+              </div>
+              <div class="line-flex-row">
+                <span class="label">สถานะ</span>
+                <span class="value" style="color: var(--good);">ยอมรับเมื่อ 10:42 · 12 พ.ค.</span>
+              </div>
+              <div class="line-flex-row">
+                <span class="label">ยอดที่ยอมรับ</span>
+                <span class="value mono">฿ 511,502</span>
+              </div>
+              <div class="line-flex-divider"></div>
+              <div style="font-size: 12px; color: var(--ink-2); line-height: 1.55; padding-top: 4px;">
+                <strong style="color: var(--ink);">ขั้นถัดไป:</strong><br>
+                1. ทีมจะติดต่อยืนยันที่อยู่และเวลาส่งใน 24 ชั่วโมง<br>
+                2. ทำการชำระเงินมัดจำ 50% · ฿ 255,751<br>
+                3. ส่งและติดตั้ง 25-30 มิ.ย. 2569
+              </div>
+            </div>
+            <div class="line-flex-buttons">
+              <button class="line-flex-btn primary">ดูช่องทางชำระเงิน</button>
+              <button class="line-flex-btn secondary">ดาวน์โหลดใบเสร็จมัดจำ</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- JSON spec example -->
+    <div class="pdf-annot">
+      <div class="title">JSON spec ของ template 1 (ใบเสนอใหม่) · ใช้ส่งผ่าน LINE Messaging API</div>
+      <ul>
+        <li><strong>Endpoint</strong>: <code>POST https://api.line.me/v2/bot/message/push</code></li>
+        <li><strong>Type</strong>: <code>flex</code> · altText: "ใบเสนอราคา QT-2026-0142 · 4 รายการ · ฿511,502"</li>
+        <li><strong>Hero block</strong>: bubble body · ink background · padding 16/20</li>
+        <li><strong>Items rows</strong>: vertical box · separator: <code>1px solid #EFE8D7</code></li>
+        <li><strong>Total row</strong>: top border 2px ink · accent color value</li>
+        <li><strong>Buttons</strong>: action type <code>uri</code> → ส่งไปหน้า public quote page</li>
+        <li><strong>Fallback text</strong>: หาก client ไม่รองรับ flex → ส่งเป็น text + URL</li>
+        <li><strong>Webhook</strong>: ตามจาก postback action เมื่อ user กดปุ่ม</li>
+      </ul>
+    </div>
+
+    <div class="json-block">
+<span class="comment">// Template 1 · ใบเสนอใหม่ · Flex Message JSON</span>
+{
+  <span class="key">"type"</span>: <span class="str">"flex"</span>,
+  <span class="key">"altText"</span>: <span class="str">"ใบเสนอราคา QT-2026-0142 · 4 รายการ · ฿511,502"</span>,
+  <span class="key">"contents"</span>: {
+    <span class="key">"type"</span>: <span class="str">"bubble"</span>,
+    <span class="key">"size"</span>: <span class="str">"mega"</span>,
+    <span class="key">"hero"</span>: { <span class="key">"type"</span>: <span class="str">"box"</span>, <span class="key">"layout"</span>: <span class="str">"vertical"</span>,
+      <span class="key">"backgroundColor"</span>: <span class="str">"#1B2A3A"</span>, <span class="key">"paddingAll"</span>: <span class="str">"20px"</span>,
+      <span class="key">"contents"</span>: [
+        { <span class="key">"type"</span>: <span class="str">"text"</span>, <span class="key">"text"</span>: <span class="str">"QUOTATION"</span>, <span class="key">"color"</span>: <span class="str">"#A5ACB5"</span>, <span class="key">"size"</span>: <span class="str">"xxs"</span>, <span class="key">"weight"</span>: <span class="str">"bold"</span> },
+        { <span class="key">"type"</span>: <span class="str">"text"</span>, <span class="key">"text"</span>: <span class="str">"ใบเสนอราคา"</span>, <span class="key">"color"</span>: <span class="str">"#F6F1E7"</span>, <span class="key">"size"</span>: <span class="str">"xl"</span>, <span class="key">"weight"</span>: <span class="str">"regular"</span> },
+        { <span class="key">"type"</span>: <span class="str">"text"</span>, <span class="key">"text"</span>: <span class="str">"QT-2026-0142"</span>, <span class="key">"color"</span>: <span class="str">"#C8501F"</span>, <span class="key">"size"</span>: <span class="str">"xxl"</span>, <span class="key">"weight"</span>: <span class="str">"bold"</span> }
+      ]
+    },
+    <span class="key">"body"</span>: { <span class="comment">/* rows: โครงการ, รายการ, ส่งและติดตั้ง, ยอดสุทธิ */</span> },
+    <span class="key">"footer"</span>: { <span class="key">"type"</span>: <span class="str">"box"</span>, <span class="key">"layout"</span>: <span class="str">"vertical"</span>, <span class="key">"spacing"</span>: <span class="str">"sm"</span>,
+      <span class="key">"contents"</span>: [
+        { <span class="key">"type"</span>: <span class="str">"button"</span>, <span class="key">"style"</span>: <span class="str">"primary"</span>, <span class="key">"color"</span>: <span class="str">"#C8501F"</span>,
+          <span class="key">"action"</span>: { <span class="key">"type"</span>: <span class="str">"uri"</span>, <span class="key">"label"</span>: <span class="str">"ดูใบเสนอเต็ม · ยอมรับ"</span>,
+            <span class="key">"uri"</span>: <span class="str">"https://salesdee.app/q/abc-narit-0142"</span> } },
+        { <span class="key">"type"</span>: <span class="str">"button"</span>, <span class="key">"style"</span>: <span class="str">"secondary"</span>,
+          <span class="key">"action"</span>: { <span class="key">"type"</span>: <span class="str">"postback"</span>, <span class="key">"label"</span>: <span class="str">"ขอแก้ไข · แชตต่อ"</span>,
+            <span class="key">"data"</span>: <span class="str">"action=revise&amp;quote=QT-2026-0142"</span> } }
+      ]
+    }
+  }
+}
+    </div>
+
+  </section>
+
+  <!-- Footer -->
+  <footer class="doc-footer">
+    <div class="doc-footer-text">
+      <strong>สรุป</strong> · 5 template ทั้งหมด (1 PDF + 4 LINE Flex) · ใช้ palette/fonts/wordmark เดียวกันกับแบรนด์ · มี fallback text สำหรับ LINE client ที่ไม่รองรับ flex · ทุกการกดปุ่มในข้อความ Flex มี postback กลับเข้า webhook ของระบบ
+    </div>
+    <div class="doc-footer-text" style="margin-top: 14px;">
+      ส่วนตัวคิดว่า — ตัว <strong>template 2 (customer activity)</strong> เป็นสิ่งที่ทำให้ salesdee. ต่างจาก SaaS อื่น · เซลส์ได้รู้ <em style="font-family: 'Fraunces', serif; font-style: italic;">เมื่อใด</em> ลูกค้ากำลังคิด ไม่ใช่แค่ <em style="font-family: 'Fraunces', serif; font-style: italic;">ส่งแล้วรอ</em>
+    </div>
+    <div class="doc-footer-meta">salesdee. · PDF + LINE templates · 12 พฤษภาคม 2569</div>
+  </footer>
+
+</div>
+
+</body>
+</html>

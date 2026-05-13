@@ -1,32 +1,20 @@
 {% extends "base.html" %}
-
-{% block title %}ประวัติเวอร์ชัน {{ document.doc_number }} · {{ current_tenant.name }}{% endblock %}
-
+{% block title %}ประวัติแก้ไข {{ document.doc_number }} · salesdee.{% endblock %}
 {% block content %}
-  <a href="{% url 'quotes:quotation_detail' document.pk %}" class="text-sm text-slate-500 hover:underline">&larr; กลับไปที่ใบเสนอราคา {{ document.doc_number }}</a>
-  <h1 class="mt-1 text-xl font-semibold">ประวัติเวอร์ชัน — {{ document.doc_number }}</h1>
-  <p class="mt-1 text-sm text-slate-500">แต่ละแถวคือสำเนาแช่แข็งของใบเสนอราคา ณ ตอนที่ส่งให้ลูกค้า; ฉบับปัจจุบันคือ Rev.{{ document.revision }} (สถานะ {{ document.get_status_display }})</p>
-
-  <div class="mt-4 overflow-hidden rounded-lg border bg-white">
-    <table class="w-full text-sm">
-      <thead class="bg-slate-50 text-left text-slate-500"><tr>
-        <th class="px-3 py-2">Rev.</th><th class="px-3 py-2">ส่งเมื่อ</th><th class="px-3 py-2">เหตุผลที่แก้ไข</th>
-        <th class="px-3 py-2 text-right">ยอดรวม</th><th class="px-3 py-2">โดย</th><th class="w-16"></th>
-      </tr></thead>
-      <tbody class="divide-y">
-        {% for r in revisions %}
-          <tr class="hover:bg-slate-50">
-            <td class="px-3 py-2 font-medium">Rev.{{ r.revision }}</td>
-            <td class="px-3 py-2 text-slate-500">{{ r.snapshot.sent_at|slice:":16"|default:"—" }}</td>
-            <td class="px-3 py-2">{{ r.reason|default:"—" }}</td>
-            <td class="px-3 py-2 text-right">{{ r.snapshot.totals.grand_total }}</td>
-            <td class="px-3 py-2 text-slate-500">{{ r.changed_by.get_full_name|default:"—" }}</td>
-            <td class="px-3 py-2"><a class="text-slate-600 hover:underline" href="{% url 'quotes:quotation_revision_detail' document.pk r.revision %}">ดู</a></td>
-          </tr>
-        {% empty %}
-          <tr><td colspan="6" class="px-3 py-8 text-center text-slate-400">ยังไม่มีเวอร์ชันที่ส่ง — เวอร์ชันจะถูกบันทึกอัตโนมัติเมื่อกด “ส่งให้ลูกค้า”</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+<div class="row between" style="align-items:flex-end;margin-bottom:16px">
+  <div><div class="eyebrow">ใบเสนอราคา</div><h1 class="h1 serif-it">ประวัติแก้ไข · {{ document.doc_number }}</h1></div>
+  <a class="btn btn-sm btn-ghost" href="{% url 'quotes:quotation_detail' document.pk %}">กลับไปเอกสาร</a>
+</div>
+<div class="card">
+  <table class="tbl">
+    <thead><tr><th>Rev.</th><th>เหตุผล</th><th>ยอดรวม</th><th>โดย</th><th>เมื่อ</th><th></th></tr></thead>
+    <tbody>
+    {% for r in revisions %}
+      <tr><td>Rev.{{ r.revision }}</td><td>{{ r.reason|default:"—" }}</td><td class="mono">{{ r.snapshot.totals.grand_total|default:"—" }}</td>
+        <td>{{ r.changed_by.get_short_name|default:"—" }}</td><td class="mono">{{ r.created_at|date:"d/m/Y H:i" }}</td>
+        <td><a class="btn btn-sm btn-ghost" href="{% url 'quotes:quotation_revision_detail' document.pk r.revision %}">ดู</a></td></tr>
+    {% empty %}<tr><td colspan="6" class="muted">ยังไม่มีการแก้ไข</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endblock %}

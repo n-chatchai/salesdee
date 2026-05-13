@@ -1,144 +1,98 @@
 {% extends "base.html" %}
-
-{% block title %}แดชบอร์ด · {{ current_tenant.name|default:"salesdee" }}{% endblock %}
-
+{% block title %}แดชบอร์ด · salesdee.{% endblock %}
 {% block content %}
-  {% if not dash %}
-    <h1 class="text-2xl font-semibold">ยินดีต้อนรับ</h1>
-    <p class="mt-2 text-amber-700">ยังไม่ได้ผูกผู้ใช้นี้กับ workspace ใด — สร้าง Tenant และ Membership ใน <a class="underline" href="/admin/">/admin</a></p>
-  {% else %}
-  <div class="flex items-baseline justify-between">
-    <h1 class="text-2xl font-semibold">แดชบอร์ด</h1>
-    <span class="text-sm text-slate-500">{{ current_tenant.name }}</span>
+{% if not dash %}
+  <div class="empty-state">
+    <svg class="ico ico-xl muted"><use href="#i-building"/></svg>
+    <h2 class="h2" style="margin-top:12px">ยังไม่ได้ผูกผู้ใช้นี้กับ workspace</h2>
+    <p class="muted">ติดต่อผู้ดูแลระบบเพื่อเชิญคุณเข้าพื้นที่ทำงาน</p>
+  </div>
+{% else %}
+<div class="row between" style="align-items:flex-end;margin-bottom:20px">
+  <div>
+    <div class="eyebrow">แดชบอร์ด</div>
+    <h1 class="h1 serif-it" style="margin-top:4px">สวัสดี{% if user.get_short_name %}, {{ user.get_short_name }}{% endif %}</h1>
+  </div>
+</div>
+
+{% if onboarding_remaining %}
+<div class="ai-panel" style="margin-bottom:18px">
+  <div class="row between"><div><strong>ตั้งค่า workspace ให้เสร็จ</strong> — เหลืออีก {{ onboarding_remaining }} ขั้น</div>
+  <a class="btn btn-sm btn-ai" href="{% url 'workspace:onboarding' %}">ทำต่อ</a></div>
+</div>
+{% endif %}
+
+<div class="kpi-row">
+  <div class="kpi accent"><div class="label">มูลค่าดีลที่เปิดอยู่</div><div class="value">{{ open_value|floatformat:0 }}</div><div class="delta">{{ open_count }} ดีล · คาดการณ์ {{ weighted_forecast|floatformat:0 }}</div></div>
+  <div class="kpi"><div class="label">ปิดได้เดือนนี้</div><div class="value">{{ won_value|floatformat:0 }}</div><div class="delta">{{ won_count }} ดีล{% if win_rate is not None %} · อัตราชนะ {{ win_rate }}%{% endif %}</div></div>
+  <div class="kpi"><div class="label">งานของฉัน</div><div class="value">{{ upcoming_tasks|length }}</div><div class="delta {% if overdue_tasks %}down{% endif %}">เกินกำหนด {{ overdue_tasks }} · วันนี้ {{ due_today_tasks }}</div></div>
+  <div class="kpi"><div class="label">ลีดใหม่</div><div class="value">{{ new_leads_count }}</div><div class="delta">ใบเสนอราคารอตอบ {{ awaiting_count }} · ใกล้หมดอายุ {{ expiring_count }}</div></div>
+</div>
+
+{% if target_amount %}
+<div class="card">
+  <div class="card-head"><div class="title">เป้ายอดขายเดือนนี้</div><span class="chip {% if target_percent >= 100 %}chip-good{% endif %}">{{ target_percent }}%</span></div>
+  <div class="row between"><span class="muted">ทำได้ {{ won_value|floatformat:0 }}</span><span class="muted">เป้า {{ target_amount|floatformat:0 }}</span></div>
+  <div style="height:10px;background:var(--border);border-radius:6px;overflow:hidden;margin-top:8px"><div style="height:100%;width:{% if target_percent > 100 %}100{% else %}{{ target_percent }}{% endif %}%;background:var(--accent)"></div></div>
+</div>
+{% endif %}
+
+<div class="row wrap" style="align-items:flex-start;gap:16px">
+  <div class="card grow" style="min-width:340px">
+    <div class="card-head"><div class="title">Pipeline</div><a class="btn btn-sm btn-ghost" href="{% url 'crm:pipeline' %}">เปิดบอร์ด</a></div>
+    <table class="tbl">
+      <thead><tr><th>ขั้น</th><th>ดีล</th><th>มูลค่า</th></tr></thead>
+      <tbody>
+        {% for stage, n, v in stage_rows %}
+        <tr><td>{{ stage.name }}</td><td>{{ n }}</td><td>{{ v|floatformat:0 }}</td></tr>
+        {% empty %}<tr><td colspan="3" class="muted">ยังไม่มีดีล</td></tr>{% endfor %}
+      </tbody>
+    </table>
+    {% if stale_deals %}
+    <div class="divider"></div>
+    <div class="muted" style="margin-bottom:6px">ดีลที่ค้างนาน</div>
+    {% for d in stale_deals %}<div class="row between"><a href="{% url 'crm:deal_detail' d.pk %}">{{ d.name }}</a><span class="muted mono">{{ d.updated_at|date:"d/m/Y" }}</span></div>{% endfor %}
+    {% endif %}
   </div>
 
-  {# KPI cards #}
-  <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-    <a href="{% url 'crm:pipeline' %}" class="rounded-lg border bg-white p-4 hover:shadow">
-      <div class="text-sm text-slate-500">มูลค่า pipeline ที่เปิดอยู่</div>
-      <div class="mt-1 text-2xl font-semibold">{{ open_value|floatformat:0 }} ฿</div>
-      <div class="mt-0.5 text-xs text-slate-400">{{ open_count }} ดีล · ถ่วงน้ำหนัก ~{{ weighted_forecast|floatformat:0 }} ฿</div>
-    </a>
-    <div class="rounded-lg border bg-white p-4">
-      <div class="text-sm text-slate-500">ปิดได้เดือนนี้</div>
-      <div class="mt-1 text-2xl font-semibold">{{ won_value|floatformat:0 }} ฿</div>
-      <div class="mt-0.5 text-xs text-slate-400">ชนะ {{ won_count }} · แพ้ {{ lost_count }}{% if win_rate is not None %} · อัตราปิด {{ win_rate }}%{% endif %}</div>
-    </div>
-    <a href="{% url 'crm:tasks' %}" class="rounded-lg border bg-white p-4 hover:shadow">
-      <div class="text-sm text-slate-500">งานของฉัน</div>
-      <div class="mt-1 text-2xl font-semibold">{{ due_today_tasks }} <span class="text-base font-normal text-slate-400">วันนี้</span></div>
-      <div class="mt-0.5 text-xs {% if overdue_tasks %}text-amber-700{% else %}text-slate-400{% endif %}">เกินกำหนด {{ overdue_tasks }}</div>
-    </a>
-    <a href="{% url 'crm:leads' %}" class="rounded-lg border bg-white p-4 hover:shadow">
-      <div class="text-sm text-slate-500">Lead ใหม่</div>
-      <div class="mt-1 text-2xl font-semibold">{{ new_leads_count }}</div>
-      <div class="mt-0.5 text-xs text-slate-400">ยังไม่ได้คัดกรอง</div>
-    </a>
+  <div class="card grow" style="min-width:300px">
+    <div class="card-head"><div class="title">งานของฉัน</div><a class="btn btn-sm btn-ghost" href="{% url 'crm:tasks' %}">ทั้งหมด</a></div>
+    {% for t in upcoming_tasks %}
+    <div class="row between"><span>{{ t.description|default:t.get_kind_display }}{% if t.deal %} <span class="muted">· {{ t.deal.name }}</span>{% endif %}</span>{% if t.due_at %}<span class="chip {% if t.due_at < now %}chip-danger{% endif %}">{{ t.due_at|date:"d/m H:i" }}</span>{% endif %}</div>
+    {% empty %}<p class="muted">ไม่มีงานค้าง</p>{% endfor %}
+  </div>
+</div>
+
+<div class="row wrap" style="align-items:flex-start;gap:16px">
+  <div class="card grow" style="min-width:320px">
+    <div class="card-head"><div class="title">ใบเสนอราคารอลูกค้าตอบ</div><a class="btn btn-sm btn-ghost" href="{% url 'quotes:quotations' %}">ทั้งหมด</a></div>
+    {% for d in awaiting_list %}<div class="row between"><a href="{% url 'quotes:quotation_detail' d.pk %}">{{ d.doc_number|default:d }}</a><span class="muted">{{ d.customer.name|default:"" }}</span></div>{% empty %}<p class="muted">ไม่มี</p>{% endfor %}
+    {% if expiring_list %}
+    <div class="divider"></div><div class="muted" style="margin-bottom:6px">ใกล้หมดอายุ</div>
+    {% for d in expiring_list %}<div class="row between"><a href="{% url 'quotes:quotation_detail' d.pk %}">{{ d.doc_number|default:d }}</a><span class="chip chip-warn">{{ d.valid_until|date:"d/m/Y" }}</span></div>{% endfor %}
+    {% endif %}
   </div>
 
-  <div class="mt-6 grid gap-6 lg:grid-cols-2">
-    {# Pipeline by stage #}
-    <section class="rounded-lg border bg-white p-4">
-      <div class="mb-2 flex items-center justify-between"><h2 class="font-medium">Pipeline ตามขั้น</h2><a href="{% url 'crm:pipeline' %}" class="text-sm text-slate-500 hover:underline">เปิด Kanban</a></div>
-      <table class="w-full text-sm">
-        <tbody class="divide-y">
-          {% for stage, n, v in stage_rows %}
-            <tr><td class="py-1.5">{{ stage.name }}</td><td class="py-1.5 text-right text-slate-500">{{ n }} ดีล</td><td class="py-1.5 text-right">{{ v|floatformat:0 }} ฿</td></tr>
-          {% empty %}
-            <tr><td class="py-2 text-slate-400">ยังไม่มีขั้นใน pipeline</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </section>
-
-    {# Quotes awaiting a response #}
-    <section class="rounded-lg border bg-white p-4">
-      <div class="mb-2 flex items-center justify-between"><h2 class="font-medium">ใบเสนอราคา: ส่งแล้วยังไม่ตอบ ({{ awaiting_count }})</h2><a href="{% url 'quotes:quotations' %}" class="text-sm text-slate-500 hover:underline">ทั้งหมด</a></div>
-      <ul class="divide-y text-sm">
-        {% for d in awaiting_list %}
-          <li class="flex items-center justify-between py-1.5">
-            <a href="{% url 'quotes:quotation_detail' d.pk %}" class="hover:underline">{{ d.doc_number }} · {{ d.customer.name|default:"—" }}</a>
-            <span class="text-xs text-slate-400">ส่ง {{ d.sent_at|date:"d/m/Y" }}</span>
-          </li>
-        {% empty %}
-          <li class="py-2 text-slate-400">ไม่มี</li>
-        {% endfor %}
-      </ul>
-    </section>
-
-    {# Quotes expiring soon #}
-    <section class="rounded-lg border bg-white p-4">
-      <h2 class="mb-2 font-medium">ใบเสนอราคาใกล้หมดอายุ (7 วัน) ({{ expiring_count }})</h2>
-      <ul class="divide-y text-sm">
-        {% for d in expiring_list %}
-          <li class="flex items-center justify-between py-1.5">
-            <a href="{% url 'quotes:quotation_detail' d.pk %}" class="hover:underline">{{ d.doc_number }} · {{ d.customer.name|default:"—" }}</a>
-            <span class="text-xs text-amber-700">หมด {{ d.valid_until|date:"d/m/Y" }}</span>
-          </li>
-        {% empty %}
-          <li class="py-2 text-slate-400">ไม่มี</li>
-        {% endfor %}
-      </ul>
-    </section>
-
-    {# Tasks #}
-    <section class="rounded-lg border bg-white p-4">
-      <div class="mb-2 flex items-center justify-between"><h2 class="font-medium">งานที่ต้องตาม</h2><a href="{% url 'crm:tasks' %}" class="text-sm text-slate-500 hover:underline">ทั้งหมด</a></div>
-      <ul class="divide-y text-sm">
-        {% for t in upcoming_tasks %}
-          <li class="flex items-center justify-between py-1.5">
-            <span>{{ t.description|default:t.get_kind_display }}{% if t.customer %} <span class="text-slate-400">· {{ t.customer.name }}</span>{% endif %}</span>
-            <span class="text-xs {% if t.due_at and t.due_at < now %}text-amber-700{% else %}text-slate-400{% endif %}">{{ t.due_at|date:"d/m/Y"|default:"—" }}</span>
-          </li>
-        {% empty %}
-          <li class="py-2 text-slate-400">ไม่มีงานค้าง</li>
-        {% endfor %}
-      </ul>
-    </section>
-
-    {# Stale deals #}
-    <section class="rounded-lg border bg-white p-4">
-      <h2 class="mb-2 font-medium">ดีลค้างนาน (ไม่อัปเดต &gt; 3 สัปดาห์)</h2>
-      <ul class="divide-y text-sm">
-        {% for d in stale_deals %}
-          <li class="flex items-center justify-between py-1.5">
-            <a href="{% url 'crm:deal_detail' d.pk %}" class="hover:underline">{{ d.name }}{% if d.customer %} <span class="text-slate-400">· {{ d.customer.name }}</span>{% endif %}</a>
-            <span class="text-xs text-slate-400">อัปเดต {{ d.updated_at|date:"d/m/Y" }}</span>
-          </li>
-        {% empty %}
-          <li class="py-2 text-slate-400">ไม่มี</li>
-        {% endfor %}
-      </ul>
-    </section>
-
-    {# Lost reasons #}
-    <section class="rounded-lg border bg-white p-4">
-      <h2 class="mb-2 font-medium">เหตุผลที่แพ้ (90 วันล่าสุด)</h2>
-      <ul class="divide-y text-sm">
-        {% for r in lost_reasons %}
-          <li class="flex items-center justify-between py-1.5"><span>{{ r.lost_reason }}</span><span class="text-slate-500">{{ r.n }}</span></li>
-        {% empty %}
-          <li class="py-2 text-slate-400">ยังไม่มีข้อมูล</li>
-        {% endfor %}
-      </ul>
-    </section>
-
-    {# New leads #}
-    <section class="rounded-lg border bg-white p-4">
-      <div class="mb-2 flex items-center justify-between"><h2 class="font-medium">Lead ใหม่ล่าสุด</h2><a href="{% url 'crm:leads' %}" class="text-sm text-slate-500 hover:underline">ทั้งหมด</a></div>
-      <ul class="divide-y text-sm">
-        {% for l in new_leads_recent %}
-          <li class="flex items-center justify-between py-1.5">
-            <a href="{% url 'crm:lead_detail' l.pk %}" class="hover:underline">{{ l }}</a>
-            <span class="text-xs text-slate-400">{{ l.get_channel_display }} · {{ l.created_at|date:"d/m/Y" }}</span>
-          </li>
-        {% empty %}
-          <li class="py-2 text-slate-400">ไม่มี</li>
-        {% endfor %}
-      </ul>
-    </section>
+  <div class="card grow" style="min-width:320px">
+    <div class="card-head"><div class="title">ลีดใหม่</div><a class="btn btn-sm btn-ghost" href="{% url 'crm:leads' %}">ทั้งหมด</a></div>
+    {% for l in new_leads_recent %}<div class="row between"><a href="{% url 'crm:lead_detail' l.pk %}">{{ l.name }}{% if l.company_name %} <span class="muted">· {{ l.company_name }}</span>{% endif %}</a><span class="chip">{{ l.get_channel_display }}</span></div>{% empty %}<p class="muted">ไม่มีลีดใหม่</p>{% endfor %}
   </div>
+</div>
 
-  <p class="mt-6 text-xs text-slate-400">ฟอร์มรับ lead จากเว็บไซต์: <code>/crm/intake/{{ current_tenant.slug }}/</code> · LINE webhook: <code>/integrations/line/webhook/{{ current_tenant.slug }}/</code></p>
-  {% endif %}
+{% if lost_reasons %}
+<div class="card">
+  <div class="card-head"><div class="title">เหตุผลที่แพ้ (90 วัน)</div></div>
+  <table class="tbl"><thead><tr><th>เหตุผล</th><th>จำนวน</th></tr></thead><tbody>
+  {% for r in lost_reasons %}<tr><td>{{ r.lost_reason }}</td><td>{{ r.n }}</td></tr>{% endfor %}
+  </tbody></table>
+</div>
+{% endif %}
+
+{% if recent_activities %}
+<div class="card">
+  <div class="card-head"><div class="title">กิจกรรมล่าสุด</div></div>
+  {% for a in recent_activities %}<div class="row between"><span><span class="chip">{{ a.get_kind_display }}</span> {{ a.body|truncatechars:90 }}</span><span class="muted mono">{{ a.occurred_at|date:"d/m H:i" }}</span></div>{% endfor %}
+</div>
+{% endif %}
+{% endif %}
 {% endblock %}

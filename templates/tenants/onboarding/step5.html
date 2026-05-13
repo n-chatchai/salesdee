@@ -1,0 +1,15 @@
+<div class="card">
+  <div class="card-head"><span class="title">5 · เชื่อม LINE OA</span></div>
+  <p class="muted" style="margin-top:0">นำ Webhook URL นี้ไปใส่ใน LINE Developers Console แล้วกรอกข้อมูลช่องทาง — หรือข้ามไปก่อนก็ได้</p>
+  <code class="mono" style="display:block;padding:10px;background:var(--surface-2,#f3eee2);border-radius:8px;word-break:break-all;margin-bottom:14px">{{ webhook_url }}</code>
+  <form method="post">{% csrf_token %}
+    {% include "partials/_form.html" %}
+    <div class="row between" style="margin-top:14px">
+      <a class="btn btn-ghost btn-sm" href="?step=4"><svg class="ico ico-sm"><use href="#i-arrow-left"/></svg> ย้อนกลับ</a>
+      <div class="row" style="gap:8px">
+        <button class="btn btn-ghost btn-sm" name="_finish" value="1" type="submit">ข้าม — เริ่มใช้งาน</button>
+        <button class="btn btn-accent btn-sm" type="submit">บันทึกแล้วเริ่มใช้งาน</button>
+      </div>
+    </div>
+  </form>
+</div>

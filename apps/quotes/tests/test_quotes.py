@@ -451,7 +451,7 @@ def test_quotation_send_line(client, user, membership, tenant, monkeypatch) -> N
 
     sent: dict = {}
     monkeypatch.setattr(
-        "apps.quotes.views.push_text", lambda to, text: sent.update(to=to, text=text)
+        "apps.quotes.views.push_quotation_flex", lambda to, **kw: sent.update(to=to, **kw)
     )
     with tenant_context(tenant):
         customer = Customer.objects.create(name="ลูกค้า LINE")
@@ -468,7 +468,7 @@ def test_quotation_send_line(client, user, membership, tenant, monkeypatch) -> N
     resp = client.post(reverse("quotes:quotation_send_line", args=[doc.pk]))
     assert resp.status_code == 302
     assert sent["to"] == "Uabc123"
-    assert "QT-2569-0700" in sent["text"]
+    assert sent["doc_number"] == "QT-2569-0700"
     with tenant_context(tenant):
         doc.refresh_from_db()
         assert doc.status == DocStatus.SENT

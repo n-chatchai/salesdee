@@ -1,16 +1,17 @@
-<!doctype html>
-<html lang="th">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ลิงก์ไม่ถูกต้อง</title><script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600&display=swap" rel="stylesheet">
-<style>:root{font-family:"Sarabun",system-ui,sans-serif}</style></head>
-<body class="min-h-screen bg-slate-100 py-12">
-  <div class="mx-auto max-w-md px-4">
-    <div class="rounded-xl border bg-white p-8 text-center shadow-sm">
-      <div class="text-4xl">🔗</div>
-      <h1 class="mt-3 text-lg font-semibold">ลิงก์ไม่ถูกต้องหรือหมดอายุแล้ว</h1>
-      <p class="mt-1 text-sm text-slate-500">กรุณาติดต่อผู้ส่งใบเสนอราคาเพื่อขอลิงก์ใหม่</p>
-    </div>
+{% load static %}<!DOCTYPE html>
+<html lang="th"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ลิงก์ไม่ถูกต้อง</title>
+<link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'css/app.css' %}">
+<link rel="stylesheet" href="{% static 'css/public.css' %}">
+</head><body class="public">
+{% include "partials/icons.html" %}
+<div class="pub-wrap">
+  <div class="pub-card" style="text-align:center">
+    <svg class="ico ico-xl muted"><use href="#i-alert"/></svg>
+    <h1>ลิงก์นี้ใช้งานไม่ได้</h1>
+    <p class="muted">ลิงก์ใบเสนอราคานี้อาจหมดอายุ ถูกยกเลิก หรือไม่ถูกต้อง — กรุณาติดต่อผู้ที่ส่งให้คุณ</p>
   </div>
-</body>
-</html>
+</div>
+</body></html>

@@ -1,79 +1,65 @@
-{# Editable lines + totals + add-line form. Root id="quote-lines" — htmx swaps this whole div.
-   Context: document, totals, line_form (add), editing_line_id?, line_edit_form? #}
+{% load static %}
 <div id="quote-lines">
-  {% for g in totals.groups %}
-    <div class="mt-5">
-      {% if g.label %}<h2 class="mb-1 font-medium">{{ g.label }}</h2>{% endif %}
-      <div class="overflow-hidden rounded-lg border bg-white">
-        <table class="w-full text-sm">
-          <thead class="bg-slate-50 text-left text-slate-500"><tr>
-            <th class="w-8 px-3 py-2">#</th><th class="px-3 py-2">รายละเอียด</th>
-            <th class="px-3 py-2 text-right">จำนวน</th><th class="px-3 py-2 text-right">ราคา/หน่วย</th>
-            <th class="px-3 py-2 text-right">ส่วนลด</th><th class="px-3 py-2 text-right">จำนวนเงิน</th><th class="w-16"></th>
-          </tr></thead>
-          <tbody class="divide-y"{% if editable %} data-reorder-url="{% url 'quotes:quotation_reorder_lines' document.pk %}"{% endif %}>
-            {% for ln in g.lines %}
-              {% if editing_line_id == ln.pk %}
-                <tr><td colspan="7" class="bg-amber-50 p-3">
-                  <form class="crm-form space-y-2" hx-post="{% url 'quotes:quotation_line_edit' document.pk ln.pk %}" hx-target="#quote-lines" hx-swap="outerHTML" hx-encoding="multipart/form-data">
-                    {% csrf_token %}
-                    {% include "crm/_form_fields.html" with form=line_edit_form %}
-                    <button type="submit" class="rounded bg-slate-800 px-3 py-1.5 text-sm text-white hover:bg-slate-700">บันทึก</button>
-                    <button type="button" class="rounded border px-3 py-1.5 text-sm hover:bg-slate-50"
-                            hx-get="{% url 'quotes:quotation_lines_partial' document.pk %}" hx-target="#quote-lines" hx-swap="outerHTML">ยกเลิก</button>
-                  </form>
-                </td></tr>
-              {% elif ln.line_type == 'heading' %}
-                <tr class="bg-slate-50" data-line-id="{{ ln.pk }}"><td colspan="6" class="px-3 py-1.5 font-medium">{% if editable %}<span data-drag-handle class="mr-1 cursor-move select-none text-slate-300" title="ลากเพื่อจัดลำดับ">⠿</span>{% endif %}{{ ln.description }}</td><td class="px-2 py-1.5">{% include "quotes/_line_actions.html" %}</td></tr>
-              {% elif ln.line_type == 'note' %}
-                <tr data-line-id="{{ ln.pk }}"><td colspan="6" class="px-3 py-1.5 text-slate-500">{% if editable %}<span data-drag-handle class="mr-1 cursor-move select-none text-slate-300" title="ลากเพื่อจัดลำดับ">⠿</span>{% endif %}{{ ln.description|linebreaksbr }}</td><td class="px-2 py-1.5">{% include "quotes/_line_actions.html" %}</td></tr>
-              {% else %}
-                <tr data-line-id="{{ ln.pk }}">
-                  <td class="px-3 py-2 align-top text-slate-400">{% if editable %}<span data-drag-handle class="mr-1 cursor-move select-none text-slate-300" title="ลากเพื่อจัดลำดับ">⠿</span>{% endif %}{{ forloop.counter }}</td>
-                  <td class="px-3 py-2">{% if ln.image %}<img src="{{ ln.image.url }}" alt="" class="mb-1 h-16 w-16 rounded border object-cover">{% endif %}{{ ln.description|linebreaksbr }}{% if ln.dimensions or ln.material %}<div class="text-xs text-slate-500">{{ ln.dimensions }}{% if ln.dimensions and ln.material %} · {% endif %}{{ ln.material }}</div>{% endif %}</td>
-                  <td class="px-3 py-2 text-right align-top">{{ ln.quantity|floatformat:"-2" }} {{ ln.unit }}</td>
-                  <td class="px-3 py-2 text-right align-top">{{ ln.unit_price|floatformat:2 }}</td>
-                  <td class="px-3 py-2 text-right align-top text-slate-500">{% if ln.discount_value %}{{ ln.discount_value|floatformat:"-2" }}{% if ln.discount_kind == 'percent' %}%{% endif %}{% else %}—{% endif %}</td>
-                  <td class="px-3 py-2 text-right align-top">{{ ln.amount|floatformat:2 }}</td>
-                  <td class="px-2 py-2 align-top">{% include "quotes/_line_actions.html" %}</td>
-                </tr>
-              {% endif %}
-            {% endfor %}
-          </tbody>
-          {% if g.subtotal %}<tfoot><tr class="border-t bg-slate-50"><td colspan="5" class="px-3 py-1.5 text-right text-slate-500">รวมกลุ่ม{% if g.label %} "{{ g.label }}"{% endif %}</td><td class="px-3 py-1.5 text-right font-medium">{{ g.subtotal|floatformat:2 }}</td><td></td></tr></tfoot>{% endif %}
-        </table>
-      </div>
-    </div>
-  {% empty %}
-    <p class="mt-5 text-sm text-slate-400">ยังไม่มีรายการ — เพิ่มด้านล่าง</p>
-  {% endfor %}
+  <table class="tbl">
+    <thead><tr><th></th><th>ห้อง/โซน</th><th>รายการ</th><th>จำนวน</th><th>หน่วย</th><th>ราคา/หน่วย</th><th>ส่วนลด</th><th>ภาษี</th><th>จำนวนเงิน</th>{% if editable %}<th></th>{% endif %}</tr></thead>
+    <tbody id="line-rows">
+    {% for line in document.lines.all %}
+      {% if line.pk == editing_line_id %}
+      <tr><td colspan="{% if editable %}10{% else %}9{% endif %}">
+        <form method="post" action="{% url 'quotes:quotation_line_edit' document.pk line.pk %}" hx-post="{% url 'quotes:quotation_line_edit' document.pk line.pk %}" hx-target="#quote-lines" hx-swap="outerHTML">{% csrf_token %}
+          {% include "partials/_form.html" with form=line_edit_form %}
+          <button class="btn btn-sm btn-primary">บันทึกรายการ</button>
+          <a class="btn btn-sm btn-ghost" href="#" hx-get="{% url 'quotes:quotation_lines_partial' document.pk %}" hx-target="#quote-lines" hx-swap="outerHTML">ยกเลิก</a>
+        </form>
+      </td></tr>
+      {% else %}
+      <tr data-line="{{ line.pk }}">
+        <td class="grip" style="cursor:grab">{% if editable and line.line_type == 'item' %}<svg class="ico ico-sm"><use href="#i-grip"/></svg>{% endif %}</td>
+        <td>{{ line.group_label }}</td>
+        <td>{% if line.line_type == 'heading' %}<strong>{{ line.description }}</strong>{% elif line.line_type == 'note' %}<em class="muted">{{ line.description }}</em>{% else %}{{ line.description }}{% if line.dimensions %}<div class="muted" style="font-size:12px">{{ line.dimensions }}</div>{% endif %}{% if line.image %}<div><img src="{{ line.image.url }}" style="height:40px;border-radius:4px"></div>{% endif %}{% endif %}</td>
+        {% if line.line_type == 'item' %}
+        <td class="mono">{{ line.quantity|floatformat:"-2" }}</td><td>{{ line.unit }}</td><td class="mono">{{ line.unit_price|floatformat:2 }}</td>
+        <td class="mono">{% if line.discount_value %}{{ line.discount_value|floatformat:"-2" }}{% if line.discount_kind == 'percent' %}%{% endif %}{% endif %}</td>
+        <td>{{ line.get_tax_type_display }}</td><td class="mono">{{ line.amount|floatformat:2 }}</td>
+        {% else %}<td colspan="6"></td>{% endif %}
+        {% if editable %}<td style="white-space:nowrap">
+          <button class="btn btn-sm btn-ghost" hx-get="{% url 'quotes:quotation_line_edit' document.pk line.pk %}" hx-target="#quote-lines" hx-swap="outerHTML"><svg class="ico ico-sm"><use href="#i-edit"/></svg></button>
+          <button class="btn btn-sm btn-danger" hx-post="{% url 'quotes:quotation_delete_line' document.pk line.pk %}" hx-target="#quote-lines" hx-swap="outerHTML" hx-confirm="ลบรายการนี้?"><svg class="ico ico-sm"><use href="#i-trash"/></svg></button>
+        </td>{% endif %}
+      </tr>
+      {% endif %}
+    {% empty %}<tr><td colspan="{% if editable %}10{% else %}9{% endif %}" class="muted">ยังไม่มีรายการ</td></tr>{% endfor %}
+    </tbody>
+  </table>
 
-  <div class="mt-5 flex justify-end">
-    <div class="w-full max-w-sm space-y-1 rounded-lg border bg-white p-4 text-sm">
-      <div class="flex justify-between"><span class="text-slate-500">รวมเป็นเงิน{% if totals.inclusive %} (รวม VAT){% endif %}</span><span>{{ totals.subtotal|floatformat:2 }}</span></div>
-      {% if totals.end_discount %}<div class="flex justify-between"><span class="text-slate-500">หักส่วนลดท้ายบิล</span><span>-{{ totals.end_discount|floatformat:2 }}</span></div>
-      <div class="flex justify-between"><span class="text-slate-500">มูลค่าหลังหักส่วนลด</span><span>{{ totals.after_discount|floatformat:2 }}</span></div>{% endif %}
-      {% if totals.inclusive or totals.has_zero_rated %}<div class="flex justify-between text-slate-500"><span>มูลค่าที่เสีย VAT 7% (ก่อนภาษี)</span><span>{{ totals.base_vat7|floatformat:2 }}</span></div>{% endif %}
-      {% if totals.has_zero_rated %}<div class="flex justify-between text-slate-500"><span>มูลค่ายกเว้น/VAT 0%</span><span>{{ totals.base_vat0|add:totals.base_exempt|add:totals.base_none|floatformat:2 }}</span></div>{% endif %}
-      <div class="flex justify-between"><span class="text-slate-500">ภาษีมูลค่าเพิ่ม 7%</span><span>{{ totals.vat_amount|floatformat:2 }}</span></div>
-      {% if totals.rounding %}<div class="flex justify-between text-slate-500"><span>ปัดเศษ</span><span>{{ totals.rounding|floatformat:2 }}</span></div>{% endif %}
-      <div class="flex justify-between border-t pt-1 font-semibold"><span>ยอดรวมทั้งสิ้น</span><span>{{ totals.grand_total|floatformat:2 }} บาท</span></div>
-      <div class="pt-1 text-xs text-slate-500">({{ totals.amount_in_words }})</div>
-      {% if totals.withholding_estimate %}<div class="mt-1 border-t pt-1 text-xs text-slate-400">หัก ณ ที่จ่ายโดยประมาณ {{ totals.withholding_estimate|floatformat:2 }} · ยอดรับสุทธิโดยประมาณ {{ totals.net_expected|floatformat:2 }}</div>{% endif %}
-    </div>
+  {% if editable and not editing_line_id %}
+  <div class="card" style="margin-top:14px;background:var(--surface-2,#f5f0e4)">
+    <div class="title" style="margin-bottom:8px">เพิ่มรายการ</div>
+    <form method="post" enctype="multipart/form-data" action="{% url 'quotes:quotation_add_line' document.pk %}" hx-post="{% url 'quotes:quotation_add_line' document.pk %}" hx-target="#quote-lines" hx-swap="outerHTML" hx-encoding="multipart/form-data">{% csrf_token %}
+      {% include "partials/_form.html" with form=line_form %}
+      <button class="btn btn-sm btn-primary"><svg class="ico ico-sm"><use href="#i-plus"/></svg> เพิ่มรายการ</button>
+    </form>
+  </div>
+  {% endif %}
+
+  <div class="totbox" style="margin-left:auto;max-width:360px;margin-top:16px">
+    <div class="row between"><span>รวมเป็นเงิน</span><span class="mono">{{ totals.subtotal|floatformat:2 }}</span></div>
+    {% if totals.end_discount %}<div class="row between"><span>ส่วนลดท้ายบิล</span><span class="mono">-{{ totals.end_discount|floatformat:2 }}</span></div>
+    <div class="row between"><span>หลังหักส่วนลด</span><span class="mono">{{ totals.after_discount|floatformat:2 }}</span></div>{% endif %}
+    {% if totals.vat_amount %}<div class="row between"><span>ภาษีมูลค่าเพิ่ม 7%</span><span class="mono">{{ totals.vat_amount|floatformat:2 }}</span></div>{% endif %}
+    {% if totals.rounding %}<div class="row between"><span>ปัดเศษ</span><span class="mono">{{ totals.rounding|floatformat:2 }}</span></div>{% endif %}
+    <div class="row between" style="font-weight:700;border-top:2px solid var(--ink,#333);margin-top:6px;padding-top:8px"><span>ยอดรวมทั้งสิ้น</span><span class="mono">{{ totals.grand_total|floatformat:2 }}</span></div>
+    {% if totals.withholding_estimate %}<div class="row between muted" style="font-size:13px"><span>หัก ณ ที่จ่าย (ประมาณ)</span><span class="mono">-{{ totals.withholding_estimate|floatformat:2 }}</span></div>
+    <div class="row between muted" style="font-size:13px"><span>ยอดที่คาดว่าจะได้รับ</span><span class="mono">{{ totals.net_expected|floatformat:2 }}</span></div>{% endif %}
+    <div class="muted" style="font-size:13px;margin-top:8px">({{ totals.amount_in_words }})</div>
   </div>
 
   {% if editable %}
-  <div class="mt-6 rounded-lg border bg-white p-4">
-    <h2 class="mb-2 font-medium">เพิ่มรายการ</h2>
-    <form class="crm-form grid gap-3 sm:grid-cols-2" hx-post="{% url 'quotes:quotation_add_line' document.pk %}" hx-target="#quote-lines" hx-swap="outerHTML" hx-encoding="multipart/form-data">
-      {% csrf_token %}
-      {% include "crm/_form_fields.html" with form=line_form %}
-      <div class="sm:col-span-2"><button type="submit" class="rounded bg-slate-800 px-4 py-2 text-sm text-white hover:bg-slate-700">เพิ่มรายการ</button></div>
-    </form>
-    <p class="mt-2 text-xs text-slate-400">"หัวข้อ/กลุ่ม" = บรรทัดชื่อห้อง/หัวข้อในตาราง · "ห้อง/โซน" = ใช้จัดกลุ่ม · เลือกสินค้าจากแคตตาล็อกแล้วเว้นราคาว่างไว้ ระบบจะเติมราคา/รายละเอียด/ภาษีให้ · ลากไอคอน ⠿ เพื่อจัดลำดับรายการในกลุ่มเดียวกัน</p>
-  </div>
-  {% else %}
-  <p class="mt-6 text-sm text-slate-400">เอกสารถูกล็อกในสถานะ “{{ document.get_status_display }}” — แก้ไขรายการไม่ได้</p>
+  <script src="{% static 'js/sortable.min.js' %}"></script>
+  <script>(function(){var tb=document.getElementById('line-rows');if(!tb||window.Sortable===undefined)return;
+    new Sortable(tb,{handle:'.grip',animation:150,onEnd:function(){
+      var ids=[].map.call(tb.querySelectorAll('tr[data-line]'),function(r){return r.dataset.line;});
+      htmx.ajax('POST',"{% url 'quotes:quotation_reorder_lines' document.pk %}",{target:'#quote-lines',swap:'outerHTML',values:{line:ids}});
+    }});})();</script>
   {% endif %}
 </div>

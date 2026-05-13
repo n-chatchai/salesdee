@@ -152,15 +152,16 @@ def test_public_catalog_inactive_tenant_404(client, tenant) -> None:
     assert resp.status_code == 404
 
 
-def test_root_on_tenant_host_shows_public_catalog(client, tenant) -> None:
-    """On the tenant's own host, ``/`` (anonymous) renders that tenant's public catalog."""
+def test_root_on_tenant_host_shows_public_home(client, tenant) -> None:
+    """On the tenant's own host, ``/`` (anonymous) renders that tenant's public homepage."""
     with tenant_context(tenant):
         Product.objects.create(name="โซฟารับแขก 3 ที่นั่ง", default_price=Decimal("25000"))
     resp = client.get("/", HTTP_HOST=f"{tenant.slug}.localhost")
     assert resp.status_code == 200
     body = resp.content.decode()
     assert "โซฟารับแขก 3 ที่นั่ง" in body
-    assert "แคตตาล็อกสินค้า" in body
+    assert tenant.name in body
+    assert "ดูสินค้าทั้งหมด" in body
 
 
 def test_root_on_platform_host_redirects_to_login(client) -> None:

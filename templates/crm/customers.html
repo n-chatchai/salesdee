@@ -1,35 +1,21 @@
 {% extends "base.html" %}
-
-{% block title %}ลูกค้า · {{ current_tenant.name }}{% endblock %}
-
+{% block title %}ลูกค้า · salesdee.{% endblock %}
+{% block topbar_actions %}<a class="btn btn-sm btn-primary" href="{% url 'crm:customer_create' %}"><svg class="ico ico-sm"><use href="#i-plus"/></svg> ลูกค้าใหม่</a>{% endblock %}
 {% block content %}
-  <div class="mb-4 flex items-center justify-between">
-    <h1 class="text-xl font-semibold">ลูกค้า</h1>
-    <a href="{% url 'crm:customer_create' %}" class="rounded bg-slate-800 px-3 py-1.5 text-sm text-white hover:bg-slate-700">+ เพิ่มลูกค้า</a>
-  </div>
-
-  <div class="overflow-hidden rounded-lg border bg-white">
-    <table class="w-full text-sm">
-      <thead class="bg-slate-50 text-left text-slate-500">
-        <tr>
-          <th class="px-3 py-2">ชื่อ</th>
-          <th class="px-3 py-2">ประเภท</th>
-          <th class="px-3 py-2">เลขผู้เสียภาษี</th>
-          <th class="px-3 py-2 text-right">ดีล</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y">
-        {% for c in customers %}
-          <tr class="hover:bg-slate-50">
-            <td class="px-3 py-2 font-medium"><a class="hover:underline" href="{% url 'crm:customer_detail' c.pk %}">{{ c.name }}</a></td>
-            <td class="px-3 py-2 text-slate-500">{{ c.get_kind_display }}</td>
-            <td class="px-3 py-2 text-slate-500">{{ c.tax_id|default:"—" }}</td>
-            <td class="px-3 py-2 text-right text-slate-500">{{ c.deal_count }}</td>
-          </tr>
-        {% empty %}
-          <tr><td colspan="4" class="px-3 py-8 text-center text-slate-400">ยังไม่มีลูกค้า</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+<div class="row between" style="align-items:flex-end;margin-bottom:16px">
+  <div><div class="eyebrow">ฐานข้อมูล</div><h1 class="h1 serif-it">ลูกค้า</h1></div>
+</div>
+<div class="card">
+  <table class="tbl">
+    <thead><tr><th>ชื่อลูกค้า</th><th>ประเภท</th><th>เลขผู้เสียภาษี</th><th>ดีล</th><th>เครดิต (วัน)</th></tr></thead>
+    <tbody>
+    {% for c in customers %}
+      <tr onclick="location.href='{% url 'crm:customer_detail' c.pk %}'" style="cursor:pointer">
+        <td>{{ c.name }}</td><td>{{ c.get_kind_display }}</td><td class="mono">{{ c.tax_id|default:"—" }}</td>
+        <td>{{ c.deal_count }}</td><td>{{ c.default_credit_days }}</td>
+      </tr>
+    {% empty %}<tr><td colspan="5" class="muted">ยังไม่มีลูกค้า</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}เชื่อม LINE OA · ตั้งค่า{% endblock %}
+{% block content %}
+<div style="margin-bottom:16px"><div class="eyebrow">ตั้งค่า</div><h1 class="h1 serif-it">เชื่อม LINE Official Account</h1></div>
+<div class="row wrap" style="gap:20px;align-items:flex-start">
+  {% include "tenants/_settings_nav.html" %}
+  <div class="grow" style="max-width:680px">
+    <div class="card">
+      <div class="card-head"><span class="title">Webhook URL</span></div>
+      <p class="muted" style="margin-top:0">นำ URL นี้ไปใส่ใน LINE Developers Console → Messaging API → Webhook URL</p>
+      <code class="mono" style="display:block;padding:10px;background:var(--surface-2,#f3eee2);border-radius:8px;word-break:break-all">{{ webhook_url }}</code>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <div class="card-head"><span class="title">ข้อมูลช่องทาง</span></div>
+      <form method="post">{% csrf_token %}
+        {% include "partials/_form.html" %}
+        <div class="row" style="margin-top:14px"><button class="btn btn-primary">บันทึก</button></div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

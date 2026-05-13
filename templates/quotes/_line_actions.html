@@ -1,9 +1,0 @@
-{# Per-line edit/delete buttons. Context: `document`, `ln`, `editable`. htmx targets #quote-lines. #}
-{% if editable %}
-<div class="flex gap-2">
-  <button type="button" class="text-xs text-slate-500 hover:underline" title="แก้ไข"
-          hx-get="{% url 'quotes:quotation_line_edit' document.pk ln.pk %}" hx-target="#quote-lines" hx-swap="outerHTML">แก้ไข</button>
-  <button type="button" class="text-xs text-red-500 hover:underline" title="ลบ" hx-confirm="ลบรายการนี้?"
-          hx-post="{% url 'quotes:quotation_delete_line' document.pk ln.pk %}" hx-target="#quote-lines" hx-swap="outerHTML">ลบ</button>
-</div>
-{% endif %}

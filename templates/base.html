@@ -1,67 +1,132 @@
-{% load static %}<!doctype html>
+{% load static i18n %}<!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}salesdee{% endblock %}</title>
-
-  {# Dev/prototype CDN assets — vendor these into static/ and tighten CSP before production. #}
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#C8501F">
+  <title>{% block title %}salesdee.{% endblock %}</title>
+  <link rel="manifest" href="{% static 'manifest.json' %}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root { font-family: "Sarabun", system-ui, sans-serif; }
-    .crm-form input:not([type=checkbox]):not([type=radio]),
-    .crm-form select, .crm-form textarea {
-      display:block; width:100%; border:1px solid #cbd5e1; border-radius:0.375rem;
-      padding:0.4rem 0.6rem; font-size:0.875rem; background:#fff;
-    }
-  </style>
-  {% block extra_head %}{% endblock %}
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <link rel="stylesheet" href="{% static 'css/mobile.css' %}">
+  {% block extra_css %}{% endblock %}
+  <script src="{% static 'js/htmx.min.js' %}" defer></script>
+  <script src="{% static 'js/alpine.min.js' %}" defer></script>
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-800" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
-  <header class="border-b bg-white">
-    <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-      <div class="flex items-center gap-6">
-        <a href="/" class="font-semibold">{% block brand %}{{ current_tenant.name|default:"salesdee" }}{% endblock %}</a>
-        {% if user.is_authenticated and current_tenant %}
-          <nav class="hidden gap-4 text-sm text-slate-600 sm:flex">
-            <a href="{% url 'crm:leads' %}" class="hover:underline">Leads</a>
-            <a href="{% url 'crm:pipeline' %}" class="hover:underline">Pipeline</a>
-            <a href="{% url 'crm:customers' %}" class="hover:underline">ลูกค้า</a>
-            <a href="{% url 'quotes:quotations' %}" class="hover:underline">ใบเสนอราคา</a>
-            <a href="{% url 'catalog:products' %}" class="hover:underline">สินค้า</a>
-            <a href="{% url 'crm:tasks' %}" class="hover:underline">งานของฉัน</a>
-            {% if can_view_reports %}<a href="{% url 'crm:reports' %}" class="hover:underline">รายงาน</a>{% endif %}
-          </nav>
-        {% endif %}
+<body>
+{% include "partials/icons.html" %}
+
+{% block layout %}
+<div class="app" x-data="{ nav: false }" x-bind:class="{ 'nav-open': nav }">
+
+  <div class="app-overlay" x-on:click="nav = false"></div>
+
+  <aside class="app-sidebar">
+    <div class="sb-brand">
+      <div class="mark"><span>d</span></div>
+      <div class="name">sales<em>dee</em><span class="dot"></span></div>
+    </div>
+
+    {% block nav %}
+    {% with ns=request.resolver_match.namespace un=request.resolver_match.url_name %}
+    <a class="sb-item {% if un == 'home' %}active{% endif %}" href="{% url 'core:home' %}">
+      <span class="icon"><svg><use href="#i-home"/></svg></span> หน้าหลัก
+    </a>
+    <a class="sb-item {% if ns == 'integrations' %}active{% endif %}" href="{% url 'integrations:inbox' %}">
+      <span class="icon"><svg><use href="#i-inbox"/></svg></span> กล่องข้อความ
+    </a>
+
+    <div class="sb-section-label">งานขาย</div>
+    <a class="sb-item {% if 'lead' in un %}active{% endif %}" href="{% url 'crm:leads' %}">
+      <span class="icon"><svg><use href="#i-target"/></svg></span> ลีด
+    </a>
+    <a class="sb-item {% if un == 'pipeline' or 'deal' in un %}active{% endif %}" href="{% url 'crm:pipeline' %}">
+      <span class="icon"><svg><use href="#i-trend"/></svg></span> ดีล
+    </a>
+    <a class="sb-item {% if ns == 'quotes' %}active{% endif %}" href="{% url 'quotes:quotations' %}">
+      <span class="icon"><svg><use href="#i-file-text"/></svg></span> ใบเสนอราคา
+    </a>
+    <a class="sb-item {% if 'customer' in un %}active{% endif %}" href="{% url 'crm:customers' %}">
+      <span class="icon"><svg><use href="#i-users"/></svg></span> ลูกค้า
+    </a>
+    <a class="sb-item {% if un == 'tasks' %}active{% endif %}" href="{% url 'crm:tasks' %}">
+      <span class="icon"><svg><use href="#i-check-square"/></svg></span> งานของฉัน
+    </a>
+
+    <div class="sb-section-label">แคตตาล็อก</div>
+    <a class="sb-item {% if ns == 'catalog' %}active{% endif %}" href="{% url 'catalog:products' %}">
+      <span class="icon"><svg><use href="#i-package"/></svg></span> สินค้า
+    </a>
+    <a class="sb-item" href="#">{# TODO: categories screen (M3) #}
+      <span class="icon"><svg><use href="#i-tag"/></svg></span> หมวดสินค้า
+    </a>
+
+    <div class="sb-section-label">ภาพรวม</div>
+    <a class="sb-item {% if un == 'reports' %}active{% endif %}" href="{% url 'crm:reports' %}">
+      <span class="icon"><svg><use href="#i-chart"/></svg></span> รายงาน
+    </a>
+    <a class="sb-item {% if ns == 'workspace' %}active{% endif %}" href="{% url 'workspace:settings_hub' %}">
+      <span class="icon"><svg><use href="#i-settings"/></svg></span> ตั้งค่า
+    </a>
+    {% endwith %}
+    {% endblock nav %}
+
+    <div class="sb-bottom">
+      {% if user.is_authenticated %}
+      <div class="sb-avatar">{{ user.get_short_name|default:user.email|slice:":1"|upper }}</div>
+      <div class="sb-user-info">
+        <div class="name">{{ user.get_short_name|default:user.email }}</div>
+        <div class="role">{% block user_role %}{% endblock %}</div>
       </div>
-      <nav class="flex items-center gap-4 text-sm">
-        {% if user.is_authenticated %}
-          <a href="/admin/" class="text-slate-500 hover:underline">admin</a>
-          <span class="text-slate-500">{{ user.get_full_name }}</span>
-          <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}
-            <button type="submit" class="text-slate-600 hover:underline">ออกจากระบบ</button>
-          </form>
-        {% else %}
-          <a href="{% url 'accounts:login' %}" class="text-slate-600 hover:underline">เข้าสู่ระบบ</a>
-        {% endif %}
-      </nav>
+      <a class="tb-action" href="{% url 'accounts:logout' %}" title="ออกจากระบบ" style="margin-left:auto;color:rgba(246,241,231,.6)"><svg class="ico"><use href="#i-lock"/></svg></a>
+      {% else %}
+      <a class="btn btn-sm" href="{% url 'accounts:login' %}">เข้าสู่ระบบ</a>
+      {% endif %}
     </div>
-  </header>
+  </aside>
 
-  {% if messages %}
-    <div class="mx-auto max-w-6xl px-4 pt-4">
-      {% for m in messages %}
-        <div class="rounded border px-3 py-2 text-sm {% if m.tags == 'error' %}border-red-300 bg-red-50 text-red-700{% else %}border-emerald-300 bg-emerald-50 text-emerald-700{% endif %}">{{ m }}</div>
-      {% endfor %}
+  <main class="app-main">
+    <header class="app-topbar">
+      {% block topbar %}
+      <button type="button" class="tb-menu" x-on:click="nav = !nav" aria-label="เมนู"><svg class="ico"><use href="#i-menu"/></svg></button>
+      <div class="search">
+        <svg class="ico"><use href="#i-search"/></svg>
+        <input type="search" placeholder="ค้นหาลูกค้า · ดีล · ใบเสนอราคา…" aria-label="ค้นหา">
+        <kbd>⌘K</kbd>
+      </div>
+      <div class="ml-auto row">
+        {% block topbar_actions %}{% endblock %}
+        {% if request.tenant %}<span class="chip" title="พื้นที่ทำงาน"><svg class="ico ico-sm"><use href="#i-building"/></svg> {{ request.tenant.name }}</span>{% endif %}
+        <a class="tb-action" href="#" title="แจ้งเตือน"><svg class="ico"><use href="#i-bell"/></svg></a>
+      </div>
+      {% endblock %}
+    </header>
+
+    {% block body %}
+    <div class="app-page">
+      {% if messages %}
+      <ul class="messages">
+        {% for m in messages %}<li class="{{ m.tags }}">{{ m }}</li>{% endfor %}
+      </ul>
+      {% endif %}
+      {% block content %}{% endblock %}
     </div>
-  {% endif %}
-
-  <main class="mx-auto max-w-6xl px-4 py-8">
-    {% block content %}{% endblock %}
+    {% endblock body %}
   </main>
+
+</div>
+{% endblock layout %}
+
+{% block extra_js %}{% endblock %}
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register("{% static 'sw.js' %}").catch(function () {});
+    });
+  }
+</script>
 </body>
 </html>

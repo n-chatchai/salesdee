@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}กล่องข้อความ · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/inbox.css' %}">{% endblock %}
+
+{% block topbar_actions %}{% endblock %}
+
+{% block body %}
+<div class="inbox{% if not selected %} no-rail{% endif %}">
+
+  <section class="inbox-list">
+    {% include "integrations/_thread_list.html" %}
+  </section>
+
+  <section class="chat" id="conversation-pane">
+    {% if selected %}
+      {% include "integrations/_conversation.html" %}
+    {% else %}
+      <div class="chat-empty">
+        <div class="empty-state">
+          <svg class="ico ico-xl"><use href="#i-inbox"/></svg>
+          <div>เลือกบทสนทนาทางซ้ายเพื่อเริ่ม</div>
+        </div>
+      </div>
+    {% endif %}
+  </section>
+
+  {% if selected %}
+  <aside class="inbox-rail" id="inbox-rail">
+    <div class="rail-head">
+      <div class="icon">d</div>
+      <div>
+        <div class="title">ผู้ช่วย</div>
+        <div class="sub">ร่างคำตอบ · สรุปลูกค้า</div>
+      </div>
+    </div>
+    <div class="rail-section">
+      <form method="post" action="{% url 'integrations:conversation_make_quote' selected.pk %}">
+        {% csrf_token %}
+        <button class="btn btn-accent" style="width:100%" type="submit">
+          <svg class="ico ico-sm"><use href="#i-file-text"/></svg> สร้างใบเสนอราคาจากแชตนี้
+        </button>
+      </form>
+      <div class="helptext" style="margin-top:6px">ผู้ช่วยจะร่างให้ — ตรวจและแก้ก่อนส่งผ่าน LINE</div>
+    </div>
+    <div class="rail-section">
+      <div class="rail-section-label">
+        ร่างคำตอบ
+        <button class="ai-link" hx-post="{% url 'integrations:conversation_ai_reply' selected.pk %}"
+                hx-target="#ai-suggestions" hx-indicator="#ai-suggestions">
+          <svg class="ico ico-sm"><use href="#i-refresh"/></svg> สร้าง
+        </button>
+      </div>
+      <div id="ai-suggestions">
+        {% include "integrations/_ai_suggestions.html" with suggestions=None error="" %}
+      </div>
+    </div>
+    {% if selected.lead %}
+    <div class="rail-section">
+      <div class="rail-section-label">ข้อมูลที่ดึงได้</div>
+      <div class="lead-row"><span class="label">ชื่อ</span><span class="val">{{ selected.lead.name }}</span></div>
+      {% if selected.lead.company_name %}<div class="lead-row"><span class="label">บริษัท</span><span class="val">{{ selected.lead.company_name }}</span></div>{% endif %}
+      {% if selected.lead.product_interest %}<div class="lead-row"><span class="label">สนใจ</span><span class="val">{{ selected.lead.product_interest }}</span></div>{% endif %}
+      <div class="lead-row"><span class="label">สถานะ</span><span class="val"><span class="chip">{{ selected.lead.get_status_display }}</span></span></div>
+      <a class="btn btn-sm" style="margin-top:10px" href="{% url 'crm:lead_detail' selected.lead.pk %}">เปิดลีด</a>
+    </div>
+    {% endif %}
+  </aside>
+  {% endif %}
+
+</div>
+{% endblock body %}

@@ -1,11 +1,1 @@
-{# Task list for a deal. Context: `tasks`. Swapped into #task-list by htmx. #}
-<ul id="task-list" class="space-y-2">
-  {% for t in tasks %}
-    <li class="flex items-center justify-between rounded border bg-white p-3 text-sm {% if t.status == 'done' %}opacity-50{% endif %}">
-      <span class="{% if t.status == 'done' %}line-through{% endif %}">{{ t.description|default:t.get_kind_display }}{% if t.assignee %} · {{ t.assignee.get_short_name }}{% endif %}</span>
-      <span class="text-xs text-slate-500">{{ t.get_status_display }}{% if t.due_at %} · {{ t.due_at|date:"d/m/Y" }}{% endif %}</span>
-    </li>
-  {% empty %}
-    <li class="text-sm text-slate-400">ยังไม่มีงาน</li>
-  {% endfor %}
-</ul>
+{% for t in tasks %}{% include "crm/_task_row.html" with task=t %}{% empty %}<p class="muted">ยังไม่มีงาน</p>{% endfor %}

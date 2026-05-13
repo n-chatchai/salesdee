@@ -1,67 +1,47 @@
 {% extends "base.html" %}
-
-{% block title %}Lead: {{ lead }} · {{ current_tenant.name }}{% endblock %}
-
+{% block title %}{{ lead.name }} · ลีด · salesdee.{% endblock %}
+{% block topbar_actions %}
+<a class="btn btn-sm btn-ghost" href="{% url 'crm:lead_edit' lead.pk %}"><svg class="ico ico-sm"><use href="#i-edit"/></svg> แก้ไข</a>
+{% if lead.status != 'converted' %}
+<form method="post" action="{% url 'crm:lead_convert' lead.pk %}" style="display:inline">{% csrf_token %}<button class="btn btn-sm btn-primary"><svg class="ico ico-sm"><use href="#i-target"/></svg> แปลงเป็นดีล</button></form>
+{% else %}<a class="btn btn-sm" href="{% url 'crm:deal_detail' lead.deal.pk %}">ดูดีล</a>{% endif %}
+{% endblock %}
 {% block content %}
-  <div class="flex items-center justify-between">
-    <div>
-      <a href="{% url 'crm:leads' %}" class="text-sm text-slate-500 hover:underline">&larr; Leads</a>
-      <h1 class="mt-1 text-xl font-semibold">{{ lead }}</h1>
+<div class="row between" style="align-items:flex-end;margin-bottom:16px">
+  <div><div class="eyebrow">ลีด · {{ lead.get_status_display }}</div><h1 class="h1 serif-it">{{ lead.name }}</h1></div>
+</div>
+<div class="row wrap" style="align-items:flex-start;gap:16px">
+  <div class="card grow" style="min-width:300px">
+    <div class="card-head"><div class="title">ข้อมูลลีด</div></div>
+    <table class="tbl">
+      <tr><th>บริษัท/หน่วยงาน</th><td>{{ lead.company_name|default:"—" }}</td></tr>
+      <tr><th>โทรศัพท์</th><td>{{ lead.phone|default:"—" }}</td></tr>
+      <tr><th>อีเมล</th><td>{{ lead.email|default:"—" }}</td></tr>
+      <tr><th>LINE</th><td>{{ lead.line_id|default:"—" }}</td></tr>
+      <tr><th>ช่องทาง</th><td>{{ lead.get_channel_display }}</td></tr>
+      <tr><th>แหล่งที่มา</th><td>{{ lead.source|default:"—" }}</td></tr>
+      <tr><th>สนใจ</th><td>{{ lead.product_interest|default:"—" }}</td></tr>
+      <tr><th>งบประมาณ</th><td>{% if lead.budget %}{{ lead.budget|floatformat:0 }} บาท{% else %}—{% endif %}</td></tr>
+      <tr><th>ผู้รับผิดชอบ</th><td>{{ lead.assigned_to.get_full_name|default:"—" }}</td></tr>
+    </table>
+    {% if lead.message %}<div class="divider"></div><div class="muted">ข้อความแรก</div><p>{{ lead.message|linebreaksbr }}</p>{% endif %}
+  </div>
+
+  <div class="card grow" style="min-width:340px">
+    {% if ai_enabled %}
+    <div class="ai-panel" style="margin-bottom:14px">
+      <strong><svg class="ico ico-sm"><use href="#i-spark"/></svg> ผู้ช่วย AI</strong>
+      <p class="muted" style="font-size:13px">ให้ AI ช่วยจากบทสนทนาของลีดนี้ — เป็นเพียงข้อเสนอแนะ โปรดตรวจสอบก่อนใช้</p>
+      <div class="row wrap">
+        <button class="btn btn-ai btn-sm" hx-post="{% url 'crm:lead_suggest_reply' lead.pk %}" hx-target="#ai-reply" hx-swap="innerHTML"><svg class="ico ico-sm"><use href="#i-spark"/></svg> ร่างข้อความตอบลูกค้า</button>
+        <form method="post" action="{% url 'quotes:quotation_from_lead_ai' lead.pk %}" style="display:inline">{% csrf_token %}<button class="btn btn-ai btn-sm"><svg class="ico ico-sm"><use href="#i-file-text"/></svg> ร่างใบเสนอราคาด้วย AI</button></form>
+      </div>
+      <div id="ai-reply" style="margin-top:10px"></div>
     </div>
-    <a href="{% url 'crm:lead_edit' lead.pk %}" class="rounded border px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">แก้ไข</a>
+    {% endif %}
+
+    <div class="card-head"><div class="title">บทสนทนา / กิจกรรม</div></div>
+    {% include "crm/_activity_list.html" %}
   </div>
-
-  <div class="mt-4 grid gap-6 md:grid-cols-3">
-    <section class="space-y-1 rounded-lg border bg-white p-4 text-sm md:col-span-2">
-      <div><span class="text-slate-500">บริษัท/หน่วยงาน:</span> {{ lead.company_name|default:"—" }}</div>
-      <div><span class="text-slate-500">โทร:</span> {{ lead.phone|default:"—" }} · <span class="text-slate-500">อีเมล:</span> {{ lead.email|default:"—" }} · <span class="text-slate-500">LINE:</span> {{ lead.line_id|default:"—" }}</div>
-      <div><span class="text-slate-500">ช่องทาง:</span> {{ lead.get_channel_display }} · <span class="text-slate-500">แหล่งที่มา:</span> {{ lead.source|default:"—" }}</div>
-      <div><span class="text-slate-500">สนใจ:</span> {{ lead.product_interest|default:"—" }}{% if lead.budget %} · งบ ~{{ lead.budget|floatformat:0 }} ฿{% endif %}</div>
-      <div><span class="text-slate-500">ผู้รับผิดชอบ:</span> {{ lead.assigned_to.get_full_name|default:"—" }}</div>
-      <div><span class="text-slate-500">สถานะ:</span> {{ lead.get_status_display }} · <span class="text-slate-500">เข้ามาเมื่อ:</span> {{ lead.created_at|date:"d/m/Y H:i" }}</div>
-      {% if lead.message %}<div class="border-t pt-2 text-slate-700">{{ lead.message|linebreaksbr }}</div>{% endif %}
-
-      {% if activities %}
-        <div class="mt-3 border-t pt-2">
-          <div class="mb-1 font-medium text-slate-600">ประวัติการติดต่อ</div>
-          <ul class="space-y-1.5">
-            {% for a in activities %}
-              <li class="flex gap-2">
-                <span class="shrink-0 rounded bg-slate-100 px-1.5 text-xs text-slate-500">{{ a.get_kind_display }}</span>
-                <span class="text-slate-700">{{ a.body|linebreaksbr }}</span>
-                <span class="ml-auto shrink-0 text-xs text-slate-400">{{ a.occurred_at|date:"d/m/Y H:i" }}</span>
-              </li>
-            {% endfor %}
-          </ul>
-        </div>
-      {% endif %}
-    </section>
-
-    <section class="space-y-3 rounded-lg border bg-white p-4 text-sm md:col-span-1">
-      {% if ai_enabled %}
-        <div class="space-y-2 rounded-lg border border-violet-200 bg-violet-50 p-3">
-          <div class="text-sm font-medium text-violet-800">ผู้ช่วย AI</div>
-          <form method="post" action="{% url 'quotes:quotation_from_lead_ai' lead.pk %}">
-            {% csrf_token %}
-            <button type="submit" class="w-full rounded bg-violet-600 px-3 py-2 text-sm text-white hover:bg-violet-700">✨ ร่างใบเสนอราคาด้วย AI</button>
-          </form>
-          <button type="button" class="w-full rounded border border-violet-300 px-3 py-2 text-sm text-violet-700 hover:bg-violet-100"
-                  hx-post="{% url 'crm:lead_suggest_reply' lead.pk %}" hx-target="#ai-reply" hx-swap="outerHTML">✨ ช่วยร่างข้อความตอบลูกค้า</button>
-          <div id="ai-reply"></div>
-          <p class="text-xs text-violet-700/70">AI จะอ่านบทสนทนา จับคู่กับแคตตาล็อก/บริบท แล้วช่วยร่างให้ — โปรดตรวจสอบก่อนใช้งาน</p>
-        </div>
-      {% endif %}
-      {% if lead.deal %}
-        <div class="text-emerald-700">แปลงเป็นดีลแล้ว</div>
-        <a href="{% url 'crm:deal_detail' lead.deal.pk %}" class="block rounded bg-slate-800 px-3 py-2 text-center text-white hover:bg-slate-700">เปิดดีล: {{ lead.deal.name }}</a>
-        {% if lead.customer %}<a href="{% url 'crm:customer_detail' lead.customer.pk %}" class="block text-slate-600 hover:underline">ลูกค้า: {{ lead.customer.name }}</a>{% endif %}
-      {% else %}
-        <form method="post" action="{% url 'crm:lead_convert' lead.pk %}">
-          {% csrf_token %}
-          <button type="submit" class="w-full rounded bg-emerald-600 px-3 py-2 text-white hover:bg-emerald-700">แปลงเป็นดีล</button>
-        </form>
-        <p class="text-xs text-slate-400">จะสร้างลูกค้า + ผู้ติดต่อ + ดีล (ขั้นแรกใน pipeline) จากข้อมูล lead นี้</p>
-      {% endif %}
-    </section>
-  </div>
+</div>
 {% endblock %}

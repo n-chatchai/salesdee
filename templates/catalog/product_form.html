@@ -1,15 +1,11 @@
 {% extends "base.html" %}
-
-{% block title %}{% if product %}แก้ไขสินค้า{% else %}เพิ่มสินค้า{% endif %} · {{ current_tenant.name }}{% endblock %}
-
+{% block title %}{% if product %}แก้ไขสินค้า{% else %}สินค้าใหม่{% endif %} · salesdee.{% endblock %}
 {% block content %}
-  <a href="{% if product %}{% url 'catalog:product_detail' product.pk %}{% else %}{% url 'catalog:products' %}{% endif %}" class="text-sm text-slate-500 hover:underline">&larr; ยกเลิก</a>
-  <h1 class="mt-1 text-xl font-semibold">{% if product %}แก้ไขสินค้า: {{ product.name }}{% else %}เพิ่มสินค้าใหม่{% endif %}</h1>
-
-  <form method="post" class="crm-form mt-4 max-w-2xl rounded-lg border bg-white p-5">
-    {% csrf_token %}
-    {% include "crm/_form_fields.html" %}
-    <button type="submit" class="mt-2 rounded bg-slate-800 px-4 py-2 text-sm text-white hover:bg-slate-700">บันทึก</button>
-    {% if product %}<p class="mt-3 text-xs text-slate-400">รูป / รุ่นย่อย / ออปชัน / รายการในชุด — จัดการได้ในหน้า <a class="underline" href="/admin/catalog/product/{{ product.pk }}/change/">admin</a></p>{% endif %}
+<div style="max-width:640px">
+  <div class="eyebrow">สินค้า</div><h1 class="h1 serif-it" style="margin-bottom:16px">{% if product %}แก้ไขสินค้า{% else %}เพิ่มสินค้าใหม่{% endif %}</h1>
+  <form method="post" class="card">{% csrf_token %}
+    {% include "partials/_form.html" %}
+    <div class="row" style="margin-top:12px"><button class="btn btn-primary">บันทึก</button><a class="btn btn-ghost" href="{% if product %}{% url 'catalog:product_detail' product.pk %}{% else %}{% url 'catalog:products' %}{% endif %}">ยกเลิก</a></div>
   </form>
+</div>
 {% endblock %}

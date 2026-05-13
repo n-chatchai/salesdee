@@ -21,7 +21,7 @@ This file is read by Claude Code at the start of every session in this repo. It 
 | Language | Python 3.12+ (Django 6 supports 3.12–3.14) |
 | Package/env manager | **uv** (not pip/poetry/pipenv) |
 | Web framework | **Django 6.x** (server-rendered, batteries-included) |
-| Frontend | **htmx** + **Alpine.js** (small client-side interactivity only) + **Tailwind CSS** — **no SPA, no React, no separate frontend app** |
+| Frontend | **htmx** + **Alpine.js** (small client-side interactivity only) + **Custom CSS Design System** (CSS Custom Properties) — **no SPA, no React, no separate frontend app** |
 | Template fragments | Django 6 **template partials** (`{% partialdef %}` / `{% partial %}`) for htmx-swappable regions; separate partial files only when reused across templates |
 | Drag-and-drop | SortableJS |
 | Database | **PostgreSQL** (with Row-Level Security for tenant isolation) |

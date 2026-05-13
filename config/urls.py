@@ -12,6 +12,7 @@ urlpatterns = [
     path("catalog/", include("apps.catalog.urls")),
     path("quotes/", include("apps.quotes.urls")),
     path("integrations/", include("apps.integrations.urls")),
+    path("settings/", include("apps.tenants.urls")),
     # Public, login-free quotation share links (tenant resolved from the token).
     path("q/<str:token>/", quote_views.public_quotation, name="public_quotation"),
     path(

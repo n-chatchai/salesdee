@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>salesdee. · Brand Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@200;300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F6F1E7;
+    --paper-2: #FBF7EF;
+    --paper-3: #ECE4D2;
+    --ink: #1B2A3A;
+    --ink-2: #2D3D50;
+    --mid: #6B7785;
+    --mid-2: #A5ACB5;
+    --accent: #C8501F;
+    --accent-deep: #9C3F18;
+    --accent-soft: #F4E2D3;
+    --ai: #7B8F6B;
+    --ai-soft: #E8EEDF;
+    --ai-deep: #5A6D4D;
+    --good: #4A6B40;
+    --good-soft: #E1EAD9;
+    --warn: #B45A3C;
+    --warn-soft: #F4DCD0;
+    --danger: #A8392F;
+    --danger-soft: #F0D5D0;
+    --border: #E5DDC9;
+    --border-2: #EFE8D7;
+    --line-green: #06C755;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { background: #393332; }
+  body {
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    color: var(--ink);
+    line-height: 1.5;
+    background: #393332;
+    min-height: 100vh;
+  }
+  .page {
+    max-width: 1400px;
+    margin: 40px auto;
+    background: var(--paper);
+    box-shadow: 0 30px 80px rgba(0,0,0,.4);
+    position: relative;
+  }
+  .page::before {
+    content: '';
+    position: absolute; inset: 0;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='1' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.1 0 0 0 0 0.1 0 0 0 0.06 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    opacity: 0.45;
+    mix-blend-mode: multiply;
+  }
+  .page > * { position: relative; z-index: 1; }
+
+  /* ═══ WORDMARK + ICON BUILDING BLOCKS ═══ */
+  .wm {
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    text-transform: lowercase;
+    line-height: 1;
+    display: inline-block;
+  }
+  .wm .sales { color: var(--ink); }
+  .wm .dee { color: var(--accent); }
+  .wm .dot {
+    display: inline-block;
+    width: 0.13em; height: 0.13em;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-left: 0.04em;
+    vertical-align: 0.05em;
+  }
+  .wm.reverse .sales { color: var(--paper); }
+  .wm.mono .sales { color: var(--ink); }
+  .wm.mono .dee { color: var(--ink); }
+  .wm.mono .dot { background: var(--ink); }
+
+  /* Icon (d + dot) */
+  .ic {
+    display: grid; place-items: center;
+    position: relative; overflow: hidden;
+    flex-shrink: 0;
+  }
+  .ic .d {
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.05em;
+    line-height: 0.85;
+  }
+  .ic .dot { position: absolute; border-radius: 50%; }
+  .ic.primary { background: var(--ink); border-radius: 22.37%; }
+  .ic.primary .d { color: var(--accent); }
+  .ic.primary .dot { background: var(--accent); }
+  .ic.accent { background: var(--accent); border-radius: 22.37%; }
+  .ic.accent .d { color: var(--paper); }
+  .ic.accent .dot { background: var(--paper); }
+  .ic.cream { background: var(--paper-2); border: 2px solid var(--ink); border-radius: 22.37%; }
+  .ic.cream .d { color: var(--ink); }
+  .ic.cream .dot { background: var(--accent); }
+  .ic.round { border-radius: 50%; }
+
+  /* Header */
+  .doc-header {
+    padding: 70px 80px 50px;
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: flex-end;
+  }
+  .doc-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--mid);
+    margin-bottom: 18px;
+  }
+  .doc-title {
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-weight: 700;
+    font-size: 96px;
+    text-transform: lowercase;
+    letter-spacing: -0.045em;
+    line-height: 0.95;
+    color: var(--ink);
+    margin-bottom: 18px;
+  }
+  .doc-title .dee { color: var(--accent); }
+  .doc-title .dot {
+    display: inline-block;
+    width: 0.13em; height: 0.13em;
+    background: var(--accent);
+    border-radius: 50%;
+    margin-left: 0.04em;
+    vertical-align: 0.05em;
+  }
+  .doc-subtitle {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 24px;
+    color: var(--mid);
+    line-height: 1.3;
+  }
+  .doc-meta {
+    text-align: right;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--mid);
+    letter-spacing: 0.08em;
+  }
+  .doc-meta div + div { margin-top: 4px; }
+
+  /* TOC */
+  .doc-toc {
+    padding: 24px 80px;
+    border-bottom: 1px solid var(--border);
+    background: var(--paper-2);
+    display: flex; gap: 32px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--mid);
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .doc-toc .label {
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-weight: 500;
+  }
+  .doc-toc a {
+    color: var(--ink-2);
+    text-decoration: none;
+    text-transform: uppercase;
+    padding: 4px 0;
+    border-bottom: 1px solid transparent;
+  }
+  .doc-toc a:hover {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  /* Section */
+  .section {
+    padding: 64px 80px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-head {
+    display: grid;
+    grid-template-columns: 80px 1fr 300px;
+    gap: 32px;
+    align-items: baseline;
+    margin-bottom: 40px;
+  }
+  .section-num {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 64px;
+    color: var(--accent);
+    line-height: 0.85;
+  }
+  .section-title {
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+  .section-title em {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    color: var(--accent);
+  }
+  .section-desc {
+    font-size: 14px;
+    color: var(--mid);
+    line-height: 1.6;
+    max-width: 580px;
+  }
+  .section-side {
+    font-size: 12px;
+    color: var(--mid);
+    line-height: 1.6;
+    padding: 16px 18px;
+    background: var(--paper-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .section-side .key {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--mid);
+    margin-bottom: 8px;
+  }
+  .section-side strong { color: var(--ink); font-weight: 600; }
+
+  /* ═══ BRAND ESSENCE ═══ */
+  .essence-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+  }
+  .essence-card {
+    background: var(--paper-2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+  }
+  .essence-card .head {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+  .essence-card h3 {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 26px;
+    color: var(--ink);
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+  .essence-card p {
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.65;
+  }
+
+  /* ═══ WORDMARK SECTION ═══ */
+  .wm-hero {
+    background: var(--paper-2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 100px 60px;
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .wm-160 { font-size: 160px; }
+  .wm-96 { font-size: 96px; }
+  .wm-64 { font-size: 64px; }
+  .wm-48 { font-size: 48px; }
+  .wm-36 { font-size: 36px; }
+  .wm-28 { font-size: 28px; }
+  .wm-22 { font-size: 22px; }
+  .wm-18 { font-size: 18px; }
+  .wm-14 { font-size: 14px; }
+  .wm-12 { font-size: 12px; font-weight: 700; }
+
+  .wm-anatomy {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 60px 40px;
+    margin-bottom: 24px;
+    position: relative;
+    display: grid;
+    place-items: center;
+  }
+  .wm-anatomy-display {
+    position: relative;
+    display: inline-block;
+  }
+  .wm-anatomy-display .wm { font-size: 140px; }
+  .wm-anatomy .annot {
+    position: absolute;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--mid);
+    letter-spacing: 0.05em;
+  }
+  .wm-anatomy .annot::before {
+    content: '';
+    position: absolute;
+    background: var(--accent);
+  }
+  .wm-anatomy .annot.top {
+    top: -28px;
+    color: var(--accent);
+  }
+  .wm-anatomy .annot.bot {
+    bottom: -28px;
+    color: var(--accent);
+  }
+
+  /* Size scale */
+  .scale-grid {
+    display: flex; flex-direction: column;
+    gap: 4px;
+  }
+  .scale-row {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 24px;
+    align-items: baseline;
+    padding: 16px 24px;
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .scale-row .meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--mid);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .scale-row .meta strong {
+    display: block;
+    color: var(--ink);
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    letter-spacing: 0;
+    text-transform: none;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  /* ═══ ICON SYSTEM ═══ */
+  .icon-hero {
+    display: flex; justify-content: center; gap: 40px;
+    padding: 40px 0;
+    flex-wrap: wrap;
+  }
+  .icon-block { text-align: center; }
+  .icon-block-label {
+    margin-top: 18px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mid);
+  }
+  .icon-block-label strong {
+    color: var(--ink);
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    letter-spacing: 0;
+    text-transform: none;
+    font-family: 'IBM Plex Sans Thai';
+  }
+
+  /* Icon sizes */
+  .ic-200 { width: 200px; height: 200px; }
+  .ic-200 .d { font-size: 140px; }
+  .ic-200 .dot { width: 14px; height: 14px; bottom: 38px; right: 38px; }
+  .ic-120 { width: 120px; height: 120px; }
+  .ic-120 .d { font-size: 84px; }
+  .ic-120 .dot { width: 9px; height: 9px; bottom: 24px; right: 24px; }
+  .ic-72 { width: 72px; height: 72px; }
+  .ic-72 .d { font-size: 50px; }
+  .ic-72 .dot { width: 6px; height: 6px; bottom: 14px; right: 14px; }
+  .ic-48 { width: 48px; height: 48px; }
+  .ic-48 .d { font-size: 32px; }
+  .ic-48 .dot { width: 4px; height: 4px; bottom: 9px; right: 9px; }
+  .ic-32 { width: 32px; height: 32px; }
+  .ic-32 .d { font-size: 22px; }
+  .ic-32 .dot { display: none; }
+  .ic-16 { width: 16px; height: 16px; }
+  .ic-16 .d { font-size: 12px; }
+  .ic-16 .dot { display: none; }
+
+  /* Size scale for icons */
+  .icon-scale {
+    display: flex; gap: 24px;
+    align-items: flex-end;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 24px 0;
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+  .icon-scale-block { text-align: center; }
+  .icon-scale-label {
+    margin-top: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mid);
+  }
+
+  /* ═══ COLOR PALETTE ═══ */
+  .palette-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+  .palette-group .group-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .swatch-stack {
+    display: flex; flex-direction: column;
+    gap: 6px;
+  }
+  .swatch {
+    display: grid;
+    grid-template-columns: 80px 1fr 140px;
+    gap: 20px;
+    align-items: center;
+    padding: 14px 18px;
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .swatch-color {
+    width: 60px; height: 60px;
+    border-radius: 8px;
+    border: 1px solid rgba(0,0,0,.05);
+  }
+  .swatch-info .name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 3px;
+  }
+  .swatch-info .use {
+    font-size: 11px;
+    color: var(--mid);
+    line-height: 1.5;
+  }
+  .swatch-codes {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink);
+    text-align: right;
+  }
+  .swatch-codes .hex {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+  .swatch-codes .var {
+    font-size: 10px;
+    color: var(--mid);
+  }
+
+  /* ═══ TYPOGRAPHY ═══ */
+  .type-block {
+    background: var(--paper-2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 36px;
+    margin-bottom: 20px;
+  }
+  .type-block-head {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 24px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .type-block-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .type-block-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.015em;
+  }
+  .type-block-use {
+    font-size: 12px;
+    color: var(--mid);
+    line-height: 1.5;
+    text-align: right;
+    max-width: 260px;
+  }
+  .type-sample {
+    color: var(--ink);
+  }
+  .type-sample-row {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 18px;
+    align-items: baseline;
+    padding: 12px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .type-sample-row:last-child { border-bottom: none; }
+  .type-sample-row .meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--mid);
+    letter-spacing: 0.05em;
+  }
+  .type-sample-row .meta strong {
+    display: block;
+    color: var(--ink-2);
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .type-sample-row .display {
+    color: var(--ink);
+  }
+
+  /* Plex variants */
+  .px-32 { font-family: 'IBM Plex Sans Thai'; font-size: 32px; }
+  .px-24 { font-family: 'IBM Plex Sans Thai'; font-size: 24px; }
+  .px-18 { font-family: 'IBM Plex Sans Thai'; font-size: 18px; }
+  .px-14 { font-family: 'IBM Plex Sans Thai'; font-size: 14px; }
+  /* Fraunces */
+  .fr-48 { font-family: 'Fraunces', serif; font-style: italic; font-weight: 500; font-size: 48px; letter-spacing: -0.02em; }
+  .fr-32 { font-family: 'Fraunces', serif; font-style: italic; font-weight: 500; font-size: 32px; letter-spacing: -0.02em; }
+  .fr-24 { font-family: 'Fraunces', serif; font-style: italic; font-weight: 500; font-size: 24px; }
+  /* Mono */
+  .mn-14 { font-family: 'IBM Plex Mono'; font-size: 14px; }
+  .mn-11 { font-family: 'IBM Plex Mono'; font-size: 11px; letter-spacing: 0.05em; }
+  .mn-10 { font-family: 'IBM Plex Mono'; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+  /* ═══ VOICE & TONE ═══ */
+  .voice-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .voice-card {
+    background: var(--paper-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .voice-head {
+    padding: 14px 20px;
+    background: var(--paper-2);
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .voice-head .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .voice-head .label.do { color: var(--good); }
+  .voice-head .label.dont { color: var(--danger); }
+  .voice-head .badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 99px;
+  }
+  .voice-head .badge.do { background: var(--good-soft); color: var(--good); }
+  .voice-head .badge.dont { background: var(--danger-soft); color: var(--danger); }
+  .voice-body { padding: 20px; }
+  .voice-example {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 18px;
+    color: var(--ink);
+    line-height: 1.5;
+    padding: 14px 18px;
+    background: var(--paper);
+    border-left: 3px solid var(--good);
+    border-radius: 0 6px 6px 0;
+    margin-bottom: 10px;
+  }
+  .voice-example.dont { border-left-color: var(--danger); }
+  .voice-example.dont {
+    text-decoration: line-through;
+    text-decoration-color: var(--danger);
+    color: var(--mid);
+  }
+
+  /* ═══ APP ICONS ═══ */
+  .app-icon-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .app-icon-card {
+    background: var(--paper-2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .app-icon-head {
+    padding: 14px 20px;
+    background: var(--paper-2);
+    border-bottom: 1px solid var(--border);
+  }
+  .app-icon-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 3px;
+  }
+  .app-icon-spec {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--mid);
+    letter-spacing: 0.05em;
+  }
+  .app-icon-body {
+    padding: 40px;
+    background: var(--paper);
+    display: grid; place-items: center;
+    min-height: 280px;
+  }
+  .app-icon-foot {
+    padding: 14px 20px;
+    background: var(--paper-2);
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--mid);
+    line-height: 1.5;
+  }
+
+  /* ═══ USAGE RULES ═══ */
+  .rule-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .rule-card {
+    background: var(--paper-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .rule-head {
+    padding: 12px 16px;
+    background: var(--paper-2);
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .rule-head .label {
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .rule-head .badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 99px;
+  }
+  .rule-card.do .head { color: var(--good); }
+  .rule-card.do .badge { background: var(--good-soft); color: var(--good); }
+  .rule-card.dont .head { color: var(--danger); }
+  .rule-card.dont .badge { background: var(--danger-soft); color: var(--danger); }
+  .rule-body {
+    padding: 32px;
+    background: var(--paper);
+    display: grid; place-items: center;
+    min-height: 160px;
+    position: relative;
+  }
+  .rule-card.dont .rule-body::after {
+    content: '';
+    position: absolute;
+    inset: 30px;
+    border: 2px solid var(--danger);
+    border-radius: 8px;
+    pointer-events: none;
+    opacity: 0.25;
+  }
+  .rule-foot {
+    padding: 12px 16px;
+    background: var(--paper-2);
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--mid);
+    line-height: 1.5;
+  }
+
+  /* Footer */
+  .doc-footer {
+    padding: 50px 80px;
+    background: var(--paper-2);
+    text-align: center;
+  }
+  .doc-footer-text {
+    font-size: 13px;
+    color: var(--mid);
+    line-height: 1.7;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  .doc-footer-text strong { color: var(--ink); font-weight: 600; }
+  .doc-footer-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--mid);
+    margin-top: 14px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ═══ HEADER ═══ -->
+  <header class="doc-header">
+    <div>
+      <div class="doc-eyebrow">Brand Guide · v1.0</div>
+      <h1 class="doc-title">sales<span class="dee">dee</span><span class="dot"></span></h1>
+      <p class="doc-subtitle">ผู้ช่วยขายของ <span style="font-family: 'Fraunces', serif;">SME</span> ไทย<br>เปลี่ยน LINE chat เป็นใบเสนอราคาใน 30 วินาที</p>
+    </div>
+    <div class="doc-meta">
+      <div>12 พฤษภาคม 2569</div>
+      <div>internal · for team</div>
+      <div>v1.0 finalized</div>
+    </div>
+  </header>
+
+  <!-- TOC -->
+  <nav class="doc-toc">
+    <span class="label">Contents</span>
+    <a href="#essence">01 · Essence</a>
+    <a href="#wordmark">02 · Wordmark</a>
+    <a href="#icon">03 · Icon</a>
+    <a href="#color">04 · Color</a>
+    <a href="#type">05 · Typography</a>
+    <a href="#voice">06 · Voice</a>
+    <a href="#apps">07 · App Icons</a>
+    <a href="#rules">08 · Rules</a>
+  </nav>
+
+  <!-- ═══ 01 ESSENCE ═══ -->
+  <section class="section" id="essence">
+    <div class="section-head">
+      <div class="section-num">01</div>
+      <div>
+        <h2 class="section-title">Essence<br><em>· พื้นฐานของแบรนด์</em></h2>
+        <p class="section-desc">salesdee. เป็น <strong>ผู้ช่วยที่เซลส์ของ SME ไทยเรียกใช้ตลอดวัน</strong> · บุคลิกของแบรนด์มาจากสามคำ — มีรสนิยม · เป็นมิตร · ใช้ AI โดยไม่หยิ่ง</p>
+      </div>
+      <div class="section-side">
+        <div class="key">มาจาก</div>
+        Sales (การขาย) + ดี (ภาษาไทย = <strong>good</strong>) · เล่นเสียงพยางค์ที่อ่านได้ทั้งสองภาษา · ทับศัพท์ Dee ตรงตามเสียงไทย
+      </div>
+    </div>
+
+    <div class="essence-grid">
+      <div class="essence-card">
+        <div class="head">01 · Look</div>
+        <h3>มีรสนิยม<br>ไม่ใช่หรูหรา</h3>
+        <p>กระดาษครีม · หมึกเข้ม · ส้มเปอร์ซิมมอน — ใช้สีไม่เยอะ พิมพ์ใจเย็น · มีพื้นผิว texture เบา ๆ เหมือนพิมพ์จริง · ดู editorial มากกว่า tech</p>
+      </div>
+      <div class="essence-card">
+        <div class="head">02 · Sound</div>
+        <h3>เป็นมิตร<br>พูดเหมือนเพื่อนเซลส์</h3>
+        <p>พูด "พี่มะลิ" ไม่ใช่ "User 1" · ใช้ภาษาที่เซลส์ไทยใช้จริง · ไม่ทำเป็น corporate · ไม่ทำเป็นเทคโนโลยีศัพท์</p>
+      </div>
+      <div class="essence-card">
+        <div class="head">03 · Smart</div>
+        <h3>ใช้ AI<br>แต่ไม่หยิ่ง</h3>
+        <p>AI ทำงานเงียบ ๆ ในพื้นหลัง · พูดเมื่อมีประโยชน์เท่านั้น · พื้นเซจอ่อน ๆ เป็นเครื่องหมายของ AI · ไม่เคลมว่าเป็นเครื่องวิเศษ</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 02 WORDMARK ═══ -->
+  <section class="section" id="wordmark">
+    <div class="section-head">
+      <div class="section-num">02</div>
+      <div>
+        <h2 class="section-title">Wordmark<br><em>· ตัวพิมพ์เล็ก · dee สีส้ม</em></h2>
+        <p class="section-desc">โลโก้คือการพิมพ์ — ไม่มีเครื่องหมายแยก · "sales" สีหมึก · "dee" สีส้ม · มี dot เล็ก ๆ ต่อท้ายเป็น signature · ทั้งหมดตัวพิมพ์เล็ก เรียบและเป็นมิตร</p>
+      </div>
+      <div class="section-side">
+        <div class="key">spec</div>
+        IBM Plex Sans Thai <strong>700</strong><br>
+        tracking <strong>−4%</strong><br>
+        lowercase · มี dot
+      </div>
+    </div>
+
+    <div class="wm-hero">
+      <span class="wm wm-160"><span class="sales">sales</span><span class="dee">dee</span><span class="dot"></span></span>
+    </div>
+
+    <div class="scale-grid">
+      <div class="scale-row">
+        <div class="meta"><strong>96 px</strong>hero · landing</div>
+        <span class="wm wm-96"><span class="sales">sales</span><span class="dee">dee</span><span class="dot"></span></span>
+      </div>
+      <div class="scale-row">
+        <div class="meta"><strong>64 px</strong>page header</div>
+        <span class="wm wm-64"><span class="sales">sales</span><span class="dee">dee</span><span class="dot"></span></span>
+      </div>
+      <div class="scale-row">
+        <div class="meta"><strong>48 px</strong>cover · doc</div>
+        <span class="wm wm-48"><span class="sales">sales</span><span class="dee">dee</span><span class="dot"></span></span>
+      </div>
+      <div class="scale-row">
+        <div class="meta"><strong>28 px</strong>nav · sidebar</div>
+        <span class="wm wm-28"><span class="sales">sales</span><span class="dee">dee</span><span class="dot"></span></span>
+      </div>
+      <div class="scale-row">
+        <div class="meta"><strong>18 px</strong>inline · paragraph</div>
+        <span class="wm wm-18"><span class="sales">sales</span><span class="dee">dee</span><span class="dot"></span></span>
+      </div>
+      <div class="scale-row">
+        <div class="meta"><strong>14 px</strong>footer · fine print</div>
+        <span class="wm wm-14"><span class="sales">sales</span><span class="dee">dee</span><span class="dot"></span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 03 ICON ═══ -->
+  <section class="section" id="icon">
+    <div class="section-head">
+      <div class="section-num">03</div>
+      <div>
+        <h2 class="section-title">Icon<br><em>· "d" + dot</em></h2>
+        <p class="section-desc">สำหรับ app icon · favicon · sidebar mark — derived จาก wordmark · ตัว "d" อ้างอิงคำว่า "dee" · dot อ้างอิง signature</p>
+      </div>
+      <div class="section-side">
+        <div class="key">spec</div>
+        radius <strong>22.37%</strong> (Apple squircle)<br>
+        font <strong>IBM Plex Sans Thai 700</strong><br>
+        dot <strong>มุมขวาล่าง</strong>
+      </div>
+    </div>
+
+    <div class="icon-hero">
+      <div class="icon-block">
+        <div class="ic ic-200 primary"><span class="d">d</span><span class="dot"></span></div>
+        <div class="icon-block-label">
+          <strong>ink · default</strong>
+          ใช้เกือบทุกที่
+        </div>
+      </div>
+      <div class="icon-block">
+        <div class="ic ic-200 accent"><span class="d">d</span><span class="dot"></span></div>
+        <div class="icon-block-label">
+          <strong>accent · marketing</strong>
+          campaign · ads · social
+        </div>
+      </div>
+      <div class="icon-block">
+        <div class="ic ic-200 cream"><span class="d">d</span><span class="dot"></span></div>
+        <div class="icon-block-label">
+          <strong>cream · stationery</strong>
+          เอกสาร · นามบัตร
+        </div>
+      </div>
+    </div>
+
+    <div class="icon-scale">
+      <div class="icon-scale-block">
+        <div class="ic ic-120 primary"><span class="d">d</span><span class="dot"></span></div>
+        <div class="icon-scale-label">120 px</div>
+      </div>
+      <div class="icon-scale-block">
+        <div class="ic ic-72 primary"><span class="d">d</span><span class="dot"></span></div>
+        <div class="icon-scale-label">72 px</div>
+      </div>
+      <div class="icon-scale-block">
+        <div class="ic ic-48 primary"><span class="d">d</span><span class="dot"></span></div>
+        <div class="icon-scale-label">48 px</div>
+      </div>
+      <div class="icon-scale-block">
+        <div class="ic ic-32 primary"><span class="d">d</span></div>
+        <div class="icon-scale-label">32 px</div>
+      </div>
+      <div class="icon-scale-block">
+        <div class="ic ic-16 primary"><span class="d">d</span></div>
+        <div class="icon-scale-label">16 px favicon</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 04 COLOR ═══ -->
+  <section class="section" id="color">
+    <div class="section-head">
+      <div class="section-num">04</div>
+      <div>
+        <h2 class="section-title">Color<br><em>· Thai Craft Modern</em></h2>
+        <p class="section-desc">Palette ที่นึกถึงกระดาษพิมพ์จริงและงานหัตถกรรมไทย · มี <strong>กฎเดียว</strong>: <em>สีเซจใช้ได้เฉพาะใน AI surfaces เท่านั้น</em> — เมื่อใดเห็นเซจ = ผู้ช่วยอัจฉริยะกำลังพูด</p>
+      </div>
+      <div class="section-side">
+        <div class="key">rule</div>
+        <strong>sage = AI</strong><br>
+        ใช้ที่อื่นจะทำลายความหมายของสี · ทำให้ user งง ว่า AI กำลังพูดหรือเปล่า
+      </div>
+    </div>
+
+    <div class="palette-grid">
+
+      <div class="palette-group">
+        <div class="group-label">PRIMARY · paper + ink</div>
+        <div class="swatch-stack">
+          <div class="swatch">
+            <div class="swatch-color" style="background: #F6F1E7;"></div>
+            <div class="swatch-info">
+              <div class="name">Paper</div>
+              <div class="use">พื้นหลังหลัก · สีกระดาษพิมพ์</div>
+            </div>
+            <div class="swatch-codes">
+              <span class="hex">#F6F1E7</span>
+              <span class="var">--paper</span>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: #FBF7EF;"></div>
+            <div class="swatch-info">
+              <div class="name">Paper 2</div>
+              <div class="use">ส่วนยกขึ้น · card · ส่วนบน</div>
+            </div>
+            <div class="swatch-codes">
+              <span class="hex">#FBF7EF</span>
+              <span class="var">--paper-2</span>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: #1B2A3A;"></div>
+            <div class="swatch-info">
+              <div class="name">Ink</div>
+              <div class="use">หมึกเข้ม · ตัวอักษร · sidebar</div>
+            </div>
+            <div class="swatch-codes">
+              <span class="hex">#1B2A3A</span>
+              <span class="var">--ink</span>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: #6B7785;"></div>
+            <div class="swatch-info">
+              <div class="name">Mid</div>
+              <div class="use">ข้อความรอง · placeholder · label</div>
+            </div>
+            <div class="swatch-codes">
+              <span class="hex">#6B7785</span>
+              <span class="var">--mid</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="palette-group">
+        <div class="group-label">ACCENT · persimmon</div>
+        <div class="swatch-stack">
+          <div class="swatch">
+            <div class="swatch-color" style="background: #C8501F;"></div>
+            <div class="swatch-info">
+              <div class="name">Persimmon</div>
+              <div class="use">brand color · dee · CTA · highlight</div>
+            </div>
+            <div class="swatch-codes">
+              <span class="hex">#C8501F</span>
+              <span class="var">--accent</span>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: #F4E2D3;"></div>
+            <div class="swatch-info">
+              <div class="name">Persimmon Soft</div>
+              <div class="use">พื้นจาง · selected state · badge</div>
+            </div>
+            <div class="swatch-codes">
+              <span class="hex">#F4E2D3</span>
+              <span class="var">--accent-soft</span>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: #9C3F18;"></div>
+            <div class="swatch-info">
+              <div class="name">Persimmon Deep</div>
+              <div class="use">hover · pressed · ตัวอักษรเข้ม</div>
+            </div>
+            <div class="swatch-codes">
+              <span class="hex">#9C3F18</span>
+              <span class="var">--accent-deep</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- AI + Status -->
+    <div class="palette-grid" style="margin-top: 32px;">
+      <div class="palette-group">
+        <div class="group-label">AI · sage (ใช้เฉพาะ AI)</div>
+        <div class="swatch-stack">
+          <div class="swatch">
+            <div class="swatch-color" style="background: #7B8F6B;"></div>
+            <div class="swatch-info">
+              <div class="name">Sage</div>
+              <div class="use"><strong>เฉพาะ AI surfaces เท่านั้น</strong> · panel · banner · suggestion</div>
+            </div>
+            <div class="swatch-codes">
+              <span class="hex">#7B8F6B</span>
+              <span class="var">--ai</span>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: #E8EEDF;"></div>
+            <div class="swatch-info">
+              <div class="name">Sage Soft</div>
+              <div class="use">พื้นจาง AI · ribbon · hint</div>
+            </div>
+            <div class="swatch-codes">
+              <span class="hex">#E8EEDF</span>
+              <span class="var">--ai-soft</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="palette-group">
+        <div class="group-label">STATUS</div>
+        <div class="swatch-stack">
+          <div class="swatch">
+            <div class="swatch-color" style="background: #4A6B40;"></div>
+            <div class="swatch-info">
+              <div class="name">Good</div>
+              <div class="use">success · ปิดดีล · มีสต๊อก</div>
+            </div>
+            <div class="swatch-codes">
+              <span class="hex">#4A6B40</span>
+              <span class="var">--good</span>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: #B45A3C;"></div>
+            <div class="swatch-info">
+              <div class="name">Warn</div>
+              <div class="use">เตือน · ใกล้หมดอายุ · สต๊อกน้อย</div>
+            </div>
+            <div class="swatch-codes">
+              <span class="hex">#B45A3C</span>
+              <span class="var">--warn</span>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: #A8392F;"></div>
+            <div class="swatch-info">
+              <div class="name">Danger</div>
+              <div class="use">error · ปฏิเสธ · หมดสต๊อก</div>
+            </div>
+            <div class="swatch-codes">
+              <span class="hex">#A8392F</span>
+              <span class="var">--danger</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 05 TYPOGRAPHY ═══ -->
+  <section class="section" id="type">
+    <div class="section-head">
+      <div class="section-num">05</div>
+      <div>
+        <h2 class="section-title">Typography<br><em>· 3 families · 1 system</em></h2>
+        <p class="section-desc">IBM Plex สำหรับ <strong>ทำงาน</strong> (อ่านยาว ๆ ได้, รองรับไทย) · Fraunces สำหรับ <strong>moment</strong> (italic เน้น emotional moment) · Mono สำหรับ <strong>ตัวเลขและ code</strong></p>
+      </div>
+      <div class="section-side">
+        <div class="key">source</div>
+        ทั้งสามเป็น <strong>Google Fonts</strong> · open source · ใช้ทั้งภาษาไทยและอังกฤษ
+      </div>
+    </div>
+
+    <!-- IBM Plex Sans Thai -->
+    <div class="type-block">
+      <div class="type-block-head">
+        <div>
+          <div class="type-block-name">PRIMARY · 80% ของข้อความทั้งหมด</div>
+          <div class="type-block-title">IBM Plex Sans Thai</div>
+        </div>
+        <div class="type-block-use">
+          UI · ปุ่ม · ข้อความใน app · เอกสาร · ทุกที่ที่อ่านนาน ๆ · รองรับไทยและอังกฤษเต็มที่
+        </div>
+      </div>
+      <div class="type-sample">
+        <div class="type-sample-row">
+          <div class="meta">700 · <strong>32 / -2.5%</strong></div>
+          <div class="display"><span class="px-32" style="font-weight: 700; letter-spacing: -0.025em;">ใบเสนอราคาที่ดีในจังหวะเดียว</span></div>
+        </div>
+        <div class="type-sample-row">
+          <div class="meta">600 · <strong>24 / -1.5%</strong></div>
+          <div class="display"><span class="px-24" style="font-weight: 600; letter-spacing: -0.015em;">เปลี่ยน LINE chat เป็นใบเสนอ</span></div>
+        </div>
+        <div class="type-sample-row">
+          <div class="meta">500 · <strong>18 / 0</strong></div>
+          <div class="display"><span class="px-18" style="font-weight: 500;">สร้างใบเสนอจากแชต LINE ภายใน 30 วินาที</span></div>
+        </div>
+        <div class="type-sample-row">
+          <div class="meta">400 · <strong>14 / 1.5</strong></div>
+          <div class="display"><span class="px-14" style="font-weight: 400; line-height: 1.5;">เมื่อเซลส์ของวัน.ดี.ดี.ได้รับข้อความใน LINE Official ของบริษัท ระบบจะอ่านข้อความและจับคู่สินค้าจากแคตตาล็อก</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fraunces -->
+    <div class="type-block">
+      <div class="type-block-head">
+        <div>
+          <div class="type-block-name">EDITORIAL · 15% สำหรับ moment</div>
+          <div class="type-block-title">Fraunces Italic</div>
+        </div>
+        <div class="type-block-use">
+          ใช้เป็น italic ตัวเอียงเท่านั้น · highlight กลุ่มเล็ก ๆ ใน hero · pull quote · ตัวเลข rank · ส่วนที่ต้อง "หยุดให้คนสนใจ"
+        </div>
+      </div>
+      <div class="type-sample">
+        <div class="type-sample-row">
+          <div class="meta">500 · <strong>48 italic</strong></div>
+          <div class="display"><span class="fr-48">เพราะการขายดี · เริ่มจากความสนใจที่ดี</span></div>
+        </div>
+        <div class="type-sample-row">
+          <div class="meta">500 · <strong>32 italic</strong></div>
+          <div class="display"><span class="fr-32">moment ที่สำคัญในเรื่อง</span></div>
+        </div>
+        <div class="type-sample-row">
+          <div class="meta">500 · <strong>24 italic</strong></div>
+          <div class="display"><span class="fr-24">เน้นตัวย่อย ๆ ในประโยคที่ยาวกว่า</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Plex Mono -->
+    <div class="type-block">
+      <div class="type-block-head">
+        <div>
+          <div class="type-block-name">DATA · 5% สำหรับตัวเลข</div>
+          <div class="type-block-title">IBM Plex Mono</div>
+        </div>
+        <div class="type-block-use">
+          ตัวเลข · ราคา · SKU · code · vertical label เล็ก · ส่วนที่ต้องการความเป็น "technical/structured"
+        </div>
+      </div>
+      <div class="type-sample">
+        <div class="type-sample-row">
+          <div class="meta">500 · <strong>14 / 0</strong></div>
+          <div class="display"><span class="mn-14" style="font-weight: 500;">฿ 159,430 · TWB-180 · 12 variants</span></div>
+        </div>
+        <div class="type-sample-row">
+          <div class="meta">500 · <strong>11 / 5%</strong></div>
+          <div class="display"><span class="mn-11" style="font-weight: 500;">QT-2026-0142 · Rev.1 · ใกล้หมดอายุ 2 วัน</span></div>
+        </div>
+        <div class="type-sample-row">
+          <div class="meta">500 · <strong>10 / 10% caps</strong></div>
+          <div class="display"><span class="mn-10" style="font-weight: 500;">ELIGIBLE FOR DISCOUNT · MID 0089</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 06 VOICE & TONE ═══ -->
+  <section class="section" id="voice">
+    <div class="section-head">
+      <div class="section-num">06</div>
+      <div>
+        <h2 class="section-title">Voice<br><em>· พูดเหมือนเพื่อนเซลส์</em></h2>
+        <p class="section-desc">salesdee. พูดเหมือน <strong>เพื่อนร่วมงานที่ฉลาดกว่าและช่วยเหลือดี</strong> · ไม่ใช่หุ่นยนต์ · ไม่ใช่ corporate · ไม่ใช่ "เทพแห่ง AI"</p>
+      </div>
+      <div class="section-side">
+        <div class="key">3 หลัก</div>
+        <strong>1.</strong> ใช้ "พี่ครับ/ค่ะ" + ชื่อจริง<br>
+        <strong>2.</strong> สั้น ตรงจุด<br>
+        <strong>3.</strong> มีอารมณ์เบา ๆ
+      </div>
+    </div>
+
+    <div class="voice-grid">
+      <div class="voice-card">
+        <div class="voice-head">
+          <span class="label do">DO · พูดแบบนี้</span>
+          <span class="badge do">เป็นมิตร</span>
+        </div>
+        <div class="voice-body">
+          <div class="voice-example">"พี่มะลิ ลูกค้าเปิดดูใบเสนอ 4 ครั้งแล้ว แสดงว่าสนใจแต่ลังเลเรื่องราคา · ลองเสนอผ่อนเป็นงวดดูไหมคะ?"</div>
+          <div class="voice-example">"ดีลของ ABC ใกล้หมดอายุพรุ่งนี้ · ต้องตามตอนนี้เลยนะ"</div>
+          <div class="voice-example">"ใบเสนอนี้ทำเสร็จแล้ว · ตรวจดูก่อนส่งให้คุณนริศไหม?"</div>
+        </div>
+      </div>
+      <div class="voice-card">
+        <div class="voice-head">
+          <span class="label dont">DON'T · ไม่พูดแบบนี้</span>
+          <span class="badge dont">corporate</span>
+        </div>
+        <div class="voice-body">
+          <div class="voice-example dont">"การวิเคราะห์ของระบบบ่งชี้ว่าลูกค้ามีระดับความสนใจสูง โปรดพิจารณาการเสนอแผนการชำระเงิน"</div>
+          <div class="voice-example dont">"ALERT: Quote #QT-2026-0142 expiring in 24h. ACTION REQUIRED."</div>
+          <div class="voice-example dont">"AI Agent v2.1 has successfully generated the quotation document."</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 07 APP ICONS ═══ -->
+  <section class="section" id="apps">
+    <div class="section-head">
+      <div class="section-num">07</div>
+      <div>
+        <h2 class="section-title">App icons<br><em>· LINE OA + PWA</em></h2>
+        <p class="section-desc">icon เดียวกัน ใช้ใน 2 context หลักที่ลูกค้าและเซลส์เห็น · LINE OA สำหรับลูกค้า · PWA สำหรับเซลส์ที่ติดตั้งบนมือถือ</p>
+      </div>
+      <div class="section-side">
+        <div class="key">เลือก</div>
+        <strong>ทางเลือก A · ink</strong> สำหรับทั้ง 2 context<br>
+        contrast ดีในทุกพื้น
+      </div>
+    </div>
+
+    <div class="app-icon-grid">
+
+      <div class="app-icon-card">
+        <div class="app-icon-head">
+          <div class="app-icon-name">LINE Official Account</div>
+          <div class="app-icon-spec">640 × 640 px · PNG · ครอปเป็นวงกลม</div>
+        </div>
+        <div class="app-icon-body">
+          <div class="ic ic-200 primary round"><span class="d">d</span><span class="dot"></span></div>
+        </div>
+        <div class="app-icon-foot">
+          ปรากฏใน chat list, message bubble, friend search · ตัด contrast กับ LINE green · ลูกค้าจำได้ภายในข้อความที่ 2-3
+        </div>
+      </div>
+
+      <div class="app-icon-card">
+        <div class="app-icon-head">
+          <div class="app-icon-name">PWA · iOS + Android</div>
+          <div class="app-icon-spec">512 / 192 / 180 px · maskable · safe zone 80%</div>
+        </div>
+        <div class="app-icon-body">
+          <div class="ic ic-200 primary"><span class="d">d</span><span class="dot"></span></div>
+        </div>
+        <div class="app-icon-foot">
+          home screen ของเซลส์ · iOS pre-rounded · Android adaptive (ครอปเป็น circle/squircle/teardrop ก็ได้)
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══ 08 USAGE RULES ═══ -->
+  <section class="section" id="rules">
+    <div class="section-head">
+      <div class="section-num">08</div>
+      <div>
+        <h2 class="section-title">Usage<br><em>· do / don't</em></h2>
+        <p class="section-desc">กฎสั้น ๆ ที่ต้องระวังเมื่อใช้ wordmark · icon · สี</p>
+      </div>
+      <div class="section-side">
+        <div class="key">หลัก</div>
+        เก็บ <strong>contrast</strong> ที่อ่านได้<br>
+        ไม่ปรับ tracking ของ wordmark<br>
+        ไม่ใช้สีอื่นแทน persimmon
+      </div>
+    </div>
+
+    <div class="rule-grid">
+      <div class="rule-card do">
+        <div class="rule-head">
+          <span class="label">ใช้ตัวพิมพ์เล็กล้วน</span>
+          <span class="badge">DO</span>
+        </div>
+        <div class="rule-body">
+          <span class="wm wm-48"><span class="sales">sales</span><span class="dee">dee</span><span class="dot"></span></span>
+        </div>
+        <div class="rule-foot">
+          wordmark เป็นตัวพิมพ์เล็กทั้งหมดเสมอ · ในประโยคปกติเขียน "SalesDee" ได้ (เป็นชื่อแบรนด์)
+        </div>
+      </div>
+
+      <div class="rule-card dont">
+        <div class="rule-head">
+          <span class="label">ห้ามใส่ตัวพิมพ์ใหญ่</span>
+          <span class="badge">DON'T</span>
+        </div>
+        <div class="rule-body">
+          <span style="font-family: 'IBM Plex Sans Thai'; font-weight: 700; font-size: 48px; letter-spacing: -0.04em; color: var(--ink);">Sales<span style="color: var(--accent);">Dee</span></span>
+        </div>
+        <div class="rule-foot">
+          อย่าใช้รุ่น CamelCase หรือ ALL CAPS เป็น wordmark — ใช้เฉพาะรุ่นตัวพิมพ์เล็กที่กำหนด
+        </div>
+      </div>
+
+      <div class="rule-card do">
+        <div class="rule-head">
+          <span class="label">dee สีส้ม persimmon</span>
+          <span class="badge">DO</span>
+        </div>
+        <div class="rule-body">
+          <span class="wm wm-48"><span class="sales">sales</span><span class="dee">dee</span><span class="dot"></span></span>
+        </div>
+        <div class="rule-foot">
+          "dee" + dot เป็นสี #C8501F เสมอ · ในรุ่น monochrome ใช้สี ink ทั้งหมดได้
+        </div>
+      </div>
+
+      <div class="rule-card dont">
+        <div class="rule-head">
+          <span class="label">ห้ามเปลี่ยนสี dee</span>
+          <span class="badge">DON'T</span>
+        </div>
+        <div class="rule-body">
+          <span class="wm wm-48"><span class="sales">sales</span><span class="dee" style="color: #7B8F6B;">dee</span><span class="dot" style="background: #7B8F6B;"></span></span>
+        </div>
+        <div class="rule-foot">
+          อย่าใช้สีเซจ น้ำเงิน หรือสีอื่นแทน persimmon — สี dee ต้องเป็น brand color เสมอ
+        </div>
+      </div>
+
+      <div class="rule-card do">
+        <div class="rule-head">
+          <span class="label">เซจใช้กับ AI เท่านั้น</span>
+          <span class="badge">DO</span>
+        </div>
+        <div class="rule-body" style="background: var(--ai-soft); padding: 16px;">
+          <div style="background: var(--paper); padding: 14px; border-radius: 8px; display: flex; gap: 10px; align-items: center;">
+            <div style="width: 28px; height: 28px; background: var(--ai); color: var(--paper); border-radius: 6px; display: grid; place-items: center; font-family: 'Fraunces', serif; font-style: italic; font-weight: 500; font-size: 15px;">D</div>
+            <div>
+              <div style="font-size: 11px; color: var(--ai-deep); font-weight: 600;">SalesDee คาดการณ์</div>
+              <div style="font-size: 10px; color: var(--mid);">ลูกค้าเปิดใบเสนอ 4 ครั้ง</div>
+            </div>
+          </div>
+        </div>
+        <div class="rule-foot">
+          พื้นเซจหรือกรอบเซจ = AI กำลังพูด · เมื่อ user เห็นเซจ จะรู้ทันทีว่ามาจากผู้ช่วย ไม่ใช่ system
+        </div>
+      </div>
+
+      <div class="rule-card dont">
+        <div class="rule-head">
+          <span class="label">ห้ามใช้เซจกับสิ่งอื่น</span>
+          <span class="badge">DON'T</span>
+        </div>
+        <div class="rule-body">
+          <button style="background: var(--ai); color: var(--paper); border: none; padding: 10px 22px; border-radius: 6px; font-family: inherit; font-size: 13px; font-weight: 500;">บันทึก</button>
+        </div>
+        <div class="rule-foot">
+          ปุ่ม submit ทั่วไปไม่ควรเป็นสีเซจ — จะทำให้ user คิดว่ามาจาก AI · ใช้ persimmon (accent) แทน
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="doc-footer">
+    <div class="doc-footer-text">
+      <strong>salesdee. brand guide · v1.0</strong> — บันทึก wordmark, icon, สี, ฟอนต์, เสียง, และกฎการใช้งานที่ตัดสินใจแล้ว · ใช้เป็น single source of truth สำหรับทีม design, dev, marketing, content · เมื่อสงสัย กลับมาดูที่นี่
+    </div>
+    <div class="doc-footer-meta">salesdee. · brand guide · 12 พฤษภาคม 2569</div>
+  </footer>
+
+</div>
+
+</body>
+</html>

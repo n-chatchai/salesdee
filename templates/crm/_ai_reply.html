@@ -1,17 +1,15 @@
-{# AI-drafted reply box. Context: lead, text? / error? / can_send_line?. Root id="ai-reply" — htmx swaps it. #}
-<div id="ai-reply" class="mt-2">
-  {% if error %}
-    <p class="rounded border border-amber-300 bg-amber-50 px-2 py-1 text-xs text-amber-800">{{ error }}</p>
-  {% elif text %}
-    <form method="post" action="{% url 'crm:lead_send_line_reply' lead.pk %}" class="space-y-2">
-      {% csrf_token %}
-      <textarea name="text" rows="6" class="w-full rounded border px-2 py-1.5 text-sm">{{ text }}</textarea>
-      <div class="flex flex-wrap gap-2">
-        {% if can_send_line %}<button type="submit" class="rounded bg-emerald-600 px-3 py-1.5 text-sm text-white hover:bg-emerald-700">ส่งทาง LINE</button>{% endif %}
-        <button type="button" class="rounded border px-3 py-1.5 text-sm text-slate-500 hover:bg-slate-50"
-                hx-post="{% url 'crm:lead_suggest_reply' lead.pk %}" hx-target="#ai-reply" hx-swap="outerHTML">ร่างใหม่</button>
-      </div>
-      <p class="text-xs text-slate-400">แก้ไขข้อความได้ก่อนส่ง · ข้อความนี้สร้างโดย AI โปรดตรวจสอบ</p>
-    </form>
-  {% endif %}
+{% if error %}
+<div class="ai-panel" style="border-style:dashed"><svg class="ico ico-sm"><use href="#i-alert"/></svg> {{ error }}</div>
+{% else %}
+<div class="ai-panel">
+  <div class="muted" style="font-size:12px;margin-bottom:6px"><svg class="ico ico-sm"><use href="#i-spark"/></svg> ร่างโดย AI — แก้ไขได้ก่อนส่ง</div>
+  <form method="post" action="{% url 'crm:lead_send_line_reply' lead.pk %}">{% csrf_token %}
+    <textarea name="text" rows="5" class="input">{{ text }}</textarea>
+    {% if can_send_line %}
+    <button class="btn btn-ai btn-sm" style="margin-top:8px"><svg class="ico ico-sm"><use href="#i-line-app"/></svg> ส่งทาง LINE</button>
+    {% else %}
+    <p class="muted" style="font-size:12px;margin-top:6px">เปิดใช้งาน LINE และเพิ่ม LINE user ID ของลูกค้าเพื่อส่งข้อความนี้ได้</p>
+    {% endif %}
+  </form>
 </div>
+{% endif %}

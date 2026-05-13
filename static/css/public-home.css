@@ -1,0 +1,21 @@
+/* Per-tenant public homepage (deck "หน้าหลักสาธารณะ"). Loaded after tokens.css + app.css + public.css. */
+.ph-hero { background: linear-gradient(135deg, var(--paper, #f6f1e7), #efe7d6); border-bottom: 1px solid var(--line, #e3dccb); }
+.ph-hero-inner { max-width: 1100px; margin: 0 auto; padding: 56px 20px; display: flex; gap: 32px; align-items: center; flex-wrap: wrap; }
+.ph-hero-inner .txt { flex: 1; min-width: 280px; }
+.ph-hero h1 { font-family: "Fraunces", Georgia, serif; font-size: 40px; line-height: 1.15; margin: 8px 0 14px; }
+.ph-hero .tagline { font-size: 17px; color: #5b5346; max-width: 520px; }
+.ph-logo { width: 120px; height: 120px; border-radius: 18px; object-fit: cover; background: #fff; border: 1px solid var(--line, #e3dccb); }
+.ph-section { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
+.ph-section h2 { font-family: "Fraunces", Georgia, serif; font-size: 26px; margin: 0 0 18px; }
+.ph-cats { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
+.ph-cat { background: #fff; border: 1px solid var(--line, #e3dccb); border-radius: 12px; padding: 18px; text-decoration: none; color: inherit; display: block; }
+.ph-cat:hover { border-color: var(--accent, #d2552a); }
+.ph-cat .n { color: #857d70; font-size: 13px; }
+.ph-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+.ph-step { background: #fff; border: 1px solid var(--line, #e3dccb); border-radius: 12px; padding: 18px; }
+.ph-step .num { display: inline-flex; width: 30px; height: 30px; border-radius: 999px; background: var(--accent, #d2552a); color: #fff; align-items: center; justify-content: center; font-weight: 700; margin-bottom: 8px; }
+.ph-ai { background: linear-gradient(135deg, #eef2ec, #e6ede2); border: 1px solid #cdd8c8; border-radius: 14px; padding: 24px; }
+.ph-ai textarea { width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 9px; border: 1px solid var(--line, #ccc); font: inherit; }
+.ph-footer { background: var(--ink, #2a2620); color: #d8d1c2; }
+.ph-footer-inner { max-width: 1100px; margin: 0 auto; padding: 36px 20px; }
+.ph-footer a { color: #f1eadb; }

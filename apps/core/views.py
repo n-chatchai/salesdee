@@ -14,13 +14,17 @@ def home(request: HttpRequest) -> HttpResponse:
     if not request.user.is_authenticated:
         tenant = getattr(request, "tenant", None)
         if tenant is not None:
-            from apps.catalog.views import public_catalog
+            from apps.catalog.views import public_home
 
-            return public_catalog(request, tenant.slug)
+            return public_home(request, tenant=tenant)
         return redirect_to_login(request.get_full_path())
     ctx: dict = {}
     if getattr(request, "tenant", None) is not None:
         from apps.crm.dashboard import build_dashboard
+        from apps.tenants.views import onboarding_status
 
         ctx = build_dashboard(request)
+        ob = onboarding_status(request)
+        ctx["onboarding_remaining"] = ob["remaining"]
+        ctx["onboarding_complete"] = ob["complete"]
     return render(request, "core/home.html", ctx)

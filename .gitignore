@@ -27,11 +27,12 @@ local_settings.py
 .coverage
 htmlcov/
 
-# Node / Tailwind build (if used)
+# Node (if used for future asset building)
 node_modules/
-static/css/tailwind.out.css
 
 # OS / editor
 .DS_Store
 .idea/
 .vscode/
+
+graphify-out/

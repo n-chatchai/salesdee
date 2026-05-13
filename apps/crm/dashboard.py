@@ -7,13 +7,15 @@ is tenant-scoped (the request middleware has the tenant active by the time this 
 from __future__ import annotations
 
 from datetime import date, timedelta
+from decimal import Decimal
 
-from django.db.models import Count, DecimalField, ExpressionWrapper, F, Sum
+from django.db.models import Count, DecimalField, ExpressionWrapper, F, Q, Sum
 from django.utils import timezone
 
 
-def _money(value) -> object:
-    return value or 0
+def _money(value: Decimal | int | None) -> Decimal:
+    """An aggregate sum (or None) → a Decimal, defaulting to 0."""
+    return value if isinstance(value, Decimal) else Decimal(value or 0)
 
 
 def build_dashboard(request) -> dict:
@@ -125,6 +127,36 @@ def build_dashboard(request) -> dict:
     new_leads = Lead.objects.filter(own_leads, status=LeadStatus.NEW)
     new_leads_count = new_leads.count()
     new_leads_recent = list(new_leads.order_by("-created_at")[:8])
+    channel_counts = list(
+        Lead.objects.filter(created_at__date__gte=month_start)
+        .values("channel")
+        .annotate(n=Count("id"))
+        .order_by("-n")
+    )
+
+    # --- recent activities ----------------------------------------------------
+    from .models import Activity
+
+    recent_activities = list(
+        Activity.objects.filter(Q(created_by=user) | Q(deal__owner=user))
+        .select_related("deal", "lead", "customer")
+        .order_by("-occurred_at")[:10]
+    )
+
+    # --- sales targets --------------------------------------------------------
+    from .models import SalesTarget
+
+    target = (
+        SalesTarget.objects.filter(
+            Q(salesperson=user) | Q(salesperson__isnull=True),
+            year=today.year,
+            month=today.month,
+        )
+        .order_by("-salesperson")
+        .first()
+    )
+    target_amount = target.amount if target else 0
+    target_percent = round(won_value * 100 / target_amount) if target_amount and won_value else 0
 
     return {
         "dash": True,
@@ -147,5 +179,9 @@ def build_dashboard(request) -> dict:
         "expiring_list": expiring_list,
         "new_leads_count": new_leads_count,
         "new_leads_recent": new_leads_recent,
+        "channel_counts": channel_counts,
+        "recent_activities": recent_activities,
+        "target_amount": target_amount,
+        "target_percent": target_percent,
         "now": now,
     }

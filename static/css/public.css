@@ -1,0 +1,25 @@
+/* Public, login-free pages (intake, public quotation, public catalog). Uses tokens.css vars. */
+body.public { background: var(--paper, #f6f1e7); color: var(--ink, #2a2620); font-family: "IBM Plex Sans Thai", system-ui, sans-serif; margin: 0; }
+.pub-wrap { max-width: 760px; margin: 0 auto; padding: 32px 20px 64px; }
+.pub-wrap.wide { max-width: 1100px; }
+.pub-head { display:flex; align-items:center; gap:12px; margin-bottom:28px; }
+.pub-head .mark { width:38px; height:38px; border-radius:10px; background: var(--accent, #d2552a); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; }
+.pub-card { background:#fff; border:1px solid var(--line, #e3dccb); border-radius:14px; padding:24px; box-shadow:0 1px 3px rgba(0,0,0,.04); }
+.pub-card + .pub-card { margin-top:16px; }
+.pub-wrap .field { margin-bottom:14px; }
+.pub-wrap .field-label { display:block; font-size:13px; font-weight:600; margin-bottom:4px; }
+.pub-wrap input, .pub-wrap textarea, .pub-wrap select { width:100%; box-sizing:border-box; padding:9px 11px; border:1px solid var(--line,#ccc); border-radius:8px; font:inherit; }
+.pub-wrap .btn { display:inline-flex; align-items:center; gap:6px; padding:10px 18px; border-radius:9px; border:1px solid transparent; background:var(--accent,#d2552a); color:#fff; font-weight:600; cursor:pointer; text-decoration:none; }
+.pub-wrap .btn.ghost { background:transparent; border-color:var(--line,#ccc); color:inherit; }
+.pub-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; }
+.pub-prod { background:#fff; border:1px solid var(--line,#e3dccb); border-radius:12px; overflow:hidden; }
+.pub-prod img { width:100%; height:160px; object-fit:cover; display:block; background:#eee; }
+.pub-prod .body { padding:12px; }
+.muted { color:#857d70; }
+.tbl-pub { width:100%; border-collapse:collapse; }
+.tbl-pub th, .tbl-pub td { padding:8px 6px; border-bottom:1px solid var(--line,#eee); text-align:left; font-size:14px; }
+.tbl-pub td.num, .tbl-pub th.num { text-align:right; }
+.totbox { margin-top:16px; margin-left:auto; max-width:340px; }
+.totbox .row { display:flex; justify-content:space-between; padding:3px 0; }
+.totbox .grand { font-size:18px; font-weight:700; border-top:2px solid var(--ink,#333); margin-top:6px; padding-top:8px; }
+.chip { display:inline-block; padding:2px 9px; border-radius:999px; font-size:12px; background:#eee; }

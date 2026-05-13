@@ -1,39 +1,27 @@
 {% extends "base.html" %}
-
-{% block title %}ใบเสนอราคา · {{ current_tenant.name }}{% endblock %}
-
+{% block title %}ใบเสนอราคา · salesdee.{% endblock %}
+{% block topbar_actions %}<a class="btn btn-sm btn-primary" href="{% url 'quotes:quotation_create' %}"><svg class="ico ico-sm"><use href="#i-plus"/></svg> ใบเสนอราคาใหม่</a>{% endblock %}
 {% block content %}
-  <div class="mb-4 flex items-center justify-between">
-    <h1 class="text-xl font-semibold">ใบเสนอราคา</h1>
-    <a href="{% url 'quotes:quotation_create' %}" class="rounded bg-slate-800 px-3 py-1.5 text-sm text-white hover:bg-slate-700">+ ใบเสนอราคาใหม่</a>
-  </div>
-
-  <div class="overflow-hidden rounded-lg border bg-white">
-    <table class="w-full text-sm">
-      <thead class="bg-slate-50 text-left text-slate-500">
-        <tr>
-          <th class="px-3 py-2">เลขที่</th>
-          <th class="px-3 py-2">ลูกค้า</th>
-          <th class="px-3 py-2">วันที่</th>
-          <th class="px-3 py-2">ยืนราคาถึง</th>
-          <th class="px-3 py-2 text-right">ยอดรวม</th>
-          <th class="px-3 py-2">สถานะ</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y">
-        {% for d, t in rows %}
-          <tr class="hover:bg-slate-50">
-            <td class="px-3 py-2 font-medium"><a class="hover:underline" href="{% url 'quotes:quotation_detail' d.pk %}">{{ d.doc_number|default:"(ร่าง)" }}{% if d.revision %} Rev.{{ d.revision }}{% endif %}</a></td>
-            <td class="px-3 py-2 text-slate-600">{{ d.customer.name|default:"—" }}</td>
-            <td class="px-3 py-2 text-slate-500">{{ d.issue_date|date:"d/m/Y" }}</td>
-            <td class="px-3 py-2 text-slate-500">{{ d.valid_until|date:"d/m/Y"|default:"—" }}</td>
-            <td class="px-3 py-2 text-right">{{ t.grand_total|floatformat:2 }}</td>
-            <td class="px-3 py-2 text-slate-500">{{ d.get_status_display }}</td>
-          </tr>
-        {% empty %}
-          <tr><td colspan="6" class="px-3 py-8 text-center text-slate-400">ยังไม่มีใบเสนอราคา</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+<div class="row between" style="align-items:flex-end;margin-bottom:16px">
+  <div><div class="eyebrow">งานขาย</div><h1 class="h1 serif-it">ใบเสนอราคา</h1></div>
+</div>
+<div class="card">
+  <table class="tbl">
+    <thead><tr><th>เลขที่</th><th>ลูกค้า</th><th>วันที่ออก</th><th>ยืนราคาถึง</th><th>ยอดรวม</th><th>สถานะ</th><th>ดู</th><th>พนักงานขาย</th></tr></thead>
+    <tbody>
+    {% for doc, totals in rows %}
+      <tr onclick="location.href='{% url 'quotes:quotation_detail' doc.pk %}'" style="cursor:pointer">
+        <td class="mono">{{ doc.doc_number|default:doc }}{% if doc.revision %} <span class="muted">Rev.{{ doc.revision }}</span>{% endif %}</td>
+        <td>{{ doc.customer.name|default:doc.reference|default:"—" }}</td>
+        <td class="mono">{{ doc.issue_date|date:"d/m/Y" }}</td>
+        <td class="mono">{{ doc.valid_until|date:"d/m/Y"|default:"—" }}</td>
+        <td>{{ totals.grand_total|floatformat:2 }}</td>
+        <td><span class="chip {% if doc.status == 'accepted' %}chip-good{% elif doc.status == 'rejected' or doc.status == 'cancelled' %}chip-danger{% elif doc.status == 'sent' %}chip-accent{% elif doc.status == 'pending' %}chip-warn{% endif %}">{{ doc.get_status_display }}</span></td>
+        <td>{{ doc.view_count }}</td>
+        <td>{{ doc.salesperson.get_short_name|default:"—" }}</td>
+      </tr>
+    {% empty %}<tr><td colspan="8" class="muted">ยังไม่มีใบเสนอราคา</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}ข้อมูลบริษัท · ตั้งค่า{% endblock %}
+{% block content %}
+<div style="margin-bottom:16px"><div class="eyebrow">ตั้งค่า</div><h1 class="h1 serif-it">ข้อมูลบริษัท</h1></div>
+<div class="row wrap" style="gap:20px;align-items:flex-start">
+  {% include "tenants/_settings_nav.html" %}
+  <div class="card grow" style="max-width:680px">
+    <p class="muted" style="margin-top:0">ข้อมูลนี้แสดงบนหัวเอกสารทุกฉบับ (ใบเสนอราคา ใบกำกับภาษี ฯลฯ)</p>
+    <form method="post" enctype="multipart/form-data">{% csrf_token %}
+      {% include "partials/_form.html" %}
+      <div class="row" style="margin-top:14px"><button class="btn btn-primary">บันทึก</button></div>
+    </form>
+  </div>
+</div>
+{% endblock %}

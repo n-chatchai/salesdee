@@ -1,51 +1,29 @@
-<!doctype html>
-<html lang="th">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+{% load static %}<!DOCTYPE html>
+<html lang="th"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{{ product.name }} · {{ company.name_th|default:tenant.name }}</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>:root{font-family:"Sarabun",system-ui,sans-serif}</style>
-</head>
-<body class="min-h-screen bg-slate-100">
-  <header class="border-b bg-white">
-    <div class="mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
-      <a href="{% url 'public_catalog' tenant.slug %}" class="text-lg font-semibold">{{ company.name_th|default:tenant.name }}</a>
-      <a href="{% url 'crm:lead_intake' tenant.slug %}?product={{ product.name|urlencode }}" class="rounded bg-slate-800 px-3 py-1.5 text-sm text-white hover:bg-slate-700">ขอใบเสนอราคา / ติดต่อ</a>
-    </div>
-  </header>
-
-  <div class="mx-auto max-w-4xl px-4 py-6">
-    <a href="{% url 'public_catalog' tenant.slug %}" class="text-sm text-slate-500 hover:underline">&larr; แคตตาล็อกทั้งหมด</a>
-    <div class="mt-3 grid gap-6 md:grid-cols-2">
-      <div class="space-y-3">
-        {% for img in product.images.all %}<img src="{{ img.image.url }}" alt="{{ product.name }}" class="w-full rounded-lg border object-cover">{% empty %}<div class="flex h-56 items-center justify-center rounded-lg border bg-white text-slate-300">— ไม่มีรูป —</div>{% endfor %}
-      </div>
-      <div>
-        <h1 class="text-xl font-semibold">{{ product.name }}</h1>
-        <div class="text-sm text-slate-500">{{ product.code }}{% if product.category %} · {{ product.category.name }}{% endif %}</div>
-        <div class="mt-2 text-lg font-semibold">{{ product.default_price|floatformat:0 }} บาท{% if product.unit %} / {{ product.unit }}{% endif %}</div>
-        <dl class="mt-4 space-y-1 text-sm">
-          {% if product.dimensions %}<div><dt class="inline text-slate-500">ขนาด (W×D×H):</dt> {{ product.dimensions }}</div>{% endif %}
-          {% if product.material %}<div><dt class="inline text-slate-500">วัสดุ/ผิว:</dt> {{ product.material }}</div>{% endif %}
-          {% if product.finish or product.color_code %}<div><dt class="inline text-slate-500">สี:</dt> {{ product.finish }} {{ product.color_code }}</div>{% endif %}
-          {% if product.hardware_brand %}<div><dt class="inline text-slate-500">อุปกรณ์:</dt> {{ product.hardware_brand }}</div>{% endif %}
-          {% if product.standard %}<div><dt class="inline text-slate-500">มาตรฐาน:</dt> {{ product.standard }}</div>{% endif %}
-        </dl>
-        {% if product.description %}<p class="mt-3 text-sm text-slate-700">{{ product.description|linebreaksbr }}</p>{% endif %}
-
-        {% if product.variants.all %}
-          <div class="mt-4"><div class="text-sm font-medium">รุ่นย่อย</div><ul class="mt-1 text-sm">{% for v in product.variants.all %}<li class="flex justify-between border-b py-1"><span>{{ v.name }}</span><span class="text-slate-500">{{ v.price|floatformat:0 }} บาท</span></li>{% endfor %}</ul></div>
-        {% endif %}
-        {% if product.options.all %}
-          <div class="mt-3"><div class="text-sm font-medium">ออปชันเสริม</div><ul class="mt-1 text-sm">{% for o in product.options.all %}<li class="flex justify-between border-b py-1"><span>{{ o.name }}</span><span class="text-slate-500">+{{ o.extra_price|floatformat:0 }} บาท</span></li>{% endfor %}</ul></div>
-        {% endif %}
-
-        <a href="{% url 'crm:lead_intake' tenant.slug %}?product={{ product.name|urlencode }}" class="mt-5 inline-block rounded-md bg-slate-800 px-5 py-2.5 text-white hover:bg-slate-700">ขอใบเสนอราคาสินค้านี้</a>
-      </div>
-    </div>
+<link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'css/app.css' %}">
+<link rel="stylesheet" href="{% static 'css/public.css' %}">
+</head><body class="public">
+{% include "partials/icons.html" %}
+<div class="pub-wrap">
+  <div class="pub-head"><div class="mark">d</div><div><a href="{% url 'public_catalog' tenant.slug %}" style="text-decoration:none;color:inherit"><strong>{{ company.name_th|default:tenant.name }}</strong></a><div class="muted" style="font-size:13px"><a href="{% url 'public_catalog' tenant.slug %}" style="color:inherit">← กลับแคตตาล็อก</a></div></div></div>
+  <div class="pub-card">
+    {% if product.images.all %}<div class="pub-grid" style="margin-bottom:16px">{% for im in product.images.all %}<img src="{{ im.image.url }}" alt="{{ im.caption|default:product.name }}" style="width:100%;border-radius:10px">{% endfor %}</div>{% endif %}
+    <h1 style="margin-top:0">{{ product.name }}</h1>
+    {% if product.code %}<div class="muted mono">{{ product.code }}</div>{% endif %}
+    {% if product.default_price %}<div style="font-size:20px;margin:8px 0">{{ product.default_price|floatformat:0 }} บาท</div>{% endif %}
+    {% if product.description %}<p>{{ product.description|linebreaksbr }}</p>{% endif %}
+    <table class="tbl-pub">
+      {% if product.dimensions %}<tr><th>ขนาด</th><td>{{ product.dimensions }}</td></tr>{% endif %}
+      {% if product.material %}<tr><th>วัสดุ/ผิว</th><td>{{ product.material }}</td></tr>{% endif %}
+      {% if product.finish %}<tr><th>สี/ผิวสำเร็จ</th><td>{{ product.finish }} {{ product.color_code }}</td></tr>{% endif %}
+      {% if product.standard %}<tr><th>มาตรฐาน</th><td>{{ product.standard }}</td></tr>{% endif %}
+    </table>
+    {% if product.variants.all %}<h3>รุ่นย่อย</h3>{% for v in product.variants.all %}<div class="totbox" style="margin:0"><div class="row"><span>{{ v.name }}</span><span>{{ v.price|floatformat:0 }}</span></div></div>{% endfor %}{% endif %}
+    {% if product.options.all %}<h3>ออปชันเสริม</h3>{% for o in product.options.all %}<div class="row"><span>{{ o.name }}</span><span>+{{ o.extra_price|floatformat:0 }}</span></div>{% endfor %}{% endif %}
+    <p style="margin-top:20px"><a class="btn" href="{% url 'crm:lead_intake' tenant.slug %}?product={{ product.name|urlencode }}">ขอใบเสนอราคาสินค้านี้</a></p>
   </div>
-</body>
-</html>
+</div>
+</body></html>

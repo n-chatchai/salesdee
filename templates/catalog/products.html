@@ -1,43 +1,23 @@
 {% extends "base.html" %}
-
-{% block title %}แคตตาล็อกสินค้า · {{ current_tenant.name }}{% endblock %}
-
+{% block title %}สินค้า · salesdee.{% endblock %}
+{% block topbar_actions %}<a class="btn btn-sm btn-primary" href="{% url 'catalog:product_create' %}"><svg class="ico ico-sm"><use href="#i-plus"/></svg> สินค้าใหม่</a>{% endblock %}
 {% block content %}
-  <div class="mb-2 flex items-center justify-between gap-3">
-    <h1 class="text-xl font-semibold">แคตตาล็อกสินค้า</h1>
-    <form method="get" class="flex-1">
-      <input type="search" name="q" value="{{ q }}" placeholder="ค้นหาชื่อ/รหัส…" class="w-full max-w-sm rounded border px-3 py-1.5 text-sm">
-    </form>
-    <a href="{% url 'catalog:product_create' %}" class="rounded bg-slate-800 px-3 py-1.5 text-sm text-white hover:bg-slate-700">+ เพิ่มสินค้า</a>
-  </div>
-  <p class="mb-4 text-sm text-slate-500">หน้าแคตตาล็อกสาธารณะ (ลูกค้าเปิดดูได้ ไม่ต้องล็อกอิน): <a href="{% url 'public_catalog' current_tenant.slug %}" target="_blank" class="text-slate-700 underline">{% url 'public_catalog' current_tenant.slug %}</a> — บนโดเมนของคุณเอง หน้าแรก (<code>/</code>) ก็แสดงแคตตาล็อกนี้</p>
-
-  <div class="overflow-hidden rounded-lg border bg-white">
-    <table class="w-full text-sm">
-      <thead class="bg-slate-50 text-left text-slate-500">
-        <tr>
-          <th class="px-3 py-2">รหัส</th>
-          <th class="px-3 py-2">ชื่อ</th>
-          <th class="px-3 py-2">หมวด</th>
-          <th class="px-3 py-2">ขนาด</th>
-          <th class="px-3 py-2 text-right">ราคา</th>
-          <th class="px-3 py-2">ภาษี</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y">
-        {% for p in products %}
-          <tr class="hover:bg-slate-50">
-            <td class="px-3 py-2 text-slate-500">{{ p.code|default:"—" }}</td>
-            <td class="px-3 py-2 font-medium"><a class="hover:underline" href="{% url 'catalog:product_detail' p.pk %}">{{ p.name }}</a>{% if p.is_bundle %} <span class="rounded bg-slate-100 px-1 text-xs">ชุด</span>{% endif %}{% if not p.is_active %} <span class="text-xs text-amber-600">(ปิดขาย)</span>{% endif %}</td>
-            <td class="px-3 py-2 text-slate-500">{{ p.category|default:"—" }}</td>
-            <td class="px-3 py-2 text-slate-400">{{ p.dimensions|default:"—" }}</td>
-            <td class="px-3 py-2 text-right">{{ p.default_price|floatformat:2 }}</td>
-            <td class="px-3 py-2 text-slate-500">{{ p.get_tax_type_display }}</td>
-          </tr>
-        {% empty %}
-          <tr><td colspan="6" class="px-3 py-8 text-center text-slate-400">ยังไม่มีสินค้า — เพิ่มเอง หรือ <code>manage.py import_catalog &lt;file.xlsx&gt; --tenant {{ current_tenant.slug }}</code></td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+<div class="row between" style="align-items:flex-end;margin-bottom:16px">
+  <div><div class="eyebrow">แคตตาล็อก</div><h1 class="h1 serif-it">สินค้า</h1></div>
+  <form method="get" class="row"><input type="search" name="q" value="{{ q }}" placeholder="ค้นห รหัส/ชื่อ…"><button class="btn btn-sm">ค้นหา</button></form>
+</div>
+<div class="card">
+  <table class="tbl">
+    <thead><tr><th>รหัส</th><th>ชื่อสินค้า</th><th>หมวด</th><th>หน่วย</th><th>ราคา</th><th>ภาษี</th><th>สถานะ</th></tr></thead>
+    <tbody>
+    {% for p in products %}
+      <tr onclick="location.href='{% url 'catalog:product_detail' p.pk %}'" style="cursor:pointer">
+        <td class="mono">{{ p.code|default:"—" }}</td><td>{{ p.name }}</td><td>{{ p.category.name|default:"—" }}</td>
+        <td>{{ p.unit }}</td><td>{{ p.default_price|floatformat:0 }}</td><td>{{ p.get_tax_type_display }}</td>
+        <td><span class="chip {% if p.is_active %}chip-good{% else %}chip-warn{% endif %}">{% if p.is_active %}เปิดขาย{% else %}ปิด{% endif %}</span></td>
+      </tr>
+    {% empty %}<tr><td colspan="7" class="muted">ยังไม่มีสินค้า</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endblock %}

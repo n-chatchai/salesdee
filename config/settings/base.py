@@ -184,7 +184,6 @@ SECURE_CSP: dict[str, list[str]] | None = {
     "script-src": [
         "'self'",
         "'nonce-{nonce}'",
-        "https://cdn.tailwindcss.com",
         "https://unpkg.com",
         "https://cdn.jsdelivr.net",
     ],

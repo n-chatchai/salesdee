@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}สมาชิกและสิทธิ์ · ตั้งค่า{% endblock %}
+{% block content %}
+<div style="margin-bottom:16px"><div class="eyebrow">ตั้งค่า</div><h1 class="h1 serif-it">สมาชิกและสิทธิ์</h1></div>
+<div class="row wrap" style="gap:20px;align-items:flex-start">
+  {% include "tenants/_settings_nav.html" %}
+  <div class="grow" style="max-width:760px">
+    <div class="card">
+      <div class="card-head"><span class="title">สมาชิก ({{ memberships|length }})</span></div>
+      <table class="tbl"><thead><tr><th>อีเมล</th><th>บทบาท</th><th>การมองเห็น</th><th>สถานะ</th>{% if can_admin %}<th></th>{% endif %}</tr></thead><tbody>
+      {% for m in memberships %}
+        <tr>
+          <td>{{ m.user.email }}{% if m.user_id == request.user.pk %} <span class="muted">(คุณ)</span>{% endif %}{% if m.user.full_name %}<div class="muted" style="font-size:12px">{{ m.user.full_name }}</div>{% endif %}</td>
+          {% if can_admin and m.user_id != request.user.pk %}
+          <td colspan="{% if can_admin %}4{% else %}3{% endif %}">
+            <form method="post" action="{% url 'workspace:member_edit' m.pk %}" class="row" style="gap:8px;align-items:center">{% csrf_token %}
+              <select name="role">{% for v,l in role_form.fields.role.choices %}<option value="{{ v }}" {% if m.role == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+              <label class="row" style="gap:4px"><input type="checkbox" name="can_see_all_records" {% if m.can_see_all_records %}checked{% endif %}> เห็นข้อมูลทุกคน</label>
+              <label class="row" style="gap:4px"><input type="checkbox" name="is_active" {% if m.is_active %}checked{% endif %}> ใช้งาน</label>
+              <button class="btn btn-sm">บันทึก</button>
+            </form>
+          </td>
+          {% else %}
+          <td>{{ m.get_role_display }}</td>
+          <td>{% if m.can_see_all_records %}ทุกคน{% else %}เฉพาะของตน{% endif %}</td>
+          <td>{% if m.is_active %}<span class="chip chip-good">ใช้งาน</span>{% else %}<span class="chip chip-warn">ปิด</span>{% endif %}</td>
+          {% if can_admin %}<td class="muted" style="font-size:12px">—</td>{% endif %}
+          {% endif %}
+        </tr>
+      {% empty %}<tr><td colspan="5" class="muted">ยังไม่มีสมาชิก</td></tr>{% endfor %}
+      </tbody></table>
+    </div>
+    {% if can_admin %}
+    <div class="card" style="margin-top:16px">
+      <div class="card-head"><span class="title">เชิญสมาชิกใหม่</span></div>
+      <form method="post">{% csrf_token %}
+        {% include "partials/_form.html" %}
+        <div class="row" style="margin-top:12px"><button class="btn btn-primary"><svg class="ico ico-sm"><use href="#i-send"/></svg> ส่งคำเชิญ</button></div>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

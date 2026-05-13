@@ -44,22 +44,193 @@ def push_text(to: str, text: str) -> None:
         )
 
 
-# --- Inbound webhook ---------------------------------------------------------
-def _record_inbound_text(line_user_id: str, text: str) -> None:
-    """Find-or-create the LINE lead for this user (current tenant) and log the message as an Activity.
-    TODO: enrich the lead's name from the LINE profile API (in a background task)."""
-    from apps.crm.models import Activity, ActivityKind, Lead, LeadChannel
+def push_quotation_flex(
+    to: str,
+    *,
+    doc_number: str,
+    customer_name: str,
+    total_text: str,
+    valid_text: str,
+    view_url: str,
+    pdf_url: str,
+    company_name: str = "",
+) -> None:
+    """Push a LINE Flex 'bubble' summarising a quotation, with buttons to open the web view / PDF.
+    Layout follows specs/salesdee-pdf-and-line.html. Raises ``LineNotConfigured`` or SDK errors."""
+    integration = _active_integration()
+    if integration is None:
+        raise LineNotConfigured("ยังไม่ได้ตั้งค่าการเชื่อม LINE OA สำหรับ workspace นี้")
+    from linebot.v3.messaging import (
+        ApiClient,
+        Configuration,
+        FlexMessage,
+        MessagingApi,
+        PushMessageRequest,
+    )
+    from linebot.v3.messaging.models import FlexContainer
 
-    lead = Lead.objects.filter(line_id=line_user_id).order_by("created_at").first()
-    if lead is None:
-        lead = Lead.objects.create(
-            name=f"ลูกค้า LINE {line_user_id[-6:]}",
-            line_id=line_user_id,
-            channel=LeadChannel.LINE,
-            source="LINE OA",
-            message=text,
+    def _row(label: str, value: str) -> dict:
+        return {
+            "type": "box",
+            "layout": "baseline",
+            "spacing": "sm",
+            "contents": [
+                {"type": "text", "text": label, "color": "#8c8c8c", "size": "sm", "flex": 2},
+                {
+                    "type": "text",
+                    "text": value or "—",
+                    "wrap": True,
+                    "color": "#2c3e50",
+                    "size": "sm",
+                    "flex": 5,
+                },
+            ],
+        }
+
+    body_rows = [
+        _row("ลูกค้า", customer_name),
+        _row("ยอดรวม", total_text),
+        _row("ยืนราคาถึง", valid_text),
+    ]
+    bubble = {
+        "type": "bubble",
+        "header": {
+            "type": "box",
+            "layout": "vertical",
+            "backgroundColor": "#1B2A3A",
+            "paddingAll": "16px",
+            "contents": [
+                {
+                    "type": "text",
+                    "text": company_name or "ใบเสนอราคา",
+                    "color": "#F6F1E7",
+                    "size": "sm",
+                },
+                {
+                    "type": "text",
+                    "text": doc_number or "ใบเสนอราคา",
+                    "color": "#FFFFFF",
+                    "size": "lg",
+                    "weight": "bold",
+                },
+            ],
+        },
+        "body": {"type": "box", "layout": "vertical", "spacing": "md", "contents": body_rows},
+        "footer": {
+            "type": "box",
+            "layout": "vertical",
+            "spacing": "sm",
+            "contents": [
+                {
+                    "type": "button",
+                    "style": "primary",
+                    "color": "#C8501F",
+                    "action": {"type": "uri", "label": "ดูใบเสนอราคา", "uri": view_url},
+                },
+                {
+                    "type": "button",
+                    "style": "secondary",
+                    "action": {"type": "uri", "label": "ดาวน์โหลด PDF", "uri": pdf_url},
+                },
+            ],
+        },
+    }
+    with ApiClient(Configuration(access_token=integration.channel_access_token)) as api_client:
+        MessagingApi(api_client).push_message(
+            PushMessageRequest(
+                to=to,
+                messages=[
+                    FlexMessage(
+                        alt_text=f"ใบเสนอราคา {doc_number}".strip(),
+                        contents=FlexContainer.from_dict(bubble),
+                    )
+                ],
+            )
         )
-    Activity.objects.create(lead=lead, kind=ActivityKind.LINE, body=text)
+
+
+# --- Inbox: conversations & messages -----------------------------------------
+def get_or_create_conversation(line_user_id: str):
+    """Find-or-create the LINE conversation for this user in the current tenant, linking it to a
+    matching ``Lead`` (creating one if none exists). Must run inside a tenant context."""
+    from apps.crm.models import Lead, LeadChannel
+
+    from .models import Conversation, ConversationChannel
+
+    conv, created = Conversation.objects.get_or_create(
+        channel=ConversationChannel.LINE,
+        external_id=line_user_id,
+        defaults={"display_name": f"ลูกค้า LINE {line_user_id[-6:]}"},
+    )
+    if conv.lead_id is None:
+        lead = Lead.objects.filter(line_id=line_user_id).order_by("created_at").first()
+        if lead is None:
+            lead = Lead.objects.create(
+                name=f"ลูกค้า LINE {line_user_id[-6:]}",
+                line_id=line_user_id,
+                channel=LeadChannel.LINE,
+                source="LINE OA",
+            )
+        conv.lead = lead
+        conv.save(update_fields=["lead"])
+    return conv
+
+
+def _append_message(
+    conv, *, direction, text, kind=None, external_id="", media_url="", sender_user=None
+):
+    from django.utils import timezone
+
+    from .models import Message, MessageDirection, MessageKind
+
+    msg = Message.objects.create(
+        conversation=conv,
+        direction=direction,
+        kind=kind or MessageKind.TEXT,
+        text=text,
+        external_id=external_id,
+        media_url=media_url,
+        sender_user=sender_user,
+        sent_at=timezone.now(),
+    )
+    conv.last_message_at = msg.sent_at
+    conv.last_message_preview = (text or msg.get_kind_display())[:255]
+    update_fields = ["last_message_at", "last_message_preview"]
+    if direction == MessageDirection.IN:
+        conv.unread_count = (conv.unread_count or 0) + 1
+        update_fields.append("unread_count")
+    conv.save(update_fields=update_fields)
+    return msg
+
+
+def record_outbound_text(conv, text: str, *, sender_user=None, external_id=""):
+    """Log an outbound text we sent on this conversation (call after ``push_text`` succeeds)."""
+    from .models import MessageDirection
+
+    return _append_message(
+        conv,
+        direction=MessageDirection.OUT,
+        text=text,
+        external_id=external_id,
+        sender_user=sender_user,
+    )
+
+
+def _record_inbound_text(line_user_id: str, text: str) -> None:
+    """Record an inbound LINE text: append it to the user's conversation (creating the conversation
+    + linked lead if needed) and mirror it onto the lead's activity timeline.
+    TODO: enrich the conversation/lead display name from the LINE profile API in a background task."""
+    from apps.crm.models import Activity, ActivityKind
+
+    from .models import MessageDirection
+
+    conv = get_or_create_conversation(line_user_id)
+    _append_message(conv, direction=MessageDirection.IN, text=text)
+    if conv.lead_id:
+        if not conv.lead.message:
+            conv.lead.message = text
+            conv.lead.save(update_fields=["message"])
+        Activity.objects.create(lead=conv.lead, kind=ActivityKind.LINE, body=text)
 
 
 def process_line_events(events: list) -> int:

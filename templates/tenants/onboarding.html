@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}ตั้งค่าครั้งแรก · salesdee.{% endblock %}
+{% block content %}
+<div style="margin-bottom:16px"><div class="eyebrow">เริ่มต้นใช้งาน</div><h1 class="h1 serif-it">ตั้งค่าครั้งแรก</h1><p class="muted">{{ tenant.name }} — ตั้งค่าให้ครบเพื่อใช้งานได้เต็มที่ (ข้ามขั้นไหนก็ได้)</p></div>
+<div class="row wrap" style="gap:24px;align-items:flex-start">
+  <div class="card" style="min-width:220px;align-self:flex-start">
+    <div class="card-head"><span class="title">ขั้นตอน</span></div>
+    {% for s in status.steps %}
+      <a class="sb-item {% if s.n == step %}active{% endif %}" href="?step={{ s.n }}">
+        <span class="icon">{% if s.done %}<svg style="color:var(--good,#3a8a4a)"><use href="#i-check"/></svg>{% else %}<svg class="muted"><use href="#i-chevron"/></svg>{% endif %}</span>
+        {{ s.n }}. {{ s.label }}
+      </a>
+    {% endfor %}
+    {% if status.complete %}<p class="muted" style="font-size:12px;margin:8px 4px 0">ครบทุกขั้นแล้ว 🎉</p>{% endif %}
+  </div>
+  <div class="grow" style="max-width:680px">
+    {% include step_template %}
+  </div>
+</div>
+{% endblock %}

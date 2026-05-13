@@ -1,46 +1,24 @@
 {% extends "base.html" %}
-
-{% block title %}Leads · {{ current_tenant.name }}{% endblock %}
-
+{% block title %}ลีด · salesdee.{% endblock %}
+{% block topbar_actions %}<a class="btn btn-sm btn-primary" href="{% url 'crm:lead_create' %}"><svg class="ico ico-sm"><use href="#i-plus"/></svg> ลีดใหม่</a>{% endblock %}
 {% block content %}
-  <div class="mb-4 flex items-center justify-between">
-    <div class="flex items-baseline gap-3">
-      <h1 class="text-xl font-semibold">Leads</h1>
-      {% if new_count %}<span class="rounded-full bg-amber-100 px-2 text-xs text-amber-800">{{ new_count }} ใหม่</span>{% endif %}
-    </div>
-    <a href="{% url 'crm:lead_create' %}" class="rounded bg-slate-800 px-3 py-1.5 text-sm text-white hover:bg-slate-700">+ บันทึก Lead</a>
-  </div>
-
-  <div class="overflow-hidden rounded-lg border bg-white">
-    <table class="w-full text-sm">
-      <thead class="bg-slate-50 text-left text-slate-500">
-        <tr>
-          <th class="px-3 py-2">ชื่อ / บริษัท</th>
-          <th class="px-3 py-2">ช่องทาง</th>
-          <th class="px-3 py-2">สนใจ</th>
-          <th class="px-3 py-2">ผู้รับผิดชอบ</th>
-          <th class="px-3 py-2">สถานะ</th>
-          <th class="px-3 py-2">เข้ามาเมื่อ</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y">
-        {% for l in leads %}
-          <tr class="hover:bg-slate-50">
-            <td class="px-3 py-2 font-medium"><a class="hover:underline" href="{% url 'crm:lead_detail' l.pk %}">{{ l }}</a></td>
-            <td class="px-3 py-2 text-slate-500">{{ l.get_channel_display }}</td>
-            <td class="px-3 py-2 text-slate-500">{{ l.product_interest|default:"—" }}</td>
-            <td class="px-3 py-2 text-slate-500">{{ l.assigned_to.get_short_name|default:"—" }}</td>
-            <td class="px-3 py-2 text-slate-500">{{ l.get_status_display }}</td>
-            <td class="px-3 py-2 text-slate-400">{{ l.created_at|date:"d/m/Y H:i" }}</td>
-          </tr>
-        {% empty %}
-          <tr><td colspan="6" class="px-3 py-8 text-center text-slate-400">ยังไม่มี lead</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-
-  {% if current_tenant %}
-    <p class="mt-4 text-xs text-slate-400">ฟอร์มรับ lead จากเว็บไซต์: <code>/crm/intake/{{ current_tenant.slug }}/</code></p>
-  {% endif %}
+<div class="row between" style="align-items:flex-end;margin-bottom:16px">
+  <div><div class="eyebrow">งานขาย</div><h1 class="h1 serif-it">ลีด</h1></div>
+  {% if new_count %}<span class="chip chip-accent">ใหม่ {{ new_count }}</span>{% endif %}
+</div>
+<div class="card">
+  <table class="tbl">
+    <thead><tr><th>ชื่อ</th><th>บริษัท</th><th>ช่องทาง</th><th>สนใจ</th><th>สถานะ</th><th>ผู้รับผิดชอบ</th><th>วันที่</th></tr></thead>
+    <tbody>
+    {% for l in leads %}
+      <tr onclick="location.href='{% url 'crm:lead_detail' l.pk %}'" style="cursor:pointer">
+        <td>{{ l.name }}</td><td>{{ l.company_name }}</td><td>{{ l.get_channel_display }}</td>
+        <td>{{ l.product_interest }}</td>
+        <td><span class="chip {% if l.status == 'new' %}chip-accent{% elif l.status == 'converted' %}chip-good{% elif l.status == 'disqualified' %}chip-danger{% endif %}">{{ l.get_status_display }}</span></td>
+        <td>{{ l.assigned_to.get_short_name|default:"—" }}</td><td class="mono">{{ l.created_at|date:"d/m/Y" }}</td>
+      </tr>
+    {% empty %}<tr><td colspan="7" class="muted">ยังไม่มีลีด</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endblock %}

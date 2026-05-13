@@ -1,51 +1,50 @@
 {% extends "base.html" %}
-
-{% block title %}Pipeline · {{ current_tenant.name }}{% endblock %}
-
-{% block extra_head %}
-  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js" defer></script>
-{% endblock %}
-
+{% load static %}
+{% block title %}ดีล · salesdee.{% endblock %}
+{% block topbar_actions %}<a class="btn btn-sm btn-primary" href="{% url 'crm:deal_create' %}"><svg class="ico ico-sm"><use href="#i-plus"/></svg> ดีลใหม่</a>{% endblock %}
+{% block extra_css %}<style>
+.kanban{display:flex;gap:14px;overflow-x:auto;padding-bottom:8px}
+.kcol{flex:0 0 280px;background:var(--surface-2,#f3eee2);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.kcol h3{font-size:13px;font-weight:600;display:flex;justify-content:space-between;margin:2px 4px}
+.kcol .drop{display:flex;flex-direction:column;gap:8px;min-height:24px}
+.dcard{background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px;cursor:grab}
+.dcard .nm{font-weight:600;font-size:14px}
+.dcard .meta{font-size:12px;color:var(--muted-fg,#6b6357);margin-top:4px}
+.sortable-ghost{opacity:.4}
+</style>{% endblock %}
 {% block content %}
-  <div class="mb-4 flex items-center justify-between">
-    <div class="flex items-baseline gap-3">
-      <h1 class="text-xl font-semibold">Pipeline การขาย</h1>
-      {% if unassigned_count %}
-        <span class="text-xs text-amber-700">ดีล {{ unassigned_count }} รายการยังไม่ได้จัดขั้น</span>
-      {% endif %}
-    </div>
-    <a href="{% url 'crm:deal_create' %}" class="rounded bg-slate-800 px-3 py-1.5 text-sm text-white hover:bg-slate-700">+ ดีลใหม่</a>
-  </div>
-
-  {% if not columns %}
-    <p class="text-slate-600">ยังไม่มีขั้นใน pipeline — สร้าง Tenant ใหม่จะมีชุดเริ่มต้นให้อัตโนมัติ หรือเพิ่มได้ที่ <a class="underline" href="/admin/crm/pipelinestage/">/admin</a></p>
-  {% else %}
-  <div class="flex gap-4 overflow-x-auto pb-4">
-    {% for stage, deals in columns %}
-      <div class="w-72 shrink-0 rounded-lg bg-slate-100 p-2" data-stage-id="{{ stage.pk }}">
-        <div class="mb-2 flex items-center justify-between px-1 text-sm font-medium text-slate-600">
-          <span>{{ stage.name }}</span>
-          <span class="rounded-full bg-slate-200 px-2 text-xs">{{ deals|length }}</span>
-        </div>
-        <div class="space-y-2"
-             x-data
-             x-init="new Sortable($el, {
-               group: 'deals', animation: 150, ghostClass: 'opacity-40',
-               onEnd(evt) {
-                 htmx.ajax('POST', '{% url 'crm:move_deal' %}', { swap: 'none', values: {
-                   deal_id: evt.item.dataset.dealId,
-                   stage_id: evt.to.closest('[data-stage-id]').dataset.stageId
-                 }});
-               }
-             })">
-          {% for deal in deals %}
-            {% include "crm/_deal_card.html" %}
-          {% empty %}
-            <p class="px-1 py-4 text-center text-xs text-slate-400">— ว่าง —</p>
-          {% endfor %}
-        </div>
+<div class="row between" style="align-items:flex-end;margin-bottom:16px">
+  <div><div class="eyebrow">งานขาย</div><h1 class="h1 serif-it">ดีล</h1></div>
+  {% if unassigned_count %}<span class="chip chip-warn">ยังไม่จัดขั้น {{ unassigned_count }}</span>{% endif %}
+</div>
+<div class="kanban">
+  {% for stage, deals in columns %}
+  <div class="kcol">
+    <h3>{{ stage.name }} <span class="muted">{{ deals|length }}</span></h3>
+    <div class="drop" data-stage="{{ stage.pk }}">
+      {% for d in deals %}
+      <div class="dcard" data-deal="{{ d.pk }}" onclick="if(!window.__drag)location.href='{% url 'crm:deal_detail' d.pk %}'">
+        <div class="nm">{{ d.name }}</div>
+        <div class="meta">{% if d.customer %}{{ d.customer.name }} · {% endif %}{{ d.estimated_value|floatformat:0 }} บาท{% if d.owner %} · {{ d.owner.get_short_name }}{% endif %}</div>
       </div>
-    {% endfor %}
+      {% endfor %}
+    </div>
   </div>
-  {% endif %}
+  {% empty %}<p class="muted">ยังไม่มีขั้นใน pipeline — ตั้งค่าใน admin</p>{% endfor %}
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="{% static 'js/sortable.min.js' %}"></script>
+<script>
+document.querySelectorAll('.kanban .drop').forEach(function(el){
+  new Sortable(el,{group:'deals',animation:150,ghostClass:'sortable-ghost',
+    onStart:function(){window.__drag=true},
+    onEnd:function(evt){
+      setTimeout(function(){window.__drag=false},50);
+      var dealId=evt.item.dataset.deal, stageId=evt.to.dataset.stage;
+      var fd=new FormData();fd.append('deal_id',dealId);fd.append('stage_id',stageId);
+      fetch("{% url 'crm:move_deal' %}",{method:'POST',body:fd,headers:{'X-CSRFToken':"{{ csrf_token }}"}});
+    }});
+});
+</script>
 {% endblock %}

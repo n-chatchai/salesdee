@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}สถานะระบบ · ตั้งค่า{% endblock %}
+{% block content %}
+<div style="margin-bottom:16px"><div class="eyebrow">ตั้งค่า</div><h1 class="h1 serif-it">สถานะระบบ</h1></div>
+<div class="row wrap" style="gap:20px;align-items:flex-start">
+  {% include "tenants/_settings_nav.html" %}
+  <div class="grow" style="max-width:680px">
+    <div class="card">
+      <table class="tbl"><tbody>
+      {% for c in checks %}
+        <tr>
+          <td style="width:30px">{% if c.ok and not c.warn %}<svg class="ico" style="color:var(--good,#3a8a4a)"><use href="#i-check"/></svg>{% elif c.warn %}<svg class="ico" style="color:var(--warn,#c98a16)"><use href="#i-alert"/></svg>{% else %}<svg class="ico" style="color:var(--danger,#c0392b)"><use href="#i-x"/></svg>{% endif %}</td>
+          <td><strong>{{ c.label }}</strong></td>
+          <td class="muted">{{ c.note }}</td>
+          <td>{% if c.ok and not c.warn %}<span class="chip chip-good">ปกติ</span>{% elif c.warn %}<span class="chip chip-warn">ควรตรวจสอบ</span>{% else %}<span class="chip chip-danger">มีปัญหา</span>{% endif %}</td>
+        </tr>
+      {% endfor %}
+      </tbody></table>
+    </div>
+    <p class="muted" style="margin-top:12px">เวอร์ชันแอป: <span class="mono">{{ app_version }}</span></p>
+  </div>
+</div>
+{% endblock %}

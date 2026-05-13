@@ -1,0 +1,8 @@
+{# Wizard step nav buttons. Vars: prev (int|None), skip_to (int|None), next_label (str), is_last (bool) #}
+<div class="row between" style="margin-top:18px">
+  <div>{% if prev %}<a class="btn btn-ghost btn-sm" href="?step={{ prev }}"><svg class="ico ico-sm"><use href="#i-arrow-left"/></svg> ย้อนกลับ</a>{% endif %}</div>
+  <div class="row" style="gap:8px">
+    {% if skip_to %}<a class="btn btn-ghost btn-sm" href="?step={{ skip_to }}">ข้ามขั้นนี้</a>{% endif %}
+    <button class="btn btn-primary btn-sm" type="submit">{{ next_label|default:"ต่อไป" }}</button>
+  </div>
+</div>

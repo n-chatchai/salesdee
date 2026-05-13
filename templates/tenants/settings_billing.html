@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}แพ็กเกจ · ตั้งค่า{% endblock %}
+{% block content %}
+<div style="margin-bottom:16px"><div class="eyebrow">ตั้งค่า</div><h1 class="h1 serif-it">แพ็กเกจ</h1></div>
+<div class="row wrap" style="gap:20px;align-items:flex-start">
+  {% include "tenants/_settings_nav.html" %}
+  <div class="grow">
+    <div class="card" style="margin-bottom:16px"><strong>แพ็กเกจปัจจุบัน:</strong> {{ tenant.get_plan_display }} — <span class="muted">ติดต่อทีมงานเพื่อเปลี่ยนแพ็กเกจ</span></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px">
+      {% for code,name,price,desc in tiers %}
+      <div class="card" style="{% if code == tenant.plan %}border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft,rgba(210,85,42,.15)){% endif %}">
+        <div class="card-head"><span class="title">{{ name }}</span>{% if code == tenant.plan %}<span class="chip chip-accent ml-auto">ปัจจุบัน</span>{% endif %}</div>
+        <div class="h2">{% if price %}{{ price }} <span class="muted" style="font-size:14px">บาท/เดือน</span>{% else %}ฟรี{% endif %}</div>
+        <p class="muted">{{ desc }}</p>
+      </div>
+      {% endfor %}
+    </div>
+    <p class="muted" style="margin-top:16px">ยังไม่มีระบบชำระเงินอัตโนมัติ — ติดต่อทีมงาน salesdee เพื่อเปลี่ยนแพ็กเกจ</p>
+  </div>
+</div>
+{% endblock %}

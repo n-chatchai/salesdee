@@ -1,63 +1,38 @@
 {% extends "base.html" %}
-
-{% block title %}{{ product.name }} · {{ current_tenant.name }}{% endblock %}
-
+{% block title %}{{ product.name }} · สินค้า · salesdee.{% endblock %}
+{% block topbar_actions %}<a class="btn btn-sm btn-ghost" href="{% url 'catalog:product_edit' product.pk %}"><svg class="ico ico-sm"><use href="#i-edit"/></svg> แก้ไข</a>{% endblock %}
 {% block content %}
-  <div class="flex items-center justify-between">
-    <div>
-      <a href="{% url 'catalog:products' %}" class="text-sm text-slate-500 hover:underline">&larr; แคตตาล็อก</a>
-      <h1 class="mt-1 text-xl font-semibold">{{ product.code }} {{ product.name }}{% if not product.is_active %} <span class="text-sm text-amber-600">(ปิดขาย)</span>{% endif %}</h1>
-    </div>
-    <a href="{% url 'catalog:product_edit' product.pk %}" class="rounded border px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">แก้ไข</a>
+<div class="row between" style="align-items:flex-end;margin-bottom:16px">
+  <div><div class="eyebrow">สินค้า{% if product.code %} · {{ product.code }}{% endif %}{% if not product.is_active %} · ปิดขาย{% endif %}</div><h1 class="h1 serif-it">{{ product.name }}</h1></div>
+  <div class="kpi" style="min-width:0"><div class="label">ราคาขายเริ่มต้น</div><div class="value">{{ product.default_price|floatformat:0 }}</div></div>
+</div>
+<div class="row wrap" style="align-items:flex-start;gap:16px">
+  <div class="card grow" style="min-width:320px">
+    <div class="card-head"><div class="title">รายละเอียด</div></div>
+    {% if product.description %}<p>{{ product.description|linebreaksbr }}</p>{% endif %}
+    <table class="tbl">
+      <tr><th>หมวด</th><td>{{ product.category|default:"—" }}</td></tr>
+      <tr><th>หน่วยนับ</th><td>{{ product.unit }}</td></tr>
+      <tr><th>ภาษี</th><td>{{ product.get_tax_type_display }}</td></tr>
+      <tr><th>ขนาด W×D×H</th><td>{{ product.dimensions|default:"—" }}</td></tr>
+      <tr><th>วัสดุ/ผิว</th><td>{{ product.material|default:"—" }}</td></tr>
+      <tr><th>สี/ผิวสำเร็จ</th><td>{{ product.finish|default:"—" }} {{ product.color_code }}</td></tr>
+      <tr><th>ยี่ห้ออุปกรณ์</th><td>{{ product.hardware_brand|default:"—" }}</td></tr>
+      <tr><th>มาตรฐาน</th><td>{{ product.standard|default:"—" }}</td></tr>
+      {% if product.tags %}<tr><th>แท็ก</th><td>{{ product.tags }}</td></tr>{% endif %}
+    </table>
   </div>
-
-  <div class="mt-4 grid gap-6 md:grid-cols-3">
-    <section class="space-y-1 rounded-lg border bg-white p-4 text-sm md:col-span-1">
-      <div><span class="text-slate-500">หมวด:</span> {{ product.category|default:"—" }}</div>
-      <div><span class="text-slate-500">หน่วย:</span> {{ product.unit }} · <span class="text-slate-500">ภาษี:</span> {{ product.get_tax_type_display }}</div>
-      <div><span class="text-slate-500">ราคาขายเริ่มต้น:</span> {{ product.default_price|floatformat:2 }} ฿{% if product.cost %} · <span class="text-slate-500">ต้นทุน:</span> {{ product.cost|floatformat:2 }} ฿{% endif %}</div>
-      {% if product.dimensions %}<div><span class="text-slate-500">ขนาด (W×D×H):</span> {{ product.dimensions }}</div>{% endif %}
-      {% if product.material %}<div><span class="text-slate-500">วัสดุ/ผิว:</span> {{ product.material }}</div>{% endif %}
-      {% if product.finish or product.color_code %}<div><span class="text-slate-500">สี:</span> {{ product.finish }} {{ product.color_code }}</div>{% endif %}
-      {% if product.hardware_brand %}<div><span class="text-slate-500">อุปกรณ์:</span> {{ product.hardware_brand }}</div>{% endif %}
-      {% if product.standard %}<div><span class="text-slate-500">มาตรฐาน:</span> {{ product.standard }}</div>{% endif %}
-      {% if product.tags %}<div><span class="text-slate-500">แท็ก:</span> {{ product.tags }}</div>{% endif %}
-      {% if product.description %}<div class="border-t pt-2 text-slate-700">{{ product.description|linebreaksbr }}</div>{% endif %}
-    </section>
-
-    <section class="space-y-6 md:col-span-2">
-      {% if product.images.all %}
-        <div class="flex flex-wrap gap-3">
-          {% for img in product.images.all %}<img src="{{ img.image.url }}" alt="{{ img.caption }}" class="h-32 w-32 rounded border object-cover">{% endfor %}
-        </div>
-      {% endif %}
-
-      {% if product.variants.all %}
-        <div>
-          <h2 class="mb-2 font-medium">รุ่นย่อย</h2>
-          <ul class="space-y-1 text-sm">
-            {% for v in product.variants.all %}<li class="flex justify-between rounded border bg-white px-3 py-2"><span>{{ v.name }}{% if v.sku %} ({{ v.sku }}){% endif %}</span><span class="text-slate-500">{{ v.price|floatformat:2 }} ฿</span></li>{% endfor %}
-          </ul>
-        </div>
-      {% endif %}
-
-      {% if product.options.all %}
-        <div>
-          <h2 class="mb-2 font-medium">ออปชันเสริม</h2>
-          <ul class="space-y-1 text-sm">
-            {% for o in product.options.all %}<li class="flex justify-between rounded border bg-white px-3 py-2"><span>{{ o.name }}</span><span class="text-slate-500">+{{ o.extra_price|floatformat:2 }} ฿</span></li>{% endfor %}
-          </ul>
-        </div>
-      {% endif %}
-
-      {% if product.is_bundle and product.bundle_items.all %}
-        <div>
-          <h2 class="mb-2 font-medium">รายการในชุด</h2>
-          <ul class="space-y-1 text-sm">
-            {% for b in product.bundle_items.all %}<li class="flex justify-between rounded border bg-white px-3 py-2"><span>{{ b.component }}{% if b.variant %} — {{ b.variant.name }}{% endif %}</span><span class="text-slate-500">× {{ b.quantity|floatformat:0 }}</span></li>{% endfor %}
-          </ul>
-        </div>
-      {% endif %}
-    </section>
+  <div class="card grow" style="min-width:300px">
+    {% if product.images.all %}<div class="card-head"><div class="title">รูป</div></div>
+    <div class="row wrap">{% for im in product.images.all %}<figure style="margin:0"><img src="{{ im.image.url }}" alt="{{ im.caption }}" style="width:160px;height:120px;object-fit:cover;border-radius:8px"><figcaption class="muted" style="font-size:12px">{{ im.caption }}</figcaption></figure>{% endfor %}</div>
+    <div class="divider"></div>{% endif %}
+    {% if product.variants.all %}<div class="title" style="margin-bottom:6px">รุ่นย่อย</div>
+    {% for v in product.variants.all %}<div class="row between"><span>{{ v.name }} <span class="muted mono">{{ v.sku }}</span></span><span>{{ v.price|floatformat:0 }}</span></div>{% endfor %}
+    <div class="divider"></div>{% endif %}
+    {% if product.options.all %}<div class="title" style="margin-bottom:6px">ออปชันเสริม</div>
+    {% for o in product.options.all %}<div class="row between"><span>{{ o.name }}</span><span>+{{ o.extra_price|floatformat:0 }}</span></div>{% endfor %}{% endif %}
+    {% if product.is_bundle %}<div class="divider"></div><div class="title" style="margin-bottom:6px">รายการในชุด</div>
+    {% for b in product.bundle_items.all %}<div class="row between"><span>{{ b.component.name }}{% if b.variant %} ({{ b.variant.name }}){% endif %}</span><span>×{{ b.quantity }}</span></div>{% endfor %}{% endif %}
   </div>
+</div>
 {% endblock %}

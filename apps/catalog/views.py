@@ -92,6 +92,41 @@ def public_catalog(request: HttpRequest, tenant_slug: str) -> HttpResponse:
         )
 
 
+def public_home(request: HttpRequest, tenant_slug: str | None = None, tenant=None) -> HttpResponse:
+    """Per-tenant public landing page (deck "หน้าหลักสาธารณะ"): hero, browse-by-category,
+    featured products, an AI-match teaser, how-it-works, contact footer."""
+    if tenant is None:
+        tenant = _public_tenant(tenant_slug or "")
+    with tenant_context(tenant):
+        from apps.integrations.ai import ai_is_configured
+        from apps.tenants.models import CompanyProfile
+
+        company = CompanyProfile.objects.filter(tenant=tenant).first()
+        categories = list(
+            ProductCategory.objects.annotate(
+                n=Count("products", filter=Q(products__is_active=True))
+            )
+            .filter(n__gt=0)
+            .order_by("order", "name")[:8]
+        )
+        featured = list(
+            Product.objects.filter(is_active=True)
+            .select_related("category")
+            .order_by("-created_at")[:8]
+        )
+        return render(
+            request,
+            "catalog/public_home.html",
+            {
+                "tenant": tenant,
+                "company": company,
+                "categories": categories,
+                "featured": featured,
+                "ai_enabled": ai_is_configured(),
+            },
+        )
+
+
 def public_product(request: HttpRequest, tenant_slug: str, pk: int) -> HttpResponse:
     tenant = _public_tenant(tenant_slug)
     with tenant_context(tenant):

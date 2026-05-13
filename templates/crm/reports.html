@@ -1,89 +1,55 @@
 {% extends "base.html" %}
-
-{% block title %}รายงานการขาย · {{ current_tenant.name }}{% endblock %}
-
+{% block title %}รายงานการขาย · salesdee.{% endblock %}
+{% block topbar_actions %}
+<a class="btn btn-sm btn-ghost {% if period == 'month' %}btn-primary{% endif %}" href="?period=month">เดือนนี้</a>
+<a class="btn btn-sm btn-ghost {% if period == '90d' %}btn-primary{% endif %}" href="?period=90d">90 วัน</a>
+<a class="btn btn-sm btn-ghost {% if period == 'year' %}btn-primary{% endif %}" href="?period=year">ปีนี้</a>
+<a class="btn btn-sm" href="?period={{ period }}&export=xlsx"><svg class="ico ico-sm"><use href="#i-download"/></svg> Excel</a>
+{% endblock %}
 {% block content %}
-  <div class="flex flex-wrap items-baseline justify-between gap-3">
-    <h1 class="text-xl font-semibold">รายงานการขาย</h1>
-    <div class="flex items-center gap-3 text-sm">
-      <span class="text-slate-500">ช่วง:</span>
-      <a href="?period=month" class="rounded-full border px-3 py-1 {% if period == 'month' %}bg-slate-800 text-white{% else %}hover:bg-slate-50{% endif %}">เดือนนี้</a>
-      <a href="?period=90d" class="rounded-full border px-3 py-1 {% if period == '90d' %}bg-slate-800 text-white{% else %}hover:bg-slate-50{% endif %}">90 วัน</a>
-      <a href="?period=year" class="rounded-full border px-3 py-1 {% if period == 'year' %}bg-slate-800 text-white{% else %}hover:bg-slate-50{% endif %}">ปีนี้</a>
-      <a href="?period={{ period }}&amp;export=xlsx" class="rounded border px-3 py-1 text-slate-600 hover:bg-slate-50">ดาวน์โหลด Excel</a>
-    </div>
+<div class="row between" style="align-items:flex-end;margin-bottom:16px">
+  <div><div class="eyebrow">ภาพรวม</div><h1 class="h1 serif-it">รายงานการขาย</h1></div>
+  <span class="muted mono">{{ start|date:"d/m/Y" }} – {{ end|date:"d/m/Y" }}</span>
+</div>
+
+<div class="kpi-row">
+  <div class="kpi accent"><div class="label">มูลค่าปิดได้</div><div class="value">{{ totals.won_value|floatformat:0 }}</div><div class="delta">{{ totals.won_count }} ดีล</div></div>
+  <div class="kpi"><div class="label">ใบเสนอราคา (ในช่วง)</div><div class="value">{{ totals.quotes_count }}</div></div>
+  {% if team_target %}<div class="kpi"><div class="label">เป้าทีมเดือนนี้</div><div class="value">{{ team_target|floatformat:0 }}</div></div>{% endif %}
+</div>
+
+<div class="card">
+  <div class="card-head"><div class="title">ยอดขายตามพนักงานขาย</div></div>
+  <table class="tbl">
+    <thead><tr><th>พนักงานขาย</th><th>ดีลที่ปิดได้</th><th>มูลค่าที่ปิดได้</th><th>ใบเสนอราคาที่ส่ง</th><th>ลูกค้าตอบรับ</th><th>อัตราปิด</th><th>เป้าเดือนนี้</th></tr></thead>
+    <tbody>
+    {% for r in by_salesperson %}
+      <tr><td>{{ r.name }}</td><td>{{ r.won_count }}</td><td>{{ r.won_value|floatformat:0 }}</td><td>{{ r.quotes_sent }}</td><td>{{ r.quotes_accepted }}</td>
+        <td>{% if r.conv_rate is not None %}{{ r.conv_rate }}%{% else %}—{% endif %}</td>
+        <td>{% if r.target is not None %}{{ r.target|floatformat:0 }}{% else %}—{% endif %}</td></tr>
+    {% empty %}<tr><td colspan="7" class="muted">ไม่มีข้อมูลในช่วงนี้</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="row wrap" style="align-items:flex-start;gap:16px">
+  <div class="card grow" style="min-width:280px">
+    <div class="card-head"><div class="title">ยอดปิดได้รายเดือน</div></div>
+    <table class="tbl"><thead><tr><th>เดือน</th><th>ดีล</th><th>มูลค่า</th></tr></thead><tbody>
+    {% for m in by_month %}<tr><td>{{ m.m|date:"m/Y" }}</td><td>{{ m.n }}</td><td>{{ m.v|floatformat:0 }}</td></tr>{% empty %}<tr><td colspan="3" class="muted">—</td></tr>{% endfor %}
+    </tbody></table>
   </div>
-  <p class="mt-1 text-sm text-slate-500">{{ start|date:"d/m/Y" }} – {{ end|date:"d/m/Y" }} · ปิดได้ {{ totals.won_count }} ดีล · มูลค่ารวม {{ totals.won_value|floatformat:0 }} ฿ · ออกใบเสนอราคา {{ totals.quotes_count }} ใบ</p>
-
-  {# Sales by salesperson #}
-  <section class="mt-5 overflow-hidden rounded-lg border bg-white">
-    <h2 class="border-b bg-slate-50 px-3 py-2 text-sm font-medium text-slate-600">ยอดขายตามพนักงานขาย</h2>
-    <table class="w-full text-sm">
-      <thead class="text-left text-slate-500"><tr>
-        <th class="px-3 py-2">พนักงานขาย</th><th class="px-3 py-2 text-right">ปิดได้ (ดีล)</th><th class="px-3 py-2 text-right">มูลค่าที่ปิดได้</th>
-        <th class="px-3 py-2 text-right">ใบเสนอราคาที่ส่ง</th><th class="px-3 py-2 text-right">ลูกค้าตอบรับ</th><th class="px-3 py-2 text-right">อัตราปิด</th>
-        <th class="px-3 py-2 text-right">เป้าเดือนนี้</th><th class="px-3 py-2 text-right">% ของเป้า</th>
-      </tr></thead>
-      <tbody class="divide-y">
-        {% for r in by_salesperson %}
-          <tr>
-            <td class="px-3 py-2">{{ r.name }}</td>
-            <td class="px-3 py-2 text-right">{{ r.won_count }}</td>
-            <td class="px-3 py-2 text-right">{{ r.won_value|floatformat:0 }}</td>
-            <td class="px-3 py-2 text-right text-slate-500">{{ r.quotes_sent }}</td>
-            <td class="px-3 py-2 text-right text-slate-500">{{ r.quotes_accepted }}</td>
-            <td class="px-3 py-2 text-right">{% if r.conv_rate is not None %}{{ r.conv_rate }}%{% else %}—{% endif %}</td>
-            <td class="px-3 py-2 text-right text-slate-500">{% if r.target %}{{ r.target|floatformat:0 }}{% else %}—{% endif %}</td>
-            <td class="px-3 py-2 text-right">{% if r.target %}{% widthratio r.won_value r.target 100 %}%{% else %}—{% endif %}</td>
-          </tr>
-        {% empty %}
-          <tr><td colspan="8" class="px-3 py-6 text-center text-slate-400">ไม่มีข้อมูลในช่วงนี้</td></tr>
-        {% endfor %}
-      </tbody>
-      {% if team_target %}<tfoot><tr class="border-t bg-slate-50"><td colspan="2" class="px-3 py-2 text-slate-500">เป้าทั้งทีมเดือนนี้</td><td class="px-3 py-2 text-right font-medium">{{ team_target|floatformat:0 }}</td><td colspan="5"></td></tr></tfoot>{% endif %}
-    </table>
-  </section>
-
-  <div class="mt-5 grid gap-5 lg:grid-cols-2">
-    {# Won by month #}
-    <section class="overflow-hidden rounded-lg border bg-white">
-      <h2 class="border-b bg-slate-50 px-3 py-2 text-sm font-medium text-slate-600">ยอดที่ปิดได้ตามเดือน</h2>
-      <table class="w-full text-sm"><tbody class="divide-y">
-        {% for r in by_month %}
-          <tr><td class="px-3 py-1.5">{{ r.m|date:"m/Y" }}</td><td class="px-3 py-1.5 text-right text-slate-500">{{ r.n }} ดีล</td><td class="px-3 py-1.5 text-right">{{ r.v|floatformat:0 }} ฿</td></tr>
-        {% empty %}
-          <tr><td class="px-3 py-6 text-center text-slate-400">ไม่มีข้อมูล</td></tr>
-        {% endfor %}
-      </tbody></table>
-    </section>
-
-    {# By channel #}
-    <section class="overflow-hidden rounded-lg border bg-white">
-      <h2 class="border-b bg-slate-50 px-3 py-2 text-sm font-medium text-slate-600">ตามช่องทางที่มา</h2>
-      <table class="w-full text-sm">
-        <thead class="text-left text-slate-500"><tr><th class="px-3 py-2">ช่องทาง</th><th class="px-3 py-2 text-right">Lead ใหม่</th><th class="px-3 py-2 text-right">ปิดได้</th><th class="px-3 py-2 text-right">มูลค่า</th></tr></thead>
-        <tbody class="divide-y">
-          {% for r in by_channel %}
-            <tr><td class="px-3 py-1.5">{{ r.label }}</td><td class="px-3 py-1.5 text-right text-slate-500">{{ r.leads }}</td><td class="px-3 py-1.5 text-right">{{ r.won_deals }}</td><td class="px-3 py-1.5 text-right">{{ r.won_value|floatformat:0 }}</td></tr>
-          {% empty %}
-            <tr><td colspan="4" class="px-3 py-6 text-center text-slate-400">ไม่มีข้อมูล</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </section>
-
-    {# Lost reasons #}
-    <section class="overflow-hidden rounded-lg border bg-white lg:col-span-2">
-      <h2 class="border-b bg-slate-50 px-3 py-2 text-sm font-medium text-slate-600">เหตุผลที่แพ้</h2>
-      <table class="w-full text-sm"><tbody class="divide-y">
-        {% for r in lost_by_reason %}
-          <tr><td class="px-3 py-1.5">{{ r.lost_reason }}</td><td class="px-3 py-1.5 text-right text-slate-500">{{ r.n }}</td></tr>
-        {% empty %}
-          <tr><td class="px-3 py-6 text-center text-slate-400">ไม่มีข้อมูล</td></tr>
-        {% endfor %}
-      </tbody></table>
-    </section>
+  <div class="card grow" style="min-width:280px">
+    <div class="card-head"><div class="title">ตามช่องทาง</div></div>
+    <table class="tbl"><thead><tr><th>ช่องทาง</th><th>ลีดใหม่</th><th>ดีลที่ปิดได้</th><th>มูลค่า</th></tr></thead><tbody>
+    {% for r in by_channel %}<tr><td>{{ r.label }}</td><td>{{ r.leads }}</td><td>{{ r.won_deals }}</td><td>{{ r.won_value|floatformat:0 }}</td></tr>{% empty %}<tr><td colspan="4" class="muted">—</td></tr>{% endfor %}
+    </tbody></table>
   </div>
-
-  <p class="mt-4 text-xs text-slate-400">ตั้งเป้ายอดขายรายเดือนต่อพนักงานขายได้ที่ <a class="underline" href="/admin/crm/salestarget/">/admin</a></p>
+  <div class="card grow" style="min-width:280px">
+    <div class="card-head"><div class="title">เหตุผลที่แพ้</div></div>
+    <table class="tbl"><thead><tr><th>เหตุผล</th><th>จำนวน</th></tr></thead><tbody>
+    {% for r in lost_by_reason %}<tr><td>{{ r.lost_reason }}</td><td>{{ r.n }}</td></tr>{% empty %}<tr><td colspan="2" class="muted">—</td></tr>{% endfor %}
+    </tbody></table>
+  </div>
+</div>
 {% endblock %}

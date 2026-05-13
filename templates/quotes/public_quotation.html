@@ -1,101 +1,88 @@
-<!doctype html>
-<html lang="th">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ใบเสนอราคา {{ document.doc_number }} · {{ company.name_th }}</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  :root { font-family: "Sarabun", system-ui, sans-serif; }
-  .f input:not([type=radio]), .f textarea { display:block; width:100%; border:1px solid #cbd5e1; border-radius:.375rem; padding:.5rem .6rem; font-size:.95rem; }
-</style>
-</head>
-<body class="min-h-screen bg-slate-100 py-8">
-<div class="mx-auto max-w-3xl px-4">
-  <div class="rounded-xl border bg-white p-6 shadow-sm">
-    <div class="flex items-start justify-between border-b pb-3">
-      <div class="text-sm">
-        <div class="text-lg font-semibold">{{ company.name_th|default:"บริษัท" }}</div>
-        {% if company %}<div class="text-slate-500">{{ company.address|linebreaksbr }}</div>
-        {% if company.tax_id %}<div class="text-slate-500">เลขผู้เสียภาษี {{ company.tax_id }} ({{ company.branch_label }})</div>{% endif %}
-        <div class="text-slate-500">{% if company.phone %}โทร {{ company.phone }}{% endif %}{% if company.email %} · {{ company.email }}{% endif %}{% if company.line_id %} · LINE {{ company.line_id }}{% endif %}</div>{% endif %}
+{% load static %}<!DOCTYPE html>
+<html lang="th"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ใบเสนอราคา {{ document.doc_number }}</title>
+<link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'css/app.css' %}">
+<link rel="stylesheet" href="{% static 'css/public.css' %}">
+</head><body class="public">
+{% include "partials/icons.html" %}
+<div class="pub-wrap">
+  <div class="pub-head"><div class="mark">d</div><div><strong>{{ company.name_th|default:"" }}</strong><div class="muted" style="font-size:13px">ใบเสนอราคา</div></div></div>
+
+  <div class="pub-card">
+    <div class="row between" style="align-items:flex-start">
+      <div>
+        {% if company %}<strong>{{ company.name_th }}</strong><br>{% if company.address %}<span class="muted">{{ company.address|linebreaksbr }}</span><br>{% endif %}{% if company.tax_id %}<span class="muted">เลขผู้เสียภาษี {{ company.tax_id }}</span>{% endif %}{% endif %}
       </div>
-      <div class="text-right text-sm">
-        <div class="font-semibold">ใบเสนอราคา</div>
-        <div class="text-base font-bold">{{ document.doc_number|default:"(ร่าง)" }}{% if document.revision %} Rev.{{ document.revision }}{% endif %}</div>
-        <div class="text-slate-500">วันที่ {{ document.issue_date|date:"d/m/Y" }} · ยืนราคาถึง {{ document.valid_until|date:"d/m/Y"|default:"—" }}</div>
-        <a href="{% url 'public_quotation_pdf' token %}" target="_blank" class="mt-1 inline-block rounded bg-slate-800 px-3 py-1 text-xs text-white">ดาวน์โหลด PDF</a>
+      <div style="text-align:right">
+        <div style="font-size:20px;font-weight:700">ใบเสนอราคา</div>
+        <div class="mono">{{ document.doc_number }}{% if document.revision %} Rev.{{ document.revision }}{% endif %}</div>
+        <div class="muted">วันที่ {{ document.issue_date|date:"d/m/Y" }}</div>
+        {% if document.valid_until %}<div class="muted">ยืนราคาถึง {{ document.valid_until|date:"d/m/Y" }}</div>{% endif %}
       </div>
     </div>
-
-    <div class="mt-3 text-sm">
-      <strong>ลูกค้า:</strong> {{ document.customer.name|default:"—" }}{% if document.contact %} ({{ document.contact.name }}){% endif %}
-      {% if document.reference %} · <strong>อ้างอิง:</strong> {{ document.reference }}{% endif %}
-    </div>
-
-    {% for g in totals.groups %}
-      {% if g.label %}<div class="mt-4 font-medium">{{ g.label }}</div>{% endif %}
-      <table class="mt-1 w-full border text-sm">
-        <thead class="bg-slate-50 text-left text-slate-500"><tr>
-          <th class="border px-2 py-1 w-8">#</th><th class="border px-2 py-1">รายละเอียด</th>
-          <th class="border px-2 py-1 text-right w-24">จำนวน</th><th class="border px-2 py-1 text-right w-28">ราคา/หน่วย</th><th class="border px-2 py-1 text-right w-28">จำนวนเงิน</th>
-        </tr></thead>
-        <tbody>
-          {% for ln in g.lines %}
-            {% if ln.line_type == 'heading' %}<tr><td colspan="5" class="border bg-slate-50 px-2 py-1 font-semibold">{{ ln.description }}</td></tr>
-            {% elif ln.line_type == 'note' %}<tr><td colspan="5" class="border px-2 py-1 text-slate-500">{{ ln.description|linebreaksbr }}</td></tr>
-            {% else %}<tr>
-              <td class="border px-2 py-1 align-top text-slate-400">{{ forloop.counter }}</td>
-              <td class="border px-2 py-1">{% if ln.image %}<img src="{{ ln.image.url }}" alt="" class="mb-1 h-14 w-14 rounded border object-cover">{% endif %}{{ ln.description|linebreaksbr }}{% if ln.dimensions or ln.material %}<div class="text-xs text-slate-500">{{ ln.dimensions }}{% if ln.dimensions and ln.material %} · {% endif %}{{ ln.material }}</div>{% endif %}</td>
-              <td class="border px-2 py-1 text-right align-top">{{ ln.quantity|floatformat:"-2" }} {{ ln.unit }}</td>
-              <td class="border px-2 py-1 text-right align-top">{{ ln.unit_price|floatformat:2 }}</td>
-              <td class="border px-2 py-1 text-right align-top">{{ ln.amount|floatformat:2 }}</td>
-            </tr>{% endif %}
-          {% endfor %}
-          {% if g.subtotal %}<tr class="bg-slate-50 font-medium"><td colspan="4" class="border px-2 py-1 text-right">รวม{% if g.label %} {{ g.label }}{% endif %}</td><td class="border px-2 py-1 text-right">{{ g.subtotal|floatformat:2 }}</td></tr>{% endif %}
-        </tbody>
-      </table>
-    {% endfor %}
-
-    <div class="mt-4 flex justify-end">
-      <table class="w-full max-w-xs text-sm">
-        <tr><td class="py-0.5 text-slate-500">รวมเป็นเงิน{% if totals.inclusive %} (รวม VAT){% endif %}</td><td class="py-0.5 text-right">{{ totals.subtotal|floatformat:2 }}</td></tr>
-        {% if totals.end_discount %}<tr><td class="py-0.5 text-slate-500">หักส่วนลดท้ายบิล</td><td class="py-0.5 text-right">-{{ totals.end_discount|floatformat:2 }}</td></tr>{% endif %}
-        <tr><td class="py-0.5 text-slate-500">ภาษีมูลค่าเพิ่ม 7%</td><td class="py-0.5 text-right">{{ totals.vat_amount|floatformat:2 }}</td></tr>
-        {% if totals.rounding %}<tr><td class="py-0.5 text-slate-500">ปัดเศษ</td><td class="py-0.5 text-right">{{ totals.rounding|floatformat:2 }}</td></tr>{% endif %}
-        <tr class="border-t font-semibold"><td class="py-1">ยอดรวมทั้งสิ้น</td><td class="py-1 text-right">{{ totals.grand_total|floatformat:2 }} บาท</td></tr>
-      </table>
-    </div>
-    <div class="text-right text-xs text-slate-500">({{ totals.amount_in_words }})</div>
-
-    {% if document.payment_terms or document.warranty or document.lead_time %}
-    <div class="mt-3 border-t pt-2 text-sm text-slate-600">
-      {% if document.payment_terms %}<div><strong>เงื่อนไขการชำระเงิน:</strong> {{ document.payment_terms|linebreaksbr }}</div>{% endif %}
-      {% if document.lead_time %}<div><strong>กำหนดส่งมอบ/ติดตั้ง:</strong> {{ document.lead_time }}</div>{% endif %}
-      {% if document.warranty %}<div><strong>การรับประกัน:</strong> {{ document.warranty }}</div>{% endif %}
-    </div>
-    {% endif %}
+    <div class="divider" style="margin:14px 0;border-top:1px solid var(--line,#eee)"></div>
+    <div><span class="muted">เรียน</span> {{ document.customer.name|default:document.reference }}{% if document.contact %} (คุณ{{ document.contact.name }}){% endif %}</div>
+    {% if document.customer.billing_address %}<div class="muted">{{ document.customer.billing_address|linebreaksbr }}</div>{% endif %}
   </div>
 
-  {% if document.customer_response %}
-    <div class="mt-4 rounded-xl border bg-emerald-50 p-4 text-sm text-emerald-800">
-      คุณได้ตอบกลับแล้ว: <strong>{{ document.get_customer_response_display }}</strong>{% if document.customer_signed_name %} (โดย {{ document.customer_signed_name }}){% endif %} เมื่อ {{ document.customer_responded_at|date:"d/m/Y H:i" }}
-      {% if document.customer_response_note %}<div class="mt-1">หมายเหตุ: {{ document.customer_response_note }}</div>{% endif %}
+  <div class="pub-card">
+    <table class="tbl-pub">
+      <thead><tr><th>#</th><th>รายการ</th><th class="num">จำนวน</th><th>หน่วย</th><th class="num">ราคา/หน่วย</th><th class="num">จำนวนเงิน</th></tr></thead>
+      <tbody>
+      {% for group in totals.groups %}
+        {% if group.label %}<tr><td colspan="6"><strong>{{ group.label }}</strong></td></tr>{% endif %}
+        {% for line in group.lines %}
+        {% if line.line_type == 'item' %}
+        <tr><td>{{ forloop.parentloop.counter }}.{{ forloop.counter }}</td>
+          <td>{{ line.description }}{% if line.dimensions %}<div class="muted" style="font-size:12px">{{ line.dimensions }}</div>{% endif %}</td>
+          <td class="num mono">{{ line.quantity|floatformat:"-2" }}</td><td>{{ line.unit }}</td>
+          <td class="num mono">{{ line.unit_price|floatformat:2 }}</td><td class="num mono">{{ line.amount|floatformat:2 }}</td></tr>
+        {% elif line.line_type == 'heading' %}<tr><td></td><td colspan="5"><strong>{{ line.description }}</strong></td></tr>
+        {% else %}<tr><td></td><td colspan="5"><em class="muted">{{ line.description }}</em></td></tr>{% endif %}
+        {% endfor %}
+      {% endfor %}
+      </tbody>
+    </table>
+    <div class="totbox">
+      <div class="row"><span>รวมเป็นเงิน</span><span class="mono">{{ totals.subtotal|floatformat:2 }}</span></div>
+      {% if totals.end_discount %}<div class="row"><span>ส่วนลด</span><span class="mono">-{{ totals.end_discount|floatformat:2 }}</span></div><div class="row"><span>หลังหักส่วนลด</span><span class="mono">{{ totals.after_discount|floatformat:2 }}</span></div>{% endif %}
+      {% if totals.vat_amount %}<div class="row"><span>ภาษีมูลค่าเพิ่ม 7%</span><span class="mono">{{ totals.vat_amount|floatformat:2 }}</span></div>{% endif %}
+      {% if totals.rounding %}<div class="row"><span>ปัดเศษ</span><span class="mono">{{ totals.rounding|floatformat:2 }}</span></div>{% endif %}
+      <div class="row grand"><span>ยอดรวมทั้งสิ้น</span><span class="mono">{{ totals.grand_total|floatformat:2 }}</span></div>
+      <div class="muted" style="font-size:13px;margin-top:6px">({{ totals.amount_in_words }})</div>
     </div>
+  </div>
+
+  {% if document.payment_terms or document.lead_time or document.warranty or document.notes %}
+  <div class="pub-card">
+    {% if document.payment_terms %}<p><strong>เงื่อนไขการชำระเงิน:</strong> {{ document.payment_terms|linebreaksbr }}</p>{% endif %}
+    {% if document.lead_time %}<p><strong>กำหนดส่งมอบ/ติดตั้ง:</strong> {{ document.lead_time }}</p>{% endif %}
+    {% if document.warranty %}<p><strong>การรับประกัน:</strong> {{ document.warranty }}</p>{% endif %}
+    {% if document.notes %}<p class="muted">{{ document.notes|linebreaksbr }}</p>{% endif %}
+  </div>
+  {% endif %}
+
+  {% if document.customer_response %}
+  <div class="pub-card" style="text-align:center">
+    <svg class="ico ico-lg" style="color:var(--accent)"><use href="#i-check"/></svg>
+    <p>คุณได้ตอบกลับใบเสนอราคานี้แล้ว: <strong>{{ document.get_customer_response_display }}</strong></p>
+  </div>
   {% else %}
-    <form method="post" action="{% url 'public_quotation_respond' token %}" class="f mt-4 space-y-3 rounded-xl border bg-white p-5">
-      {% csrf_token %}
-      <div class="font-medium">ตอบกลับใบเสนอราคานี้</div>
-      <label class="flex items-center gap-2 text-sm"><input type="radio" name="response" value="{{ responses.ACCEPTED }}" required> ยอมรับ / สั่งซื้อ</label>
-      <label class="flex items-center gap-2 text-sm"><input type="radio" name="response" value="{{ responses.CHANGES }}"> ขอแก้ไข (โปรดระบุในหมายเหตุ)</label>
-      <label class="flex items-center gap-2 text-sm"><input type="radio" name="response" value="{{ responses.REJECTED }}"> ปฏิเสธ</label>
-      <div><label class="text-sm text-slate-600">ลงชื่อ (ชื่อผู้ตอบกลับ)</label><input type="text" name="signed_name" required></div>
-      <div><label class="text-sm text-slate-600">หมายเหตุ (ถ้ามี)</label><textarea name="note" rows="2"></textarea></div>
-      <button type="submit" class="rounded-md bg-slate-800 px-4 py-2 text-white hover:bg-slate-700">ส่งคำตอบ</button>
+  <div class="pub-card">
+    <h3 style="margin-top:0">ตอบกลับใบเสนอราคา</h3>
+    <form method="post" action="{% url 'public_quotation_respond' token %}">{% csrf_token %}
+      <div class="field"><label class="field-label">ชื่อผู้ตอบ</label><input type="text" name="signed_name" placeholder="ชื่อ-นามสกุล"></div>
+      <div class="field"><label class="field-label">ข้อความถึงผู้ขาย (ถ้ามี)</label><textarea name="note" rows="2"></textarea></div>
+      <div class="row wrap">
+        <button class="btn" name="response" value="{{ responses.ACCEPTED }}"><svg class="ico ico-sm"><use href="#i-check"/></svg> ยอมรับใบเสนอราคา</button>
+        <button class="btn ghost" name="response" value="{{ responses.CHANGES }}"><svg class="ico ico-sm"><use href="#i-edit"/></svg> ขอแก้ไข</button>
+        <button class="btn ghost" name="response" value="{{ responses.REJECTED }}"><svg class="ico ico-sm"><use href="#i-x"/></svg> ปฏิเสธ</button>
+      </div>
     </form>
+    <p style="margin-top:14px"><a class="btn ghost" href="{% url 'public_quotation_pdf' token %}" target="_blank"><svg class="ico ico-sm"><use href="#i-download"/></svg> ดาวน์โหลด PDF</a></p>
+  </div>
   {% endif %}
 </div>
-</body>
-</html>
+</body></html>

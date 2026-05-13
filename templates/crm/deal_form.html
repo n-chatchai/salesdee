@@ -1,14 +1,11 @@
 {% extends "base.html" %}
-
-{% block title %}{% if deal %}แก้ไขดีล{% else %}ดีลใหม่{% endif %} · {{ current_tenant.name }}{% endblock %}
-
+{% block title %}{% if deal %}แก้ไขดีล{% else %}ดีลใหม่{% endif %} · salesdee.{% endblock %}
 {% block content %}
-  <a href="{% if deal %}{% url 'crm:deal_detail' deal.pk %}{% else %}{% url 'crm:pipeline' %}{% endif %}" class="text-sm text-slate-500 hover:underline">&larr; ยกเลิก</a>
-  <h1 class="mt-1 text-xl font-semibold">{% if deal %}แก้ไขดีล: {{ deal.name }}{% else %}สร้างดีลใหม่{% endif %}</h1>
-
-  <form method="post" class="crm-form mt-4 max-w-xl rounded-lg border bg-white p-5">
-    {% csrf_token %}
-    {% include "crm/_form_fields.html" %}
-    <button type="submit" class="mt-2 rounded bg-slate-800 px-4 py-2 text-sm text-white hover:bg-slate-700">บันทึก</button>
+<div style="max-width:560px">
+  <div class="eyebrow">ดีล</div><h1 class="h1 serif-it" style="margin-bottom:16px">{% if deal %}แก้ไขดีล{% else %}สร้างดีลใหม่{% endif %}</h1>
+  <form method="post" class="card">{% csrf_token %}
+    {% include "partials/_form.html" %}
+    <div class="row" style="margin-top:12px"><button class="btn btn-primary">บันทึก</button><a class="btn btn-ghost" href="{% if deal %}{% url 'crm:deal_detail' deal.pk %}{% else %}{% url 'crm:pipeline' %}{% endif %}">ยกเลิก</a></div>
   </form>
+</div>
 {% endblock %}

@@ -1,0 +1,88 @@
+{% load static %}<!DOCTYPE html>
+<html lang="th"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ company.name_th|default:tenant.name }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'css/app.css' %}">
+<link rel="stylesheet" href="{% static 'css/public.css' %}">
+<link rel="stylesheet" href="{% static 'css/public-home.css' %}">
+</head><body class="public">
+{% include "partials/icons.html" %}
+
+<section class="ph-hero">
+  <div class="ph-hero-inner">
+    {% if company.logo %}<img class="ph-logo" src="{{ company.logo.url }}" alt="{{ company.name_th }}">{% else %}<div class="ph-logo" style="display:flex;align-items:center;justify-content:center;font-family:Fraunces,serif;font-size:40px;color:var(--accent,#d2552a)">{{ tenant.name|slice:":1" }}</div>{% endif %}
+    <div class="txt">
+      <div class="eyebrow">{{ company.branch_label|default:"" }}</div>
+      <h1>{{ company.name_th|default:tenant.name }}</h1>
+      <p class="tagline">{% if company.name_en %}{{ company.name_en }}{% else %}เฟอร์นิเจอร์คุณภาพ พร้อมบริการเสนอราคา ติดตั้ง และรับประกัน{% endif %}</p>
+      <div class="row" style="gap:10px;margin-top:18px">
+        <a class="btn" href="{% url 'public_catalog' tenant.slug %}">ดูสินค้าทั้งหมด</a>
+        {% if company.line_id %}<a class="btn ghost" href="https://line.me/R/ti/p/{{ company.line_id }}">ติดต่อทาง LINE</a>{% elif company.phone %}<a class="btn ghost" href="tel:{{ company.phone }}">โทร {{ company.phone }}</a>{% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if categories %}
+<section class="ph-section">
+  <h2>เลือกตามหมวด</h2>
+  <div class="ph-cats">
+    {% for c in categories %}<a class="ph-cat" href="{% url 'public_catalog' tenant.slug %}?cat={{ c.pk }}"><strong>{{ c.name }}</strong><div class="n">{{ c.n }} รายการ</div></a>{% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if featured %}
+<section class="ph-section" style="padding-top:0">
+  <h2>รุ่นแนะนำ</h2>
+  <div class="pub-grid">
+    {% for p in featured %}
+    <a class="pub-prod" href="{% url 'public_product' tenant.slug p.pk %}">
+      {% if p.images.first %}<img src="{{ p.images.first.image.url }}" alt="{{ p.name }}">{% else %}<div style="height:160px;background:linear-gradient(135deg,#e9e2d2,#dcd3bf);display:flex;align-items:center;justify-content:center"><svg class="ico ico-xl muted"><use href="#i-package"/></svg></div>{% endif %}
+      <div class="body"><strong>{{ p.name }}</strong><div class="muted" style="font-size:13px">{{ p.category.name|default:"" }}</div>{% if p.default_price %}<div style="margin-top:4px">{{ p.default_price|floatformat:0 }} บาท</div>{% endif %}</div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="ph-section" style="padding-top:0">
+  <div class="ph-ai">
+    <h2 style="margin-top:0"><svg class="ico"><use href="#i-spark"/></svg> ให้ผู้ช่วยช่วยจับคู่</h2>
+    <p class="muted">บอกสิ่งที่คุณต้องการ (เช่น "โต๊ะทำงาน 1.2 เมตร สีไม้") แล้วเราจะแนะนำรุ่นที่เหมาะ</p>
+    {% if ai_enabled %}
+    <form method="get" action="{% url 'public_catalog' tenant.slug %}"><textarea name="q" rows="2" placeholder="พิมพ์สิ่งที่ต้องการ…"></textarea><div style="margin-top:10px"><button class="btn">ค้นหา</button></div></form>
+    {% else %}
+    <p>{% if company.line_id %}ทักหาเราทาง LINE ได้เลย — เรายินดีช่วยเลือก{% else %}ติดต่อเราเพื่อให้ทีมงานช่วยเลือกสินค้าที่เหมาะ{% endif %}</p>
+    {% if company.line_id %}<a class="btn" href="https://line.me/R/ti/p/{{ company.line_id }}">ติดต่อทาง LINE</a>{% elif company.phone %}<a class="btn" href="tel:{{ company.phone }}">โทร {{ company.phone }}</a>{% endif %}
+    {% endif %}
+  </div>
+</section>
+
+<section class="ph-section" style="padding-top:0">
+  <h2>4 ขั้นตอน</h2>
+  <div class="ph-steps">
+    <div class="ph-step"><div class="num">1</div><strong>เลือกสินค้า</strong><p class="muted">เลือกรุ่นที่สนใจ หรือทักมาบอกความต้องการ</p></div>
+    <div class="ph-step"><div class="num">2</div><strong>รับใบเสนอราคา</strong><p class="muted">เราส่งใบเสนอราคาให้ทาง LINE/อีเมล</p></div>
+    <div class="ph-step"><div class="num">3</div><strong>ยืนยันสั่งซื้อ</strong><p class="muted">ตกลงรายละเอียดและชำระเงิน</p></div>
+    <div class="ph-step"><div class="num">4</div><strong>จัดส่งและติดตั้ง</strong><p class="muted">ส่งของ ติดตั้ง พร้อมรับประกัน</p></div>
+  </div>
+</section>
+
+<footer class="ph-footer">
+  <div class="ph-footer-inner">
+    <strong>{{ company.name_th|default:tenant.name }}</strong>
+    <div style="margin-top:8px;font-size:14px;line-height:1.7">
+      {% if company.address %}<div>{{ company.address|linebreaksbr }}</div>{% endif %}
+      {% if company.phone %}<div>โทร {{ company.phone }}</div>{% endif %}
+      {% if company.email %}<div><a href="mailto:{{ company.email }}">{{ company.email }}</a></div>{% endif %}
+      {% if company.website %}<div><a href="{{ company.website }}">{{ company.website }}</a></div>{% endif %}
+      {% if company.tax_id %}<div class="muted">เลขประจำตัวผู้เสียภาษี {{ company.tax_id }}</div>{% endif %}
+    </div>
+    <div style="margin-top:16px;font-size:12px;opacity:.6">ขับเคลื่อนด้วย salesdee.</div>
+  </div>
+</footer>
+</body></html>
