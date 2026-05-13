@@ -180,10 +180,37 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
-STORAGES = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-}
+
+# Media storage: filesystem by default; flip to Cloudflare R2 (S3-compatible) when USE_R2=True.
+# R2 is private — django-storages signs every GET URL (querystring_auth) with the lifetime
+# configured here, so leaked URLs auto-expire. Static files stay on disk + are served by Nginx
+# (already cheap + Cloudflare-cached); no need to host them on R2.
+USE_R2 = env.bool("USE_R2", default=False)
+if USE_R2:
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3.S3Storage",
+            "OPTIONS": {
+                "bucket_name": env("R2_BUCKET"),
+                "endpoint_url": env("R2_ENDPOINT_URL"),
+                "access_key": env("R2_ACCESS_KEY_ID"),
+                "secret_key": env("R2_SECRET_ACCESS_KEY"),
+                "region_name": env("R2_REGION", default="auto"),
+                "addressing_style": "virtual",
+                "signature_version": "s3v4",
+                "default_acl": None,            # R2 doesn't honour S3 ACLs
+                "querystring_auth": True,        # presign every URL
+                "querystring_expire": env.int("R2_URL_TTL_SECONDS", default=3600),
+                "file_overwrite": False,
+            },
+        },
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    }
+else:
+    STORAGES = {
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    }
 
 # --- Email --------------------------------------------------------------------
 vars().update(env.email_url("EMAIL_URL", default="consolemail://"))

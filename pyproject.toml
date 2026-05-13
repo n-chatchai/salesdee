@@ -17,6 +17,7 @@ dependencies = [
     "pyotp>=2.9.0",
     "django-q2>=1.10.0",
     "croniter>=6.2.2",
+    "django-storages[s3]>=1.14.6",
 ]
 
 [dependency-groups]

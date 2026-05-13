@@ -171,6 +171,14 @@ SENTRY_DSN=
 USE_X_FORWARDED_HOST=True
 
 # Local media for now; swap to S3/R2 via django-storages later
+# Media storage — Cloudflare R2 (S3-compatible, $0 egress, signed URLs)
+USE_R2=True
+R2_ENDPOINT_URL=https://<account>.r2.cloudflarestorage.com
+R2_ACCESS_KEY_ID=<r2 access key>
+R2_SECRET_ACCESS_KEY=<r2 secret>
+R2_BUCKET=salesdee-media
+R2_URL_TTL_SECONDS=3600
+# Local fallback (only used if USE_R2=False):
 MEDIA_ROOT=/home/deploy/salesdee/media
 ```
 
@@ -427,7 +435,18 @@ Set it in the LINE Developers console with the tenant's `channel_secret` + `chan
 
 ## 13. Media storage
 
-Local `MEDIA_ROOT` is fine for the anchor tenant. When usage grows: `uv add 'django-storages[s3]'`, point `DEFAULT_FILE_STORAGE` at Cloudflare R2 (S3-compatible, cheapest egress), private bucket served via signed URLs, copy existing media over with `aws s3 sync`.
+**Cloudflare R2 (default in prod).** `django-storages[s3]` is wired; `USE_R2=True` swaps `STORAGES["default"]` to a private R2 bucket. Every `ImageField` / `FileField` URL is presigned (`querystring_auth=True`) with a TTL from `R2_URL_TTL_SECONDS` so leaked URLs auto-expire. Static files stay on disk (Nginx serves them, Cloudflare caches at the edge — no point hosting on R2).
+
+Setup once at Cloudflare:
+1. Dashboard → R2 → **Create bucket** `salesdee-media` (region: APAC). Keep it private (default).
+2. R2 → **Manage R2 API Tokens** → Create API Token → permission **Object Read & Write**, scope to this bucket. Copy `accessKeyId`, `secretAccessKey`, `endpoint URL`.
+3. Paste into `.env` as `R2_*` vars above + set `USE_R2=True` + `systemctl restart salesdee-web salesdee-qcluster`.
+4. (If migrating from local) sync existing files with rclone:
+   ```bash
+   rclone sync /home/deploy/salesdee/media r2:salesdee-media --progress
+   ```
+
+Set `USE_R2=False` to stay on local disk (dev/tests do this — no live R2 calls during pytest).
 
 ---
 
