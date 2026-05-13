@@ -123,3 +123,16 @@ All deck screens rebuilt; LINE inbox + Quote-from-Chat + Flex out; onboarding, s
 ## Definition of done (per CLAUDE.md §8) — applies every milestone
 
 `make check` green · new behavior has tests (incl. tenant-leakage test for any new scoped model) · migrations generated + reviewed · no unjustified `# type: ignore`/`noqa`/`all_tenants()` · money is `Decimal` · slow work in a background task · no per-customer branches (new variability = a setting with a default).
+
+---
+
+## M7 — design-polish pass (in progress)
+
+Visual/markup-only pass to bring screens up to `specs/salesdee-design-deck.html`. No view/model/URL/permission changes.
+
+- [x] **Dashboard** (`core/home.html`): rebuilt to the deck's D1 layout — `.d-hero` greeting + date, KPI row, `.d-grid` 2-col, `.pipeline-flow` strip, sage `.ai-digest` block, `.task-list`, `.quote-list-mini`, monthly-target bar. New `static/css/dashboard.css`.
+- [x] **Pipeline kanban** (`crm/pipeline.html`): inline `<style>` moved to `static/css/kanban.css`; columns/cards restyled to the deck's `.kb-col`/`.kb-card` (customer, value, owner avatar, age); SortableJS reorder + `crm:move_deal` POST unchanged.
+- [x] **List screens** — started: `quotes/quotations.html`, `crm/leads.html` now use a shared `.list-head` toolbar (title + count pill) + `.tbl` with right-aligned mono number columns. `static/css/lists.css`. Still rough: `crm/customers.html`, `crm/tasks.html`, `catalog/products.html`, `catalog/categories.html` (not yet converted to `.list-head`).
+- [ ] **Inbox / quote editor / deal detail / customer detail / reports / settings / forms / public pages** — not yet touched in this pass; still "match spirit not pixels".
+
+215 tests still green; `manage.py check` clean.

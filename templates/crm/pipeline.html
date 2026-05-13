@@ -2,31 +2,34 @@
 {% load static %}
 {% block title %}ดีล · salesdee.{% endblock %}
 {% block topbar_actions %}<a class="btn btn-sm btn-primary" href="{% url 'crm:deal_create' %}"><svg class="ico ico-sm"><use href="#i-plus"/></svg> ดีลใหม่</a>{% endblock %}
-{% block extra_css %}<style>
-.kanban{display:flex;gap:14px;overflow-x:auto;padding-bottom:8px}
-.kcol{flex:0 0 280px;background:var(--surface-2,#f3eee2);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px}
-.kcol h3{font-size:13px;font-weight:600;display:flex;justify-content:space-between;margin:2px 4px}
-.kcol .drop{display:flex;flex-direction:column;gap:8px;min-height:24px}
-.dcard{background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px;cursor:grab}
-.dcard .nm{font-weight:600;font-size:14px}
-.dcard .meta{font-size:12px;color:var(--muted-fg,#6b6357);margin-top:4px}
-.sortable-ghost{opacity:.4}
-</style>{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/kanban.css' %}">{% endblock %}
 {% block content %}
-<div class="row between" style="align-items:flex-end;margin-bottom:16px">
-  <div><div class="eyebrow">งานขาย</div><h1 class="h1 serif-it">ดีล</h1></div>
+<div class="kb-toolbar">
+  <h1>ดีล <span class="count">Kanban</span></h1>
   {% if unassigned_count %}<span class="chip chip-warn">ยังไม่จัดขั้น {{ unassigned_count }}</span>{% endif %}
 </div>
-<div class="kanban">
+<div class="kb-board">
   {% for stage, deals in columns %}
-  <div class="kcol">
-    <h3>{{ stage.name }} <span class="muted">{{ deals|length }}</span></h3>
-    <div class="drop" data-stage="{{ stage.pk }}">
+  <div class="kb-col">
+    <div class="kb-col-head">
+      <span class="kb-col-stage"></span>
+      <span class="kb-col-name">{{ stage.name }}</span>
+      <span class="kb-col-count">{{ deals|length }}</span>
+    </div>
+    <div class="kb-cards drop" data-stage="{{ stage.pk }}">
       {% for d in deals %}
-      <div class="dcard" data-deal="{{ d.pk }}" onclick="if(!window.__drag)location.href='{% url 'crm:deal_detail' d.pk %}'">
-        <div class="nm">{{ d.name }}</div>
-        <div class="meta">{% if d.customer %}{{ d.customer.name }} · {% endif %}{{ d.estimated_value|floatformat:0 }} บาท{% if d.owner %} · {{ d.owner.get_short_name }}{% endif %}</div>
-      </div>
+      <a class="kb-card" data-deal="{{ d.pk }}" href="{% url 'crm:deal_detail' d.pk %}"
+         onclick="if(window.__drag){return false;}">
+        <div class="kb-card-top">
+          <span class="kb-card-cust">{% if d.customer %}{{ d.customer.name }}{% else %}{{ d.name }}{% endif %}</span>
+          <span class="kb-card-amt">฿ {{ d.estimated_value|floatformat:0 }}</span>
+        </div>
+        {% if d.customer %}<div class="kb-card-title">{{ d.name }}</div>{% endif %}
+        <div class="kb-card-foot">
+          {% if d.owner %}<span class="avatar">{{ d.owner.get_short_name|slice:":1"|default:"?" }}</span><span>{{ d.owner.get_short_name }}</span>{% endif %}
+          <span class="days">{{ d.updated_at|timesince|truncatewords:1 }}</span>
+        </div>
+      </a>
       {% endfor %}
     </div>
   </div>
@@ -36,7 +39,7 @@
 {% block extra_js %}
 <script src="{% static 'js/sortable.min.js' %}"></script>
 <script>
-document.querySelectorAll('.kanban .drop').forEach(function(el){
+document.querySelectorAll('.kb-board .drop').forEach(function(el){
   new Sortable(el,{group:'deals',animation:150,ghostClass:'sortable-ghost',
     onStart:function(){window.__drag=true},
     onEnd:function(evt){
