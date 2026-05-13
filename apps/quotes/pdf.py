@@ -1,6 +1,6 @@
-"""Render a quotation to PDF via WeasyPrint. The template embeds no remote fonts; the system
-needs a Thai-capable font (e.g. ``fonts-thai-tlwg`` on Linux) — or bundle Sarabun and add an
-``@font-face`` with a ``file://`` path for production. See CLAUDE.md."""
+"""Render a quotation to PDF via WeasyPrint. The PDF template ``@font-face``-loads the bundled
+Sarabun TTFs from ``static/fonts/`` (relative to ``base_url`` below) — no system font or remote
+fetch needed. See CLAUDE.md §7."""
 
 from __future__ import annotations
 
@@ -21,4 +21,5 @@ def render_quotation_pdf(document: SalesDocument) -> bytes:
         "quotes/pdf/quotation.html",
         {"document": document, "totals": compute_document_totals(document), "company": company},
     )
-    return HTML(string=html, base_url=getattr(settings, "SITE_BASE_URL", None)).write_pdf()
+    static_dir = settings.STATICFILES_DIRS[0] if settings.STATICFILES_DIRS else settings.BASE_DIR / "static"
+    return HTML(string=html, base_url=str(static_dir)).write_pdf()
