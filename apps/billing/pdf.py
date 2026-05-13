@@ -48,3 +48,8 @@ def render_receipt_pdf(doc, *, copy: bool = False) -> bytes:
 def render_credit_note_pdf(doc, *, copy: bool = False) -> bytes:
     ref = doc.references_document.doc_number if doc.references_document_id else ""
     return _render(doc, doc_title="ใบลดหนี้", copy=copy, original_ref=ref or "")
+
+
+def render_debit_note_pdf(doc, *, copy: bool = False) -> bytes:
+    ref = doc.references_document.doc_number if doc.references_document_id else ""
+    return _render(doc, doc_title="ใบเพิ่มหนี้", copy=copy, original_ref=ref or "")

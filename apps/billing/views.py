@@ -20,7 +20,12 @@ from apps.quotes.services import WorkflowError, compute_document_totals
 
 from . import services
 from .models import Payment, PaymentMethod
-from .pdf import render_credit_note_pdf, render_receipt_pdf, render_tax_invoice_pdf
+from .pdf import (
+    render_credit_note_pdf,
+    render_debit_note_pdf,
+    render_receipt_pdf,
+    render_tax_invoice_pdf,
+)
 
 
 def _membership(request):
@@ -148,6 +153,9 @@ def tax_invoice_detail(request: HttpRequest, pk: int) -> HttpResponse:
             "credit_notes": SalesDocument.objects.filter(
                 references_document=doc, doc_type=DocType.CREDIT_NOTE
             ),
+            "debit_notes": SalesDocument.objects.filter(
+                references_document=doc, doc_type=DocType.DEBIT_NOTE
+            ),
             "can_write": _can_write(request),
             "editable": False,
         },
@@ -251,6 +259,57 @@ def credit_note_create(request: HttpRequest, tax_pk: int) -> HttpResponse:
         messages.success(request, f"ออกใบลดหนี้ {cn.doc_number} (ลดเต็มจำนวน)")
         return redirect("billing:credit_note_detail", pk=cn.pk)
     return render(request, "billing/credit_note_create.html", {"tax_invoice": tax})
+
+
+# --- Debit notes -------------------------------------------------------------
+@login_required
+def debit_notes(request: HttpRequest) -> HttpResponse:
+    rows = [
+        (d, compute_document_totals(d))
+        for d in _docs(DocType.DEBIT_NOTE).select_related("customer").prefetch_related("lines")
+    ]
+    return render(
+        request,
+        "billing/_list.html",
+        {"rows": rows, "title": "ใบเพิ่มหนี้", "detail_url": "billing:debit_note_detail"},
+    )
+
+
+@login_required
+def debit_note_detail(request: HttpRequest, pk: int) -> HttpResponse:
+    doc = get_object_or_404(_docs(DocType.DEBIT_NOTE).prefetch_related("lines"), pk=pk)
+    return render(
+        request,
+        "billing/debit_note_detail.html",
+        {
+            "document": doc,
+            "title": "ใบเพิ่มหนี้",
+            "totals": compute_document_totals(doc),
+            "editable": False,
+        },
+    )
+
+
+@login_required
+def debit_note_pdf(request: HttpRequest, pk: int) -> HttpResponse:
+    doc = get_object_or_404(_docs(DocType.DEBIT_NOTE), pk=pk)
+    return _pdf_response(render_debit_note_pdf(doc), doc.doc_number or f"dn-{doc.pk}")
+
+
+@login_required
+def debit_note_create(request: HttpRequest, tax_pk: int) -> HttpResponse:
+    _require_write(request)
+    tax = get_object_or_404(_docs(DocType.TAX_INVOICE), pk=tax_pk)
+    if request.method == "POST":
+        reason = request.POST.get("reason", "").strip()
+        try:
+            dn = services.create_debit_note(tax, reason=reason, user=request.user)
+        except WorkflowError as e:
+            messages.error(request, str(e))
+            return redirect("billing:tax_invoice_detail", pk=tax.pk)
+        messages.success(request, f"ออกใบเพิ่มหนี้ {dn.doc_number}")
+        return redirect("billing:debit_note_detail", pk=dn.pk)
+    return render(request, "billing/debit_note_create.html", {"tax_invoice": tax})
 
 
 @login_required

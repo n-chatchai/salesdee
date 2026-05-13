@@ -167,6 +167,29 @@ def test_credit_note_full_reversal(tenant) -> None:
             services.cancel_tax_document(tax, reason="x")
 
 
+# --- debit note ---------------------------------------------------------------
+def test_debit_note_creates_linked_gap_free_dn(tenant) -> None:
+    q = _quote(tenant)
+    with tenant_context(tenant):
+        tax = services.issue_tax_invoice(services.create_invoice_from_quotation(q))
+        dn = services.create_debit_note(tax, reason="คิดราคาน้อยไป 500 บาท")
+        assert dn.doc_type == DocType.DEBIT_NOTE
+        assert dn.references_document_id == tax.pk
+        assert dn.doc_number.startswith("DN-")
+        # default: one positive summary line referencing the tax invoice
+        first = dn.lines.first()
+        assert first is not None
+        assert first.unit_price > 0
+        from apps.quotes.services import compute_document_totals
+
+        assert compute_document_totals(dn).grand_total > 0
+        # gap-free: a second DN gets the next number
+        dn2 = services.create_debit_note(tax, reason="ค่าขนส่งเพิ่ม")
+        n1 = int(dn.doc_number.rsplit("-", 1)[-1])
+        n2 = int(dn2.doc_number.rsplit("-", 1)[-1])
+        assert n2 == n1 + 1
+
+
 # --- AR aging -----------------------------------------------------------------
 def test_ar_aging_buckets(tenant) -> None:
     with tenant_context(tenant):

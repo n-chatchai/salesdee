@@ -333,6 +333,70 @@ def create_credit_note(
 
 
 @transaction.atomic
+def create_debit_note(
+    tax_invoice: SalesDocument, *, reason: str, lines=None, user=None
+) -> SalesDocument:
+    """A DEBIT_NOTE (ใบเพิ่มหนี้, §86/9) referencing a tax invoice — symmetric to ``create_credit_note``
+    but increases the amount payable. ``lines`` is an optional list of ``{description, quantity,
+    unit_price, tax_type?}``; if omitted a single positive summary line equal to the tax invoice's
+    grand total is created. Gap-free DN number, ``issued_at`` stamped."""
+    if tax_invoice.doc_type != DocType.TAX_INVOICE:
+        raise WorkflowError("ออกใบเพิ่มหนี้ได้จากใบกำกับภาษีเท่านั้น")
+    if not reason.strip():
+        raise WorkflowError("ต้องระบุเหตุผลของการเพิ่มหนี้")
+    dn = SalesDocument(
+        doc_type=DocType.DEBIT_NOTE,
+        status=DocStatus.SENT,
+        issue_date=date.today(),
+        references_document=tax_invoice,
+        source_document=tax_invoice,
+        notes=reason,
+    )
+    _copy_header(tax_invoice, dn)
+    dn.save()
+    pos = 0
+    if lines:
+        for item in lines:
+            pos += 1
+            SalesDocLine.objects.create(
+                document=dn,
+                position=pos,
+                line_type=LineType.ITEM,
+                description=item["description"],
+                quantity=Decimal(str(item.get("quantity", 1))),
+                unit=item.get("unit", "รายการ"),
+                unit_price=Decimal(str(item["unit_price"])),
+                tax_type=item.get("tax_type", "vat7"),
+            )
+    else:
+        # default: one summary line at the tax invoice's grand total
+        totals = compute_document_totals(tax_invoice)
+        SalesDocLine.objects.create(
+            document=dn,
+            position=1,
+            line_type=LineType.ITEM,
+            description=f"เพิ่มหนี้จาก {tax_invoice.doc_number} — {reason}"[:255],
+            quantity=Decimal("1"),
+            unit="รายการ",
+            unit_price=totals.grand_total,
+            tax_type="vat7",
+        )
+    dn.doc_number = next_document_number(DocType.DEBIT_NOTE, prefix="DN")
+    dn.issued_at = timezone.now()
+    dn.save()
+    from apps.audit.services import record as audit_record
+
+    audit_record(
+        user,
+        action="debit_note.issued",
+        obj=dn,
+        object_repr=dn.doc_number,
+        changes={"against": tax_invoice.doc_number, "reason": reason},
+    )
+    return dn
+
+
+@transaction.atomic
 def cancel_tax_document(doc: SalesDocument, *, reason: str, user=None) -> None:
     """Cancel an issued tax document — keeps ``doc_number``, sets ``status=CANCELLED`` and the
     reason (CLAUDE.md §4.3). Refuses if the doc has non-cancelled dependents (e.g. a tax invoice
