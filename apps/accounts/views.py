@@ -119,8 +119,6 @@ def two_factor_disable(request: HttpRequest) -> HttpResponse:
     return redirect("accounts:two_factor_settings")
 
 
-
-
 def signup(request: HttpRequest) -> HttpResponse:
     """Self-serve signup: create a Tenant + CompanyProfile + owner User + Membership, seed the
     default pipeline, log the new owner in and send them to onboarding."""
