@@ -31,8 +31,15 @@ class Command(BaseCommand):
         else:
             self.stdout.write("User already exists: e2e@test.com")
 
-        # Create membership
-        Membership.objects.get_or_create(user=user, tenant=tenant)
-        self.stdout.write(self.style.SUCCESS(f"Membership created for tenant: {tenant.slug}"))
+        # Create membership with OWNER role
+        membership, _ = Membership.objects.get_or_create(
+            user=user, tenant=tenant, defaults={"role": "owner"}
+        )
+        if membership.role != "owner":
+            membership.role = "owner"
+            membership.save()
+        self.stdout.write(
+            self.style.SUCCESS(f"Membership created with owner role for tenant: {tenant.slug}")
+        )
 
         self.stdout.write(self.style.SUCCESS("E2E credentials: e2e@test.com / TestPass123!"))

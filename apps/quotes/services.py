@@ -196,11 +196,16 @@ def record_quote_viewed(document: SalesDocument, *, ip: str | None = None) -> No
     """Count a customer opening the public share link (REQUIREMENTS.md §4.8). ``ip`` is currently
     unused beyond being available for a future per-open audit row; we keep first/last/count here."""
     now = timezone.now()
-    if document.first_viewed_at is None:
+    first_view = document.first_viewed_at is None
+    if first_view:
         document.first_viewed_at = now
     document.last_viewed_at = now
     document.view_count = (document.view_count or 0) + 1
     document.save(update_fields=["first_viewed_at", "last_viewed_at", "view_count"])
+    if first_view:
+        from apps.core.notifications import notify_quote_viewed
+
+        notify_quote_viewed.enqueue(document.pk, document.tenant_id)
 
 
 def record_customer_response(

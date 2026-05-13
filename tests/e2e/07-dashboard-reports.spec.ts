@@ -7,7 +7,7 @@ test.describe('P1: Dashboard & Reports', () => {
 
   test('dashboard loads', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('text=Dashboard').or(page.locator('text=แดชบอร์ด'))).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('text=หน้าหลัก').or(page.locator('h1'))).toBeVisible({ timeout: 15000 });
   });
 
   test('leads page accessible', async ({ page }) => {

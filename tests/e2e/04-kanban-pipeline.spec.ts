@@ -7,7 +7,7 @@ test.describe('E2E-04: Kanban Pipeline', () => {
 
   test('pipeline page loads with stages', async ({ page }) => {
     await page.goto('/crm/');
-    await expect(page.locator('text=Pipeline').or(page.locator('[class*="pipeline"]'))).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('text=Pipeline').or(page.locator('[class*="pipeline"]')).first()).toBeVisible({ timeout: 15000 });
   });
 
   test('create deal button exists', async ({ page }) => {
