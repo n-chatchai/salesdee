@@ -11,10 +11,10 @@ from types import SimpleNamespace
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives, send_mail
-from django.tasks import task
 from django.template.loader import render_to_string
 
 from apps.core.current_tenant import tenant_context
+from apps.core.tasks import task
 from apps.tenants.models import Tenant
 
 

@@ -7,9 +7,9 @@ import contextlib
 
 from django.conf import settings
 from django.core.mail import EmailMessage
-from django.tasks import task
 
 from apps.core.current_tenant import tenant_context
+from apps.core.tasks import task
 from apps.tenants.models import Tenant
 
 

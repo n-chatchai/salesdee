@@ -12,8 +12,8 @@ install: ## uv sync (install deps)
 run: ## Run dev server
 	$(UV) python manage.py runserver
 
-worker: ## Run the background task worker (django.tasks DatabaseBackend)
-	$(UV) python manage.py db_worker
+worker: ## Run the background task worker + scheduler (django-q2 qcluster)
+	$(UV) python manage.py qcluster
 
 shell: ## Django shell
 	$(UV) python manage.py shell

@@ -1,8 +1,19 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import redirect_to_login
+from django.db import connection
 from django.db.models import Q
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import render
+
+
+def healthz(_request: HttpRequest) -> JsonResponse:
+    """Tiny readiness probe — pings the DB and returns 200 OK. Hit by the deploy script
+    + any uptime monitor. No tenant context required."""
+    try:
+        connection.ensure_connection()
+        return JsonResponse({"status": "ok"})
+    except Exception as exc:  # noqa: BLE001 — we want the body to carry the error class
+        return JsonResponse({"status": "error", "detail": type(exc).__name__}, status=503)
 
 
 def home(request: HttpRequest) -> HttpResponse:

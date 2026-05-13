@@ -22,12 +22,12 @@ client ──HTTPS──▶ Cloudflare (edge: TLS, WAF, CDN, DDoS)
 ```
 
 - Cloudflare is the public IP your DNS points at. The VPS origin is only reachable via Cloudflare (lock it down — see §10).
-- Each tenant uses `<slug>.salesdee.app` (a wildcard you proxy through Cloudflare) **or** their own domain mapped via **Cloudflare for SaaS / Custom Hostnames** — that's the production-grade equivalent of on-demand TLS. The Django middleware (`apps/core/middleware.py::CurrentTenantMiddleware`) resolves the tenant from the `Host` header regardless of which it is.
+- Each tenant uses `<slug>.salesdee.com` (a wildcard you proxy through Cloudflare) **or** their own domain mapped via **Cloudflare for SaaS / Custom Hostnames** — that's the production-grade equivalent of on-demand TLS. The Django middleware (`apps/core/middleware.py::CurrentTenantMiddleware`) resolves the tenant from the `Host` header regardless of which it is.
 
 ```
 # DNS at Cloudflare — proxied (orange-cloud):
-salesdee.app.            A     <origin-ip>   ; proxied
-*.salesdee.app.          A     <origin-ip>   ; proxied
+salesdee.com.            A     <origin-ip>   ; proxied
+*.salesdee.com.          A     <origin-ip>   ; proxied
 ```
 Tenant custom domains: they add a `CNAME tenant.example.com → tenant.example.com.cdn.cloudflare.net.` (the exact target depends on your Cloudflare for SaaS config). Issuing the edge cert + validating ownership happens at Cloudflare; the origin doesn't care.
 
@@ -80,7 +80,7 @@ for net in $(curl -fsSL https://www.cloudflare.com/ips-v6); do ufw allow from "$
 ufw --force enable
 ```
 
-(Keep a small cron job to refresh those rules. Or use `nft` sets — same idea.)
+(The `salesdee-cf-ips.timer` in §18 re-runs this weekly so the allow-list stays fresh — no cron.)
 
 ---
 
@@ -141,7 +141,7 @@ DJANGO_SETTINGS_MODULE=config.settings.prod
 SECRET_KEY=__paste 64 random bytes from secrets.token_urlsafe(64)__
 DEBUG=False
 ALLOWED_HOSTS=*              # see "host gating" below
-APP_DOMAIN=salesdee.app
+APP_DOMAIN=salesdee.com
 
 # Postgres — APP role (not owner)
 DATABASE_URL=postgres://salesdee_app:change-me-app@127.0.0.1:5432/salesdee
@@ -152,7 +152,7 @@ REDIS_URL=redis://127.0.0.1:6379/0
 
 # Email — SMTP relay (Postmark / SES / Sendgrid / Mailgun)
 EMAIL_URL=submission+tls://user:pass@smtp.example.com:587
-DEFAULT_FROM_EMAIL=salesdee. <no-reply@salesdee.app>
+DEFAULT_FROM_EMAIL=salesdee. <no-reply@salesdee.com>
 
 # Optional AI
 ANTHROPIC_API_KEY=
@@ -230,44 +230,45 @@ WantedBy=multi-user.target
 
 Group is `www-data` and umask `007` so Nginx (running as `www-data`) can read the socket.
 
-### Tasks worker — `/etc/systemd/system/salesdee-tasks.service`
+### Tasks worker — `/etc/systemd/system/salesdee-qcluster.service`
 
-`TASKS` currently uses the **ImmediateBackend** (`config/settings/base.py`): every `.enqueue()` runs inline in the request. There is no separate worker yet — this unit is the slot for when you swap a real backend in (django-tasks PyPI's DatabaseBackend → `manage.py db_worker`, or Celery+Redis). Install it then; for now you can leave the file masked.
+Background queue + scheduler is **django-q2** (`Q_CLUSTER` setting; broker = Redis). One process drains the queue AND fires `Schedule` rows. In prod, `Q_CLUSTER["sync"]` is `False` (set in `config/settings/prod.py`), so `.enqueue()` actually queues and this worker picks it up.
 
 ```ini
 [Unit]
-Description=salesdee background tasks worker
+Description=salesdee background queue + scheduler (django-q2 qcluster)
 After=network.target postgresql.service redis-server.service salesdee-web.service
 Wants=postgresql.service redis-server.service
 
 [Service]
 User=deploy
-Group=www-data
+Group=deploy
 WorkingDirectory=/home/deploy/salesdee
 EnvironmentFile=/home/deploy/salesdee/.env
-# Replace once a real backend is chosen:
-#   uv run python manage.py db_worker            # django-tasks PyPI DatabaseBackend
-#   uv run celery -A config worker -l info       # Celery
-ExecStart=/home/deploy/.local/bin/uv run python manage.py db_worker
+ExecStart=/home/deploy/.local/bin/uv run python manage.py qcluster
 Restart=on-failure
 RestartSec=3
 NoNewPrivileges=yes
 ProtectSystem=strict
 ProtectHome=read-only
+ReadWritePaths=/home/deploy/salesdee/media
 PrivateTmp=yes
 
 [Install]
 WantedBy=multi-user.target
 ```
 
-Enable:
+Enable both units + seed schedules once:
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable --now salesdee-web
-# sudo systemctl enable --now salesdee-tasks    # when a real backend is wired
-systemctl status salesdee-web
+sudo systemctl enable --now salesdee-web salesdee-qcluster
+# Idempotent — creates django_q Schedule rows (daily digest, AR reminders, expire quotations).
+cd /home/deploy/salesdee && uv run python manage.py setup_q_schedules
+systemctl status salesdee-web salesdee-qcluster
 ```
+
+Schedules live in the **DB** (`django_q_schedule` table) — owners/admins can view, edit cron expressions, and trigger a run from Django admin without redeploying. No cron, no systemd timers.
 
 ---
 
@@ -295,15 +296,15 @@ server {
     server_name _;
 
     # Origin certificate from Cloudflare (15-year, only valid behind Cloudflare):
-    ssl_certificate     /etc/ssl/cloudflare/salesdee.app.pem;
-    ssl_certificate_key /etc/ssl/cloudflare/salesdee.app.key;
+    ssl_certificate     /etc/ssl/cloudflare/salesdee.com.pem;
+    ssl_certificate_key /etc/ssl/cloudflare/salesdee.com.key;
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers HIGH:!aNULL:!MD5;
 
     # Cloudflare → Nginx — trust the Real IP header
     set_real_ip_from 173.245.48.0/20;   # …or `include /etc/nginx/cloudflare.conf;` if you generate one
     # (Generate /etc/nginx/cloudflare.conf from https://www.cloudflare.com/ips-v4 and -v6;
-    #  refresh it with a cron job.)
+    #  the systemd timer in §18 refreshes both ufw and this file weekly.)
     real_ip_header CF-Connecting-IP;
     real_ip_recursive on;
 
@@ -370,7 +371,7 @@ sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
-**Cloudflare Origin Cert.** Cloudflare → SSL/TLS → Origin Server → Create Certificate (RSA, 15-year). Save `.pem` to `/etc/ssl/cloudflare/salesdee.app.pem` and `.key` to `/etc/ssl/cloudflare/salesdee.app.key` (mode 600 root:root). Set Cloudflare SSL/TLS mode to **Full (strict)** so Cloudflare verifies the origin cert.
+**Cloudflare Origin Cert.** Cloudflare → SSL/TLS → Origin Server → Create Certificate (RSA, 15-year). Save `.pem` to `/etc/ssl/cloudflare/salesdee.com.pem` and `.key` to `/etc/ssl/cloudflare/salesdee.com.key` (mode 600 root:root). Set Cloudflare SSL/TLS mode to **Full (strict)** so Cloudflare verifies the origin cert.
 
 ---
 
@@ -384,38 +385,25 @@ sudo nginx -t && sudo systemctl reload nginx
 - **Lock down the origin**: in Cloudflare → Authenticated Origin Pulls, enable; on Nginx, require the Cloudflare-issued client cert. Or simpler: the `ufw` rules in §2 already only allow Cloudflare IPs.
 - **No Cloudflare caching for dynamic routes** (default behaviour). For `/static/*` you can turn on aggressive caching (Cache Everything rule + Edge Cache TTL 1 month) — files in `staticfiles/` are hashed by `ManifestStaticFilesStorage` if you enable it in `prod.py`.
 
-(If you'd rather not pay for Custom Hostnames: skip it; tenants get a `*.salesdee.app` subdomain only. Add custom-domain support later.)
+(If you'd rather not pay for Custom Hostnames: skip it; tenants get a `*.salesdee.com` subdomain only. Add custom-domain support later.)
 
 ---
 
-## 11. Deploy script — commit at `scripts/deploy.sh`
+## 11. Deploy script — `scripts/deploy.sh` (lives in the repo)
 
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
-cd "$(dirname "$0")/.."
-set -a; source .env; set +a
+The script (already committed at `scripts/deploy.sh`) does, in order: `git pull` → `uv sync --frozen` → `manage.py migrate` (using `DATABASE_URL_OWNER`) → `collectstatic` → `setup_q_schedules` → `systemctl restart salesdee-web` → `systemctl restart salesdee-qcluster` (if installed) → `manage.py check --deploy` → poll `/healthz/` until 200 → Slack notify with the commit SHA + elapsed time.
 
-git fetch --tags
-git checkout "${1:-main}"
-git pull --ff-only
+Required `.env` additions on the box (alongside the rest):
+```dotenv
+# Used by scripts/deploy.sh for migrations — the *owner* role, NOT the runtime app role.
+DATABASE_URL_OWNER=postgres://salesdee_owner:OWNER_PASS@127.0.0.1:5432/salesdee
 
-uv sync --frozen
-
-# Migrate as owner (separate DSN; app role can't ALTER tables).
-DATABASE_URL=postgres://salesdee_owner:${PG_OWNER_PASSWORD}@127.0.0.1:5432/salesdee \
-  uv run python manage.py migrate
-
-uv run python manage.py collectstatic --noinput
-
-sudo systemctl restart salesdee-web
-# sudo systemctl restart salesdee-tasks    # once a real backend is wired
-
-uv run python manage.py check --deploy
-echo "deployed $(git rev-parse --short HEAD)"
+# Optional — deploy script Slack notification
+SLACK_DEPLOY_WEBHOOK_URL=https://hooks.slack.com/services/...
+PROD_URL=https://salesdee.com
 ```
 
-`./scripts/deploy.sh` (main) or `./scripts/deploy.sh v1.2.0`. gunicorn workers cycle within seconds on `systemctl restart`; in-flight requests queue at Nginx briefly.
+Run by hand: `bash scripts/deploy.sh`. Or trigger from GitHub: the workflow at `.github/workflows/deploy.yml` SSHs in and runs it on every push to `main` (secrets `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY`, `DEPLOY_PATH`). gunicorn workers cycle within seconds on `systemctl restart`; in-flight requests queue at Nginx briefly. The qcluster restart picks up new task code from the same deploy.
 
 ---
 
@@ -424,7 +412,7 @@ echo "deployed $(git rev-parse --short HEAD)"
 Each tenant gets its own webhook URL (see `apps/integrations/urls.py`):
 
 ```
-https://<slug>.salesdee.app/integrations/line/webhook/<slug>/
+https://<slug>.salesdee.com/integrations/line/webhook/<slug>/
 ```
 
 Set it in the LINE Developers console with the tenant's `channel_secret` + `channel_access_token`, which you saved in `settings → การเชื่อม LINE OA`. The signature is verified server-side (HMAC-SHA256 over the raw body); a bad signature returns 403. Nginx must NOT rewrite/buffer-then-rewrite the body for this path — the config in §9 already passes it untouched.
@@ -439,18 +427,49 @@ Local `MEDIA_ROOT` is fine for the anchor tenant. When usage grows: `uv add 'dja
 
 ---
 
-## 14. Backups
+## 14. Backups (systemd timer — no cron)
 
-```bash
-sudo install -d -o postgres /var/backups/salesdee
-sudo tee /etc/cron.d/salesdee-backup >/dev/null <<'CRON'
-30 2 * * * postgres pg_dump -Fc salesdee | gzip > /var/backups/salesdee/$(date +\%F).dump.gz; find /var/backups/salesdee -name '*.dump.gz' -mtime +14 -delete
-CRON
+The whole box uses systemd timers, never cron — `journalctl` gives one place to look for both run history and stderr; `systemctl list-timers` shows next-fire at a glance; `OnCalendar` is timezone-aware and `Persistent=true` catches up after a reboot.
+
+`/etc/systemd/system/salesdee-backup.service`:
+```ini
+[Unit]
+Description=salesdee Postgres + media backup
+After=postgresql.service
+
+[Service]
+Type=oneshot
+User=postgres
+StateDirectory=salesdee-backups
+ExecStart=/bin/bash -c 'pg_dump -Fc salesdee | gzip > /var/lib/salesdee-backups/$(date +%%F).dump.gz'
+ExecStartPost=/usr/bin/find /var/lib/salesdee-backups -name "*.dump.gz" -mtime +14 -delete
+# off-box copy (optional — uses /home/deploy/.config/rclone)
+# ExecStartPost=/usr/bin/rclone copy /var/lib/salesdee-backups r2:salesdee-pgbackups
 ```
 
-Push the dump off-box (`rclone copy /var/backups/salesdee r2:salesdee-pgbackups` nightly). Restore drill quarterly: dump → scratch DB → render a tenant's latest invoice in a staging app to verify.
+`/etc/systemd/system/salesdee-backup.timer`:
+```ini
+[Unit]
+Description=salesdee nightly backup
 
-For media: `rclone sync /home/deploy/salesdee/media r2:salesdee-media-backup` nightly.
+[Timer]
+OnCalendar=*-*-* 02:30:00 Asia/Bangkok
+Persistent=true
+RandomizedDelaySec=10m
+
+[Install]
+WantedBy=timers.target
+```
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now salesdee-backup.timer
+systemctl list-timers --all | grep salesdee
+```
+
+For media: a second timer pair `salesdee-media-sync.{service,timer}` running `rclone sync /home/deploy/salesdee/media r2:salesdee-media-backup` daily.
+
+Restore drill quarterly: dump → scratch DB → render a tenant's latest invoice in a staging app to verify.
 
 ---
 
@@ -490,14 +509,15 @@ sudo tail -f /var/log/nginx/error.log
 
 cd ~/salesdee && uv run python manage.py shell
 
-# Scheduled jobs (cron these once the tasks worker is real; for now they run inline):
-uv run python manage.py send_daily_digests
-uv run python manage.py send_ar_reminders
-uv run python manage.py expire_quotations
+# Scheduled jobs live in django-q (see §18); the qcluster worker fires them.
+sudo systemctl status salesdee-qcluster
+sudo journalctl -u salesdee-qcluster -f
+# Trigger one-off (still goes through the queue):
+uv run python manage.py shell -c "from django_q.tasks import async_task; async_task('django.core.management.call_command','send_daily_digests')"
 
 sudo nginx -t && sudo systemctl reload nginx
 
-./scripts/deploy.sh v1.2.0
+bash scripts/deploy.sh                     # roll the current main forward
 
 # Cloudflare cache purge after a static asset rev:
 curl -sS -X POST "https://api.cloudflare.com/client/v4/zones/<ZONE_ID>/purge_cache" \
@@ -509,19 +529,72 @@ curl -sS -X POST "https://api.cloudflare.com/client/v4/zones/<ZONE_ID>/purge_cac
 
 ---
 
-## 18. Cron / scheduled jobs
+## 18. Scheduled jobs — django-q2 `Schedule` rows (no cron, no systemd timers)
 
-Add a cron job for the daily digest + AR reminders + quotation expiry. Pre-async-worker, these commands run sync inside the cron invocation:
+App-level recurring jobs (daily digest, AR reminders, quotation expiry) live in the **`django_q_schedule`** table and are fired by the `qcluster` worker (§8). Seed them once with the management command — idempotent, safe to re-run on every deploy:
 
 ```bash
-sudo tee /etc/cron.d/salesdee >/dev/null <<'CRON'
-0  7  * * * deploy cd /home/deploy/salesdee && /home/deploy/.local/bin/uv run python manage.py send_daily_digests > /dev/null 2>&1
-30 8  * * * deploy cd /home/deploy/salesdee && /home/deploy/.local/bin/uv run python manage.py send_ar_reminders   > /dev/null 2>&1
-0  2  * * * deploy cd /home/deploy/salesdee && /home/deploy/.local/bin/uv run python manage.py expire_quotations    > /dev/null 2>&1
-CRON
+cd /home/deploy/salesdee && uv run python manage.py setup_q_schedules
 ```
 
-(`expire_quotations` walks tenants internally; the digests do too.)
+That creates / updates three `Schedule` rows (Asia/Bangkok, `Schedule.CRON`):
+
+| Name | Cron | Calls |
+|---|---|---|
+| `salesdee.send_daily_digests` | `0 7 * * *` | `manage.py send_daily_digests` |
+| `salesdee.send_ar_reminders` | `30 8 * * *` | `manage.py send_ar_reminders` |
+| `salesdee.expire_quotations` | `0 2 * * *` | `manage.py expire_quotations` |
+
+To **edit a schedule without redeploying**: Django admin → Django Q → Scheduled tasks → edit the cron field. The change takes effect at the next cluster tick (a few seconds). Failed runs land in admin → Failed tasks.
+
+To trigger one on demand from the box:
+
+```bash
+cd /home/deploy/salesdee
+uv run python manage.py shell -c "from django_q.tasks import async_task; async_task('django.core.management.call_command','send_daily_digests')"
+```
+
+### Cloudflare-IP allow-list refresh — `/etc/systemd/system/salesdee-cf-ips.{service,timer}`
+
+This one is **not** a Django task (it edits `ufw`, needs root), so it stays a systemd timer.
+
+```ini
+# /etc/systemd/system/salesdee-cf-ips.service
+[Unit]
+Description=Refresh Cloudflare IP allow-list in ufw
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/refresh-cf-ips.sh
+```
+`/usr/local/sbin/refresh-cf-ips.sh` (chmod 0755 root:root):
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+# wipe previous CF rules (any "ALLOW IN" rule with comment "cf"), then re-add.
+ufw status numbered | awk '/cf]/ {print $1}' | tr -d '[]' | sort -rn | while read -r n; do yes | ufw delete "$n"; done
+for n in $(curl -fsSL https://www.cloudflare.com/ips-v4); do ufw allow proto tcp from "$n" to any port 443 comment 'cf'; done
+for n in $(curl -fsSL https://www.cloudflare.com/ips-v6); do ufw allow proto tcp from "$n" to any port 443 comment 'cf'; done
+```
+```ini
+# /etc/systemd/system/salesdee-cf-ips.timer
+[Unit]
+Description=Refresh CF IPs weekly
+
+[Timer]
+OnCalendar=Sun *-*-* 03:00:00 Asia/Bangkok
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+```
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now salesdee-backup.timer salesdee-cf-ips.timer
+systemctl list-timers --all | grep salesdee
+```
+
+> The Postgres-backup timer in §14 also stays systemd (`pg_dump` runs as the `postgres` system user, not the Django app).
 
 ---
 
@@ -529,7 +602,7 @@ CRON
 
 - **Dockerfile / compose** — single-VPS systemd is simpler at this size. Containerise when you need >1 host or want CI/CD-driven blue-green.
 - **K8s** — overkill at the first ~30 tenants. Revisit at Phase-2 traffic.
-- **Async worker** — `TASKS` is ImmediateBackend; swap in `django-tasks` PyPI's `DatabaseBackend` (writes to `django_tasks_*` tables, polled by `manage.py db_worker`) or Celery+Redis when fire-and-forget actually matters. `apps/*/tasks.py` call sites won't change.
+- **Heavier task backend** — django-q2 + Redis covers the workload at current scale. Swap to Celery+Redis if/when fire-and-forget volume justifies it; the `@task` decorator in `apps/core/tasks.py` is a shim that makes the swap a settings change, not a code change.
 - **Multi-region** — ditto.
 - **Real-time notifications** (WebSockets / SSE) — htmx-poll is fine for inbox unread counts at current scale.
 - **Cloudflare Tunnel (cloudflared)** instead of a public IP — viable, swap §2's `ufw` for a tunnel service. The Nginx config below stays identical.

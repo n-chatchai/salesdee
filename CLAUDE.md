@@ -25,7 +25,7 @@ This file is read by Claude Code at the start of every session in this repo. It 
 | Template fragments | Django 6 **template partials** (`{% partialdef %}` / `{% partial %}`) for htmx-swappable regions; separate partial files only when reused across templates |
 | Drag-and-drop | SortableJS |
 | Database | **PostgreSQL** (with Row-Level Security for tenant isolation) |
-| Background jobs | **Django Tasks** (`django.tasks` — built into Django 6): `@task` + `.enqueue()`; `TASKS` setting → DatabaseBackend; worker via `manage.py db_worker`. (A Celery/RQ backend can be swapped in later without changing call sites.) |
+| Background jobs | **django-q2** (Redis-backed queue + cron scheduler). Decorator `@task` from `apps/core/tasks.py` (shim) → call `fn.enqueue(*args)`; worker = `manage.py qcluster`; recurring jobs are `django_q.Schedule` rows seeded by `manage.py setup_q_schedules`. Dev/tests set `Q_CLUSTER["sync"]=True` so `.enqueue()` runs inline. **No cron** — schedules live in the DB. |
 | Caching / sessions | Redis (Django cache backend) |
 | Security headers | Django 6 built-in **CSP** (`django.middleware.csp.ContentSecurityPolicyMiddleware` + `SECURE_CSP`) |
 | PDF generation | **WeasyPrint** (HTML→PDF; embed Thai font e.g. Sarabun) |
@@ -89,7 +89,7 @@ This file is read by Claude Code at the start of every session in this repo. It 
 
 4. **Issued tax documents are immutable.** Once a tax invoice is issued you don't edit it — you issue a credit/debit note. Same for posted journal entries in closed accounting periods. Model this with status + guards, not by trusting callers.
 
-5. **Slow work goes to a background task, not the request.** Use `django.tasks` (`@task` + `.enqueue()`). PDF generation, email/LINE sending, Excel import, report exports, follow-up reminders — all background tasks. Requests stay fast. A tenant-scoped task must activate the tenant context first (see §5).
+5. **Slow work goes to a background task, not the request.** Use `from apps.core.tasks import task` (`@task` + `.enqueue()` — shim over django-q2). PDF generation, email/LINE sending, Excel import, report exports, follow-up reminders — all background tasks. Requests stay fast. A tenant-scoped task must activate the tenant context first (see §5). Recurring jobs are `django_q.Schedule` rows — register them in `apps/core/management/commands/setup_q_schedules.py` (no cron, no systemd timers).
 
 6. **Store rates/values as-of-the-event on the document itself.** Exchange rate, VAT rate, withholding rate at the time the document was issued live on the document/line rows (immutable snapshot), not looked up live later.
 
@@ -146,7 +146,7 @@ uv sync                          # install deps from pyproject.toml/uv.lock
 cp .env.example .env             # then fill in values
 make migrate                     # uv run python manage.py migrate
 make run                         # uv run python manage.py runserver
-make worker                      # uv run python manage.py db_worker   (django.tasks DatabaseBackend worker)
+make worker                      # uv run python manage.py qcluster      (django-q2 queue + scheduler)
 make test                        # uv run pytest
 make lint                        # uv run ruff check . && uv run ruff format --check .
 make fmt                         # uv run ruff check --fix . && uv run ruff format .

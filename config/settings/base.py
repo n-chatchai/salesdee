@@ -30,9 +30,7 @@ DJANGO_APPS = [
 
 THIRD_PARTY_APPS = [
     "django_htmx",
-    # Background tasks use Django 6's built-in `django.tasks` framework. To run a durable
-    # DB-backed queue, add the database backend app here (e.g. "django.tasks.backends.database")
-    # and configure TASKS below — verify the exact module path against the Django 6.0 docs first.
+    "django_q",  # background queue + scheduler (Redis-backed); see Q_CLUSTER below
 ]
 
 LOCAL_APPS = [
@@ -111,12 +109,23 @@ LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "accounts:login"
 
-# --- Background tasks (django.tasks, built into Django 6) ---------------------
-# Django 6.0 core ships only the ImmediateBackend (tasks run synchronously inside
-# `.enqueue()`); a durable DB worker (`django-tasks` on PyPI) or a Celery/RQ backend
-# is a config-only swap here later — no `@task` call site changes needed.
-TASKS = {
-    "default": {"BACKEND": "django.tasks.backends.immediate.ImmediateBackend"},
+# --- Background tasks (django-q2 — Redis-backed queue + scheduler) -----------
+# `apps/core/tasks.py::task` decorator wraps a function in a `.enqueue()`-having object
+# that `async_task`s it onto django-q's Redis broker; the `qcluster` process drains the
+# queue + runs scheduled jobs (the `Schedule` admin/model). In dev/tests `sync=True`
+# runs every `async_task` inline so tests assert post-POST side effects unchanged.
+Q_CLUSTER = {
+    "name": "salesdee",
+    "workers": env.int("Q_WORKERS", default=2),
+    "recycle": 200,
+    "timeout": 120,
+    "retry": 180,
+    "queue_limit": 50,
+    "bulk": 10,
+    "redis": env("REDIS_URL", default="redis://localhost:6379/0"),
+    # Run tasks synchronously by default (dev + tests). Production overrides → False.
+    "sync": env.bool("Q_SYNC", default=True),
+    "log_level": "INFO",
 }
 
 # --- Cache --------------------------------------------------------------------

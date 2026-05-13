@@ -8,9 +8,8 @@ rather than crashing (the webhook must never 500 because of this).
 
 from __future__ import annotations
 
-from django.tasks import task
-
 from apps.core.current_tenant import tenant_context
+from apps.core.tasks import task
 from apps.tenants.models import Tenant
 
 

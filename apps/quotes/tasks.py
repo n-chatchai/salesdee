@@ -9,9 +9,9 @@ changes here).
 from __future__ import annotations
 
 from django.core.mail import send_mail
-from django.tasks import task
 
 from apps.core.current_tenant import tenant_context
+from apps.core.tasks import task
 from apps.tenants.models import Tenant
 
 
