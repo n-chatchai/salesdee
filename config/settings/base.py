@@ -109,6 +109,14 @@ LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "accounts:login"
 
+# --- Redis URLs ---------------------------------------------------------------
+# Queue and cache go to SEPARATE logical DB indexes on the same Redis instance so a
+# cache `FLUSHDB` never wipes queued/scheduled tasks. `REDIS_URL` is the fallback; the
+# more-specific vars override.
+_REDIS_DEFAULT = env("REDIS_URL", default="redis://localhost:6379/0")
+Q_REDIS_URL = env("Q_REDIS_URL", default=_REDIS_DEFAULT)
+CACHE_REDIS_URL = env("CACHE_REDIS_URL", default=_REDIS_DEFAULT)
+
 # --- Background tasks (django-q2 — Redis-backed queue + scheduler) -----------
 # `apps/core/tasks.py::task` decorator wraps a function in a `.enqueue()`-having object
 # that `async_task`s it onto django-q's Redis broker; the `qcluster` process drains the
@@ -122,7 +130,7 @@ Q_CLUSTER = {
     "retry": 180,
     "queue_limit": 50,
     "bulk": 10,
-    "redis": env("REDIS_URL", default="redis://localhost:6379/0"),
+    "redis": Q_REDIS_URL,
     # Run tasks synchronously by default (dev + tests). Production overrides → False.
     "sync": env.bool("Q_SYNC", default=True),
     "log_level": "INFO",
@@ -132,7 +140,7 @@ Q_CLUSTER = {
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": env("REDIS_URL", default="redis://localhost:6379/0"),
+        "LOCATION": CACHE_REDIS_URL,
     }
 }
 

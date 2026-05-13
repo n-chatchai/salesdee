@@ -148,7 +148,11 @@ DATABASE_URL=postgres://salesdee_app:change-me-app@127.0.0.1:5432/salesdee
 RLS_ENABLED=True
 
 # Redis
-REDIS_URL=redis://127.0.0.1:6379/0
+# Redis — queue and cache on separate logical DB indexes so a cache flush never
+# wipes queued/scheduled tasks. Pick free indexes via `redis-cli INFO keyspace`.
+REDIS_URL=redis://127.0.0.1:6379/0          # generic fallback
+Q_REDIS_URL=redis://127.0.0.1:6379/2        # django-q broker
+CACHE_REDIS_URL=redis://127.0.0.1:6379/3    # Django cache + session
 
 # Email — SMTP relay (Postmark / SES / Sendgrid / Mailgun)
 EMAIL_URL=submission+tls://user:pass@smtp.example.com:587
