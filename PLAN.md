@@ -33,7 +33,7 @@ Source of truth for *how we work*: `CLAUDE.md`.
 - [x] `templates/base.html` — app shell: sidebar nav (matches deck sections), topbar (search/notifications/CTA), `messages`, blocks (`title`, `extra_css`, `nav`, `topbar`, `topbar_actions`, `content`, `body`, `extra_js`). Loads Google Fonts + htmx 2 + Alpine 3 (CDN — vendor later).
 - [x] `templates/auth_base.html` + `static/css/auth.css` — centered auth/onboarding layout per deck's auth screens.
 - [x] Vendor htmx 2 / alpine 3 / sortablejs into `static/js/` (base.html now serves them locally).
-- [ ] Self-host Sarabun/IBM Plex Thai fonts in `static/fonts/` (also needed by the WeasyPrint PDF — see CLAUDE.md §7). Fonts still loaded via Google CDN in base/auth templates.
+- [x] Self-hosted fonts: IBM Plex Sans Thai / Mono + Fraunces in `static/fonts/` + `static/css/fonts.css`; Google CDN dropped from base/auth/public templates. PDF: bundled Sarabun TTFs + `@font-face` in `pdf/quotation.html`, `pdf.py` passes `base_url = static/` (no system/remote font needed).
 - [ ] Per-feature css files as screens land: `inbox.css`, `kanban.css`, `quote-editor.css`, `public.css`, `onboarding.css`.
 
 > Note: every view currently points at a now-deleted template → expect 500s until the screen is rebuilt in its milestone. Rebuild order follows M1→M5.
@@ -96,16 +96,15 @@ Source of truth for *how we work*: `CLAUDE.md`.
 - [x] Reports UI (`templates/crm/reports.html` on `apps/crm/reports.py`) — by-salesperson, by-month, by-channel, lost-by-reason, totals (won count/value, quotes count); manager-only per FR-15.x. (Built in M3; carried.)
 - [x] Fixed the pre-existing `apps/crm/dashboard.py:157` mypy error — `_money()` now typed `Decimal | int | None -> Decimal`. `mypy apps` fully clean.
 - [x] Mobile: `static/css/mobile.css` — sidebar → off-canvas drawer (`.app.nav-open`), `.app-overlay`, hamburger `.tb-menu` in topbar (Alpine `nav` state in `base.html`), responsive `.kpi-row` / inbox 3-pane stack / table-scroll. Loaded after `app.css`.
-- [x] PWA: `static/manifest.json` (theme `#C8501F`, paper bg, standalone) + `static/sw.js` (cache-first for `/static/`) + `<link rel="manifest">` / `theme-color` meta / SW registration in `base.html`. (No app icons yet — manifest `icons: []`.)
+- [x] PWA: `static/manifest.json` (theme `#C8501F`, paper bg, standalone, icons) + app icons (192/512 + maskable + apple-touch + svg favicon) + `static/sw.js` (network-first, offline-page fallback, registered only off-localhost) + manifest/theme-color/apple-touch links in `base.html`.
 - [x] **`make check` green** — ruff + mypy + 199 tests all pass; `collectstatic` works.
-- [ ] App icon PNGs (192/512) for the manifest; offline fallback page in the SW.
 - [ ] Self-host fonts (still M0-leftover) — also unblocks the WeasyPrint PDF's Thai font (currently relies on a system font).
 
 ---
 
 ## Status — Phase-1 MVP build complete (M0–M5)
 
-All deck screens rebuilt; LINE inbox + Quote-from-Chat + Flex out; onboarding, settings, public homepage; mobile/PWA baseline. `make check` green. Open follow-ups are tracked as unchecked `[ ]` items under each milestone above — notably: background-tasking PDF/LINE sends (CLAUDE.md §4.5), LINE profile enrichment + non-text inbound, AI customer-summary in the inbox rail, AI catalog-match endpoint on the public home, categories management + bulk catalog actions + AI catalog import, Alpine live quote-line math, surfacing "เปิด N ครั้ง" on deal/quote screens, self-hosted Thai fonts + PDF font, app icons, and pixel-polish vs the design deck.
+All deck screens rebuilt; LINE inbox + Quote-from-Chat + Flex out; onboarding, settings, public homepage; mobile/PWA baseline. `make check` green. Open follow-ups are tracked as unchecked `[ ]` items under each milestone above — notably: background-tasking PDF/LINE sends (CLAUDE.md §4.5), disabling the SW in DEBUG is already done, LINE profile enrichment + non-text inbound, AI customer-summary in the inbox rail, AI catalog-match endpoint on the public home, categories management + bulk catalog actions + AI catalog import, Alpine live quote-line math, surfacing "เปิด N ครั้ง" on deal/quote screens, and pixel-polish vs the design deck.
 
 ---
 
