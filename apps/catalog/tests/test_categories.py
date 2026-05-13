@@ -51,3 +51,20 @@ def test_public_catalog_match_fallback_when_ai_off(client, tenant, settings) -> 
     # fallback block rendered (no AI), not a 500
     body = resp.content.decode()
     assert "ติดต่อ" in body or "ทีมงาน" in body or "match-results" not in body
+
+
+def test_category_reorder_updates_sort(client, user, membership, tenant) -> None:
+    with tenant_context(tenant):
+        a = ProductCategory.objects.create(name="A", order=0)
+        b = ProductCategory.objects.create(name="B", order=1)
+        c = ProductCategory.objects.create(name="C", order=2)
+    client.force_login(user)
+    resp = client.post(
+        reverse("catalog:category_reorder"), {"category": [str(c.pk), str(a.pk), str(b.pk)]}
+    )
+    assert resp.status_code == 200
+    with tenant_context(tenant):
+        a.refresh_from_db()
+        b.refresh_from_db()
+        c.refresh_from_db()
+        assert (c.order, a.order, b.order) == (0, 1, 2)

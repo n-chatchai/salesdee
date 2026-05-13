@@ -79,6 +79,9 @@ def test_send_quotation_flex_to_source_conversation(
     from apps.quotes.services import create_quotation_from_ai_draft
 
     with tenant_context(tenant):
+        from apps.integrations.models import LineIntegration
+
+        LineIntegration.objects.create(channel_access_token="tok", channel_secret="sec")
         Product.objects.create(
             name="เก้าอี้",
             code="CHR-1",
@@ -104,7 +107,7 @@ def test_send_quotation_flex_to_source_conversation(
     def fake_flex(to, **kwargs):
         calls.append({"to": to, **kwargs})
 
-    monkeypatch.setattr("apps.quotes.views.push_quotation_flex", fake_flex)
+    monkeypatch.setattr("apps.integrations.line.push_quotation_flex", fake_flex)
     client.force_login(user)
     resp = client.post(reverse("quotes:quotation_send_line", args=[doc.pk]))
     assert resp.status_code == 302

@@ -111,11 +111,12 @@ LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "accounts:login"
 
 # --- Background tasks (django.tasks, built into Django 6) ---------------------
-# Left unset for now -> uses Django's default backend. When ready for a durable queue,
-# add the DB backend app to INSTALLED_APPS and set:
-#   TASKS = {"default": {"BACKEND": "django.tasks.backends.database.DatabaseBackend"}}
-# then run migrations and `python manage.py db_worker`. (Confirm names against Django 6.0 docs.)
-# A Celery/RQ backend can be swapped here later without changing any `@task` call sites.
+# Django 6.0 core ships only the ImmediateBackend (tasks run synchronously inside
+# `.enqueue()`); a durable DB worker (`django-tasks` on PyPI) or a Celery/RQ backend
+# is a config-only swap here later — no `@task` call site changes needed.
+TASKS = {
+    "default": {"BACKEND": "django.tasks.backends.immediate.ImmediateBackend"},
+}
 
 # --- Cache --------------------------------------------------------------------
 CACHES = {

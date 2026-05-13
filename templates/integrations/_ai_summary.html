@@ -1,0 +1,10 @@
+{% if error %}
+  <div class="ai-suggest"><div class="ai-suggest-text">{{ error }}</div></div>
+{% elif summary %}
+  <div class="ai-suggest">
+    <div class="ai-suggest-text">{{ summary }}</div>
+  </div>
+  <div class="helptext" style="margin-top:6px">ผู้ช่วยสรุป — ตรวจก่อนใช้</div>
+{% else %}
+  <div class="helptext">กด "สรุป" เพื่อให้ผู้ช่วยสรุปลูกค้าจากบทสนทนานี้</div>
+{% endif %}

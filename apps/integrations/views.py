@@ -149,6 +149,42 @@ def conversation_ai_reply(request: HttpRequest, pk: int) -> HttpResponse:
 
 @login_required
 @require_POST
+def conversation_ai_summary(request: HttpRequest, pk: int) -> HttpResponse:
+    """Draft a short Thai summary of the customer/their needs/where the deal stands (sage UI)."""
+    from .ai import AINotConfigured, ai_is_configured, summarize_conversation
+
+    conv = get_object_or_404(Conversation.objects.select_related("customer", "lead"), pk=pk)
+    summary = ""
+    error = ""
+    if not ai_is_configured():
+        error = "ยังไม่ได้ตั้งค่าผู้ช่วย AI"
+    else:
+        transcript = "\n".join(
+            f"{'ลูกค้า' if m.direction == 'in' else 'เรา'}: {m.text}"
+            for m in conv.messages.all()
+            if m.text
+        )
+        if not transcript:
+            error = "บทสนทนานี้ยังไม่มีข้อความให้สรุป"
+        else:
+            name = conv.display_name or (
+                conv.customer.name if conv.customer else (conv.lead.name if conv.lead else "")
+            )
+            try:
+                summary = summarize_conversation(transcript, customer_name=name)
+            except AINotConfigured:
+                error = "ยังไม่ได้ตั้งค่าผู้ช่วย AI"
+            except Exception:
+                error = "ผู้ช่วยสรุปไม่สำเร็จ ลองใหม่อีกครั้ง"
+    return render(
+        request,
+        "integrations/_ai_summary.html",
+        {"selected": conv, "summary": summary, "error": error},
+    )
+
+
+@login_required
+@require_POST
 def conversation_make_quote(request: HttpRequest, pk: int) -> HttpResponse:
     """Quote-from-Chat: draft a quotation from this conversation's transcript (Claude), link it to
     the thread, and open the editor for the salesperson to review before sending."""

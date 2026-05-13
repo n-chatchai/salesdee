@@ -11,10 +11,11 @@
 </div>
 <div class="card" style="padding:0;overflow:hidden">
   <table class="tbl">
-    <thead><tr><th>ชื่อหมวด</th><th>หมวดแม่</th><th class="num">ลำดับ</th><th class="num">สินค้า</th><th></th></tr></thead>
-    <tbody>
+    <thead><tr><th></th><th>ชื่อหมวด</th><th>หมวดแม่</th><th class="num">ลำดับ</th><th class="num">สินค้า</th><th></th></tr></thead>
+    <tbody id="cat-rows">
     {% for c in categories %}
-      <tr>
+      <tr data-category="{{ c.pk }}">
+        <td class="cat-grip" style="cursor:grab;color:var(--muted)"><svg class="ico ico-sm"><use href="#i-grip"/></svg></td>
         <td>{% if c.parent_id %}<span class="muted">└ </span>{% endif %}{{ c.name }}</td>
         <td class="muted">{{ c.parent.name|default:"—" }}</td>
         <td class="num">{{ c.order }}</td>
@@ -24,8 +25,23 @@
           <a class="btn btn-sm btn-ghost" href="{% url 'catalog:category_delete' c.pk %}">ลบ</a>
         </td>
       </tr>
-    {% empty %}<tr><td colspan="5" class="muted">ยังไม่มีหมวดสินค้า</td></tr>{% endfor %}
+    {% empty %}<tr><td colspan="6" class="muted">ยังไม่มีหมวดสินค้า</td></tr>{% endfor %}
     </tbody>
   </table>
 </div>
+{% endblock %}
+{% block extra_js %}
+<script src="{% static 'js/sortable.min.js' %}"></script>
+<script>
+(function(){
+  var tbody=document.getElementById('cat-rows');
+  if(!tbody)return;
+  new Sortable(tbody,{handle:'.cat-grip',animation:150,ghostClass:'sortable-ghost',
+    onEnd:function(){
+      var fd=new FormData();
+      tbody.querySelectorAll('tr[data-category]').forEach(function(tr){fd.append('category',tr.dataset.category);});
+      fetch("{% url 'catalog:category_reorder' %}",{method:'POST',body:fd,headers:{'X-CSRFToken':"{{ csrf_token }}"}});
+    }});
+})();
+</script>
 {% endblock %}

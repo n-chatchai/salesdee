@@ -448,12 +448,14 @@ def test_quotation_send_creates_link_marks_sent_and_follow_up(
 
 def test_quotation_send_line(client, user, membership, tenant, monkeypatch) -> None:
     from apps.crm.models import Contact
+    from apps.integrations.models import LineIntegration
 
     sent: dict = {}
     monkeypatch.setattr(
-        "apps.quotes.views.push_quotation_flex", lambda to, **kw: sent.update(to=to, **kw)
+        "apps.integrations.line.push_quotation_flex", lambda to, **kw: sent.update(to=to, **kw)
     )
     with tenant_context(tenant):
+        LineIntegration.objects.create(channel_access_token="tok", channel_secret="sec")
         customer = Customer.objects.create(name="ลูกค้า LINE")
         contact = Contact.objects.create(customer=customer, name="คุณเอ", line_id="Uabc123")
         doc = SalesDocument.objects.create(

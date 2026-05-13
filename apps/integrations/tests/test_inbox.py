@@ -119,3 +119,62 @@ def test_close_and_reopen(client, user, membership, tenant) -> None:
     with tenant_context(tenant):
         conv.refresh_from_db()
         assert conv.status == ConversationStatus.CLOSED
+
+
+# --- non-text inbound (item 2) ----------------------------------------------
+def _image_event_payload(user_id: str):
+    from linebot.v3.webhooks import ImageMessageContent, MessageEvent, UserSource
+
+    return MessageEvent(
+        message=ImageMessageContent(id="img-1", contentProvider={"type": "line"}, quoteToken="qt"),
+        timestamp=1,
+        source=UserSource(userId=user_id),
+        replyToken="r",
+        mode="active",
+        webhookEventId="e",
+        deliveryContext={"isRedelivery": False},
+    )
+
+
+def test_image_event_records_image_message(tenant) -> None:
+    from apps.integrations.line import process_line_events
+
+    with tenant_context(tenant):
+        n = process_line_events([_image_event_payload("Upic")])
+        assert n == 1
+        conv = Conversation.objects.get(external_id="Upic")
+        msg = conv.messages.get()
+        assert msg.kind == "image"
+        assert msg.text == "[รูปภาพ]"
+        assert msg.external_id == "img-1"
+        assert conv.last_message_preview == "[รูปภาพ]"
+        # non-text doesn't get mirrored onto the lead's activity timeline
+        assert conv.lead is not None
+        assert conv.lead.activities.count() == 0
+
+
+# --- LINE profile-name enrichment (item 3) ----------------------------------
+def test_enrich_sets_display_name_and_lead_name(tenant, monkeypatch) -> None:
+    from apps.integrations.models import LineIntegration
+
+    monkeypatch.setattr("apps.integrations.line.fetch_line_profile_name", lambda _uid: "คุณสมชาย")
+    with tenant_context(tenant):
+        LineIntegration.objects.create(channel_access_token="tok", is_active=True)
+        # creating the conversation enqueues the enrichment task (runs synchronously here)
+        _record_inbound_text("Uenrich", "สวัสดีครับ")
+        conv = Conversation.objects.get(external_id="Uenrich")
+        assert conv.display_name == "คุณสมชาย"
+        assert conv.lead is not None
+        assert conv.lead.name == "คุณสมชาย"
+
+
+# --- AI customer summary (item 6) -------------------------------------------
+def test_ai_summary_when_ai_off(client, user, membership, tenant, settings) -> None:
+    settings.ANTHROPIC_API_KEY = ""
+    with tenant_context(tenant):
+        _record_inbound_text("Usum", "อยากได้โต๊ะทำงาน")
+        conv = Conversation.objects.get(external_id="Usum")
+    client.force_login(user)
+    resp = client.post(reverse("integrations:conversation_ai_summary", args=[conv.pk]))
+    assert resp.status_code == 200
+    assert "ยังไม่ได้ตั้งค่าผู้ช่วย AI" in resp.content.decode()

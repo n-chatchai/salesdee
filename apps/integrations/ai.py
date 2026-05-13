@@ -128,3 +128,33 @@ def draft_reply_from_text(conversation: str, *, company_name: str = "") -> str:
     )
     text_parts = [b.text for b in response.content if isinstance(b, anthropic.types.TextBlock)]
     return "\n".join(text_parts).strip()
+
+
+def summarize_conversation(transcript: str, *, customer_name: str = "") -> str:
+    """Ask Claude for a short (2-3 sentence) Thai summary of the customer, their needs, and where
+    the deal stands, from the conversation transcript. Returns plain Thai text. Raises
+    ``AINotConfigured`` or the SDK's errors."""
+    key = getattr(settings, "ANTHROPIC_API_KEY", "")
+    if not key:
+        raise AINotConfigured("ยังไม่ได้ตั้งค่า ANTHROPIC_API_KEY — ใช้ฟีเจอร์ AI ไม่ได้")
+    import anthropic
+
+    who = f" (ลูกค้า: {customer_name})" if customer_name else ""
+    client = anthropic.Anthropic(api_key=key)
+    response = client.messages.create(
+        model=getattr(settings, "ANTHROPIC_MODEL", "claude-sonnet-4-6"),
+        max_tokens=512,
+        system=(
+            "คุณเป็นผู้ช่วยฝ่ายขายเฟอร์นิเจอร์ในไทย สรุปบทสนทนากับลูกค้าให้พนักงานขายอ่านอย่างรวดเร็ว "
+            "ใน 2-3 ประโยค ครอบคลุม: ลูกค้าเป็นใคร/ต้องการอะไร ประเด็นหรือเงื่อนไขสำคัญ และสถานะของดีลตอนนี้ "
+            "ตอบเป็นข้อความไทยล้วน ไม่ต้องมีหัวข้อหรือสัญลักษณ์ markdown"
+        ),
+        messages=[
+            {
+                "role": "user",
+                "content": f"บทสนทนากับลูกค้า{who}:\n{transcript}\n\nสรุปสั้น ๆ ให้พนักงานขาย",
+            }
+        ],
+    )
+    text_parts = [b.text for b in response.content if isinstance(b, anthropic.types.TextBlock)]
+    return "\n".join(text_parts).strip()

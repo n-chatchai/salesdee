@@ -5,7 +5,6 @@ from datetime import date, timedelta
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.core.mail import send_mail
 from django.db.models import Max
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -16,7 +15,7 @@ from django.views.decorators.http import require_POST
 from apps.core.current_tenant import tenant_context
 from apps.core.permissions import own_q
 from apps.crm.models import Deal, Task, TaskKind
-from apps.integrations.line import LineNotConfigured, push_quotation_flex
+from apps.integrations.line import line_is_configured
 
 from .forms import QuotationForm, SalesDocLineForm
 from .models import (
@@ -45,6 +44,7 @@ from .services import (
     reopen_quotation,
     submit_quotation,
 )
+from .tasks import render_and_email_quotation, send_quotation_via_line
 
 
 def _visible_quotes(request: HttpRequest):
@@ -426,14 +426,14 @@ def quotation_send(request: HttpRequest, pk: int) -> HttpResponse:
     url = _public_quote_url(request, link.token)
     _finalize_sent(request, doc)
     if doc.contact and doc.contact.email:
-        send_mail(
-            subject=f"ใบเสนอราคา {doc.doc_number}",
-            message=f"เรียนคุณ {doc.contact.name}\n\nดูใบเสนอราคาได้ที่ลิงก์นี้: {url}\n\nขอบคุณครับ",
-            from_email=None,
-            recipient_list=[doc.contact.email],
-            fail_silently=True,
+        render_and_email_quotation.enqueue(
+            doc.pk,
+            doc.tenant_id,
+            recipient_email=doc.contact.email,
+            recipient_name=doc.contact.name,
+            public_url=url,
         )
-        messages.success(request, f"ส่งอีเมลถึง {doc.contact.email} แล้ว · ลิงก์: {url}")
+        messages.success(request, f"กำลังส่งอีเมลถึง {doc.contact.email} … · ลิงก์: {url}")
     else:
         messages.success(request, f"สร้างลิงก์แชร์แล้ว · {url}")
     return redirect("quotes:quotation_detail", pk=doc.pk)
@@ -456,6 +456,10 @@ def quotation_send_line(request: HttpRequest, pk: int) -> HttpResponse:
             request, "ยังไม่รู้ LINE user ID ของลูกค้า — เพิ่มในข้อมูลผู้ติดต่อ หรือสร้างใบเสนอราคาจากแชต"
         )
         return redirect("quotes:quotation_detail", pk=doc.pk)
+    # Cheap, synchronous gate: don't mark the quote sent if this tenant has no usable LINE OA.
+    if not line_is_configured():
+        messages.error(request, "ยังไม่ได้ตั้งค่าการเชื่อม LINE OA สำหรับ workspace นี้")
+        return redirect("quotes:quotation_detail", pk=doc.pk)
     err = _ensure_sendable(request, doc)
     if err:
         messages.error(request, err)
@@ -467,32 +471,23 @@ def quotation_send_line(request: HttpRequest, pk: int) -> HttpResponse:
     from apps.tenants.models import CompanyProfile
 
     profile = CompanyProfile.objects.filter(tenant_id=doc.tenant_id).first()
-    try:
-        push_quotation_flex(
-            recipient,
-            doc_number=doc.doc_number or "ใบเสนอราคา",
-            customer_name=(doc.customer.name if doc.customer else (doc.reference or "")),
-            total_text=f"{totals.grand_total:,.2f} บาท",
-            valid_text=format_thai_date(doc.valid_until) if doc.valid_until else "—",
-            view_url=url,
-            pdf_url=pdf_url,
-            company_name=profile.name_th if profile else "",
-        )
-    except LineNotConfigured as exc:
-        messages.error(request, str(exc))
-        return redirect("quotes:quotation_detail", pk=doc.pk)
-    except Exception as exc:  # noqa: BLE001 — SDK/network error; surface it rather than 500
-        messages.error(request, f"ส่งทาง LINE ไม่สำเร็จ: {exc}")
-        return redirect("quotes:quotation_detail", pk=doc.pk)
-    if doc.source_conversation_id:
-        from apps.integrations.line import record_outbound_text
-
-        record_outbound_text(
-            doc.source_conversation, f"ส่งใบเสนอราคา {doc.doc_number} แล้ว", sender_user=request.user
-        )
     _finalize_sent(request, doc)
+    send_quotation_via_line.enqueue(
+        doc.pk,
+        doc.tenant_id,
+        recipient=recipient,
+        doc_number=doc.doc_number or "ใบเสนอราคา",
+        customer_name=(doc.customer.name if doc.customer else (doc.reference or "")),
+        total_text=f"{totals.grand_total:,.2f} บาท",
+        valid_text=format_thai_date(doc.valid_until) if doc.valid_until else "—",
+        view_url=url,
+        pdf_url=pdf_url,
+        company_name=profile.name_th if profile else "",
+        log_to_conversation_id=doc.source_conversation_id,
+        sender_user_id=request.user.pk,
+    )
     who = doc.contact.name if doc.contact else "ลูกค้า"
-    messages.success(request, f"ส่งใบเสนอราคาทาง LINE ถึง {who} แล้ว · ลิงก์: {url}")
+    messages.success(request, f"กำลังส่งใบเสนอราคาทาง LINE ถึง {who} … · ลิงก์: {url}")
     return redirect("quotes:quotation_detail", pk=doc.pk)
 
 

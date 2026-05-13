@@ -29,7 +29,7 @@
   {% for day in day_groups %}
     <div class="bubble-day">{{ day.grouper|date:"j M Y" }}</div>
     {% for m in day.list %}
-      <div class="bubble {{ m.direction }}">{% if m.text %}{{ m.text }}{% else %}<em>[{{ m.get_kind_display }}]</em>{% endif %}</div>
+      <div class="bubble {{ m.direction }}">{% if m.kind != 'text' %}<em>{{ m.text|default:m.get_kind_display }}</em>{% elif m.text %}{{ m.text }}{% else %}<em>[{{ m.get_kind_display }}]</em>{% endif %}</div>
       <div class="bubble-time">{{ m.sent_at|time:"H:i" }}{% if m.direction == 'out' and m.sender_user %} · {{ m.sender_user.get_short_name|default:m.sender_user.email }}{% endif %}</div>
     {% endfor %}
   {% empty %}

@@ -103,6 +103,20 @@ def category_delete(request: HttpRequest, pk: int) -> HttpResponse:
     return render(request, "catalog/category_form.html", {"category": category, "delete": True})
 
 
+@login_required
+@require_POST
+def category_reorder(request: HttpRequest) -> HttpResponse:
+    """htmx/SortableJS: reassign ``ProductCategory.order`` from a list of ``category=<pk>`` (repeated)
+    given in the new visual order."""
+    ids = [int(x) for x in request.POST.getlist("category") if x.isdigit()]
+    known = set(ProductCategory.objects.filter(pk__in=ids).values_list("pk", flat=True))
+    for idx, pk in enumerate(i for i in ids if i in known):
+        ProductCategory.objects.filter(pk=pk).update(order=idx)
+    from django.http import JsonResponse
+
+    return JsonResponse({"ok": True})
+
+
 # --- Public, login-free showroom (tenant resolved from the URL slug) ---------
 def _public_tenant(tenant_slug: str):
     from apps.tenants.models import Tenant

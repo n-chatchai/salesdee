@@ -45,6 +45,18 @@
     </div>
     <div class="rail-section">
       <div class="rail-section-label">
+        สรุปลูกค้า
+        <button class="ai-link" hx-post="{% url 'integrations:conversation_ai_summary' selected.pk %}"
+                hx-target="#ai-summary" hx-indicator="#ai-summary">
+          <svg class="ico ico-sm"><use href="#i-spark"/></svg> สรุป
+        </button>
+      </div>
+      <div id="ai-summary">
+        {% include "integrations/_ai_summary.html" with summary=None error="" %}
+      </div>
+    </div>
+    <div class="rail-section">
+      <div class="rail-section-label">
         ร่างคำตอบ
         <button class="ai-link" hx-post="{% url 'integrations:conversation_ai_reply' selected.pk %}"
                 hx-target="#ai-suggestions" hx-indicator="#ai-suggestions">

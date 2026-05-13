@@ -149,6 +149,23 @@ def push_quotation_flex(
         )
 
 
+def fetch_line_profile_name(line_user_id: str) -> str:
+    """Return the LINE display name for ``line_user_id`` via the Messaging API, or "" if LINE isn't
+    configured / the API errors / the id is unknown. Must run inside a tenant context. Best-effort
+    only — never raises (used by a background task that must not crash the webhook)."""
+    integration = _active_integration()
+    if integration is None:
+        return ""
+    try:
+        from linebot.v3.messaging import ApiClient, Configuration, MessagingApi
+
+        with ApiClient(Configuration(access_token=integration.channel_access_token)) as api_client:
+            profile = MessagingApi(api_client).get_profile(line_user_id)
+    except Exception:  # noqa: BLE001 — network/SDK/permission error; give up quietly
+        return ""
+    return (getattr(profile, "display_name", "") or "").strip()
+
+
 # --- Inbox: conversations & messages -----------------------------------------
 def get_or_create_conversation(line_user_id: str):
     """Find-or-create the LINE conversation for this user in the current tenant, linking it to a
@@ -173,6 +190,12 @@ def get_or_create_conversation(line_user_id: str):
             )
         conv.lead = lead
         conv.save(update_fields=["lead"])
+    if created:
+        # Best-effort: fetch the customer's LINE display name in the background (no-ops if LINE
+        # isn't configured / the API errors — never blocks or breaks the webhook).
+        from .tasks import enrich_conversation_display_name
+
+        enrich_conversation_display_name.enqueue(conv.pk, conv.tenant_id)
     return conv
 
 
@@ -216,26 +239,64 @@ def record_outbound_text(conv, text: str, *, sender_user=None, external_id=""):
     )
 
 
-def _record_inbound_text(line_user_id: str, text: str) -> None:
-    """Record an inbound LINE text: append it to the user's conversation (creating the conversation
-    + linked lead if needed) and mirror it onto the lead's activity timeline.
-    TODO: enrich the conversation/lead display name from the LINE profile API in a background task."""
+def _record_inbound(line_user_id: str, *, text: str, kind=None, external_id: str = "") -> None:
+    """Record an inbound LINE message: append it to the user's conversation (creating the
+    conversation + linked lead if needed); for text, also mirror it onto the lead's activity
+    timeline. ``kind`` defaults to ``MessageKind.TEXT``."""
     from apps.crm.models import Activity, ActivityKind
 
-    from .models import MessageDirection
+    from .models import MessageDirection, MessageKind
 
     conv = get_or_create_conversation(line_user_id)
-    _append_message(conv, direction=MessageDirection.IN, text=text)
-    if conv.lead_id:
+    _append_message(
+        conv, direction=MessageDirection.IN, text=text, kind=kind, external_id=external_id
+    )
+    if conv.lead_id and kind in (None, MessageKind.TEXT) and text:
         if not conv.lead.message:
             conv.lead.message = text
             conv.lead.save(update_fields=["message"])
         Activity.objects.create(lead=conv.lead, kind=ActivityKind.LINE, body=text)
 
 
+def _record_inbound_text(line_user_id: str, text: str) -> None:
+    _record_inbound(line_user_id, text=text)
+
+
+def _inbound_placeholder(message) -> tuple[object, str]:
+    """Map a non-text LINE message-content object to (MessageKind, placeholder text)."""
+    from linebot.v3.webhooks import (
+        AudioMessageContent,
+        FileMessageContent,
+        ImageMessageContent,
+        LocationMessageContent,
+        StickerMessageContent,
+        VideoMessageContent,
+    )
+
+    from .models import MessageKind
+
+    if isinstance(message, ImageMessageContent):
+        return MessageKind.IMAGE, "[รูปภาพ]"
+    if isinstance(message, StickerMessageContent):
+        return MessageKind.STICKER, "[สติกเกอร์]"
+    if isinstance(message, FileMessageContent):
+        name = getattr(message, "file_name", "") or "ไฟล์"
+        return MessageKind.FILE, f"[ไฟล์] {name}"
+    if isinstance(message, VideoMessageContent):
+        return MessageKind.VIDEO, "[วิดีโอ]"
+    if isinstance(message, AudioMessageContent):
+        return MessageKind.AUDIO, "[เสียง]"
+    if isinstance(message, LocationMessageContent):
+        label = getattr(message, "title", "") or getattr(message, "address", "") or ""
+        return MessageKind.LOCATION, f"[ตำแหน่ง] {label}".strip()
+    return MessageKind.OTHER, "[ข้อความ]"
+
+
 def process_line_events(events: list) -> int:
-    """Turn parsed LINE webhook events into lead activities. Text messages from a user only (group/
-    room messages and non-text messages are ignored). Returns how many were recorded.
+    """Turn parsed LINE webhook events into conversation messages (and, for text, lead activities).
+    Handles user messages of any kind (text + image/sticker/file/video/audio/location); media bytes
+    aren't downloaded — only the message is recorded. Group/room messages are ignored. Returns how
+    many were recorded.
 
     The current tenant context must be active (the webhook view sets it from the URL slug).
     """
@@ -243,12 +304,17 @@ def process_line_events(events: list) -> int:
 
     count = 0
     for event in events:
-        if (
+        if not (
             isinstance(event, MessageEvent)
             and isinstance(event.source, UserSource)
-            and isinstance(event.message, TextMessageContent)
-            and event.source.user_id
+            and getattr(event.source, "user_id", None)
         ):
-            _record_inbound_text(event.source.user_id, event.message.text)
-            count += 1
+            continue
+        ext_id = str(getattr(event.message, "id", "") or "")
+        if isinstance(event.message, TextMessageContent):
+            _record_inbound(event.source.user_id, text=event.message.text, external_id=ext_id)
+        else:
+            kind, placeholder = _inbound_placeholder(event.message)
+            _record_inbound(event.source.user_id, text=placeholder, kind=kind, external_id=ext_id)
+        count += 1
     return count

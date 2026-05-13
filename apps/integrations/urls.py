@@ -14,6 +14,11 @@ urlpatterns = [
     path("inbox/<int:pk>/status/", views.conversation_status, name="conversation_status"),
     path("inbox/<int:pk>/ai-reply/", views.conversation_ai_reply, name="conversation_ai_reply"),
     path(
+        "inbox/<int:pk>/ai-summary/",
+        views.conversation_ai_summary,
+        name="conversation_ai_summary",
+    ),
+    path(
         "inbox/<int:pk>/make-quote/", views.conversation_make_quote, name="conversation_make_quote"
     ),
 ]
