@@ -1,7 +1,8 @@
 {% load static %}
 <div id="quote-lines">
+  <div class="qd-lines">
   <table class="tbl">
-    <thead><tr><th></th><th>ห้อง/โซน</th><th>รายการ</th><th>จำนวน</th><th>หน่วย</th><th>ราคา/หน่วย</th><th>ส่วนลด</th><th>ภาษี</th><th>จำนวนเงิน</th>{% if editable %}<th></th>{% endif %}</tr></thead>
+    <thead><tr><th></th><th>ห้อง/โซน</th><th>รายการ</th><th class="mono">จำนวน</th><th>หน่วย</th><th class="mono">ราคา/หน่วย</th><th class="mono">ส่วนลด</th><th>ภาษี</th><th class="mono">จำนวนเงิน</th>{% if editable %}<th></th>{% endif %}</tr></thead>
     <tbody id="line-rows">
     {% for line in document.lines.all %}
       {% if line.pk == editing_line_id %}
@@ -13,10 +14,10 @@
         </form>
       </td></tr>
       {% else %}
-      <tr data-line="{{ line.pk }}">
-        <td class="grip" style="cursor:grab">{% if editable and line.line_type == 'item' %}<svg class="ico ico-sm"><use href="#i-grip"/></svg>{% endif %}</td>
+      <tr data-line="{{ line.pk }}"{% if line.line_type == 'heading' %} class="ln-heading"{% elif line.line_type == 'note' %} class="ln-note"{% endif %}>
+        <td class="grip">{% if editable and line.line_type == 'item' %}<svg class="ico ico-sm"><use href="#i-grip"/></svg>{% endif %}</td>
         <td>{{ line.group_label }}</td>
-        <td>{% if line.line_type == 'heading' %}<strong>{{ line.description }}</strong>{% elif line.line_type == 'note' %}<em class="muted">{{ line.description }}</em>{% else %}{{ line.description }}{% if line.dimensions %}<div class="muted" style="font-size:12px">{{ line.dimensions }}</div>{% endif %}{% if line.image %}<div><img src="{{ line.image.url }}" style="height:40px;border-radius:4px"></div>{% endif %}{% endif %}</td>
+        <td>{% if line.line_type == 'heading' %}<strong>{{ line.description }}</strong>{% elif line.line_type == 'note' %}{{ line.description }}{% else %}<div class="ln-name">{{ line.description }}</div>{% if line.dimensions %}<div class="ln-spec">{{ line.dimensions }}</div>{% endif %}{% if line.image %}<div><img class="ln-thumb" src="{{ line.image.url }}"></div>{% endif %}{% endif %}</td>
         {% if line.line_type == 'item' %}
         <td class="mono">{{ line.quantity|floatformat:"-2" }}</td><td>{{ line.unit }}</td><td class="mono">{{ line.unit_price|floatformat:2 }}</td>
         <td class="mono">{% if line.discount_value %}{{ line.discount_value|floatformat:"-2" }}{% if line.discount_kind == 'percent' %}%{% endif %}{% endif %}</td>
@@ -28,13 +29,14 @@
         </td>{% endif %}
       </tr>
       {% endif %}
-    {% empty %}<tr><td colspan="{% if editable %}10{% else %}9{% endif %}" class="muted">ยังไม่มีรายการ</td></tr>{% endfor %}
+    {% empty %}<tr><td colspan="{% if editable %}10{% else %}9{% endif %}" class="muted" style="padding:24px;text-align:center">ยังไม่มีรายการ</td></tr>{% endfor %}
     </tbody>
   </table>
+  </div>
 
   {% if editable and not editing_line_id %}
-  <div class="card" style="margin-top:14px;background:var(--surface-2,#f5f0e4)">
-    <div class="title" style="margin-bottom:8px">เพิ่มรายการ</div>
+  <div class="qd-add-line">
+    <div class="title">เพิ่มรายการ</div>
     <form method="post" enctype="multipart/form-data" action="{% url 'quotes:quotation_add_line' document.pk %}" hx-post="{% url 'quotes:quotation_add_line' document.pk %}" hx-target="#quote-lines" hx-swap="outerHTML" hx-encoding="multipart/form-data">{% csrf_token %}
       {% include "partials/_form.html" with form=line_form %}
       <button class="btn btn-sm btn-primary"><svg class="ico ico-sm"><use href="#i-plus"/></svg> เพิ่มรายการ</button>
@@ -42,16 +44,18 @@
   </div>
   {% endif %}
 
-  <div class="totbox" style="margin-left:auto;max-width:360px;margin-top:16px">
-    <div class="row between"><span>รวมเป็นเงิน</span><span class="mono">{{ totals.subtotal|floatformat:2 }}</span></div>
-    {% if totals.end_discount %}<div class="row between"><span>ส่วนลดท้ายบิล</span><span class="mono">-{{ totals.end_discount|floatformat:2 }}</span></div>
-    <div class="row between"><span>หลังหักส่วนลด</span><span class="mono">{{ totals.after_discount|floatformat:2 }}</span></div>{% endif %}
-    {% if totals.vat_amount %}<div class="row between"><span>ภาษีมูลค่าเพิ่ม 7%</span><span class="mono">{{ totals.vat_amount|floatformat:2 }}</span></div>{% endif %}
-    {% if totals.rounding %}<div class="row between"><span>ปัดเศษ</span><span class="mono">{{ totals.rounding|floatformat:2 }}</span></div>{% endif %}
-    <div class="row between" style="font-weight:700;border-top:2px solid var(--ink,#333);margin-top:6px;padding-top:8px"><span>ยอดรวมทั้งสิ้น</span><span class="mono">{{ totals.grand_total|floatformat:2 }}</span></div>
-    {% if totals.withholding_estimate %}<div class="row between muted" style="font-size:13px"><span>หัก ณ ที่จ่าย (ประมาณ)</span><span class="mono">-{{ totals.withholding_estimate|floatformat:2 }}</span></div>
-    <div class="row between muted" style="font-size:13px"><span>ยอดที่คาดว่าจะได้รับ</span><span class="mono">{{ totals.net_expected|floatformat:2 }}</span></div>{% endif %}
-    <div class="muted" style="font-size:13px;margin-top:8px">({{ totals.amount_in_words }})</div>
+  <div class="qb-summary">
+    <div class="qb-sum-row"><span class="label">รวมเป็นเงิน</span><span class="val">{{ totals.subtotal|floatformat:2 }}</span></div>
+    {% if totals.end_discount %}<div class="qb-sum-row"><span class="label">ส่วนลดท้ายบิล</span><span class="val">-{{ totals.end_discount|floatformat:2 }}</span></div>
+    <div class="qb-sum-row"><span class="label">หลังหักส่วนลด</span><span class="val">{{ totals.after_discount|floatformat:2 }}</span></div>{% endif %}
+    {% if totals.vat_amount %}<div class="qb-sum-row"><span class="label">ภาษีมูลค่าเพิ่ม 7%</span><span class="val">{{ totals.vat_amount|floatformat:2 }}</span></div>{% endif %}
+    {% if totals.rounding %}<div class="qb-sum-row"><span class="label">ปัดเศษ</span><span class="val">{{ totals.rounding|floatformat:2 }}</span></div>{% endif %}
+    <div class="qb-sum-row total"><span class="label">ยอดรวมทั้งสิ้น</span><span class="val">{{ totals.grand_total|floatformat:2 }}</span></div>
+    {% if totals.withholding_estimate %}<div class="qb-sum-info">
+      <div class="qb-sum-info-row"><span>(ข้อมูล) หัก ณ ที่จ่าย (ประมาณ)</span><span class="mono">-{{ totals.withholding_estimate|floatformat:2 }}</span></div>
+      <div class="qb-sum-info-row"><span>ยอดที่คาดว่าจะได้รับ</span><span class="mono">{{ totals.net_expected|floatformat:2 }}</span></div>
+    </div>{% endif %}
+    <div class="qb-bahttext"><span class="label">จำนวนเงินตัวอักษร</span>{{ totals.amount_in_words }}</div>
   </div>
 
   {% if editable %}

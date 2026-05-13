@@ -1,14 +1,16 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}เชื่อม LINE OA · ตั้งค่า{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/settings.css' %}">{% endblock %}
 {% block content %}
-<div style="margin-bottom:16px"><div class="eyebrow">ตั้งค่า</div><h1 class="h1 serif-it">เชื่อม LINE Official Account</h1></div>
-<div class="row wrap" style="gap:20px;align-items:flex-start">
+<div class="set-page-head"><div class="eyebrow">ตั้งค่า</div><h1>เชื่อม LINE Official Account</h1></div>
+<div class="set-layout">
   {% include "tenants/_settings_nav.html" %}
-  <div class="grow" style="max-width:680px">
+  <div class="set-main" style="max-width:680px">
     <div class="card">
       <div class="card-head"><span class="title">Webhook URL</span></div>
       <p class="muted" style="margin-top:0">นำ URL นี้ไปใส่ใน LINE Developers Console → Messaging API → Webhook URL</p>
-      <code class="mono" style="display:block;padding:10px;background:var(--surface-2,#f3eee2);border-radius:8px;word-break:break-all">{{ webhook_url }}</code>
+      <code class="set-codeblock">{{ webhook_url }}</code>
     </div>
     <div class="card" style="margin-top:16px">
       <div class="card-head"><span class="title">ข้อมูลช่องทาง</span></div>

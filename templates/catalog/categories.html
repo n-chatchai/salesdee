@@ -1,20 +1,24 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}หมวดสินค้า · salesdee.{% endblock %}
 {% block topbar_actions %}<a class="btn btn-sm btn-primary" href="{% url 'catalog:category_create' %}"><svg class="ico ico-sm"><use href="#i-plus"/></svg> หมวดใหม่</a>{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/lists.css' %}">{% endblock %}
 {% block content %}
-<div class="row between" style="align-items:flex-end;margin-bottom:16px">
-  <div><div class="eyebrow">แคตตาล็อก</div><h1 class="h1 serif-it">หมวดสินค้า</h1></div>
+<div class="list-head">
+  <div class="eyebrow">แคตตาล็อก</div>
+  <h1>หมวดสินค้า</h1>
+  <span class="count-pill">{{ categories|length }}</span>
 </div>
-<div class="card">
+<div class="card" style="padding:0;overflow:hidden">
   <table class="tbl">
-    <thead><tr><th>ชื่อหมวด</th><th>หมวดแม่</th><th>ลำดับ</th><th>สินค้า</th><th></th></tr></thead>
+    <thead><tr><th>ชื่อหมวด</th><th>หมวดแม่</th><th class="num">ลำดับ</th><th class="num">สินค้า</th><th></th></tr></thead>
     <tbody>
     {% for c in categories %}
       <tr>
         <td>{% if c.parent_id %}<span class="muted">└ </span>{% endif %}{{ c.name }}</td>
         <td class="muted">{{ c.parent.name|default:"—" }}</td>
-        <td class="mono">{{ c.order }}</td>
-        <td class="mono">{{ c.product_count }}</td>
+        <td class="num">{{ c.order }}</td>
+        <td class="num">{{ c.product_count }}</td>
         <td class="row" style="justify-content:flex-end;gap:6px">
           <a class="btn btn-sm btn-ghost" href="{% url 'catalog:category_edit' c.pk %}">แก้ไข</a>
           <a class="btn btn-sm btn-ghost" href="{% url 'catalog:category_delete' c.pk %}">ลบ</a>

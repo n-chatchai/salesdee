@@ -1,0 +1,61 @@
+/* salesdee. — sales reports, adapted from deck "รายงาน" */
+
+.rpt-top { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:18px; flex-wrap:wrap; }
+.rpt-top h1 { font-size:22px; font-weight:600; letter-spacing:-.02em; margin:0; color:var(--ink); }
+.rpt-top .range { font-family:var(--font-mono); font-size:11px; color:var(--mid); }
+.rpt-period { display:inline-flex; border:1px solid var(--border); border-radius:6px; overflow:hidden; }
+.rpt-period a {
+  padding:6px 14px; background:var(--paper); color:var(--mid); font-size:12px; text-decoration:none;
+  border-right:1px solid var(--border); font-family:inherit;
+}
+.rpt-period a:last-child { border-right:none; }
+.rpt-period a.active { background:var(--ink); color:var(--paper); font-weight:600; }
+
+.rpt-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:16px; margin-bottom:24px; }
+@media (max-width:880px){ .rpt-grid{ grid-template-columns:1fr 1fr; } }
+.rpt-kpi { background:var(--paper-2); border:1px solid var(--border); border-radius:10px; padding:16px 18px; }
+.rpt-kpi.accent { border-color:var(--accent); }
+.rpt-kpi .label { font-family:var(--font-mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--mid); margin-bottom:8px; }
+.rpt-kpi .value { font-family:var(--font-mono); font-size:28px; font-weight:600; letter-spacing:-.02em; color:var(--ink); line-height:1.1; margin-bottom:4px; }
+.rpt-kpi .sub { font-size:11px; color:var(--mid); font-family:var(--font-mono); }
+
+.rpt-section { display:grid; grid-template-columns:2fr 1fr; gap:16px; margin-bottom:24px; }
+.rpt-section.thirds { grid-template-columns:1fr 1fr 1fr; }
+.rpt-section.full { grid-template-columns:1fr; }
+@media (max-width:880px){ .rpt-section, .rpt-section.thirds{ grid-template-columns:1fr; } }
+.rpt-card { background:var(--paper-2); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+.rpt-card-head { padding:14px 18px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+.rpt-card-title { font-size:14px; font-weight:600; color:var(--ink); }
+.rpt-card-meta { font-family:var(--font-mono); font-size:10px; color:var(--mid); }
+.rpt-card-body { padding:18px; }
+
+/* horizontal bar list (by month) */
+.rpt-bars { display:flex; flex-direction:column; gap:8px; }
+.rpt-bar-row { display:grid; grid-template-columns:64px 1fr 100px; gap:12px; align-items:center; font-size:12px; }
+.rpt-bar-name { font-family:var(--font-mono); color:var(--ink-2); }
+.rpt-bar-wrap { background:var(--paper); border-radius:6px; height:24px; position:relative; overflow:hidden; }
+.rpt-bar-fill { height:100%; background:var(--accent); border-radius:6px; min-width:2px; transition:width .3s; }
+.rpt-bar-val { font-family:var(--font-mono); font-size:11.5px; font-weight:600; color:var(--ink); text-align:right; }
+.rpt-bar-sub { font-family:var(--font-mono); font-size:10px; color:var(--mid); }
+
+/* funnel-ish channel bars */
+.rpt-funnel-row { display:grid; grid-template-columns:140px 1fr 90px; gap:12px; align-items:center; font-size:12px; padding:4px 0; }
+.rpt-funnel-name { color:var(--ink-2); font-weight:500; }
+.rpt-funnel-wrap { background:var(--paper); border-radius:6px; height:26px; position:relative; overflow:hidden; }
+.rpt-funnel-bar { height:100%; background:var(--ai); border-radius:6px; min-width:2px; transition:width .3s; }
+.rpt-funnel-meta { font-family:var(--font-mono); font-size:11px; color:var(--mid); text-align:right; }
+.rpt-funnel-meta .v { color:var(--ink); font-weight:600; }
+
+/* rep table */
+.rpt-rep-row { display:grid; grid-template-columns:28px 1.4fr 70px 90px 80px 70px 90px; gap:10px; padding:10px 0; align-items:center; border-bottom:1px solid var(--border-2); font-size:12px; }
+.rpt-rep-row:last-child { border-bottom:none; }
+.rpt-rep-row.head { font-family:var(--font-mono); font-size:9px; letter-spacing:.08em; text-transform:uppercase; color:var(--mid); border-bottom:1px solid var(--border); }
+.rpt-rep-row .avatar { width:26px; height:26px; border-radius:50%; background:linear-gradient(135deg, var(--accent-soft), var(--ai-soft)); display:grid; place-items:center; font-size:11px; font-weight:600; color:var(--ink); }
+.rpt-rep-row .name { font-weight:500; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.rpt-rep-row .num { font-family:var(--font-mono); text-align:right; }
+.rpt-empty { font-size:12px; color:var(--mid); padding:8px 0; }
+
+/* simple two-col tables for lost-reason */
+.rpt-mini-row { display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid var(--border-2); font-size:12.5px; }
+.rpt-mini-row:last-child { border-bottom:none; }
+.rpt-mini-row .n { font-family:var(--font-mono); font-weight:600; color:var(--ink); }

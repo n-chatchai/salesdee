@@ -1,25 +1,30 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}ตั้งค่า · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/settings.css' %}">{% endblock %}
 {% block content %}
-<div style="margin-bottom:16px"><div class="eyebrow">workspace</div><h1 class="h1 serif-it">ตั้งค่า</h1><p class="muted">{{ tenant.name }}</p></div>
+<div class="set-page-head">
+  <div class="eyebrow">workspace</div>
+  <h1>ตั้งค่า</h1>
+  <p class="desc">{{ tenant.name }}</p>
+</div>
 
 {% if not onboarding.complete %}
-<div class="ai-panel" style="margin-bottom:18px">
-  <div class="between row"><div><strong>ตั้งค่า workspace ให้เสร็จ</strong> — เหลืออีก {{ onboarding.remaining }} ขั้น</div>
+<div class="set-notice">
+  <svg class="ico ico-sm"><use href="#i-spark"/></svg>
+  <div class="grow-row"><div><strong>ตั้งค่า workspace ให้เสร็จ</strong> — เหลืออีก {{ onboarding.remaining }} ขั้น</div>
   <a class="btn btn-sm btn-ai" href="{% url 'workspace:onboarding' %}">ทำต่อ</a></div>
 </div>
 {% endif %}
 
-<div class="row wrap" style="gap:20px;align-items:flex-start">
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;flex:1">
-    <a class="card" href="{% url 'workspace:settings_company' %}"><div class="card-head"><span class="title"><svg class="ico"><use href="#i-building"/></svg> ข้อมูลบริษัท</span></div><p class="muted">{{ company.name_th|default:"ยังไม่ได้กรอก" }}{% if company.tax_id %} · {{ company.tax_id }}{% endif %}</p></a>
-    <a class="card" href="{% url 'workspace:settings_line' %}"><div class="card-head"><span class="title"><svg class="ico"><use href="#i-line-app"/></svg> เชื่อม LINE OA</span></div><p class="muted">{% if line and line.channel_access_token %}<span class="chip chip-good">เชื่อมแล้ว</span>{% else %}<span class="chip chip-warn">ยังไม่ได้เชื่อม</span>{% endif %}</p></a>
-    <a class="card" href="{% url 'workspace:settings_pipeline' %}"><div class="card-head"><span class="title"><svg class="ico"><use href="#i-trend"/></svg> ขั้นใน Pipeline</span></div><p class="muted">{{ stage_count }} ขั้น</p></a>
-    <a class="card" href="{% url 'workspace:settings_numbering' %}"><div class="card-head"><span class="title"><svg class="ico"><use href="#i-file-text"/></svg> เลขที่เอกสาร</span></div><p class="muted">รูปแบบเลขที่ใบเสนอราคา ฯลฯ</p></a>
-    <a class="card" href="{% url 'workspace:settings_members' %}"><div class="card-head"><span class="title"><svg class="ico"><use href="#i-users"/></svg> สมาชิกและสิทธิ์</span></div><p class="muted">{{ member_count }} คน</p></a>
-    <a class="card" href="{% url 'workspace:settings_billing' %}"><div class="card-head"><span class="title"><svg class="ico"><use href="#i-card"/></svg> แพ็กเกจ</span></div><p class="muted">{{ tenant.get_plan_display }}</p></a>
-    <a class="card" href="{% url 'workspace:system_status' %}"><div class="card-head"><span class="title"><svg class="ico"><use href="#i-shield"/></svg> สถานะระบบ</span></div><p class="muted">ตรวจสถานะการเชื่อมต่อต่าง ๆ</p></a>
-    <a class="card" href="{% url 'workspace:onboarding' %}"><div class="card-head"><span class="title"><svg class="ico"><use href="#i-spark"/></svg> ตั้งค่าครั้งแรก</span></div><p class="muted">ตัวช่วยตั้งค่า 5 ขั้น</p></a>
-  </div>
+<div class="set-hub-grid">
+  <a class="set-hub-card" href="{% url 'workspace:settings_company' %}"><div class="t"><svg class="ico ico-sm"><use href="#i-building"/></svg> ข้อมูลบริษัท</div><div class="s">{{ company.name_th|default:"ยังไม่ได้กรอก" }}{% if company.tax_id %} · {{ company.tax_id }}{% endif %}</div></a>
+  <a class="set-hub-card" href="{% url 'workspace:settings_line' %}"><div class="t"><svg class="ico ico-sm"><use href="#i-line-app"/></svg> เชื่อม LINE OA</div><div class="s">{% if line and line.channel_access_token %}<span class="chip chip-good">เชื่อมแล้ว</span>{% else %}<span class="chip chip-warn">ยังไม่ได้เชื่อม</span>{% endif %}</div></a>
+  <a class="set-hub-card" href="{% url 'workspace:settings_pipeline' %}"><div class="t"><svg class="ico ico-sm"><use href="#i-trend"/></svg> ขั้นใน Pipeline</div><div class="s">{{ stage_count }} ขั้น</div></a>
+  <a class="set-hub-card" href="{% url 'workspace:settings_numbering' %}"><div class="t"><svg class="ico ico-sm"><use href="#i-file-text"/></svg> เลขที่เอกสาร</div><div class="s">รูปแบบเลขที่ใบเสนอราคา ฯลฯ</div></a>
+  <a class="set-hub-card" href="{% url 'workspace:settings_members' %}"><div class="t"><svg class="ico ico-sm"><use href="#i-users"/></svg> สมาชิกและสิทธิ์</div><div class="s">{{ member_count }} คน</div></a>
+  <a class="set-hub-card" href="{% url 'workspace:settings_billing' %}"><div class="t"><svg class="ico ico-sm"><use href="#i-card"/></svg> แพ็กเกจ</div><div class="s">{{ tenant.get_plan_display }}</div></a>
+  <a class="set-hub-card" href="{% url 'workspace:system_status' %}"><div class="t"><svg class="ico ico-sm"><use href="#i-shield"/></svg> สถานะระบบ</div><div class="s">ตรวจสถานะการเชื่อมต่อต่าง ๆ</div></a>
+  <a class="set-hub-card" href="{% url 'workspace:onboarding' %}"><div class="t"><svg class="ico ico-sm"><use href="#i-spark"/></svg> ตั้งค่าครั้งแรก</div><div class="s">ตัวช่วยตั้งค่า 5 ขั้น</div></a>
 </div>
 {% endblock %}

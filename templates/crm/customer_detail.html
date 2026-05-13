@@ -1,44 +1,88 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}{{ customer.name }} · ลูกค้า · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/customer.css' %}">{% endblock %}
 {% block topbar_actions %}<a class="btn btn-sm btn-ghost" href="{% url 'crm:customer_edit' customer.pk %}"><svg class="ico ico-sm"><use href="#i-edit"/></svg> แก้ไข</a>{% endblock %}
 {% block content %}
-<div class="row between" style="align-items:flex-end;margin-bottom:16px">
-  <div><div class="eyebrow">ลูกค้า · {{ customer.get_kind_display }}</div><h1 class="h1 serif-it">{{ customer.name }}</h1></div>
+<div class="c360-top">
+  <div class="c360-avatar">{{ customer.name|slice:":1"|upper }}</div>
+  <div class="c360-info">
+    <div class="c360-name-row">
+      <span class="c360-name">{{ customer.name }}</span>
+      <span class="chip">{{ customer.get_kind_display }}</span>
+      {% if customer.branch_label %}<span class="chip">{{ customer.branch_label }}</span>{% endif %}
+    </div>
+    <div class="c360-meta">
+      {% if customer.tax_id %}<span class="c360-meta-item"><svg class="ico ico-sm"><use href="#i-receipt"/></svg> เลขผู้เสียภาษี <span class="val">{{ customer.tax_id }}</span></span>{% endif %}
+      <span class="c360-meta-item"><svg class="ico ico-sm"><use href="#i-clock"/></svg> เครดิต <span class="val">{{ customer.default_credit_days }} วัน</span></span>
+    </div>
+  </div>
 </div>
-<div class="row wrap" style="align-items:flex-start;gap:16px">
-  <div class="card grow" style="min-width:300px">
-    <div class="card-head"><div class="title">ข้อมูล</div></div>
-    <table class="tbl">
-      <tr><th>เลขผู้เสียภาษี</th><td class="mono">{{ customer.tax_id|default:"—" }}</td></tr>
-      <tr><th>สำนักงาน/สาขา</th><td>{{ customer.branch_label|default:"—" }}</td></tr>
-      <tr><th>ที่อยู่ออกใบกำกับ</th><td>{{ customer.billing_address|linebreaksbr|default:"—" }}</td></tr>
-      <tr><th>ที่อยู่จัดส่ง</th><td>{{ customer.shipping_address|linebreaksbr|default:"—" }}</td></tr>
-      <tr><th>เครดิต (วัน)</th><td>{{ customer.default_credit_days }}</td></tr>
-    </table>
-    {% if customer.notes %}<div class="divider"></div><p class="muted">{{ customer.notes|linebreaksbr }}</p>{% endif %}
-    <div class="divider"></div>
-    <div class="title" style="margin-bottom:6px">ผู้ติดต่อ</div>
-    {% for ct in contacts %}<div class="row between"><span>{{ ct.name }}{% if ct.title %} <span class="muted">· {{ ct.title }}</span>{% endif %}</span><span class="muted mono">{{ ct.phone }} {{ ct.email }}</span></div>{% empty %}<p class="muted">ยังไม่มีผู้ติดต่อ</p>{% endfor %}
+
+<div class="c360-body">
+  <div>
+    <div class="c360-card" style="margin-bottom:16px">
+      <div class="head">ข้อมูลลูกค้า <a class="add" href="{% url 'crm:customer_edit' customer.pk %}">แก้ไข</a></div>
+      <div class="c360-field"><span class="l">เลขผู้เสียภาษี</span><span class="v mono">{{ customer.tax_id|default:"—" }}</span></div>
+      <div class="c360-field"><span class="l">สำนักงาน/สาขา</span><span class="v">{{ customer.branch_label|default:"—" }}</span></div>
+      <div class="c360-field"><span class="l">เครดิต (วัน)</span><span class="v mono">{{ customer.default_credit_days }}</span></div>
+      {% if customer.billing_address %}<div class="c360-addr"><span class="l">ที่อยู่ออกใบกำกับ</span>{{ customer.billing_address }}</div>{% endif %}
+      {% if customer.shipping_address %}<div class="c360-addr"><span class="l">ที่อยู่จัดส่ง</span>{{ customer.shipping_address }}</div>{% endif %}
+      {% if customer.notes %}<div class="c360-addr"><span class="l">บันทึก</span>{{ customer.notes }}</div>{% endif %}
+    </div>
+
+    <div class="c360-card" style="margin-bottom:16px">
+      <div class="head">กิจกรรมล่าสุด</div>
+      {% include "crm/_activity_list.html" %}
+    </div>
   </div>
 
-  <div class="card grow" style="min-width:340px">
-    <div class="card-head"><div class="title">ดีล</div></div>
-    {% for d in deals %}<div class="row between"><a href="{% url 'crm:deal_detail' d.pk %}">{{ d.name }}</a><span class="chip">{{ d.get_status_display }}{% if d.stage %} · {{ d.stage.name }}{% endif %}</span></div>{% empty %}<p class="muted">ยังไม่มีดีล</p>{% endfor %}
-    <div class="divider"></div>
-    <div class="title" style="margin-bottom:6px">ใบเสนอราคา</div>
-    {% for q in quotations %}<div class="row between">
-      <a href="{% url 'quotes:quotation_detail' q.pk %}">{{ q.doc_number|default:q }}</a>
-      <span class="muted" style="text-align:right;font-size:12px">{{ q.get_status_display }}{% if q.view_count %} · ลูกค้าเปิด {{ q.view_count }} ครั้ง{% if q.last_viewed_at %} · ล่าสุด {{ q.last_viewed_at|date:"d/m/Y" }}{% endif %}{% endif %}</span>
-    </div>{% empty %}<p class="muted">ยังไม่มีใบเสนอราคา</p>{% endfor %}
-    <div class="divider"></div>
-    <div class="title" style="margin-bottom:6px">แชท LINE</div>
-    {% for c in conversations %}<div class="row between"><a href="{% url 'integrations:conversation' c.pk %}">{{ c.display_name|default:c }}</a><span class="muted mono">{% if c.unread_count %}{{ c.unread_count }} ใหม่ · {% endif %}{{ c.last_message_at|date:"d/m/Y" }}</span></div>{% empty %}<p class="muted">ยังไม่มีแชท</p>{% endfor %}
-    <div class="divider"></div>
-    <div class="title" style="margin-bottom:6px">งานค้าง</div>
-    {% for t in tasks %}<div class="row between"><span>{{ t.description|default:t.get_kind_display }}</span><span class="muted mono">{{ t.due_at|date:"d/m/Y" }}</span></div>{% empty %}<p class="muted">ไม่มี</p>{% endfor %}
-    <div class="divider"></div>
-    <div class="title" style="margin-bottom:6px">กิจกรรมล่าสุด</div>
-    {% include "crm/_activity_list.html" %}
+  <div class="c360-side">
+    <div class="c360-card">
+      <div class="head">ผู้ติดต่อ · {{ contacts|length }}</div>
+      {% for ct in contacts %}
+      <div class="contact-row">
+        <div class="avatar">{{ ct.name|slice:":1"|upper }}</div>
+        <div class="info"><div class="name">{{ ct.name }}</div><div class="role">{% if ct.title %}{{ ct.title }} · {% endif %}{{ ct.phone }} {{ ct.email }}</div></div>
+      </div>
+      {% empty %}<p class="muted">ยังไม่มีผู้ติดต่อ</p>{% endfor %}
+    </div>
+
+    <div class="c360-card">
+      <div class="head">ดีล · {{ deals|length }}</div>
+      {% for d in deals %}
+      <a class="open-deal" href="{% url 'crm:deal_detail' d.pk %}">
+        <div class="top"><span class="t">{{ d.name }}</span><span class="amt">{{ d.estimated_value|floatformat:0 }}</span></div>
+        <div class="meta"><span class="chip">{{ d.get_status_display }}</span>{% if d.stage %}<span>{{ d.stage.name }}</span>{% endif %}</div>
+      </a>
+      {% empty %}<p class="muted">ยังไม่มีดีล</p>{% endfor %}
+    </div>
+
+    <div class="c360-card">
+      <div class="head">ใบเสนอราคา · {{ quotations|length }}</div>
+      {% for q in quotations %}
+      <a class="quote-mini" href="{% url 'quotes:quotation_detail' q.pk %}">
+        <div class="top"><span class="no">{{ q.doc_number|default:q }}</span><span class="st">{{ q.get_status_display }}</span></div>
+        {% if q.view_count %}<div class="views">ลูกค้าเปิด {{ q.view_count }} ครั้ง{% if q.last_viewed_at %} · ล่าสุด {{ q.last_viewed_at|date:"d/m/Y" }}{% endif %}</div>{% endif %}
+      </a>
+      {% empty %}<p class="muted">ยังไม่มีใบเสนอราคา</p>{% endfor %}
+    </div>
+
+    <div class="c360-card">
+      <div class="head">แชท LINE · {{ conversations|length }}</div>
+      {% for c in conversations %}
+      <a class="quote-mini" href="{% url 'integrations:conversation' c.pk %}">
+        <div class="top"><span class="no">{{ c.display_name|default:c }}</span><span class="st">{% if c.unread_count %}{{ c.unread_count }} ใหม่ · {% endif %}{{ c.last_message_at|date:"d/m/Y" }}</span></div>
+      </a>
+      {% empty %}<p class="muted">ยังไม่มีแชท</p>{% endfor %}
+    </div>
+
+    <div class="c360-card">
+      <div class="head">งานค้าง</div>
+      {% for t in tasks %}
+      <div class="c360-field"><span class="l">{{ t.description|default:t.get_kind_display }}</span><span class="v mono">{{ t.due_at|date:"d/m/Y" }}</span></div>
+      {% empty %}<p class="muted">ไม่มี</p>{% endfor %}
+    </div>
   </div>
 </div>
 {% endblock %}

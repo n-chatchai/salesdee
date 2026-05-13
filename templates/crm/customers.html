@@ -1,18 +1,22 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}ลูกค้า · salesdee.{% endblock %}
 {% block topbar_actions %}<a class="btn btn-sm btn-primary" href="{% url 'crm:customer_create' %}"><svg class="ico ico-sm"><use href="#i-plus"/></svg> ลูกค้าใหม่</a>{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/lists.css' %}">{% endblock %}
 {% block content %}
-<div class="row between" style="align-items:flex-end;margin-bottom:16px">
-  <div><div class="eyebrow">ฐานข้อมูล</div><h1 class="h1 serif-it">ลูกค้า</h1></div>
+<div class="list-head">
+  <div class="eyebrow">ฐานข้อมูล</div>
+  <h1>ลูกค้า</h1>
+  <span class="count-pill">{{ customers|length }}</span>
 </div>
-<div class="card">
+<div class="card" style="padding:0;overflow:hidden">
   <table class="tbl">
-    <thead><tr><th>ชื่อลูกค้า</th><th>ประเภท</th><th>เลขผู้เสียภาษี</th><th>ดีล</th><th>เครดิต (วัน)</th></tr></thead>
+    <thead><tr><th>ชื่อลูกค้า</th><th>ประเภท</th><th>เลขผู้เสียภาษี</th><th class="num">ดีล</th><th class="num">เครดิต (วัน)</th></tr></thead>
     <tbody>
     {% for c in customers %}
-      <tr onclick="location.href='{% url 'crm:customer_detail' c.pk %}'" style="cursor:pointer">
-        <td>{{ c.name }}</td><td>{{ c.get_kind_display }}</td><td class="mono">{{ c.tax_id|default:"—" }}</td>
-        <td>{{ c.deal_count }}</td><td>{{ c.default_credit_days }}</td>
+      <tr onclick="location.href='{% url 'crm:customer_detail' c.pk %}'">
+        <td>{{ c.name }}</td><td><span class="chip">{{ c.get_kind_display }}</span></td><td class="mono">{{ c.tax_id|default:"—" }}</td>
+        <td class="num">{{ c.deal_count }}</td><td class="num">{{ c.default_credit_days }}</td>
       </tr>
     {% empty %}<tr><td colspan="5" class="muted">ยังไม่มีลูกค้า</td></tr>{% endfor %}
     </tbody>

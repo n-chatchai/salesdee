@@ -1,7 +1,12 @@
 {% for a in activities %}
-<div class="row between" style="align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border)">
-  <div><span class="chip">{{ a.get_kind_display }}</span> {{ a.body|linebreaksbr }}
-    {% if a.created_by %}<div class="muted" style="font-size:12px">{{ a.created_by.get_short_name }}</div>{% endif %}</div>
-  <span class="muted mono" style="font-size:12px;white-space:nowrap">{{ a.occurred_at|date:"d/m/Y H:i" }}</span>
+<div class="tl-event">
+  <div class="tl-event-icon{% if a.kind == 'line' or a.kind == 'email' %} good{% elif a.kind == 'call' or a.kind == 'meeting' or a.kind == 'site_visit' %} accent{% endif %}">
+    <svg class="ico ico-sm"><use href="#i-{% if a.kind == 'call' %}phone{% elif a.kind == 'line' %}line-app{% elif a.kind == 'email' %}mail{% elif a.kind == 'meeting' %}users{% elif a.kind == 'site_visit' %}pin{% else %}edit{% endif %}"/></svg>
+  </div>
+  <div class="tl-event-body">
+    <div class="tl-event-title">{{ a.get_kind_display }}{% if a.created_by %} · <strong>{{ a.created_by.get_short_name }}</strong>{% endif %}</div>
+    {% if a.body %}<div class="tl-event-desc">{{ a.body|linebreaksbr }}</div>{% endif %}
+  </div>
+  <span class="tl-event-time">{{ a.occurred_at|date:"d/m/Y H:i" }}</span>
 </div>
 {% empty %}<p class="muted">ยังไม่มีกิจกรรม</p>{% endfor %}

@@ -16,11 +16,12 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 {% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/settings.css' %}">{% endblock %}
 {% block content %}
-<div style="margin-bottom:16px"><div class="eyebrow">ตั้งค่า</div><h1 class="h1 serif-it">ขั้นใน Pipeline</h1></div>
-<div class="row wrap" style="gap:20px;align-items:flex-start">
+<div class="set-page-head"><div class="eyebrow">ตั้งค่า</div><h1>ขั้นใน Pipeline</h1></div>
+<div class="set-layout">
   {% include "tenants/_settings_nav.html" %}
-  <div class="grow" style="max-width:760px">
+  <div class="set-main" style="max-width:760px">
     <div class="card">
       <div class="card-head"><span class="title">ขั้นปัจจุบัน</span><span class="muted ml-auto" style="font-size:12px">ลากเพื่อจัดลำดับ</span></div>
       <table class="tbl"><tbody id="stage-list">

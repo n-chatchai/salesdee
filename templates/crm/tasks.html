@@ -1,9 +1,12 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}งานของฉัน · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/lists.css' %}">{% endblock %}
 {% block content %}
-<div class="row between" style="align-items:flex-end;margin-bottom:16px">
-  <div><div class="eyebrow">งานขาย</div><h1 class="h1 serif-it">งานของฉัน</h1></div>
-  <span class="chip">{{ tasks|length }} งานค้าง</span>
+<div class="list-head">
+  <div class="eyebrow">งานขาย</div>
+  <h1>งานของฉัน</h1>
+  <span class="count-pill">{{ tasks|length }}</span>
 </div>
 <div class="card">
   {% for t in tasks %}{% include "crm/_task_row.html" with task=t %}{% empty %}<p class="empty-state muted">ไม่มีงานค้าง 🎉</p>{% endfor %}

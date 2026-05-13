@@ -1,5 +1,7 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}{{ document.doc_number|default:"ใบเสนอราคา" }} · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/quote-editor.css' %}">{% endblock %}
 {% block topbar_actions %}
 <a class="btn btn-sm btn-ghost" href="{% url 'quotes:quotation_pdf' document.pk %}" target="_blank"><svg class="ico ico-sm"><use href="#i-download"/></svg> PDF</a>
 {% if editable %}<a class="btn btn-sm btn-ghost" href="{% url 'quotes:quotation_edit' document.pk %}"><svg class="ico ico-sm"><use href="#i-edit"/></svg> แก้ไขหัวเอกสาร</a>{% endif %}
@@ -9,49 +11,55 @@
 {% endif %}
 {% endblock %}
 {% block content %}
-<div class="row between" style="align-items:flex-end;margin-bottom:8px">
-  <div><div class="eyebrow">ใบเสนอราคา · {{ document.get_status_display }}{% if document.revision %} · Rev.{{ document.revision }}{% endif %}</div><h1 class="h1 serif-it">{{ document.doc_number|default:"(ร่าง)" }}</h1></div>
-  <div class="kpi" style="min-width:0"><div class="label">ยอดรวมทั้งสิ้น</div><div class="value">{{ totals.grand_total|floatformat:2 }}</div>{% if document.view_count %}<div class="delta">ลูกค้าเปิดดู {{ document.view_count }} ครั้ง</div>{% endif %}</div>
+<div class="qd-head">
+  <div>
+    <div class="eyebrow">ใบเสนอราคา · {{ document.get_status_display }}{% if document.revision %} · Rev.{{ document.revision }}{% endif %}</div>
+    <h1>{{ document.doc_number|default:"(ร่าง)" }}</h1>
+    <div class="qd-head-meta">
+      <span>{{ document.customer.name|default:document.reference|default:"ลูกค้า" }}</span>
+      <span>·</span>
+      <span>ออก {{ document.issue_date|date:"d/m/Y" }}</span>
+      {% if document.valid_until %}<span>·</span><span>ยืนราคาถึง {{ document.valid_until|date:"d/m/Y" }}</span>{% endif %}
+      <span class="chip">{{ document.get_status_display }}</span>
+    </div>
+  </div>
+  <div class="qd-grand">
+    <div class="label">ยอดรวมทั้งสิ้น</div>
+    <div class="value">{{ totals.grand_total|floatformat:2 }}</div>
+    {% if document.view_count %}<div class="delta">ลูกค้าเปิดดู {{ document.view_count }} ครั้ง</div>{% endif %}
+  </div>
 </div>
 
-{% if document.source_conversation_id %}<div class="ai-panel" style="margin-bottom:12px"><svg class="ico ico-sm"><use href="#i-spark"/></svg> ร่างจากบทสนทนาในกล่องข้อความ — โปรดตรวจสอบทุกบรรทัดก่อนส่ง</div>{% endif %}
+{% if document.source_conversation_id %}<div class="qd-ai-banner"><svg class="ico ico-sm"><use href="#i-spark"/></svg> ผู้ช่วยร่างจากบทสนทนาในกล่องข้อความ — โปรดตรวจสอบทุกบรรทัดก่อนส่ง</div>{% endif %}
 
 {# workflow buttons #}
-<div class="row wrap" style="margin-bottom:14px">
-  {% if document.status == 'draft' %}<form method="post" action="{% url 'quotes:quotation_submit' document.pk %}" style="display:inline">{% csrf_token %}<button class="btn btn-sm">ส่งตรวจ/ขออนุมัติ</button></form>{% endif %}
+<div class="qd-workflow">
+  {% if document.status == 'draft' %}<form method="post" action="{% url 'quotes:quotation_submit' document.pk %}">{% csrf_token %}<button class="btn btn-sm">ส่งตรวจ/ขออนุมัติ</button></form>{% endif %}
   {% if document.status == 'pending' and can_approve %}
-    <form method="post" action="{% url 'quotes:quotation_approve' document.pk %}" style="display:inline">{% csrf_token %}<button class="btn btn-sm btn-primary">อนุมัติส่วนลด</button></form>
-    <form method="post" action="{% url 'quotes:quotation_reject_approval' document.pk %}" style="display:inline">{% csrf_token %}<input type="hidden" name="note" value=""><button class="btn btn-sm btn-danger">ตีกลับ</button></form>
+    <form method="post" action="{% url 'quotes:quotation_approve' document.pk %}">{% csrf_token %}<button class="btn btn-sm btn-primary">อนุมัติส่วนลด</button></form>
+    <form method="post" action="{% url 'quotes:quotation_reject_approval' document.pk %}">{% csrf_token %}<input type="hidden" name="note" value=""><button class="btn btn-sm btn-danger">ตีกลับ</button></form>
   {% endif %}
   {% if document.status == 'pending' and not can_approve %}<span class="chip chip-warn">รอผู้จัดการอนุมัติส่วนลด</span>{% endif %}
-  {% if not editable and document.status != 'cancelled' %}<form method="post" action="{% url 'quotes:quotation_reopen' document.pk %}" style="display:inline">{% csrf_token %}<button class="btn btn-sm">เปิดแก้ไขใหม่ (Rev.)</button></form>{% endif %}
-  {% if document.status != 'cancelled' %}<form method="post" action="{% url 'quotes:quotation_cancel' document.pk %}" style="display:inline">{% csrf_token %}<button class="btn btn-sm btn-ghost" hx-confirm="ยกเลิกใบเสนอราคานี้?">ยกเลิกเอกสาร</button></form>{% endif %}
+  {% if not editable and document.status != 'cancelled' %}<form method="post" action="{% url 'quotes:quotation_reopen' document.pk %}">{% csrf_token %}<button class="btn btn-sm">เปิดแก้ไขใหม่ (Rev.)</button></form>{% endif %}
+  {% if document.status != 'cancelled' %}<form method="post" action="{% url 'quotes:quotation_cancel' document.pk %}">{% csrf_token %}<button class="btn btn-sm btn-ghost" hx-confirm="ยกเลิกใบเสนอราคานี้?">ยกเลิกเอกสาร</button></form>{% endif %}
   {% if revisions %}<a class="btn btn-sm btn-ghost" href="{% url 'quotes:quotation_revisions' document.pk %}">ประวัติเวอร์ชัน ({{ revisions|length }})</a>{% endif %}
 </div>
 
-<div class="card">
-  <div class="card-head"><div class="title">ข้อมูลเอกสาร</div></div>
-  <div class="row wrap" style="gap:32px">
-    <table class="tbl" style="flex:1;min-width:280px">
-      <tr><th>ลูกค้า</th><td>{{ document.customer.name|default:document.reference|default:"—" }}</td></tr>
-      <tr><th>ผู้ติดต่อ</th><td>{{ document.contact.name|default:"—" }}</td></tr>
-      <tr><th>อ้างอิง</th><td>{{ document.reference|default:"—" }}</td></tr>
-      <tr><th>พนักงานขาย</th><td>{{ document.salesperson.get_full_name|default:"—" }}</td></tr>
-    </table>
-    <table class="tbl" style="flex:1;min-width:280px">
-      <tr><th>วันที่ออก</th><td>{{ document.issue_date|date:"d/m/Y" }}</td></tr>
-      <tr><th>ยืนราคาถึง</th><td>{{ document.valid_until|date:"d/m/Y"|default:"—" }}</td></tr>
-      <tr><th>เงื่อนไขชำระเงิน</th><td>{{ document.payment_terms|linebreaksbr|default:"—" }}</td></tr>
-      <tr><th>กำหนดส่งมอบ/ติดตั้ง</th><td>{{ document.lead_time|default:"—" }}</td></tr>
-      <tr><th>การรับประกัน</th><td>{{ document.warranty|default:"—" }}</td></tr>
-    </table>
-  </div>
-  {% if document.notes %}<div class="divider"></div><p class="muted">{{ document.notes|linebreaksbr }}</p>{% endif %}
-  {% if document.customer_response %}<div class="divider"></div><p>คำตอบจากลูกค้า: <strong>{{ document.get_customer_response_display }}</strong>{% if document.customer_signed_name %} โดย {{ document.customer_signed_name }}{% endif %}{% if document.customer_response_note %} — {{ document.customer_response_note }}{% endif %}</p>{% endif %}
+<div class="qb-section-label">หัวเอกสาร</div>
+<div class="qb-header-grid">
+  <div class="qb-field"><div class="qb-field-label">ลูกค้า</div><div class="qb-field-value bold">{{ document.customer.name|default:document.reference|default:"—" }}</div></div>
+  <div class="qb-field"><div class="qb-field-label">ผู้ติดต่อ</div><div class="qb-field-value">{{ document.contact.name|default:"—" }}</div></div>
+  <div class="qb-field"><div class="qb-field-label">อ้างอิงโครงการ</div><div class="qb-field-value">{{ document.reference|default:"—" }}</div></div>
+  <div class="qb-field"><div class="qb-field-label">พนักงานขาย</div><div class="qb-field-value">{{ document.salesperson.get_full_name|default:"—" }}</div></div>
+  <div class="qb-field"><div class="qb-field-label">วันที่ออก</div><div class="qb-field-value mono">{{ document.issue_date|date:"d/m/Y" }}</div></div>
+  <div class="qb-field"><div class="qb-field-label">ยืนราคาถึง</div><div class="qb-field-value mono">{{ document.valid_until|date:"d/m/Y"|default:"—" }}</div></div>
+  <div class="qb-field"><div class="qb-field-label">เงื่อนไขชำระเงิน</div><div class="qb-field-value">{{ document.payment_terms|default:"—" }}</div></div>
+  <div class="qb-field"><div class="qb-field-label">กำหนดส่งมอบ/ติดตั้ง</div><div class="qb-field-value">{{ document.lead_time|default:"—" }}</div></div>
+  <div class="qb-field"><div class="qb-field-label">การรับประกัน</div><div class="qb-field-value">{{ document.warranty|default:"—" }}</div></div>
 </div>
+{% if document.notes %}<div class="qb-extra-note">{{ document.notes|linebreaksbr }}</div>{% endif %}
+{% if document.customer_response %}<div class="qb-extra-note">คำตอบจากลูกค้า: <strong>{{ document.get_customer_response_display }}</strong>{% if document.customer_signed_name %} โดย {{ document.customer_signed_name }}{% endif %}{% if document.customer_response_note %} — {{ document.customer_response_note }}{% endif %}</div>{% endif %}
 
-<div class="card">
-  <div class="card-head"><div class="title">รายการ</div></div>
-  {% include "quotes/_quote_lines.html" %}
-</div>
+<div class="qb-section-label">รายการ</div>
+{% include "quotes/_quote_lines.html" %}
 {% endblock %}

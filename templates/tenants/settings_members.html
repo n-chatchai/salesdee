@@ -1,10 +1,12 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}สมาชิกและสิทธิ์ · ตั้งค่า{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/settings.css' %}">{% endblock %}
 {% block content %}
-<div style="margin-bottom:16px"><div class="eyebrow">ตั้งค่า</div><h1 class="h1 serif-it">สมาชิกและสิทธิ์</h1></div>
-<div class="row wrap" style="gap:20px;align-items:flex-start">
+<div class="set-page-head"><div class="eyebrow">ตั้งค่า</div><h1>สมาชิกและสิทธิ์</h1></div>
+<div class="set-layout">
   {% include "tenants/_settings_nav.html" %}
-  <div class="grow" style="max-width:760px">
+  <div class="set-main" style="max-width:760px">
     <div class="card">
       <div class="card-head"><span class="title">สมาชิก ({{ memberships|length }})</span></div>
       <table class="tbl"><thead><tr><th>อีเมล</th><th>บทบาท</th><th>การมองเห็น</th><th>สถานะ</th>{% if can_admin %}<th></th>{% endif %}</tr></thead><tbody>

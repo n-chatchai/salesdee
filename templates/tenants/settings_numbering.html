@@ -1,11 +1,13 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}เลขที่เอกสาร · ตั้งค่า{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/settings.css' %}">{% endblock %}
 {% block content %}
-<div style="margin-bottom:16px"><div class="eyebrow">ตั้งค่า</div><h1 class="h1 serif-it">เลขที่เอกสาร</h1></div>
-<div class="row wrap" style="gap:20px;align-items:flex-start">
+<div class="set-page-head"><div class="eyebrow">ตั้งค่า</div><h1>เลขที่เอกสาร</h1></div>
+<div class="set-layout">
   {% include "tenants/_settings_nav.html" %}
-  <div class="grow" style="max-width:720px">
-    <div class="ai-panel" style="margin-bottom:14px"><strong>ระวัง:</strong> เลขที่เอกสารภาษี (ใบกำกับภาษี / ใบลดหนี้ / ใบเพิ่มหนี้) ต้องเรียงต่อเนื่องไม่กระโดด — แก้ค่าตัวนับเฉพาะเมื่อจำเป็นจริง ๆ</div>
+  <div class="set-main" style="max-width:720px">
+    <div class="set-notice warn"><svg class="ico ico-sm"><use href="#i-alert"/></svg><div><strong>ระวัง:</strong> เลขที่เอกสารภาษี (ใบกำกับภาษี / ใบลดหนี้ / ใบเพิ่มหนี้) ต้องเรียงต่อเนื่องไม่กระโดด — แก้ค่าตัวนับเฉพาะเมื่อจำเป็นจริง ๆ</div></div>
     <div class="card">
       <div class="card-head"><span class="title">ตัวนับปัจจุบัน</span></div>
       <table class="tbl"><thead><tr><th>ชนิดเอกสาร</th><th>ปี (พ.ศ.)</th><th>เลขล่าสุด</th><th></th></tr></thead><tbody>

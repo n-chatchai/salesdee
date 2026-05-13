@@ -1,10 +1,12 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}แพ็กเกจ · ตั้งค่า{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/settings.css' %}">{% endblock %}
 {% block content %}
-<div style="margin-bottom:16px"><div class="eyebrow">ตั้งค่า</div><h1 class="h1 serif-it">แพ็กเกจ</h1></div>
-<div class="row wrap" style="gap:20px;align-items:flex-start">
+<div class="set-page-head"><div class="eyebrow">ตั้งค่า</div><h1>แพ็กเกจ</h1></div>
+<div class="set-layout">
   {% include "tenants/_settings_nav.html" %}
-  <div class="grow">
+  <div class="set-main">
     <div class="card" style="margin-bottom:16px"><strong>แพ็กเกจปัจจุบัน:</strong> {{ tenant.get_plan_display }} — <span class="muted">ติดต่อทีมงานเพื่อเปลี่ยนแพ็กเกจ</span></div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px">
       {% for code,name,price,desc in tiers %}
