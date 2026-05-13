@@ -157,3 +157,51 @@ def send_ar_reminder(invoice_id: int, tenant_id: int) -> None:
                         f"แจ้งเตือน: ใบแจ้งหนี้ {inv.doc_number} ยอดค้างชำระ "
                         f"{outstanding:,.2f} บาท ครบกำหนด {due}",
                     )
+
+
+@task()
+def notify_new_lead(lead_id: int, tenant_id: int) -> None:
+    """Tell the workspace's owners/managers a new lead just came in from the public intake form.
+    Best-effort email to every active manager/owner; the LINE notify is via the contact's LINE
+    later if they replied. No-ops if no recipients."""
+    import contextlib
+
+    tenant = _tenant(tenant_id)
+    if tenant is None:
+        return
+    with tenant_context(tenant):
+        from apps.accounts.models import Membership, Role
+        from apps.crm.models import Lead
+
+        lead = Lead.objects.filter(pk=lead_id).first()
+        if lead is None:
+            return
+        recipients = list(
+            Membership.objects.filter(
+                tenant=tenant, is_active=True, role__in=(Role.OWNER, Role.MANAGER)
+            )
+            .select_related("user")
+            .values_list("user__email", flat=True)
+        )
+        recipients = [e for e in recipients if e]
+        if recipients:
+            interest = lead.product_interest or "ไม่ระบุ"
+            body = (
+                f"มีลีดใหม่จากหน้าโชว์รูม\n\n"
+                f"ชื่อ: {lead.name}\n"
+                f"สนใจ: {interest}\n"
+                f"โทร: {lead.phone or '—'}\n"
+                f"อีเมล: {lead.email or '—'}\n"
+                f"LINE: {lead.line_id or '—'}\n"
+                f"งบประมาณ: {lead.budget or '—'}\n\n"
+                f"ข้อความ:\n{lead.message or '—'}\n\n"
+                f"ระบบ salesdee"
+            )
+            with contextlib.suppress(Exception):
+                send_mail(
+                    subject=f"ลีดใหม่ · {lead.name} (สนใจ {interest})",
+                    message=body,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=recipients,
+                    fail_silently=True,
+                )

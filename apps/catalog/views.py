@@ -124,9 +124,21 @@ def _public_tenant(tenant_slug: str):
     return get_object_or_404(Tenant, slug=tenant_slug, is_active=True)
 
 
+_PRICE_BANDS = {
+    "u5000": (None, 5000),
+    "5to15": (5000, 15000),
+    "15to50": (15000, 50000),
+    "o50000": (50000, None),
+}
+
+
 def public_catalog(request: HttpRequest, tenant_slug: str) -> HttpResponse:
+    """Browse the tenant's published catalog with keyword + category + price-band filters.
+    Filter UI is htmx-friendly (just query params today; the page rerenders cheaply)."""
     tenant = _public_tenant(tenant_slug)
-    selected = request.GET.get("cat", "").strip()
+    selected_cat = request.GET.get("cat", "").strip() or request.GET.get("category", "").strip()
+    q = (request.GET.get("q") or "").strip()[:120]
+    band = (request.GET.get("price") or "").strip()
     with tenant_context(tenant):
         from apps.tenants.models import CompanyProfile
 
@@ -142,8 +154,16 @@ def public_catalog(request: HttpRequest, tenant_slug: str) -> HttpResponse:
             .select_related("category")
             .order_by("category__order", "name")
         )
-        if selected.isdigit():
-            products = products.filter(category_id=int(selected))
+        if selected_cat.isdigit():
+            products = products.filter(category_id=int(selected_cat))
+        if q:
+            products = products.filter(Q(name__icontains=q) | Q(code__icontains=q))
+        if band in _PRICE_BANDS:
+            lo, hi = _PRICE_BANDS[band]
+            if lo is not None:
+                products = products.filter(default_price__gte=lo)
+            if hi is not None:
+                products = products.filter(default_price__lte=hi)
         return render(
             request,
             "catalog/public_catalog.html",
@@ -152,7 +172,9 @@ def public_catalog(request: HttpRequest, tenant_slug: str) -> HttpResponse:
                 "company": CompanyProfile.objects.filter(tenant=tenant).first(),
                 "categories": categories,
                 "products": list(products),
-                "selected_cat": selected,
+                "selected_cat": selected_cat,
+                "q": q,
+                "price_band": band,
             },
         )
 
@@ -204,6 +226,14 @@ def public_product(request: HttpRequest, tenant_slug: str, pk: int) -> HttpRespo
             pk=pk,
             is_active=True,
         )
+        related = []
+        if product.category_id:
+            related = list(
+                Product.objects.filter(is_active=True, category_id=product.category_id)
+                .exclude(pk=product.pk)
+                .select_related("category")
+                .order_by("-created_at")[:4]
+            )
         return render(
             request,
             "catalog/public_product.html",
@@ -211,6 +241,7 @@ def public_product(request: HttpRequest, tenant_slug: str, pk: int) -> HttpRespo
                 "tenant": tenant,
                 "company": CompanyProfile.objects.filter(tenant=tenant).first(),
                 "product": product,
+                "related_products": related,
             },
         )
 

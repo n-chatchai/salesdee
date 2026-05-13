@@ -3,19 +3,38 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{{ product.name }} · {{ company.name_th|default:tenant.name }}</title>
 <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
-  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'css/tokens.css' %}">
 <link rel="stylesheet" href="{% static 'css/app.css' %}">
 <link rel="stylesheet" href="{% static 'css/public.css' %}">
+{% if product.images.first %}<link rel="preload" as="image" href="{{ product.images.first.image.url }}">{% endif %}
+<script src="{% static 'js/alpine.min.js' %}" defer></script>
 </head><body class="public">
 {% include "partials/icons.html" %}
-<div class="pub-wrap">
-  <div class="pub-head"><a class="mark" href="{% url 'public_home' tenant.slug %}" style="text-decoration:none">{{ tenant.name|slice:":1"|upper }}</a><div><a href="{% url 'public_home' tenant.slug %}" style="text-decoration:none;color:inherit"><strong>{{ company.name_th|default:tenant.name }}</strong></a><div class="muted" style="font-size:13px"><a href="{% url 'public_catalog' tenant.slug %}" style="color:inherit">← กลับแคตตาล็อก</a></div></div></div>
+<div class="pub-wrap" x-data="{ hero: '{% if product.images.first %}{{ product.images.first.image.url }}{% endif %}' }">
+  <div class="pub-head">
+    <a class="mark" href="{% url 'public_home' tenant.slug %}" style="text-decoration:none">{{ tenant.name|slice:":1"|upper }}</a>
+    <div><a href="{% url 'public_home' tenant.slug %}" style="text-decoration:none;color:inherit"><strong>{{ company.name_th|default:tenant.name }}</strong></a><div class="muted" style="font-size:13px"><a href="{% url 'public_catalog' tenant.slug %}" style="color:inherit">← กลับแคตตาล็อก</a></div></div>
+  </div>
   <div class="pub-card">
-    {% if product.images.all %}<div class="pub-grid" style="margin-bottom:16px">{% for im in product.images.all %}<img src="{{ im.image.url }}" alt="{{ im.caption|default:product.name }}" style="width:100%;border-radius:10px">{% endfor %}</div>{% endif %}
+    {% if product.images.all %}
+      <div class="pub-product-gallery">
+        <div class="pub-hero-image">
+          {% if product.images.first %}<img loading="eager" :src="hero" alt="{{ product.name }}">{% endif %}
+        </div>
+        {% if product.images.all|length > 1 %}
+        <div class="pub-thumbs">
+          {% for im in product.images.all %}<button type="button" class="pub-thumb" :class="{ active: hero === '{{ im.image.url }}' }" @click="hero = '{{ im.image.url }}'"><img loading="lazy" src="{{ im.image.url }}" alt="{{ im.caption|default:product.name }}"></button>{% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    {% endif %}
     <h1 style="margin-top:0">{{ product.name }}</h1>
-    {% if product.code %}<div class="muted mono">{{ product.code }}</div>{% endif %}
-    {% if product.default_price %}<div style="font-size:20px;margin:8px 0">{{ product.default_price|floatformat:0 }} บาท</div>{% endif %}
-    {% if product.description %}<p>{{ product.description|linebreaksbr }}</p>{% endif %}
+    <div class="row" style="gap:8px;align-items:center;flex-wrap:wrap">
+      {% if product.code %}<span class="muted mono">{{ product.code }}</span>{% endif %}
+      {% if product.default_price %}<span class="chip">{{ product.default_price|floatformat:0 }} บาท / {{ product.unit }}</span>{% endif %}
+      <span class="chip muted">{{ product.get_tax_type_display }}</span>
+    </div>
+    {% if product.description %}<p style="margin-top:14px">{{ product.description|linebreaksbr }}</p>{% endif %}
     <table class="tbl-pub">
       {% if product.dimensions %}<tr><th>ขนาด</th><td>{{ product.dimensions }}</td></tr>{% endif %}
       {% if product.material %}<tr><th>วัสดุ/ผิว</th><td>{{ product.material }}</td></tr>{% endif %}
@@ -24,7 +43,30 @@
     </table>
     {% if product.variants.all %}<h3>รุ่นย่อย</h3>{% for v in product.variants.all %}<div class="totbox" style="margin:0"><div class="row"><span>{{ v.name }}</span><span>{{ v.price|floatformat:0 }}</span></div></div>{% endfor %}{% endif %}
     {% if product.options.all %}<h3>ออปชันเสริม</h3>{% for o in product.options.all %}<div class="row"><span>{{ o.name }}</span><span>+{{ o.extra_price|floatformat:0 }}</span></div>{% endfor %}{% endif %}
-    <p style="margin-top:20px"><a class="btn" href="{% url 'crm:lead_intake' tenant.slug %}?product={{ product.name|urlencode }}">ขอใบเสนอราคาสินค้านี้</a></p>
+    <div class="pub-cta-row" style="margin-top:20px;display:flex;flex-wrap:wrap;gap:10px">
+      <a class="btn" href="{% url 'crm:lead_intake' tenant.slug %}?product={{ product.name|urlencode }}&product_id={{ product.pk }}">ขอใบเสนอราคาสินค้านี้</a>
+      {% if company.line_id %}<a class="btn ghost" href="https://line.me/R/ti/p/{{ company.line_id }}">ติดต่อทาง LINE</a>{% elif company.phone %}<a class="btn ghost" href="tel:{{ company.phone }}">โทร {{ company.phone }}</a>{% endif %}
+    </div>
   </div>
+
+  {% if related_products %}
+  <div class="pub-card" style="margin-top:20px">
+    <h2 style="margin-top:0">รุ่นใกล้เคียง</h2>
+    <div class="pub-grid">
+      {% for p in related_products %}
+      <a class="pub-prod" href="{% url 'public_product' tenant.slug p.pk %}">
+        {% if p.images.first %}<img loading="lazy" src="{{ p.images.first.image.url }}" alt="{{ p.name }}">{% else %}<div style="height:160px;background:linear-gradient(135deg,#e9e2d2,#dcd3bf);display:flex;align-items:center;justify-content:center"><svg class="ico ico-xl muted"><use href="#i-package"/></svg></div>{% endif %}
+        <div class="body"><strong>{{ p.name }}</strong><div class="muted" style="font-size:13px">{{ p.category.name|default:"" }}</div>{% if p.default_price %}<div style="margin-top:4px">{{ p.default_price|floatformat:0 }} บาท</div>{% endif %}</div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+{# sticky mobile CTA bar #}
+<div class="pub-mobile-bar">
+  <a class="btn" href="{% url 'crm:lead_intake' tenant.slug %}?product={{ product.name|urlencode }}&product_id={{ product.pk }}">ขอใบเสนอราคา</a>
+  {% if company.line_id %}<a class="btn ghost" href="https://line.me/R/ti/p/{{ company.line_id }}">LINE</a>{% endif %}
 </div>
 </body></html>

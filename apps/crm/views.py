@@ -472,9 +472,12 @@ def _reports_xlsx(data: dict) -> HttpResponse:
 
 
 def lead_intake(request: HttpRequest, tenant_slug: str) -> HttpResponse:
-    """Public 'request a quote / contact us' form for a tenant. No login. Tenant from the URL."""
+    """Public 'request a quote / contact us' form for a tenant. No login. Tenant from the URL.
+    Accepts ``?product=<name>`` (free-text, pre-fills "สนใจ") and ``?product_id=<pk>`` (links to a
+    catalog product). On a successful submit fires a manager email notification (apps.core.notifications)."""
+    from apps.catalog.models import Product
     from apps.core.current_tenant import tenant_context
-    from apps.tenants.models import Tenant
+    from apps.tenants.models import CompanyProfile, Tenant
 
     tenant = get_object_or_404(Tenant, slug=tenant_slug, is_active=True)
     with tenant_context(tenant):
@@ -483,10 +486,28 @@ def lead_intake(request: HttpRequest, tenant_slug: str) -> HttpResponse:
             if form.is_valid():
                 lead = form.save(commit=False)
                 lead.channel = LeadChannel.WEB_FORM
-                lead.source = "intake form"
+                source = "showroom"
+                pid = (request.POST.get("product_id") or "").strip()
+                if pid.isdigit():
+                    source = f"showroom · product={pid}"
+                lead.source = source
                 lead.save()
+                from apps.core.notifications import notify_new_lead
+
+                notify_new_lead.enqueue(lead.pk, tenant.pk)
                 return render(request, "crm/intake_thanks.html", {"tenant": tenant})
         else:
             product = request.GET.get("product", "").strip()[:255]
-            form = LeadIntakeForm(initial={"product_interest": product} if product else None)
-        return render(request, "crm/intake.html", {"form": form, "tenant": tenant})
+            pid = (request.GET.get("product_id") or "").strip()
+            initial: dict = {}
+            if product:
+                initial["product_interest"] = product
+            elif pid.isdigit():
+                prod = Product.objects.filter(pk=int(pid), is_active=True).first()
+                if prod is not None:
+                    initial["product_interest"] = prod.name
+            form = LeadIntakeForm(initial=initial or None)
+        company = CompanyProfile.objects.filter(tenant=tenant).first()
+        return render(
+            request, "crm/intake.html", {"form": form, "tenant": tenant, "company": company}
+        )

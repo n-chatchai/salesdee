@@ -19,7 +19,8 @@
       <h1>{{ company.name_th|default:tenant.name }}</h1>
       <p class="tagline">{% if company.name_en %}{{ company.name_en }}{% else %}เฟอร์นิเจอร์คุณภาพ พร้อมบริการเสนอราคา ติดตั้ง และรับประกัน{% endif %}</p>
       <div class="row" style="gap:10px;margin-top:18px">
-        <a class="btn" href="{% url 'public_catalog' tenant.slug %}">ดูสินค้าทั้งหมด</a>
+        <a class="btn" href="{% url 'crm:lead_intake' tenant.slug %}">ขอใบเสนอราคา</a>
+        <a class="btn ghost" href="{% url 'public_catalog' tenant.slug %}">ดูสินค้าทั้งหมด</a>
         {% if company.line_id %}<a class="btn ghost" href="https://line.me/R/ti/p/{{ company.line_id }}">ติดต่อทาง LINE</a>{% elif company.phone %}<a class="btn ghost" href="tel:{{ company.phone }}">โทร {{ company.phone }}</a>{% endif %}
       </div>
     </div>
@@ -84,4 +85,9 @@
     <div style="margin-top:16px;font-size:12px;opacity:.6">ขับเคลื่อนด้วย salesdee.</div>
   </div>
 </footer>
+
+<div class="pub-mobile-bar">
+  <a class="btn" href="{% url 'crm:lead_intake' tenant.slug %}">ขอใบเสนอราคา</a>
+  {% if company.line_id %}<a class="btn ghost" href="https://line.me/R/ti/p/{{ company.line_id }}">LINE</a>{% endif %}
+</div>
 </body></html>

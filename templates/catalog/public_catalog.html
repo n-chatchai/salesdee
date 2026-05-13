@@ -3,26 +3,52 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>แคตตาล็อกสินค้า · {{ company.name_th|default:tenant.name }}</title>
 <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
-  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'css/tokens.css' %}">
 <link rel="stylesheet" href="{% static 'css/app.css' %}">
 <link rel="stylesheet" href="{% static 'css/public.css' %}">
 </head><body class="public">
 {% include "partials/icons.html" %}
 <div class="pub-wrap wide">
-  <div class="pub-head"><a class="mark" href="{% url 'public_home' tenant.slug %}" style="text-decoration:none">{{ tenant.name|slice:":1"|upper }}</a><div><a href="{% url 'public_home' tenant.slug %}" style="text-decoration:none;color:inherit"><strong>{{ company.name_th|default:tenant.name }}</strong></a><div class="muted" style="font-size:13px">แคตตาล็อกสินค้า</div></div></div>
-  {% if categories %}
-  <div style="margin-bottom:18px" class="row wrap">
-    <a class="chip" href="?" style="{% if not selected_cat %}background:var(--accent);color:#fff{% endif %}">ทั้งหมด</a>
-    {% for c in categories %}<a class="chip" href="?cat={{ c.pk }}" style="{% if selected_cat == c.pk|stringformat:'s' %}background:var(--accent);color:#fff{% endif %}">{{ c.name }} ({{ c.n }})</a>{% endfor %}
+  <div class="pub-head">
+    <a class="mark" href="{% url 'public_home' tenant.slug %}" style="text-decoration:none">{{ tenant.name|slice:":1"|upper }}</a>
+    <div><a href="{% url 'public_home' tenant.slug %}" style="text-decoration:none;color:inherit"><strong>{{ company.name_th|default:tenant.name }}</strong></a><div class="muted" style="font-size:13px">แคตตาล็อกสินค้า · {{ products|length }} รายการ</div></div>
   </div>
-  {% endif %}
+
+  <form class="pub-filters" method="get">
+    <input type="search" name="q" value="{{ q }}" placeholder="ค้นหาชื่อหรือรหัสสินค้า…" aria-label="ค้นหา">
+    <select name="price" aria-label="ช่วงราคา" onchange="this.form.submit()">
+      <option value="">ทุกช่วงราคา</option>
+      <option value="u5000" {% if price_band == 'u5000' %}selected{% endif %}>ต่ำกว่า 5,000</option>
+      <option value="5to15" {% if price_band == '5to15' %}selected{% endif %}>5,000 – 15,000</option>
+      <option value="15to50" {% if price_band == '15to50' %}selected{% endif %}>15,000 – 50,000</option>
+      <option value="o50000" {% if price_band == 'o50000' %}selected{% endif %}>มากกว่า 50,000</option>
+    </select>
+    <button class="btn" type="submit">ค้นหา</button>
+    {% if categories %}
+    <div class="pub-cats">
+      <a class="chip {% if not selected_cat %}active{% endif %}" href="?{% if q %}q={{ q|urlencode }}&{% endif %}{% if price_band %}price={{ price_band }}{% endif %}">ทั้งหมด</a>
+      {% for c in categories %}<a class="chip {% if selected_cat == c.pk|stringformat:'s' %}active{% endif %}" href="?cat={{ c.pk }}{% if q %}&q={{ q|urlencode }}{% endif %}{% if price_band %}&price={{ price_band }}{% endif %}">{{ c.name }} ({{ c.n }})</a>{% endfor %}
+    </div>
+    {% endif %}
+  </form>
+
   <div class="pub-grid">
     {% for p in products %}
     <a class="pub-prod" href="{% url 'public_product' tenant.slug p.pk %}">
-      {% if p.images.first %}<img src="{{ p.images.first.image.url }}" alt="{{ p.name }}">{% else %}<div style="height:160px;background:linear-gradient(135deg,#e9e2d2,#dcd3bf);display:flex;align-items:center;justify-content:center"><svg class="ico ico-xl muted"><use href="#i-package"/></svg></div>{% endif %}
-      <div class="body"><strong>{{ p.name }}</strong><div class="muted" style="font-size:13px">{{ p.category.name|default:"" }}</div>{% if p.default_price %}<div style="margin-top:4px">{{ p.default_price|floatformat:0 }} บาท</div>{% endif %}</div>
+      {% if p.images.first %}<img loading="lazy" src="{{ p.images.first.image.url }}" alt="{{ p.name }}">{% else %}<div style="height:160px;background:linear-gradient(135deg,#e9e2d2,#dcd3bf);display:flex;align-items:center;justify-content:center"><svg class="ico ico-xl muted"><use href="#i-package"/></svg></div>{% endif %}
+      <div class="body">
+        <strong>{{ p.name }}</strong>
+        {% if p.code %}<div class="muted mono" style="font-size:11px">{{ p.code }}</div>{% endif %}
+        <div class="muted" style="font-size:13px">{{ p.category.name|default:"" }}</div>
+        {% if p.default_price %}<div style="margin-top:4px"><span class="chip">{{ p.default_price|floatformat:0 }} บาท</span></div>{% endif %}
+      </div>
     </a>
-    {% empty %}<p class="muted">ยังไม่มีสินค้าที่เผยแพร่</p>{% endfor %}
+    {% empty %}<p class="muted">ยังไม่มีสินค้าที่ตรงกับเงื่อนไข — ลองล้างตัวกรอง</p>{% endfor %}
   </div>
+</div>
+
+<div class="pub-mobile-bar">
+  <a class="btn" href="{% url 'crm:lead_intake' tenant.slug %}">ขอใบเสนอราคา</a>
+  {% if company.line_id %}<a class="btn ghost" href="https://line.me/R/ti/p/{{ company.line_id }}">LINE</a>{% endif %}
 </div>
 </body></html>

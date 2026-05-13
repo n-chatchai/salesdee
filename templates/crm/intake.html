@@ -1,21 +1,26 @@
 {% load static %}<!DOCTYPE html>
 <html lang="th"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ขอใบเสนอราคา · {{ tenant.name }}</title>
+<title>ขอใบเสนอราคา · {{ company.name_th|default:tenant.name }}</title>
 <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
-  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'css/tokens.css' %}">
 <link rel="stylesheet" href="{% static 'css/app.css' %}">
 <link rel="stylesheet" href="{% static 'css/public.css' %}">
 </head><body class="public">
 {% include "partials/icons.html" %}
 <div class="pub-wrap">
-  <div class="pub-head"><div class="mark">{{ tenant.name|slice:":1"|upper }}</div><div><strong>{{ tenant.name }}</strong><div class="muted" style="font-size:13px">ขอใบเสนอราคา / ติดต่อเรา</div></div></div>
+  <div class="pub-head">
+    <a class="mark" href="{% url 'public_home' tenant.slug %}" style="text-decoration:none">{{ tenant.name|slice:":1"|upper }}</a>
+    <div><a href="{% url 'public_home' tenant.slug %}" style="text-decoration:none;color:inherit"><strong>{{ company.name_th|default:tenant.name }}</strong></a><div class="muted" style="font-size:13px">ขอใบเสนอราคา / ติดต่อเรา</div></div>
+  </div>
   <div class="pub-card">
     <h1 style="margin-top:0">เล่าให้ฟังหน่อย</h1>
-    <p class="muted">บอกสิ่งที่คุณกำลังมองหา กรอกข้อมูลด้านล่าง — ทีมงานของเราจะติดต่อกลับโดยเร็ว</p>
+    <p class="muted">บอกสิ่งที่คุณกำลังมองหา กรอกข้อมูลด้านล่าง — ทีมงานของเราจะติดต่อกลับโดยเร็ว ปกติภายในวันทำการ</p>
     <form method="post">{% csrf_token %}
+      {% if request.GET.product_id %}<input type="hidden" name="product_id" value="{{ request.GET.product_id }}">{% endif %}
       {% include "partials/_form.html" %}
       <button class="btn" type="submit">ส่งคำขอ</button>
+      {% if company.line_id %}<a class="btn ghost" href="https://line.me/R/ti/p/{{ company.line_id }}" style="margin-left:8px">หรือทักทาง LINE</a>{% endif %}
     </form>
   </div>
 </div>
