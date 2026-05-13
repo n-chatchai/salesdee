@@ -322,6 +322,16 @@ def quotation_submit(request: HttpRequest, pk: int) -> HttpResponse:
             messages.warning(request, "ส่งขออนุมัติส่วนลดแล้ว — รอผู้จัดการอนุมัติก่อนจึงจะส่งให้ลูกค้าได้")
         else:
             messages.success(request, "เอกสารพร้อมส่งให้ลูกค้าแล้ว")
+        from apps.audit.services import record as audit_record
+
+        audit_record(
+            request.user,
+            action="quotation.submitted",
+            obj=doc,
+            object_repr=doc.doc_number or str(doc),
+            changes={"status": new_status},
+            ip=request.META.get("REMOTE_ADDR"),
+        )
     return redirect("quotes:quotation_detail", pk=doc.pk)
 
 
@@ -337,6 +347,15 @@ def quotation_approve(request: HttpRequest, pk: int) -> HttpResponse:
         messages.error(request, str(exc))
     else:
         messages.success(request, "อนุมัติส่วนลดแล้ว — พร้อมส่งให้ลูกค้า")
+        from apps.audit.services import record as audit_record
+
+        audit_record(
+            request.user,
+            action="quotation.approved",
+            obj=doc,
+            object_repr=doc.doc_number or str(doc),
+            ip=request.META.get("REMOTE_ADDR"),
+        )
     return redirect("quotes:quotation_detail", pk=doc.pk)
 
 
@@ -436,6 +455,16 @@ def quotation_send(request: HttpRequest, pk: int) -> HttpResponse:
         messages.success(request, f"กำลังส่งอีเมลถึง {doc.contact.email} … · ลิงก์: {url}")
     else:
         messages.success(request, f"สร้างลิงก์แชร์แล้ว · {url}")
+    from apps.audit.services import record as audit_record
+
+    audit_record(
+        request.user,
+        action="quotation.sent",
+        obj=doc,
+        object_repr=doc.doc_number or str(doc),
+        changes={"channel": "email" if doc.contact and doc.contact.email else "link"},
+        ip=request.META.get("REMOTE_ADDR"),
+    )
     return redirect("quotes:quotation_detail", pk=doc.pk)
 
 
@@ -488,6 +517,16 @@ def quotation_send_line(request: HttpRequest, pk: int) -> HttpResponse:
     )
     who = doc.contact.name if doc.contact else "ลูกค้า"
     messages.success(request, f"กำลังส่งใบเสนอราคาทาง LINE ถึง {who} … · ลิงก์: {url}")
+    from apps.audit.services import record as audit_record
+
+    audit_record(
+        request.user,
+        action="quotation.sent",
+        obj=doc,
+        object_repr=doc.doc_number or str(doc),
+        changes={"channel": "line", "recipient": recipient},
+        ip=request.META.get("REMOTE_ADDR"),
+    )
     return redirect("quotes:quotation_detail", pk=doc.pk)
 
 

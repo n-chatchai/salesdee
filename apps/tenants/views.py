@@ -375,10 +375,21 @@ def member_edit(request: HttpRequest, pk: int) -> HttpResponse:
     if m.role == Role.OWNER and (new_role != Role.OWNER or deactivate) and owners.count() <= 1:
         messages.error(request, "ต้องมีเจ้าของอย่างน้อยหนึ่งคน")
         return redirect("workspace:settings_members")
+    before = {"role": m.role, "is_active": m.is_active}
     form = MemberRoleForm(request.POST, instance=m)
     if form.is_valid():
         form.save()
         messages.success(request, "บันทึกสมาชิกแล้ว")
+        from apps.audit.services import record as audit_record
+
+        audit_record(
+            request.user,
+            action="membership.role_changed",
+            obj=m,
+            object_repr=m.user.email,
+            changes={"before": before, "after": {"role": m.role, "is_active": m.is_active}},
+            ip=request.META.get("REMOTE_ADDR"),
+        )
     return redirect("workspace:settings_members")
 
 

@@ -45,6 +45,7 @@ LOCAL_APPS = [
     "apps.billing",  # phase 2 — stub for now
     "apps.accounting",  # phase 3 — stub for now
     "apps.integrations",
+    "apps.audit",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

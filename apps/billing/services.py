@@ -115,6 +115,15 @@ def issue_tax_invoice(invoice: SalesDocument, *, user=None) -> SalesDocument:
     tax.doc_number = next_document_number(DocType.TAX_INVOICE, prefix="TAX")
     tax.issued_at = timezone.now()
     tax.save()  # DB still has doc_number="" at this point, so the immutability guard allows it
+    from apps.audit.services import record as audit_record
+
+    audit_record(
+        user,
+        action="tax_invoice.issued",
+        obj=tax,
+        object_repr=tax.doc_number,
+        changes={"from_invoice": invoice.doc_number},
+    )
     return tax
 
 
@@ -238,6 +247,19 @@ def record_payment(
         PaymentAllocation.objects.create(payment=payment, invoice=invoice, amount=amount)
     if issue_receipt:
         create_receipt_from_payment(payment, user=user)
+    from apps.audit.services import record as audit_record
+
+    audit_record(
+        user,
+        action="payment.recorded",
+        obj=payment,
+        object_repr=f"{payment.gross_amount} จาก {customer}",
+        changes={
+            "amount": str(payment.gross_amount),
+            "method": payment.method,
+            "invoices": [str(inv.doc_number or inv.pk) for inv, _ in allocations],
+        },
+    )
     return payment
 
 
@@ -298,6 +320,15 @@ def create_credit_note(
     cn.doc_number = next_document_number(DocType.CREDIT_NOTE, prefix="CN")
     cn.issued_at = timezone.now()
     cn.save()
+    from apps.audit.services import record as audit_record
+
+    audit_record(
+        user,
+        action="credit_note.issued",
+        obj=cn,
+        object_repr=cn.doc_number,
+        changes={"against": tax_invoice.doc_number, "reason": reason},
+    )
     return cn
 
 
@@ -316,6 +347,15 @@ def cancel_tax_document(doc: SalesDocument, *, reason: str, user=None) -> None:
     doc.status = DocStatus.CANCELLED
     doc.cancelled_reason = reason
     doc.save(update_fields=["status", "cancelled_reason", "updated_at"])
+    from apps.audit.services import record as audit_record
+
+    audit_record(
+        user,
+        action="document.cancelled",
+        obj=doc,
+        object_repr=doc.doc_number or str(doc),
+        changes={"doc_type": doc.doc_type, "reason": reason},
+    )
 
 
 # --- Reports ------------------------------------------------------------------

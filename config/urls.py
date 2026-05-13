@@ -14,6 +14,7 @@ urlpatterns = [
     path("billing/", include("apps.billing.urls")),
     path("integrations/", include("apps.integrations.urls")),
     path("settings/", include("apps.tenants.urls")),
+    path("audit/", include("apps.audit.urls")),
     # Public, login-free quotation share links (tenant resolved from the token).
     path("q/<str:token>/", quote_views.public_quotation, name="public_quotation"),
     path(

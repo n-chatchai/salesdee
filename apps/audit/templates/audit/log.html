@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}บันทึกตรวจสอบ · ตั้งค่า{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/settings.css' %}">{% endblock %}
+{% block content %}
+<div class="set-page-head"><div class="eyebrow">ตั้งค่า</div><h1>บันทึกตรวจสอบ</h1></div>
+<div class="set-layout">
+  {% include "tenants/_settings_nav.html" %}
+  <div class="set-main">
+    <div class="list-head">
+      <form method="get" class="filters" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <select name="action" class="field">
+          <option value="">— ทุกการกระทำ —</option>
+          {% for a in actions %}<option value="{{ a }}" {% if a == f_action %}selected{% endif %}>{{ a }}</option>{% endfor %}
+        </select>
+        <input type="text" name="actor" value="{{ f_actor }}" placeholder="ค้นหาตามอีเมลผู้กระทำ" class="field">
+        <button type="submit" class="btn">กรอง</button>
+        {% if f_action or f_actor %}<a class="btn btn-ghost" href="{% url 'audit:log' %}">ล้าง</a>{% endif %}
+      </form>
+    </div>
+    <div class="card">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>เวลา</th><th>การกระทำ</th><th>ผู้กระทำ</th><th>วัตถุ</th><th>หมายเหตุ</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in events %}
+            <tr>
+              <td class="muted mono" style="white-space:nowrap">{{ e.created_at|date:"Y-m-d H:i" }}</td>
+              <td><span class="chip">{{ e.action }}</span></td>
+              <td>{{ e.actor.email|default:"— ระบบ —" }}</td>
+              <td>{{ e.object_repr|default:e.object_type }}</td>
+              <td class="muted">{% if e.changes %}<span class="mono" style="font-size:12px">{{ e.changes|stringformat:'.150s' }}</span>{% endif %}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="5" class="muted" style="text-align:center;padding:32px">ยังไม่มีบันทึก</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="muted" style="margin-top:8px">แสดง 200 รายการล่าสุด</p>
+  </div>
+</div>
+{% endblock %}
