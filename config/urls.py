@@ -23,6 +23,11 @@ urlpatterns = [
     path("q/<str:token>/pdf/", quote_views.public_quotation_pdf, name="public_quotation_pdf"),
     # Public, login-free catalog / showroom (tenant resolved from the URL slug).
     path("c/<slug:tenant_slug>/", catalog_views.public_catalog, name="public_catalog"),
+    path(
+        "c/<slug:tenant_slug>/match/",
+        catalog_views.public_catalog_match,
+        name="public_catalog_match",
+    ),
     path("c/<slug:tenant_slug>/p/<int:pk>/", catalog_views.public_product, name="public_product"),
     path("", include("apps.core.urls")),
 ]

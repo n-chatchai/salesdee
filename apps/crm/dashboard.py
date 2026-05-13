@@ -185,3 +185,129 @@ def build_dashboard(request) -> dict:
         "target_percent": target_percent,
         "now": now,
     }
+
+
+def build_notifications(request) -> list[dict]:
+    """A single feed of things needing the current user's attention. Reuses the same query shapes
+    as ``build_dashboard``. Returns a list of dicts the ``core/notifications.html`` template renders.
+    Tenant is active by the time this runs (middleware)."""
+    from django.urls import reverse
+
+    from apps.core.permissions import own_q
+    from apps.integrations.models import Conversation, ConversationStatus
+    from apps.quotes.models import DocStatus, DocType, SalesDocument
+
+    from .models import Lead, LeadStatus, Task, TaskStatus
+
+    user = request.user
+    today = date.today()
+    now = timezone.now()
+    soon = today + timedelta(days=5)
+    items: list[dict] = []
+
+    my_open_tasks = Task.objects.filter(assignee=user, status=TaskStatus.OPEN).select_related(
+        "deal", "customer"
+    )
+    for t in my_open_tasks.filter(due_at__lt=now).order_by("due_at")[:20]:
+        items.append(
+            {
+                "icon": "i-check-square",
+                "tone": "danger",
+                "text": f"งานเลยกำหนด: {t.description or t.get_kind_display()}",
+                "url": reverse("crm:deal_detail", args=[t.deal_id])
+                if t.deal_id
+                else reverse("crm:tasks"),
+                "when": t.due_at,
+            }
+        )
+    for t in my_open_tasks.filter(due_at__date=today).order_by("due_at")[:20]:
+        items.append(
+            {
+                "icon": "i-check-square",
+                "tone": "warn",
+                "text": f"งานวันนี้: {t.description or t.get_kind_display()}",
+                "url": reverse("crm:deal_detail", args=[t.deal_id])
+                if t.deal_id
+                else reverse("crm:tasks"),
+                "when": t.due_at,
+            }
+        )
+
+    quotes = SalesDocument.objects.filter(own_q(request, "salesperson"), doc_type=DocType.QUOTATION)
+    for q in (
+        quotes.filter(status=DocStatus.SENT, customer_response="")
+        .select_related("customer")
+        .order_by("-sent_at")[:20]
+    ):
+        items.append(
+            {
+                "icon": "i-file-text",
+                "tone": "",
+                "text": f"รอลูกค้าตอบรับ: {q.doc_number or q} · {q.customer.name if q.customer else ''}",
+                "url": reverse("quotes:quotation_detail", args=[q.pk]),
+                "when": q.sent_at,
+            }
+        )
+    for q in (
+        quotes.filter(
+            status__in=[DocStatus.READY, DocStatus.SENT],
+            valid_until__isnull=False,
+            valid_until__gte=today,
+            valid_until__lte=soon,
+        )
+        .select_related("customer")
+        .order_by("valid_until")[:20]
+    ):
+        items.append(
+            {
+                "icon": "i-file-text",
+                "tone": "warn",
+                "text": f"ใบเสนอราคาใกล้หมดอายุ ({q.valid_until}): {q.doc_number or q}",
+                "url": reverse("quotes:quotation_detail", args=[q.pk]),
+                "when": q.valid_until,
+            }
+        )
+
+    for c in (
+        Conversation.objects.filter(status=ConversationStatus.OPEN)
+        .filter(Q(assigned_to__isnull=True) | Q(unread_count__gt=0))
+        .order_by("-last_message_at")[:20]
+    ):
+        items.append(
+            {
+                "icon": "i-inbox",
+                "tone": "ai" if c.assigned_to_id is None else "",
+                "text": ("แชทยังไม่มีผู้รับผิดชอบ: " if c.assigned_to_id is None else "แชทมีข้อความใหม่: ")
+                + (c.display_name or str(c)),
+                "url": reverse("integrations:conversation", args=[c.pk]),
+                "when": c.last_message_at,
+            }
+        )
+
+    for lead in Lead.objects.filter(
+        own_q(request, "assigned_to"), status=LeadStatus.NEW, assigned_to=user
+    ).order_by("-created_at")[:20]:
+        items.append(
+            {
+                "icon": "i-target",
+                "tone": "",
+                "text": f"ลีดใหม่ที่มอบหมายให้คุณ: {lead.name or lead.company_name}",
+                "url": reverse("crm:lead_detail", args=[lead.pk]),
+                "when": lead.created_at,
+            }
+        )
+
+    items.sort(key=lambda i: (i.get("when") is None, _as_dt(i.get("when"))), reverse=False)
+    # Most urgent (oldest due / oldest sent) first; danger items already near the top by time.
+    return items
+
+
+def _as_dt(value):
+    """Coerce a date/datetime/None to a sortable datetime."""
+    from datetime import datetime
+
+    if value is None:
+        return datetime.max
+    if isinstance(value, datetime):
+        return value.replace(tzinfo=None)
+    return datetime.combine(value, datetime.min.time())

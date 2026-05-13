@@ -25,6 +25,15 @@
     <div class="card-head"><div class="title">ดีล</div></div>
     {% for d in deals %}<div class="row between"><a href="{% url 'crm:deal_detail' d.pk %}">{{ d.name }}</a><span class="chip">{{ d.get_status_display }}{% if d.stage %} · {{ d.stage.name }}{% endif %}</span></div>{% empty %}<p class="muted">ยังไม่มีดีล</p>{% endfor %}
     <div class="divider"></div>
+    <div class="title" style="margin-bottom:6px">ใบเสนอราคา</div>
+    {% for q in quotations %}<div class="row between">
+      <a href="{% url 'quotes:quotation_detail' q.pk %}">{{ q.doc_number|default:q }}</a>
+      <span class="muted" style="text-align:right;font-size:12px">{{ q.get_status_display }}{% if q.view_count %} · ลูกค้าเปิด {{ q.view_count }} ครั้ง{% if q.last_viewed_at %} · ล่าสุด {{ q.last_viewed_at|date:"d/m/Y" }}{% endif %}{% endif %}</span>
+    </div>{% empty %}<p class="muted">ยังไม่มีใบเสนอราคา</p>{% endfor %}
+    <div class="divider"></div>
+    <div class="title" style="margin-bottom:6px">แชท LINE</div>
+    {% for c in conversations %}<div class="row between"><a href="{% url 'integrations:conversation' c.pk %}">{{ c.display_name|default:c }}</a><span class="muted mono">{% if c.unread_count %}{{ c.unread_count }} ใหม่ · {% endif %}{{ c.last_message_at|date:"d/m/Y" }}</span></div>{% empty %}<p class="muted">ยังไม่มีแชท</p>{% endfor %}
+    <div class="divider"></div>
     <div class="title" style="margin-bottom:6px">งานค้าง</div>
     {% for t in tasks %}<div class="row between"><span>{{ t.description|default:t.get_kind_display }}</span><span class="muted mono">{{ t.due_at|date:"d/m/Y" }}</span></div>{% empty %}<p class="muted">ไม่มี</p>{% endfor %}
     <div class="divider"></div>

@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="{% static 'css/app.css' %}">
 <link rel="stylesheet" href="{% static 'css/public.css' %}">
 <link rel="stylesheet" href="{% static 'css/public-home.css' %}">
+<script src="{% static 'js/htmx.min.js' %}" defer></script>
 </head><body class="public">
 {% include "partials/icons.html" %}
 
@@ -52,12 +53,11 @@
   <div class="ph-ai">
     <h2 style="margin-top:0"><svg class="ico"><use href="#i-spark"/></svg> ให้ผู้ช่วยช่วยจับคู่</h2>
     <p class="muted">บอกสิ่งที่คุณต้องการ (เช่น "โต๊ะทำงาน 1.2 เมตร สีไม้") แล้วเราจะแนะนำรุ่นที่เหมาะ</p>
-    {% if ai_enabled %}
-    <form method="get" action="{% url 'public_catalog' tenant.slug %}"><textarea name="q" rows="2" placeholder="พิมพ์สิ่งที่ต้องการ…"></textarea><div style="margin-top:10px"><button class="btn">ค้นหา</button></div></form>
-    {% else %}
-    <p>{% if company.line_id %}ทักหาเราทาง LINE ได้เลย — เรายินดีช่วยเลือก{% else %}ติดต่อเราเพื่อให้ทีมงานช่วยเลือกสินค้าที่เหมาะ{% endif %}</p>
-    {% if company.line_id %}<a class="btn" href="https://line.me/R/ti/p/{{ company.line_id }}">ติดต่อทาง LINE</a>{% elif company.phone %}<a class="btn" href="tel:{{ company.phone }}">โทร {{ company.phone }}</a>{% endif %}
-    {% endif %}
+    <form hx-post="{% url 'public_catalog_match' tenant.slug %}" hx-target="#match-results" hx-swap="innerHTML" hx-disabled-elt="find button">{% csrf_token %}
+      <textarea name="q" rows="2" placeholder="พิมพ์สิ่งที่ต้องการ… เช่น “โต๊ะทำงาน 1.2 เมตร สีไม้”"></textarea>
+      <div style="margin-top:10px"><button class="btn">{% if ai_enabled %}ให้ AI ช่วยจับคู่{% else %}ส่งให้เราช่วยเลือก{% endif %}</button></div>
+    </form>
+    <div id="match-results"></div>
   </div>
 </section>
 

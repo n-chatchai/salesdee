@@ -21,5 +21,7 @@ def render_quotation_pdf(document: SalesDocument) -> bytes:
         "quotes/pdf/quotation.html",
         {"document": document, "totals": compute_document_totals(document), "company": company},
     )
-    static_dir = settings.STATICFILES_DIRS[0] if settings.STATICFILES_DIRS else settings.BASE_DIR / "static"
+    static_dir = (
+        settings.STATICFILES_DIRS[0] if settings.STATICFILES_DIRS else settings.BASE_DIR / "static"
+    )
     return HTML(string=html, base_url=str(static_dir)).write_pdf()

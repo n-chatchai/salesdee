@@ -9,6 +9,17 @@
   <div><div class="eyebrow">ดีล · {{ deal.get_status_display }}{% if deal.stage %} · {{ deal.stage.name }}{% endif %}</div><h1 class="h1 serif-it">{{ deal.name }}</h1></div>
   <div class="kpi" style="min-width:0"><div class="label">มูลค่า</div><div class="value">{{ deal.estimated_value|floatformat:0 }}</div><div class="delta">โอกาส {{ deal.probability }}%</div></div>
 </div>
+{% if next_step %}
+<div class="ai-panel" style="margin-bottom:16px">
+  <div class="row" style="gap:10px;align-items:flex-start">
+    <svg class="ico"><use href="#i-spark"/></svg>
+    <div>
+      <div class="eyebrow">ขั้นถัดไปที่แนะนำ <span class="muted">· คำแนะนำจากกฎเกณฑ์ (ไม่ใช่ AI)</span></div>
+      <div>{{ next_step }}</div>
+    </div>
+  </div>
+</div>
+{% endif %}
 <div class="row wrap" style="align-items:flex-start;gap:16px">
   <div class="card grow" style="min-width:300px">
     <div class="card-head"><div class="title">รายละเอียด</div></div>

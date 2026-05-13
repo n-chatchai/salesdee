@@ -104,7 +104,19 @@ Source of truth for *how we work*: `CLAUDE.md`.
 
 ## Status — Phase-1 MVP build complete (M0–M5)
 
-All deck screens rebuilt; LINE inbox + Quote-from-Chat + Flex out; onboarding, settings, public homepage; mobile/PWA baseline. `make check` green. Open follow-ups are tracked as unchecked `[ ]` items under each milestone above — notably: background-tasking PDF/LINE sends (CLAUDE.md §4.5), disabling the SW in DEBUG is already done, LINE profile enrichment + non-text inbound, AI customer-summary in the inbox rail, AI catalog-match endpoint on the public home, categories management + bulk catalog actions + AI catalog import, Alpine live quote-line math, surfacing "เปิด N ครั้ง" on deal/quote screens, and pixel-polish vs the design deck.
+All deck screens rebuilt; LINE inbox + Quote-from-Chat + Flex out; onboarding, settings, public homepage; mobile/PWA baseline. `make check` green. Open follow-ups are tracked as unchecked `[ ]` items under each milestone above — notably: background-tasking PDF/LINE sends (CLAUDE.md §4.5), disabling the SW in DEBUG is already done, LINE profile enrichment + non-text inbound, AI customer-summary in the inbox rail, Alpine live quote-line math, and pixel-polish vs the design deck.
+
+### M6 — gap-fill round (done)
+
+- [x] **Categories management** (`catalog:`): list / create / edit / delete `ProductCategory` (`catalog/categories.html`, `catalog/category_form.html`, `ProductCategoryForm` with re-bound `parent` queryset). Nav link in `base.html` now points at `catalog:categories`. Reorder via Sortable not done (nice-to-have).
+- [x] **Password reset + change** (`accounts:`): wired Django's built-in views; templates under `templates/registration/` (`password_reset_*`, `password_change_*`, `password_reset_email.html`). "ลืมรหัสผ่าน?" link added on the login page.
+- [x] **Self-serve signup** (`accounts:signup`): `SignupForm` (workspace name/slug/owner name/email/password) → creates `Tenant` (the existing `crm.signals` post_save provisions `CompanyProfile` + default pipeline), sets `CompanyProfile.name_th`, creates the owner `User` + `Membership(owner)`, logs in, redirects to `workspace:onboarding`. "สมัครใช้งาน" link on the login page.
+- [x] **Global search** (`core:search`): customers / deals / leads / quotations / products (`icontains`, capped, record-visibility scoped). Topbar search input now posts to it.
+- [x] **Notifications page** (`core:notifications`): single feed from `build_notifications(request)` in `apps/crm/dashboard.py` (overdue/today tasks, awaiting/expiring quotations, unassigned/unread conversations, new leads to me). Topbar bell links to it; a context processor (`notif_count`) drives a dot.
+- [x] **Customer 360 completion**: `customer_detail` now shows linked LINE conversations + the customer's quotations with `view_count` / `last_viewed_at`.
+- [x] **Deal next-step hint**: rule-based (not AI) sage card on `deal_detail` — `_deal_next_step()` picks the highest-priority of: quotation viewed ≥3×, quotation expiring ≤5d, no quotation yet, no activity ≥7d.
+- [x] **AI catalog-match on the public home**: `catalog:public_catalog_match` POST endpoint — uses `draft_quotation_from_text` when AI is configured (resolves `product_code`s to products), graceful fallback otherwise; htmx form on `public_home.html`. Never 500s.
+- [x] Tests added for all of the above (`apps/catalog/tests/test_categories.py`, `apps/core/tests/test_search_notifications.py`, `apps/accounts/tests/test_auth_flows.py`, `apps/crm/tests/test_deal_hint_customer360.py`). `make check` green — 215 tests pass.
 
 ---
 

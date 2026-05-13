@@ -19,7 +19,8 @@
     {% if form.password.errors %}<ul class="errorlist">{% for e in form.password.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
   </div>
   {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+  <div style="text-align:right;margin-top:-6px"><a href="{% url 'accounts:password_reset' %}" style="font-size:13px">ลืมรหัสผ่าน?</a></div>
   <button class="auth-btn" type="submit">เข้าสู่ระบบ</button>
 </form>
-<div class="auth-foot">ยังไม่มีบัญชี? ติดต่อผู้ดูแลระบบของคุณ</div>
+<div class="auth-foot">ยังไม่มีบัญชี? <a href="{% url 'accounts:signup' %}">สมัครใช้งาน</a></div>
 {% endblock %}

@@ -57,10 +57,10 @@
     </a>
 
     <div class="sb-section-label">แคตตาล็อก</div>
-    <a class="sb-item {% if ns == 'catalog' %}active{% endif %}" href="{% url 'catalog:products' %}">
+    <a class="sb-item {% if ns == 'catalog' and 'categor' not in un %}active{% endif %}" href="{% url 'catalog:products' %}">
       <span class="icon"><svg><use href="#i-package"/></svg></span> สินค้า
     </a>
-    <a class="sb-item" href="#">{# TODO: categories screen (M3) #}
+    <a class="sb-item {% if 'categor' in un %}active{% endif %}" href="{% url 'catalog:categories' %}">
       <span class="icon"><svg><use href="#i-tag"/></svg></span> หมวดสินค้า
     </a>
 
@@ -92,15 +92,18 @@
     <header class="app-topbar">
       {% block topbar %}
       <button type="button" class="tb-menu" x-on:click="nav = !nav" aria-label="เมนู"><svg class="ico"><use href="#i-menu"/></svg></button>
-      <div class="search">
+      <form class="search" method="get" action="{% url 'core:search' %}">
         <svg class="ico"><use href="#i-search"/></svg>
-        <input type="search" placeholder="ค้นหาลูกค้า · ดีล · ใบเสนอราคา…" aria-label="ค้นหา">
+        <input type="search" name="q" value="{{ request.GET.q|default:'' }}" placeholder="ค้นหาลูกค้า · ดีล · ใบเสนอราคา…" aria-label="ค้นหา">
         <kbd>⌘K</kbd>
-      </div>
+      </form>
       <div class="ml-auto row">
         {% block topbar_actions %}{% endblock %}
         {% if request.tenant %}<span class="chip" title="พื้นที่ทำงาน"><svg class="ico ico-sm"><use href="#i-building"/></svg> {{ request.tenant.name }}</span>{% endif %}
-        <a class="tb-action" href="#" title="แจ้งเตือน"><svg class="ico"><use href="#i-bell"/></svg></a>
+        <a class="tb-action" href="{% url 'core:notifications' %}" title="แจ้งเตือน" style="position:relative">
+          <svg class="ico"><use href="#i-bell"/></svg>
+          {% if notif_count %}<span style="position:absolute;top:2px;right:2px;width:8px;height:8px;border-radius:50%;background:var(--accent,#c8501f)"></span>{% endif %}
+        </a>
       </div>
       {% endblock %}
     </header>

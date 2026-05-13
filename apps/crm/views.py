@@ -82,10 +82,44 @@ def deal_detail(request: HttpRequest, pk: int) -> HttpResponse:
             "deal": deal,
             "activities": _deal_activities(deal),
             "tasks": _deal_tasks(deal),
+            "next_step": _deal_next_step(deal),
             "activity_form": ActivityForm(customer=deal.customer),
             "task_form": TaskForm(initial={"assignee": request.user}),
         },
     )
+
+
+def _deal_next_step(deal: Deal) -> str | None:
+    """A rule-based (not AI) "what to do next" hint for a deal. Highest-priority match wins."""
+    from apps.quotes.models import DocStatus, DocType
+
+    today = date.today()
+    quotes = list(deal.documents.filter(doc_type=DocType.QUOTATION).order_by("-created_at"))
+    # 1. A sent quotation the customer keeps opening but hasn't responded to.
+    for q in quotes:
+        if q.status == DocStatus.SENT and not q.customer_response and (q.view_count or 0) >= 3:
+            return f"ลูกค้าเปิดดูใบเสนอราคา {q.doc_number or '#' + str(q.pk)} แล้ว {q.view_count} ครั้ง — ลองโทร/ทักไปถามว่าตัดสินใจอย่างไร"
+    # 2. A quotation expiring within 5 days.
+    for q in quotes:
+        if (
+            q.status in (DocStatus.READY, DocStatus.SENT)
+            and q.valid_until
+            and today <= q.valid_until <= today + timedelta(days=5)
+        ):
+            return f"ใบเสนอราคา {q.doc_number or '#' + str(q.pk)} ใกล้หมดอายุ ({q.valid_until}) — ติดตามด่วน"
+    # 3. No quotation yet.
+    if not quotes:
+        return "ยังไม่มีใบเสนอราคาในดีลนี้ — ลองสร้างใบเสนอราคาจากดีลนี้"
+    # 4. No activity in 7+ days.
+    last = deal.activities.order_by("-occurred_at").first()
+    if last is None or (timezone.now() - last.occurred_at).days >= 7:
+        days = (timezone.now() - last.occurred_at).days if last else None
+        return (
+            f"ไม่มีความเคลื่อนไหว {days} วันแล้ว — บันทึกการติดตามล่าสุด"
+            if days is not None
+            else "ยังไม่มีบันทึกกิจกรรม — บันทึกการติดตามครั้งแรก"
+        )
+    return None
 
 
 @login_required
@@ -167,6 +201,8 @@ def customer_list(request: HttpRequest) -> HttpResponse:
 
 @login_required
 def customer_detail(request: HttpRequest, pk: int) -> HttpResponse:
+    from apps.quotes.models import DocType
+
     customer = get_object_or_404(Customer, pk=pk)
     return render(
         request,
@@ -177,6 +213,10 @@ def customer_detail(request: HttpRequest, pk: int) -> HttpResponse:
             "deals": customer.deals.filter(own_q(request, "owner"))
             .select_related("stage")
             .order_by("-created_at"),
+            "quotations": customer.documents.filter(
+                own_q(request, "salesperson"), doc_type=DocType.QUOTATION
+            ).order_by("-created_at"),
+            "conversations": customer.conversations.order_by("-last_message_at"),
             "activities": customer.activities.select_related("created_by", "deal").order_by(
                 "-occurred_at"
             )[:30],

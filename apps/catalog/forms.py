@@ -7,6 +7,27 @@ from apps.core.forms import set_queryset
 from .models import Product, ProductCategory
 
 
+class ProductCategoryForm(forms.ModelForm):
+    class Meta:
+        model = ProductCategory
+        fields = ["name", "parent", "order"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # parent is a self-FK to a TenantScopedModel -> re-bind per request (CLAUDE.md §5).
+        qs = ProductCategory.objects.all()
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        set_queryset(self, "parent", qs)
+        self.fields["parent"].required = False
+
+    def clean_parent(self):
+        parent = self.cleaned_data.get("parent")
+        if parent and self.instance.pk and parent.pk == self.instance.pk:
+            raise forms.ValidationError("หมวดแม่ต้องไม่ใช่ตัวเอง")
+        return parent
+
+
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
