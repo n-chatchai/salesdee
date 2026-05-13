@@ -2,7 +2,7 @@
 {% load static %}
 {% block title %}{{ customer.name }} · ลูกค้า · salesdee.{% endblock %}
 {% block extra_css %}<link rel="stylesheet" href="{% static 'css/customer.css' %}">{% endblock %}
-{% block topbar_actions %}<a class="btn btn-sm btn-ghost" href="{% url 'crm:customer_edit' customer.pk %}"><svg class="ico ico-sm"><use href="#i-edit"/></svg> แก้ไข</a>{% endblock %}
+{% block topbar_actions %}<a class="btn btn-sm btn-ghost" href="{% url 'billing:customer_statement' customer.pk %}"><svg class="ico ico-sm"><use href="#i-file-text"/></svg> ใบแจ้งยอด</a> <a class="btn btn-sm btn-ghost" href="{% url 'crm:customer_edit' customer.pk %}"><svg class="ico ico-sm"><use href="#i-edit"/></svg> แก้ไข</a>{% endblock %}
 {% block content %}
 <div class="c360-top">
   <div class="c360-avatar">{{ customer.name|slice:":1"|upper }}</div>

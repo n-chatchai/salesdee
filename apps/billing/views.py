@@ -404,6 +404,53 @@ def payment_create(request: HttpRequest) -> HttpResponse:
     )
 
 
+# --- Customer statements ------------------------------------------------------
+@login_required
+def customer_statement(request: HttpRequest, pk: int) -> HttpResponse:
+    customer = get_object_or_404(Customer, pk=pk)
+    data = services.customer_statement(customer)
+    return render(request, "billing/customer_statement.html", {"data": data, "customer": customer})
+
+
+@login_required
+def customer_statement_pdf(request: HttpRequest, pk: int) -> HttpResponse:
+    customer = get_object_or_404(Customer, pk=pk)
+    from .pdf import render_customer_statement_pdf
+
+    data = services.customer_statement(customer)
+    return _pdf_response(
+        render_customer_statement_pdf(data, customer=customer),
+        f"statement-{customer.pk}",
+    )
+
+
+@login_required
+@require_POST
+def customer_statement_send(request: HttpRequest, pk: int) -> HttpResponse:
+    customer = get_object_or_404(Customer, pk=pk)
+    from .tasks import send_customer_statement_email
+
+    contact = customer.contacts.exclude(email="").first()
+    if contact is None:
+        messages.error(request, "ยังไม่มีอีเมลของผู้ติดต่อสำหรับลูกค้ารายนี้")
+        return redirect("billing:customer_statement", pk=customer.pk)
+    send_customer_statement_email.enqueue(
+        customer.pk, customer.tenant_id, recipient_email=contact.email
+    )
+    from apps.audit.services import record as audit_record
+
+    audit_record(
+        request.user,
+        action="customer_statement.sent",
+        obj=customer,
+        object_repr=customer.name,
+        changes={"to": contact.email},
+        ip=request.META.get("REMOTE_ADDR"),
+    )
+    messages.success(request, f"กำลังส่งใบแจ้งยอดให้ {contact.email} …")
+    return redirect("billing:customer_statement", pk=customer.pk)
+
+
 # --- Reports ------------------------------------------------------------------
 @login_required
 def ar_aging(request: HttpRequest) -> HttpResponse:

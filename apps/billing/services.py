@@ -426,6 +426,63 @@ def cancel_tax_document(doc: SalesDocument, *, reason: str, user=None) -> None:
 _AGING_BUCKETS = ("not_due", "1_30", "31_60", "61_90", "over_90")
 
 
+def customer_statement(customer, *, as_of: date | None = None) -> dict:
+    """One customer's open invoices, payments/allocations, aging summary and running balance
+    (FR-13.5). All amounts are quantised to 2 dp. Tenant context must be active."""
+    as_of = as_of or date.today()
+    invoices_qs = (
+        SalesDocument.objects.filter(customer=customer, doc_type=DocType.INVOICE)
+        .exclude(status=DocStatus.CANCELLED)
+        .prefetch_related("lines", "payment_allocations")
+        .order_by("issue_date", "id")
+    )
+    rows: list[dict] = []
+    totals = {b: Decimal("0.00") for b in _AGING_BUCKETS}
+    grand_outstanding = Decimal("0.00")
+    grand_issued = Decimal("0.00")
+    grand_paid = Decimal("0.00")
+    for inv in invoices_qs:
+        gt = compute_document_totals(inv).grand_total
+        out = invoice_outstanding(inv)
+        paid = gt - out  # includes credit notes
+        grand_issued += gt
+        grand_paid += paid
+        if out > 0:
+            due = inv.due_date or inv.issue_date
+            bucket = _bucket_for((as_of - due).days)
+            totals[bucket] += out
+            grand_outstanding += out
+        rows.append(
+            {
+                "invoice": inv,
+                "issue_date": inv.issue_date,
+                "due_date": inv.due_date,
+                "grand_total": _q2(gt),
+                "paid": _q2(paid),
+                "outstanding": _q2(out),
+            }
+        )
+    # payments — for transparency
+    from .models import Payment
+
+    payments = list(
+        Payment.objects.filter(customer=customer)
+        .order_by("-date", "-id")
+        .select_related("receipt_document")[:50]
+    )
+    return {
+        "as_of": as_of,
+        "customer": customer,
+        "invoices": rows,
+        "payments": payments,
+        "aging": totals,
+        "buckets": list(_AGING_BUCKETS),
+        "outstanding": _q2(grand_outstanding),
+        "total_issued": _q2(grand_issued),
+        "total_paid": _q2(grand_paid),
+    }
+
+
 def _bucket_for(days_overdue: int) -> str:
     if days_overdue <= 0:
         return "not_due"

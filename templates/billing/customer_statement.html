@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load thai_extras %}
+{% block title %}ใบแจ้งยอด — {{ customer.name }} · salesdee.{% endblock %}
+{% block topbar_actions %}
+  <a class="btn btn-sm btn-ghost" href="{% url 'billing:customer_statement_pdf' customer.pk %}" target="_blank">พิมพ์ PDF</a>
+  <form method="post" action="{% url 'billing:customer_statement_send' customer.pk %}" style="display:inline">{% csrf_token %}<button class="btn btn-sm">ส่งใบแจ้งยอดทางอีเมล</button></form>
+{% endblock %}
+{% block content %}
+<div class="list-head">
+  <div>
+    <div class="eyebrow">บัญชี / การเงิน</div>
+    <h1>ใบแจ้งยอด — {{ customer.name }}</h1>
+    <div class="muted">ณ วันที่ {{ data.as_of|thai_date }}</div>
+  </div>
+</div>
+
+<div class="card">
+  <table class="tbl">
+    <thead><tr>
+      <th>เลขที่</th><th>วันที่ออก</th><th>ครบกำหนด</th>
+      <th style="text-align:right">ยอดรวม</th>
+      <th style="text-align:right">รับชำระแล้ว</th>
+      <th style="text-align:right">ค้างชำระ</th>
+    </tr></thead>
+    <tbody>
+      {% for r in data.invoices %}
+        <tr>
+          <td><a href="{% url 'billing:invoice_detail' r.invoice.pk %}">{{ r.invoice.doc_number }}</a></td>
+          <td>{{ r.issue_date|thai_date }}</td>
+          <td>{{ r.due_date|thai_date|default:"—" }}</td>
+          <td class="mono" style="text-align:right">{{ r.grand_total|floatformat:2 }}</td>
+          <td class="mono" style="text-align:right">{{ r.paid|floatformat:2 }}</td>
+          <td class="mono" style="text-align:right"><strong>{{ r.outstanding|floatformat:2 }}</strong></td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="6" class="muted" style="text-align:center;padding:32px">ไม่มีใบแจ้งหนี้</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card" style="margin-top:16px">
+  <h3 style="margin-top:0">สรุปอายุหนี้</h3>
+  <table class="tbl"><thead><tr>
+    <th>ยังไม่ถึงกำหนด</th><th style="text-align:right">1–30 วัน</th><th style="text-align:right">31–60 วัน</th><th style="text-align:right">61–90 วัน</th><th style="text-align:right">เกิน 90 วัน</th><th style="text-align:right">รวมคงค้าง</th>
+  </tr></thead><tbody><tr>
+    <td class="mono" style="text-align:right">{{ data.aging.not_due|floatformat:2 }}</td>
+    <td class="mono" style="text-align:right">{{ data.aging|get_item:"1_30"|floatformat:2 }}</td>
+    <td class="mono" style="text-align:right">{{ data.aging|get_item:"31_60"|floatformat:2 }}</td>
+    <td class="mono" style="text-align:right">{{ data.aging|get_item:"61_90"|floatformat:2 }}</td>
+    <td class="mono" style="text-align:right">{{ data.aging.over_90|floatformat:2 }}</td>
+    <td class="mono" style="text-align:right"><strong>{{ data.outstanding|floatformat:2 }}</strong></td>
+  </tr></tbody></table>
+</div>
+{% endblock %}

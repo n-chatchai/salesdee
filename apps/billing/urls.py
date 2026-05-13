@@ -40,6 +40,17 @@ urlpatterns = [
     path("payments/", views.payments, name="payments"),
     path("payments/new/", views.payment_create, name="payment_create"),
     path("payments/<int:pk>/", views.payment_detail, name="payment_detail"),
+    path("customers/<int:pk>/statement/", views.customer_statement, name="customer_statement"),
+    path(
+        "customers/<int:pk>/statement.pdf",
+        views.customer_statement_pdf,
+        name="customer_statement_pdf",
+    ),
+    path(
+        "customers/<int:pk>/statement/send/",
+        views.customer_statement_send,
+        name="customer_statement_send",
+    ),
     path("reports/ar-aging/", views.ar_aging, name="ar_aging"),
     path("reports/sales-tax/", views.sales_tax_report, name="sales_tax_report"),
 ]

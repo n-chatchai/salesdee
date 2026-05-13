@@ -53,3 +53,14 @@ def render_credit_note_pdf(doc, *, copy: bool = False) -> bytes:
 def render_debit_note_pdf(doc, *, copy: bool = False) -> bytes:
     ref = doc.references_document.doc_number if doc.references_document_id else ""
     return _render(doc, doc_title="ใบเพิ่มหนี้", copy=copy, original_ref=ref or "")
+
+
+def render_customer_statement_pdf(data: dict, *, customer) -> bytes:
+    """Render a customer statement (FR-13.5). ``data`` is the dict from ``customer_statement(...)``."""
+    from weasyprint import HTML
+
+    company = CompanyProfile.objects.filter(tenant_id=customer.tenant_id).first()
+    html = render_to_string(
+        "billing/pdf/statement.html", {"data": data, "customer": customer, "company": company}
+    )
+    return HTML(string=html, base_url=_static_dir()).write_pdf()
