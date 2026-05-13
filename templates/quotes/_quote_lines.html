@@ -7,8 +7,8 @@
     {% for line in document.lines.all %}
       {% if line.pk == editing_line_id %}
       <tr><td colspan="{% if editable %}10{% else %}9{% endif %}">
-        <form method="post" action="{% url 'quotes:quotation_line_edit' document.pk line.pk %}" hx-post="{% url 'quotes:quotation_line_edit' document.pk line.pk %}" hx-target="#quote-lines" hx-swap="outerHTML">{% csrf_token %}
-          {% include "partials/_form.html" with form=line_edit_form %}
+        <form method="post" enctype="multipart/form-data" action="{% url 'quotes:quotation_line_edit' document.pk line.pk %}" hx-post="{% url 'quotes:quotation_line_edit' document.pk line.pk %}" hx-target="#quote-lines" hx-swap="outerHTML" hx-encoding="multipart/form-data">{% csrf_token %}
+          {% include "quotes/_quote_line_form.html" with form=line_edit_form %}
           <button class="btn btn-sm btn-primary">บันทึกรายการ</button>
           <a class="btn btn-sm btn-ghost" href="#" hx-get="{% url 'quotes:quotation_lines_partial' document.pk %}" hx-target="#quote-lines" hx-swap="outerHTML">ยกเลิก</a>
         </form>
@@ -38,7 +38,7 @@
   <div class="qd-add-line">
     <div class="title">เพิ่มรายการ</div>
     <form method="post" enctype="multipart/form-data" action="{% url 'quotes:quotation_add_line' document.pk %}" hx-post="{% url 'quotes:quotation_add_line' document.pk %}" hx-target="#quote-lines" hx-swap="outerHTML" hx-encoding="multipart/form-data">{% csrf_token %}
-      {% include "partials/_form.html" with form=line_form %}
+      {% include "quotes/_quote_line_form.html" with form=line_form %}
       <button class="btn btn-sm btn-primary"><svg class="ico ico-sm"><use href="#i-plus"/></svg> เพิ่มรายการ</button>
     </form>
   </div>

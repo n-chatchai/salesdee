@@ -1,0 +1,41 @@
+{# Quote-line form with a type-ahead product picker on top. Uses Alpine for the open-dropdown
+   state + clicking-a-row, and htmx for the search itself. The picker writes into the form's
+   existing fields (which the server still validates and apply_catalog_defaults() finalises). #}
+{% load i18n %}
+<div class="quote-line-form" x-data="{ open:false, hover:-1, pick(el){
+       var f = $root.querySelector('form');
+       function set(name, value){ var i = f.querySelector('[name=&quot;'+name+'&quot;]'); if(i){ i.value = value; i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true})); } }
+       set('product', el.dataset.pk);
+       set('description', el.dataset.name);
+       set('unit', el.dataset.unit || 'ชิ้น');
+       set('unit_price', el.dataset.price || '0');
+       set('tax_type', el.dataset.tax || 'vat7');
+       if (el.dataset.dimensions) set('dimensions', el.dataset.dimensions);
+       if (el.dataset.material) set('material', el.dataset.material);
+       this.open = false;
+       var box = $root.querySelector('[data-picker-input]');
+       if (box) box.value = el.dataset.name + (el.dataset.code ? ' · ' + el.dataset.code : '');
+     } }"
+     @click.outside="open=false">
+  <div class="field">
+    <label class="field-label" for="product-picker">ค้นหาสินค้า <span class="muted">(พิมพ์ชื่อหรือรหัส)</span></label>
+    <div class="product-picker" style="position:relative">
+      <input id="product-picker" type="search" autocomplete="off" data-picker-input
+             placeholder="พิมพ์ชื่อสินค้าหรือรหัส…"
+             hx-get="{% url 'quotes:product_search' %}"
+             hx-trigger="keyup changed delay:200ms"
+             hx-target="next .product-search-dropdown"
+             hx-swap="innerHTML"
+             hx-vals='js:{q: event.target.value}'
+             @focus="open=true"
+             @input="open=true"
+             @keydown.arrow-down.prevent="hover = Math.min(hover+1, ($refs.dd?.querySelectorAll('li').length||1) - 1)"
+             @keydown.arrow-up.prevent="hover = Math.max(hover-1, 0)"
+             @keydown.enter.prevent="var li = $refs.dd?.querySelectorAll('li')[hover]; if(li){ pick(li); }"
+             @keydown.escape="open=false">
+      <div class="product-search-dropdown" x-show="open" x-ref="dd" x-cloak></div>
+    </div>
+  </div>
+  {# the actual form fields (the picker writes into product/description/unit/unit_price/tax_type) #}
+  {% include "partials/_form.html" with form=form %}
+</div>
