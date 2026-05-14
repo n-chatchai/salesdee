@@ -188,6 +188,7 @@
     font-style: italic;
     font-weight: 500;
     color: var(--accent);
+    white-space: nowrap;
   }
   .h1 {
     font-size: clamp(32px, 5vw, 56px);
@@ -331,7 +332,10 @@
     max-width: 620px;
   }
   .hero-headline {
-    margin-bottom: 28px;
+    font-size: clamp(30px, 5.2vw, 64px);
+    line-height: 1.05;
+    letter-spacing: -0.028em;
+    margin-bottom: 24px;
   }
   .hero-sub {
     margin-bottom: 36px;
@@ -2641,14 +2645,13 @@
     <div class="hero-grid">
 
       <div class="hero-text">
-        <div class="eyebrow">Quote builder + CRM · สำหรับ SME ไทย</div>
         <h1 class="display hero-headline">
-          ออก<em>ใบเสนอ</em><br>
+          ออก<em>ใบเสนอราคา</em><br>
           ที่<em>ง่าย</em><br>
           และ<em>ถูกต้อง</em>
         </h1>
-        <p class="lead ตัวหลัก-sub">
-          ลูกค้าจะเข้ามาทาง<em>ไหน</em>ก็ตาม — เว็บ ·  · โทร · เดินมาที่ร้าน — ทีมเซลส์ออกใบเสนอที่ <em>สวย</em> และ <em>แม่นยำ</em> · ระบบช่วยให้แคตตาล็อกถูกต้อง · ราคาไม่พลาด · ขั้นตอนน้อยที่สุด
+        <p class="lead hero-sub">
+          จากแชตไลน์ถึงใบเสนอที่ส่งกลับ — ใน <em>5 นาที</em> · ราคาแม่น · ไม่มีดีลตกหาย
         </p>
         <div class="hero-ctas">
           <a href="{% url 'accounts:signup' %}" class="btn btn-primary btn-lg">
@@ -2665,7 +2668,7 @@
       </div>
 
       <div class="hero-visual">
-        <div class="line-notif">
+        <!-- <div class="line-notif">
           <div class="ln-head">
             <div class="ln-ava-wrap">
               <div class="ln-ava">น</div>
@@ -2682,7 +2685,7 @@
             <span class="ln-pulse"></span>
             <span class="ln-action-text">ลูกค้าใหม่ · กำลังเข้ามา</span>
           </div>
-        </div>
+        </div> -->
         <div class="app-mock">
           <div class="app-mock-bar">
             <div class="dot-row">
@@ -2759,31 +2762,25 @@
 <section class="problem">
   <div class="container">
     <div class="section-head">
-      <div class="eyebrow mid">ปัญหาที่ทุก SME ไทยเจอ</div>
+      <!-- <div class="eyebrow mid">ปัญหาที่ทุก SME ไทยเจอ</div> -->
       <h2 class="h1">ใบเสนอราคา<br><em>ช้า</em> · <em>ผิด</em> · <em>หาย</em></h2>
-      <p class="lead">ลูกค้าทักมาเยอะ · แต่ออกใบเสนอใช้เวลา · ราคาผิดบ่อย · เซลส์เหนื่อย · ดีลตกเพราะตอบช้า · <em>4 ปัญหา</em> เดียวกันที่ทุก SME ไทยเจอ</p>
     </div>
 
-    <div class="pain-grid">
+    <div class="pain-grid pain-grid-3">
       <div class="pain-card">
         <div class="quote-mark">"</div>
-        <div class="quote">มีลูกค้าเข้าเว็บทุกวัน · แต่ขอใบเสนอผ่านอีเมล / โทรศัพท์ · ตอบช้า · ลูกค้าหาย · ไปหาคู่แข่งที่ตอบเร็วกว่า</div>
-        <div class="source">เจ้าของ · เฟอร์นิเจอร์สำนักงาน</div>
+        <div class="quote">ทำใบเสนอใน Excel ทุกครั้ง · ราคาผิดบ่อย · ค้น SKU 30 นาที</div>
+        <div class="source">เจ้าของ · ค้าวัสดุ</div>
       </div>
       <div class="pain-card">
         <div class="quote-mark">"</div>
-        <div class="quote">ใบเสนอราคาทำใน เอ็กเซล ทุกครั้ง · ราคาผิดบ่อย · ลูกค้าทักมาก็ต้องเปิด แคตตาล็อก ค้น SKU · ใช้เวลา 30 นาที</div>
-        <div class="source">เจ้าของบริษัท · ค้าวัสดุ</div>
+        <div class="quote">ส่งใบเสนอไปแล้ว · ไม่รู้ลูกค้าเปิดดูหรือเปล่า · พลาด timing บ่อย</div>
+        <div class="source">เซลส์ · บริษัทรับเหมา</div>
       </div>
       <div class="pain-card">
         <div class="quote-mark">"</div>
-        <div class="quote">ส่งใบเสนอไปแล้ว · ไม่รู้ว่าลูกค้าเปิดดูหรือเปล่า · ไม่กล้าตามเร็วเกินไป · พลาด timing บ่อย</div>
-        <div class="source">ทีมเซลส์ · บริษัทรับเหมา</div>
-      </div>
-      <div class="pain-card">
-        <div class="quote-mark">"</div>
-        <div class="quote">เซลส์ลาออกแล้วประวัติลูกค้าหายหมด · แชต  อยู่ในเครื่องตัวเอง · ทีมใหม่เริ่มจากศูนย์ทุกครั้ง</div>
-        <div class="source">เจ้าของ · บริษัทขายเครื่องใช้สำนักงาน</div>
+        <div class="quote">เซลส์ลาออก ประวัติลูกค้าหายหมด · ทีมใหม่เริ่มจากศูนย์</div>
+        <div class="source">เจ้าของ · เครื่องใช้สำนักงาน</div>
       </div>
     </div>
   </div>
@@ -2796,9 +2793,8 @@
 <section class="how" id="how">
   <div class="container">
     <div class="section-head">
-      <div class="eyebrow">ออกใบเสนอที่ดี · ทุกครั้ง</div>
+      <!-- <div class="eyebrow">ออกใบเสนอที่ดี · ทุกครั้ง</div> -->
       <h2 class="h1">จาก<em>คำถาม</em>ของลูกค้า<br>ถึง<em>ใบเสนอ</em>ที่ส่งไป</h2>
-      <p class="lead">ทุก lead · ทุกใบเสนอ · <em>ระบบเดียว</em> · ระบบช่วย UX + อัตโนมัติ + AI ทำให้ขั้นตอนสั้นที่สุด · ราคาแม่นที่สุด · ไม่มีโอกาสพลาด</p>
     </div>
 
     <div class="workflow">
@@ -2812,13 +2808,12 @@
           </svg>
         </div>
         <h3>Lead เข้ามา</h3>
-        <p>ลูกค้าทักผ่านช่องทางไหน ระบบรับได้ทุกทาง · เก็บใน inbox เดียวกัน · ไม่หาย · มอบหมายให้เซลส์ที่ดูแลทันที</p>
+        <p>ลูกค้าทักทุกช่องทาง รวมใน inbox เดียว · มอบหมายเซลส์ทันที</p>
         <div class="wf-detail">
+          <span class="ch-pill">ไลน์ โอเอ</span>
           <span class="ch-pill">เว็บของคุณ</span>
-          <span class="ch-pill">ไลน์ ออฟฟิเชียล</span>
           <span class="ch-pill">โทรศัพท์</span>
           <span class="ch-pill">Walk-in</span>
-          <span class="ch-pill">อีเมล · referral</span>
         </div>
       </div>
 
@@ -2833,12 +2828,11 @@
           </svg>
         </div>
         <h3>ออก<em>ใบเสนอ</em></h3>
-        <p>คลิก แคตตาล็อก · ใส่จำนวน · ระบบคำนวณภาษี ส่วนลด เงื่อนไขให้ · ผู้ช่วยเสนอสินค้าที่ตรงกับคำถามและราคาที่เหมาะสม · เซลส์ตรวจและตัดสิน</p>
-        <div class="wf-detail wf-bullets">
-          <div class="wf-bullet"><span class="b-ic">✓</span><span><strong>UX ดี</strong> · ขั้นตอนน้อยที่สุด · เห็นทุกอย่างในจอเดียว</span></div>
-          <div class="wf-bullet"><span class="b-ic">⚡</span><span><strong>Automated</strong> · คำนวณภาษี · ส่วนลด · จัดรูปแบบ เอง</span></div>
-          <div class="wf-bullet"><span class="b-ic ai">✱</span><span><strong>เอไอช่วย</strong> · เสนอ product · เสนอราคา · แจ้งเตือนความผิดพลาด</span></div>
-          <div class="wf-bullet"><span class="b-ic">📋</span><span><strong>เทมเพลตs</strong> · ลูกค้าใหม่/เก่า · เงื่อนไขมาตรฐาน</span></div>
+        <p>เลือกจากแคตตาล็อก · ระบบคำนวณภาษี + ส่วนลดให้ · ผู้ช่วยเอไอเสนอรายการที่ตรง</p>
+        <div class="wf-detail">
+          <span class="ch-pill">คำนวณอัตโนมัติ</span>
+          <span class="ch-pill">เอไอจับคู่</span>
+          <span class="ch-pill">เทมเพลต</span>
         </div>
       </div>
 
@@ -2867,12 +2861,12 @@
             <polyline points="22 4 12 14.01 9 11.01"/>
           </svg>
         </div>
-        <h3>Track · ปิดดีล</h3>
-        <p>เห็นทันทีเมื่อลูกค้าเปิดดู · กี่ครั้ง · กดอะไร · ใกล้หมดอายุระบบเตือนเอง · กดยอมรับออนไลน์ → ดีลปิด → activity บันทึก</p>
-        <div class="wf-detail wf-bullets">
-          <div class="wf-bullet"><span class="b-ic">👀</span><span>ติดตามการเปิด · ทุก ช่องทาง</span></div>
-          <div class="wf-bullet"><span class="b-ic">⏰</span><span>Reminder · ก่อนหมดอายุ 24 ชม</span></div>
-          <div class="wf-bullet"><span class="b-ic">✍</span><span>Accept ออนไลน์ · ดีลปิดเอง</span></div>
+        <h3>ติดตาม · ปิดดีล</h3>
+        <p>เห็นทันทีเมื่อลูกค้าเปิดดู · ระบบเตือนใกล้หมดอายุ · กดยอมรับออนไลน์ → ดีลปิด</p>
+        <div class="wf-detail">
+          <span class="ch-pill">ติดตามการเปิด</span>
+          <span class="ch-pill">เตือนหมดอายุ</span>
+          <span class="ch-pill">ยอมรับออนไลน์</span>
         </div>
       </div>
 
@@ -3024,115 +3018,6 @@
     .paths-wrap { grid-template-columns: 1fr !important; gap: 32px !important; }
   }
 </style>
-
-
-<!-- ═══════════════════════════════════════════════
-     DEMO SCREENSHOTS
-     ═══════════════════════════════════════════════ -->
-<section class="demo" id="demo">
-  <div class="container">
-    <div class="section-head">
-      <div class="eyebrow">ภาพหน้าจอจริง · ออกแบบสำหรับไทย</div>
-      <h2 class="h1">UX ที่<em>เซลส์ไทย</em><br>ใช้ได้ในวันแรก</h2>
-      <p class="lead">ภาษาไทยทุกที่ · ตัวเลขแบบไทย · ราคาบาท · ปุ่มขนาดนิ้วโป้ง · ใช้ได้บนคอมและมือถือ · 5 หน้าจอจริงจากผลิตภัณฑ์</p>
-    </div>
-
-    <div class="demo-grid">
-
-      <!-- LARGE: Tenant website with quote drawer -->
-      <div class="demo-card large">
-        <div class="demo-card-label">เว็บของร้านคุณ · ลูกค้าเลือกสินค้าเอง</div>
-        <div class="demo-browser">
-          <div class="db-bar">
-            <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
-            <span class="db-url"><span class="db-host">wandeedee.salesdee.com</span></span>
-          </div>
-          <div class="db-body site">
-            <div class="site-nav">
-              <span class="site-brand">wandeedee<span class="dot"></span></span>
-              <span class="site-cart">ใบเสนอ <span class="cart-count">3</span></span>
-            </div>
-            <div class="site-grid">
-              <div class="site-prod">
-                <div class="prod-img" style="background: linear-gradient(135deg, #8B7355, #4A3C2C);"></div>
-                <div class="prod-name">โต๊ะ วอลนัทพรีเมียม</div>
-                <div class="prod-price">฿85,000</div>
-              </div>
-              <div class="site-prod">
-                <div class="prod-img" style="background: linear-gradient(135deg, #2D3748, #1A202C);"></div>
-                <div class="prod-name">เก้าอี้ เออร์โกโนมิก</div>
-                <div class="prod-price">฿12,800</div>
-              </div>
-              <div class="site-prod">
-                <div class="prod-img" style="background: linear-gradient(135deg, #6B6B5C, #3F4A3F);"></div>
-                <div class="prod-name">Workstation 4 ที่</div>
-                <div class="prod-price">฿48,500</div>
-              </div>
-            </div>
-            <div class="site-drawer">
-              <div class="drawer-head">
-                <span class="drawer-title">ใบเสนอราคา (3)</span>
-                <span class="drawer-x">×</span>
-              </div>
-              <div class="drawer-item">
-                <div class="d-img" style="background: linear-gradient(135deg, #8B7355, #4A3C2C);"></div>
-                <span class="d-name">โต๊ะ วอลนัท · 12</span>
-                <span class="d-price">฿1.02M</span>
-              </div>
-              <div class="drawer-item">
-                <div class="d-img" style="background: linear-gradient(135deg, #2D3748, #1A202C);"></div>
-                <span class="d-name">เก้าอี้ ergo · 14</span>
-                <span class="d-price">฿179k</span>
-              </div>
-              <div class="drawer-total">
-                <span>รวม</span>
-                <span class="t-amt">฿1.19M</span>
-              </div>
-              <button class="drawer-cta">ขอใบเสนอราคา →</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- TALL: ไลน์ Flex Message ตัวอย่าง on phone -->
-      <div class="demo-card tall">
-        <div class="demo-card-label">ใบเสนอใน <em>ไลน์</em> · ลูกค้าได้ Flex Message</div>
-        <div class="demo-phone">
-          <div class="dp-screen">
-            <div class="dp-status">
-              <span>09:42</span>
-              <span>5G ▮▮▮</span>
-            </div>
-            <div class="dp-line-head">
-              <div class="line-ava"></div>
-              <div class="line-name">วัน.ดี.ดี. <span class="badge-oa">OA</span></div>
-            </div>
-            <div class="dp-chat">
-              <div class="line-bubble out">ขอใบเสนอราคาตามที่คุยกันค่ะ พี่นริศ 🙏</div>
-              <div class="line-flex">
-                <div class="flex-head">
-                  <div class="flex-eyebrow">ใบเสนอราคา</div>
-                  <div class="flex-num">QT-2026-0142</div>
-                </div>
-                <div class="flex-body">
-                  <div class="flex-row"><span>รายการ</span><span class="v">4 รายการ</span></div>
-                  <div class="flex-row"><span>ยืนราคา</span><span class="v">13 มิ.ย. 69</span></div>
-                  <div class="flex-total"><span>ยอดสุทธิ</span><span class="v">฿ 1,375,528</span></div>
-                </div>
-                <div class="flex-foot">
-                  <button class="flex-btn primary">ดูใบเสนอ</button>
-                  <button class="flex-btn ghost">ยอมรับ</button>
-                </div>
-              </div>
-              <div class="line-time">14:42 · เปิดอ่าน 14:45</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</section>
 
 
 <!-- ═══════════════════════════════════════════════
