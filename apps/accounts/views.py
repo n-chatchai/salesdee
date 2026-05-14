@@ -135,7 +135,7 @@ def signup(request: HttpRequest) -> HttpResponse:
                 # The post_save signal (apps/crm/signals) provisions a CompanyProfile + the
                 # default pipeline for a new Tenant. We just set the company name and the owner.
                 tenant = Tenant.objects.create(
-                    name=data["workspace_name"], slug=data["slug"], plan=Plan.TRIAL
+                    name=data["workspace_name"], slug=data["slug"], plan=Plan.FREE
                 )
                 profile = tenant.company_profile
                 profile.name_th = data["workspace_name"]

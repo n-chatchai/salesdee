@@ -1,0 +1,3722 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>salesdee.com · เน้นใบเสนอ CRM สำหรับ SME ไทย</title>
+<meta name="description" content="ออกใบเสนอราคา ที่ง่ายและถูกต้อง · ทุก lead จากเว็บ · LINE · โทร · เดินมา · กลายเป็นใบเสนอที่สวยและแม่นยำ · CRM สำหรับ SME ไทย">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231B2A3A'/%3E%3Ctext x='50' y='72' font-family='IBM Plex Sans Thai' font-weight='700' font-size='70' fill='%23C8501F' text-anchor='middle' letter-spacing='-3'%3Ed%3C/text%3E%3Ccircle cx='78' cy='78' r='5' fill='%23C8501F'/%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@200;300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --paper: #F6F1E7;
+    --paper-2: #FBF7EF;
+    --paper-3: #ECE4D2;
+    --ink: #1B2A3A;
+    --ink-2: #2D3D50;
+    --mid: #6B7785;
+    --mid-2: #A5ACB5;
+    --accent: #C8501F;
+    --accent-deep: #9C3F18;
+    --accent-soft: #F4E2D3;
+    --ai: #7B8F6B;
+    --ai-soft: #E8EEDF;
+    --ai-deep: #5A6D4D;
+    --good: #4A6B40;
+    --warn: #B45A3C;
+    --border: #E5DDC9;
+    --line-green: #06C755;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html {
+    background: var(--paper);
+    scroll-behavior: smooth;
+  }
+  body {
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    color: var(--ink);
+    line-height: 1.5;
+    background: var(--paper);
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='1' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.1 0 0 0 0 0.1 0 0 0 0.04 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    opacity: 0.4;
+    mix-blend-mode: multiply;
+    z-index: 100;
+  }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+
+  /* ═══ WORDMARK + ICON ═══ */
+  .wm {
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    text-transform: lowercase;
+    line-height: 1;
+    display: inline-block;
+  }
+  .wm .sales { color: var(--ink); }
+  .wm .dee { color: var(--accent); }
+  .wm .dot {
+    display: inline-block;
+    width: 0.13em; height: 0.13em;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-left: 0.04em;
+    vertical-align: 0.05em;
+  }
+  .wm.reverse .sales { color: var(--paper); }
+  .ic {
+    display: grid; place-items: center;
+    position: relative; overflow: hidden;
+    background: var(--ink);
+    border-radius: 22.37%;
+    flex-shrink: 0;
+  }
+  .ic > .d {
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -0.05em;
+    line-height: 0.85;
+  }
+  .ic > .dot {
+    position: absolute;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+
+  /* ═══ Layout containers ═══ */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  .container-wide {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  .container-narrow {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ═══ Buttons ═══ */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 28px;
+    border-radius: 99px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: var(--paper);
+  }
+  .btn-primary:hover {
+    background: var(--accent-deep);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(200, 80, 31, 0.25);
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink);
+    border: 1.5px solid var(--ink);
+  }
+  .btn-ghost:hover {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .btn-paper {
+    background: var(--paper);
+    color: var(--ink);
+    border: 1px solid var(--border);
+  }
+  .btn-paper:hover {
+    background: var(--paper-2);
+    border-color: var(--ink);
+  }
+  .btn-sm {
+    padding: 10px 18px;
+    font-size: 13px;
+  }
+  .btn-lg {
+    padding: 18px 36px;
+    font-size: 17px;
+  }
+
+  /* ═══ Typography ═══ */
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 24px;
+    font-weight: 500;
+  }
+  .eyebrow.mid { color: var(--mid); }
+  .eyebrow.ai { color: var(--ai); }
+  .display {
+    font-size: clamp(38px, 7vw, 88px);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1.02;
+    color: var(--ink);
+  }
+  .display em {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    color: var(--accent);
+  }
+  .h1 {
+    font-size: clamp(32px, 5vw, 56px);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.08;
+    color: var(--ink);
+  }
+  .h1 em {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    color: var(--accent);
+  }
+  .h2 {
+    font-size: clamp(24px, 3vw, 36px);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+    color: var(--ink);
+  }
+  .h2 em {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    color: var(--accent);
+  }
+  .h3 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.25;
+    color: var(--ink);
+  }
+  .lead {
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--ink-2);
+  }
+  .lead em {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: var(--ink);
+  }
+  .body {
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--ink-2);
+  }
+  .small {
+    font-size: 13px;
+    color: var(--mid);
+  }
+  .mono {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+  }
+
+  /* ═══ NAVIGATION ═══ */
+  nav.top {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(246, 241, 231, 0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .nav-brand .wm {
+    font-size: 22px;
+  }
+  .nav-links {
+    display: none;
+    gap: 32px;
+    font-size: 14px;
+    color: var(--ink-2);
+  }
+  .nav-links a:hover { color: var(--accent); }
+  .nav-cta {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .nav-cta .btn-sm-mobile {
+    display: inline-flex;
+  }
+  @media (min-width: 768px) {
+    .nav-links { display: flex; }
+  }
+
+  /* ═══ HERO ═══ */
+  .hero {
+    padding: 80px 0 100px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, var(--accent-soft) 0%, transparent 65%);
+    opacity: 0.7;
+    z-index: -1;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -100px; left: -100px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, var(--ai-soft) 0%, transparent 65%);
+    opacity: 0.6;
+    z-index: -1;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 64px;
+    align-items: center;
+  }
+  @media (min-width: 960px) {
+    .hero-grid {
+      grid-template-columns: 1.1fr 1fr;
+      gap: 80px;
+    }
+  }
+  .hero-text {
+    max-width: 620px;
+  }
+  .hero-headline {
+    margin-bottom: 28px;
+  }
+  .hero-sub {
+    margin-bottom: 36px;
+    max-width: 540px;
+  }
+  .hero-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .hero-microcopy {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: var(--mid);
+    font-size: 13px;
+    flex-wrap: wrap;
+  }
+  .hero-microcopy .check {
+    color: var(--good);
+    font-weight: 600;
+  }
+  .hero-visual {
+    position: relative;
+  }
+
+  /* App mockup */
+  .app-mock {
+    background: var(--paper-2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 30px 80px rgba(27, 42, 58, 0.15);
+    overflow: hidden;
+    position: relative;
+  }
+  .app-mock-bar {
+    background: var(--ink);
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .app-mock-bar .dot-row {
+    display: flex;
+    gap: 5px;
+  }
+  .app-mock-bar .dot-row span {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+  }
+  .app-mock-bar .dot-row span.red { background: #ff5f57; }
+  .app-mock-bar .dot-row span.yellow { background: #febc2e; }
+  .app-mock-bar .dot-row span.green { background: #28c840; }
+  .app-mock-bar .url {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: rgba(246, 241, 231, 0.6);
+    margin-left: 12px;
+  }
+  .app-mock-body {
+    padding: 24px;
+    min-height: 380px;
+  }
+  .mock-chat {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .chat-incoming {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .chat-incoming .avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6B5A45, #3D2F1F);
+    flex-shrink: 0;
+  }
+  .chat-incoming .bubble {
+    background: var(--paper-3);
+    padding: 10px 14px;
+    border-radius: 14px 14px 14px 4px;
+    font-size: 13px;
+    max-width: 75%;
+    line-height: 1.5;
+  }
+  .ai-card {
+    background: var(--ai-soft);
+    border: 1px solid var(--ai);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-top: 8px;
+  }
+  .ai-card-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .ai-card-head .ic-ai {
+    width: 22px; height: 22px;
+    background: var(--ai);
+    color: var(--paper);
+    border-radius: 5px;
+    display: grid;
+    place-items: center;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 13px;
+  }
+  .ai-card-head .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--ai-deep);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .ai-card .text {
+    font-size: 12px;
+    color: var(--ai-deep);
+    line-height: 1.55;
+    margin-bottom: 10px;
+  }
+  .ai-matched {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .ai-matched-item {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .ai-matched-item .img {
+    width: 28px; height: 28px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .ai-matched-item .info {
+    flex: 1;
+    min-width: 0;
+  }
+  .ai-matched-item .name {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ai-matched-item .price {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--mid);
+  }
+  .ai-matched-item .conf {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    background: var(--good-soft, #E1EAD9);
+    color: var(--good);
+    padding: 2px 6px;
+    border-radius: 99px;
+    font-weight: 600;
+  }
+  .mock-cta-row {
+    margin-top: 14px;
+    display: flex;
+    gap: 8px;
+  }
+  .mock-cta {
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .mock-cta.primary { background: var(--accent); color: var(--paper); }
+  .mock-cta.ghost { background: var(--paper); border: 1px solid var(--border); color: var(--ink); }
+
+  /* Floating  badge */
+  .line-badge {
+    position: absolute;
+    top: -16px; left: -16px;
+    background: var(--line-green);
+    color: white;
+    padding: 8px 14px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 600;
+    box-shadow: 0 6px 20px rgba(6, 199, 85, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 2;
+  }
+  .line-badge::before {
+    content: '';
+    width: 8px; height: 8px;
+    background: white;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* Floating timer */
+  .timer-badge {
+    position: absolute;
+    bottom: -20px; right: -20px;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 14px 22px;
+    border-radius: 14px;
+    box-shadow: 0 12px 32px rgba(27, 42, 58, 0.25);
+    z-index: 2;
+  }
+  .timer-badge .num {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 36px;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .timer-badge .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: rgba(246, 241, 231, 0.7);
+    text-transform: uppercase;
+  }
+
+  /* ═══ SOCIAL PROOF ═══ */
+  .social-proof {
+    padding: 60px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--paper-2);
+  }
+  .social-proof-label {
+    text-align: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--mid);
+    margin-bottom: 32px;
+  }
+  .logos-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    align-items: center;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  @media (min-width: 768px) {
+    .logos-row { grid-template-columns: repeat(4, 1fr); }
+  }
+  .logo-item {
+    text-align: center;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 22px;
+    color: var(--mid);
+    opacity: 0.7;
+    transition: opacity 0.2s;
+  }
+  .logo-item:hover { opacity: 1; }
+  .logo-item small {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-style: normal;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    margin-top: 4px;
+    opacity: 0.65;
+  }
+
+  /* Stats row */
+  .stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
+    margin-top: 48px;
+    padding-top: 40px;
+    border-top: 1px solid var(--border);
+  }
+  .stat-item {
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(36px, 5vw, 52px);
+    color: var(--accent);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .stat-label {
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+
+  /* ═══ PROBLEM SECTION ═══ */
+  .problem {
+    padding: 100px 0;
+  }
+  .section-head {
+    text-align: center;
+    margin-bottom: 64px;
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .section-head .h1,
+  .section-head .h2 {
+    margin-bottom: 20px;
+  }
+  .pain-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    max-width: 920px;
+    margin: 0 auto;
+  }
+  @media (min-width: 768px) {
+    .pain-grid { grid-template-columns: 1fr 1fr; gap: 28px; }
+  }
+  .pain-card {
+    background: var(--paper-2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    position: relative;
+  }
+  .pain-card .quote-mark {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 64px;
+    color: var(--accent);
+    line-height: 0.5;
+    margin-bottom: 12px;
+  }
+  .pain-card .quote {
+    font-size: 17px;
+    line-height: 1.5;
+    color: var(--ink);
+    margin-bottom: 16px;
+    font-weight: 500;
+  }
+  .pain-card .source {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--mid);
+    letter-spacing: 0.05em;
+  }
+
+  /* ═══ HOW IT WORKS ═══ */
+  .how {
+    padding: 100px 0;
+    background: var(--paper-2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .steps {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 48px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  @media (min-width: 900px) {
+    .steps {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 32px;
+    }
+  }
+  .step {
+    text-align: center;
+    position: relative;
+  }
+  .step-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    margin-bottom: 16px;
+    font-weight: 500;
+  }
+  .step-icon {
+    width: 80px; height: 80px;
+    margin: 0 auto 24px;
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    display: grid;
+    place-items: center;
+    box-shadow: 0 8px 24px rgba(27, 42, 58, 0.06);
+    position: relative;
+  }
+  .step-icon svg {
+    width: 36px; height: 36px;
+    color: var(--accent);
+  }
+  .step-icon .dot {
+    position: absolute;
+    bottom: 8px; right: 8px;
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+  .step h3 {
+    font-size: 19px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    letter-spacing: -0.01em;
+  }
+  .step h3 em {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+  }
+  .step p {
+    font-size: 14px;
+    color: var(--ink-2);
+    line-height: 1.6;
+  }
+  @media (min-width: 900px) {
+    .step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 56px;
+      right: -28px;
+      width: 24px;
+      height: 1px;
+      background: var(--border);
+    }
+  }
+
+  /* ═══ FEATURES ═══ */
+  .features {
+    padding: 100px 0;
+  }
+  .features-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  @media (min-width: 768px) {
+    .features-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (min-width: 1024px) {
+    .features-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  .feature-card {
+    background: var(--paper-2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    transition: all 0.2s ease;
+  }
+  .feature-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 36px rgba(27, 42, 58, 0.08);
+    border-color: var(--accent);
+  }
+  .feature-card .icon-box {
+    width: 48px; height: 48px;
+    background: var(--accent-soft);
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    margin-bottom: 20px;
+  }
+  .feature-card .icon-box svg {
+    width: 24px; height: 24px;
+    color: var(--accent);
+  }
+  .feature-card.ai .icon-box {
+    background: var(--ai-soft);
+  }
+  .feature-card.ai .icon-box svg {
+    color: var(--ai);
+  }
+  .feature-card h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    letter-spacing: -0.01em;
+  }
+  .feature-card h3 em {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    color: var(--accent);
+  }
+  .feature-card.ai h3 em { color: var(--ai-deep); }
+  .feature-card p {
+    font-size: 14px;
+    color: var(--ink-2);
+    line-height: 1.6;
+  }
+  .feature-card .meta {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--mid);
+    letter-spacing: 0.05em;
+  }
+
+  /* ═══ DEMO SCREENSHOTS ═══ */
+  .demo {
+    padding: 100px 0;
+    background: var(--ink);
+    color: var(--paper);
+    position: relative;
+    overflow: hidden;
+  }
+  .demo::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(200, 80, 31, 0.15) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .demo .section-head .eyebrow { color: var(--accent-soft); }
+  .demo .section-head .h1,
+  .demo .section-head .h2 { color: var(--paper); }
+  .demo .section-head .h1 em,
+  .demo .section-head .h2 em { color: var(--accent); }
+  .demo .section-head .lead { color: rgba(246, 241, 231, 0.7); }
+  .demo .section-head .lead em { color: var(--paper); }
+  .demo-shots {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  @media (min-width: 900px) {
+    .demo-shots { grid-template-columns: 1.4fr 1fr; }
+  }
+  .demo-shot {
+    background: var(--paper);
+    border-radius: 14px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+    position: relative;
+  }
+  .demo-shot-label {
+    position: absolute;
+    top: 16px; left: 16px;
+    background: rgba(27, 42, 58, 0.85);
+    color: var(--paper);
+    backdrop-filter: blur(10px);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    z-index: 2;
+  }
+  .demo-shot.tall {
+    aspect-ratio: 4/5;
+  }
+  .demo-shot.wide {
+    aspect-ratio: 16/10;
+  }
+  .demo-shot-inner {
+    padding: 60px 24px 24px;
+    height: 100%;
+    color: var(--ink);
+  }
+  /* Mock dashboard ตัวอย่าง */
+  .mock-dash {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .mock-dash-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+  .mock-kpi {
+    background: var(--paper-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .mock-kpi .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8px;
+    color: var(--mid);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .mock-kpi .value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .mock-chart {
+    height: 100px;
+    background: var(--paper-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    position: relative;
+  }
+  .mock-chart svg {
+    width: 100%;
+    height: 100%;
+  }
+  .mock-table {
+    background: var(--paper-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .mock-table-row {
+    display: grid;
+    grid-template-columns: 36px 1fr 60px;
+    gap: 10px;
+    padding: 8px 12px;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+  }
+  .mock-table-row:last-child { border-bottom: none; }
+  .mock-table-row .img {
+    width: 28px; height: 28px;
+    border-radius: 4px;
+  }
+  .mock-table-row .name {
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .mock-table-row .meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: var(--mid);
+  }
+  .mock-table-row .price {
+    text-align: right;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  /* ═══ TESTIMONIAL ═══ */
+  .testimonial {
+    padding: 120px 0;
+  }
+  .testimonial-card {
+    background: var(--paper-2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 48px;
+    max-width: 900px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .testimonial-card::before {
+    content: '"';
+    position: absolute;
+    top: 12px; left: 28px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 200px;
+    color: var(--accent-soft);
+    line-height: 0.6;
+    z-index: 0;
+  }
+  .testimonial-content {
+    position: relative;
+    z-index: 1;
+  }
+  .testimonial-quote {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-style: italic;
+    font-size: clamp(22px, 2.5vw, 30px);
+    line-height: 1.4;
+    color: var(--ink);
+    margin-bottom: 32px;
+  }
+  .testimonial-author {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+  }
+  .testimonial-avatar {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6B5A45, #3D2F1F);
+    display: grid;
+    place-items: center;
+    color: var(--paper);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 24px;
+  }
+  .testimonial-author-info .name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .testimonial-author-info .role {
+    font-size: 13px;
+    color: var(--mid);
+    margin-top: 2px;
+  }
+  .testimonial-metrics {
+    margin-top: 32px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
+  }
+  .testimonial-metric .value {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(28px, 4vw, 40px);
+    color: var(--accent);
+    line-height: 1;
+  }
+  .testimonial-metric .label {
+    font-size: 12px;
+    color: var(--mid);
+    margin-top: 6px;
+  }
+
+  /* ═══ PRICING ═══ */
+  .pricing {
+    padding: 100px 0;
+    background: var(--paper-2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  @media (min-width: 700px) {
+    .pricing-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (min-width: 1024px) {
+    .pricing-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; }
+  }
+  .price-card {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px 28px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: all 0.2s ease;
+  }
+  .price-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(27, 42, 58, 0.08);
+  }
+  .price-card.featured {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+  .price-card.featured .name { color: var(--paper); }
+  .price-card.featured .price-amount { color: var(--accent); }
+  .price-card.featured .price-unit { color: rgba(246, 241, 231, 0.5); }
+  .price-card.featured .features-list li { color: rgba(246, 241, 231, 0.85); }
+  .price-card.featured .features-list .check { color: var(--accent); }
+  .price-card.featured .features-list .more { color: var(--paper); }
+  .price-card .badge {
+    position: absolute;
+    top: -10px; right: 24px;
+    background: var(--accent);
+    color: var(--paper);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    padding: 5px 12px;
+    border-radius: 99px;
+    text-transform: uppercase;
+  }
+  .price-card .name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--mid);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .price-amount {
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-weight: 700;
+    font-size: 44px;
+    color: var(--ink);
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+  .price-amount em {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    color: var(--accent);
+  }
+  .price-amount .currency {
+    font-size: 24px;
+    color: var(--mid);
+    font-weight: 400;
+  }
+  .price-unit {
+    font-size: 13px;
+    color: var(--mid);
+    margin-top: 6px;
+    margin-bottom: 24px;
+  }
+  .price-desc {
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.5;
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .price-card.featured .price-desc { border-color: rgba(246, 241, 231, 0.15); color: rgba(246, 241, 231, 0.75); }
+  .features-list {
+    list-style: none;
+    flex: 1;
+    margin-bottom: 28px;
+  }
+  .features-list li {
+    font-size: 13px;
+    color: var(--ink-2);
+    padding: 7px 0 7px 26px;
+    position: relative;
+    line-height: 1.5;
+  }
+  .features-list .check {
+    position: absolute;
+    left: 0;
+    top: 7px;
+    color: var(--good);
+    font-weight: 700;
+  }
+  .price-cta {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* ═══ FAQ ═══ */
+  .faq {
+    padding: 100px 0;
+  }
+  .faq-list {
+    max-width: 760px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .faq-item {
+    background: var(--paper-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.2s;
+  }
+  .faq-item[open] {
+    background: var(--paper);
+    border-color: var(--accent);
+  }
+  .faq-q {
+    padding: 20px 24px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    list-style: none;
+  }
+  .faq-q::-webkit-details-marker { display: none; }
+  .faq-q::after {
+    content: '+';
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 22px;
+    color: var(--accent);
+    font-weight: 400;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+  .faq-item[open] .faq-q::after {
+    transform: rotate(45deg);
+  }
+  .faq-a {
+    padding: 0 24px 24px;
+    font-size: 14px;
+    color: var(--ink-2);
+    line-height: 1.7;
+    max-width: 660px;
+  }
+
+  /* ═══ FINAL CTA ═══ */
+  .final-cta {
+    padding: 120px 0;
+    background: var(--ink);
+    color: var(--paper);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .final-cta::before,
+  .final-cta::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .final-cta::before {
+    top: -200px; left: -100px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(200, 80, 31, 0.18) 0%, transparent 65%);
+  }
+  .final-cta::after {
+    bottom: -200px; right: -100px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(123, 143, 107, 0.15) 0%, transparent 65%);
+  }
+  .final-cta .container {
+    position: relative;
+    z-index: 1;
+  }
+  .final-cta .eyebrow { color: var(--accent-soft); }
+  .final-cta .display {
+    color: var(--paper);
+    margin-bottom: 32px;
+  }
+  .final-cta .display em { color: var(--accent); }
+  .final-cta .lead {
+    color: rgba(246, 241, 231, 0.75);
+    max-width: 580px;
+    margin: 0 auto 40px;
+  }
+  .final-cta-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+  }
+  .final-cta .btn-ghost {
+    color: var(--paper);
+    border-color: rgba(246, 241, 231, 0.4);
+  }
+  .final-cta .btn-ghost:hover {
+    background: var(--paper);
+    color: var(--ink);
+    border-color: var(--paper);
+  }
+
+  /* ═══ FOOTER ═══ */
+  footer.site {
+    padding: 80px 0 40px;
+    background: var(--paper-2);
+    border-top: 1px solid var(--border);
+  }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 40px;
+    margin-bottom: 60px;
+  }
+  @media (min-width: 768px) {
+    .footer-grid {
+      grid-template-columns: 1.4fr 1fr 1fr 1fr;
+      gap: 48px;
+    }
+  }
+  .footer-brand .wm { font-size: 32px; margin-bottom: 16px; display: inline-block; }
+  .footer-brand .tagline {
+    font-size: 14px;
+    color: var(--ink-2);
+    line-height: 1.6;
+    max-width: 320px;
+    margin-bottom: 20px;
+  }
+  .footer-brand .badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .footer-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--mid);
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    letter-spacing: 0.05em;
+  }
+  .footer-col h4 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--mid);
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+  .footer-col ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .footer-col a {
+    font-size: 14px;
+    color: var(--ink-2);
+    transition: color 0.15s;
+  }
+  .footer-col a:hover { color: var(--accent); }
+  .footer-bottom {
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 16px;
+    font-size: 12px;
+    color: var(--mid);
+  }
+  .footer-bottom a { color: var(--mid); }
+  .footer-bottom a:hover { color: var(--accent); }
+  .footer-legal {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  /* ═══ Animations ═══ */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .hero-text > * {
+    animation: fadeUp 0.6s ease backwards;
+  }
+  .hero-text > *:nth-child(1) { animation-delay: 0.0s; }
+  .hero-text > *:nth-child(2) { animation-delay: 0.1s; }
+  .hero-text > *:nth-child(3) { animation-delay: 0.2s; }
+  .hero-text > *:nth-child(4) { animation-delay: 0.3s; }
+  .hero-text > *:nth-child(5) { animation-delay: 0.4s; }
+  .hero-visual {
+    animation: fadeUp 0.8s ease backwards;
+    animation-delay: 0.3s;
+  }
+
+  /* Icon definitions */
+  .ico-set { display: none; }
+
+  /* TLD suffix · added 2569-05-14 · แบรนด์ evolved to salesdee.com */
+  .wm .tld {
+    color: var(--mid);
+    font-weight: 500;
+    margin-left: 0.02em;
+    letter-spacing: -0.02em;
+  }
+  .wm.reverse .tld { color: rgba(246, 241, 231, 0.6); }
+  .sb-brand .name .tld { color: rgba(246, 241, 231, 0.45); font-weight: 500; }
+  .powered-wm .tld { color: var(--mid); font-weight: 500; }
+  .brand-name .tld { color: var(--mid); font-weight: 500; margin-left: 0.02em; }
+
+  /* ═══ MANIFESTO · dark editorial section ═══ */
+  .manifesto {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 110px 0 120px;
+    position: relative;
+    overflow: hidden;
+  }
+  .manifesto::after {
+    content: '';
+    position: absolute;
+    top: -150px; right: -150px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(200,80,31,0.18) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .manifesto-quote-mark {
+    position: absolute;
+    top: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 140px;
+    line-height: 1;
+    color: rgba(200, 80, 31, 0.25);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .manifesto::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='1' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.1 0 0 0 0 0.1 0 0 0 0.04 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    opacity: 0.5; mix-blend-mode: multiply; pointer-events: none;
+  }
+  .manifesto > * { position: relative; z-index: 1; }
+  .manifesto-inner {
+    max-width: 780px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 0 30px;
+    position: relative;
+    z-index: 1;
+  }
+  .manifesto-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 28px;
+    font-weight: 600;
+  }
+  .manifesto-h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 52px;
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+    color: var(--paper);
+    margin-bottom: 48px;
+  }
+  .manifesto-h2 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .manifesto-body p {
+    font-size: 17px;
+    line-height: 1.8;
+    color: rgba(246, 241, 231, 0.75);
+    margin-bottom: 22px;
+    text-align: left;
+  }
+  .manifesto-body p em {
+    font-style: italic;
+    color: var(--paper);
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+  }
+  .manifesto-body strong {
+    font-weight: 600;
+    color: var(--paper);
+  }
+  .manifesto-conclusion {
+    font-size: 20px !important;
+    padding-top: 30px;
+    margin-top: 8px;
+    border-top: 1px solid rgba(246, 241, 231, 0.15);
+    color: var(--paper) !important;
+    text-align: center !important;
+    line-height: 1.65 !important;
+  }
+  .manifesto-signature {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 15px;
+    color: rgba(246, 241, 231, 0.55);
+    margin-top: 36px;
+    letter-spacing: 0.02em;
+  }
+  .manifesto-signature em {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  @media (max-width: 640px) {
+    .manifesto-h2 { font-size: 32px; }
+    .manifesto-body p { font-size: 15px; }
+  }
+
+  /* ═══ WHY salesdee.com ═══ */
+  .why-section {
+    background: var(--paper);
+    padding: 90px 0 100px;
+  }
+  .why-section .container {
+    max-width: 1200px;
+  }
+  .why-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    margin-top: 50px;
+  }
+  @media (max-width: 768px) {
+    .why-grid { grid-template-columns: 1fr; }
+  }
+  .why-card {
+    background: var(--paper-2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 26px 28px 28px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .why-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(27,42,58,.08);
+  }
+  .why-card.featured {
+    background: linear-gradient(160deg, var(--accent-soft) 0%, var(--paper-2) 100%);
+    border-color: var(--accent);
+    border-width: 2px;
+    grid-column: 1 / -1;
+  }
+  @media (max-width: 768px) {
+    .why-card.featured { grid-column: auto; }
+  }
+
+  .why-num {
+    position: absolute;
+    top: 24px;
+    right: 28px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 32px;
+    font-weight: 500;
+    color: var(--accent-soft);
+    line-height: 1;
+  }
+  .why-card.featured .why-num {
+    color: rgba(200, 80, 31, 0.25);
+    font-size: 40px;
+  }
+
+  .why-pain {
+    background: var(--danger-soft, #F0D5D0);
+    border-left: 3px solid var(--danger, #A8392F);
+    border-radius: 6px;
+    padding: 12px 14px 12px 14px;
+    margin-bottom: 18px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .why-card.featured .why-pain {
+    background: rgba(168, 57, 47, 0.08);
+  }
+  .why-pain-icon {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    background: var(--danger, #A8392F);
+    color: var(--paper);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 1px;
+  }
+  .why-pain-text {
+    flex: 1;
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.6;
+  }
+  .why-pain-text .lbl {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--danger, #A8392F);
+    font-weight: 700;
+    margin-right: 8px;
+    background: var(--paper);
+    padding: 1px 7px;
+    border-radius: 99px;
+    vertical-align: 1px;
+  }
+
+  .why-arrow {
+    text-align: center;
+    margin-bottom: 14px;
+    color: var(--mid);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+  }
+  .why-arrow span {
+    display: inline-block;
+    width: 2px;
+    height: 18px;
+    background: var(--accent);
+    margin: 0 auto;
+  }
+
+  .why-solution h3 {
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.3;
+    margin-bottom: 12px;
+    letter-spacing: -0.018em;
+  }
+  .why-card.featured .why-solution h3 {
+    font-size: 22px;
+  }
+  .why-solution h3 em {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    color: var(--accent);
+  }
+  .why-solution p {
+    font-size: 14px;
+    color: var(--ink-2);
+    line-height: 1.65;
+    margin-bottom: 16px;
+  }
+
+  .why-bullets {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 16px;
+  }
+  .why-bullets li {
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.6;
+    padding: 5px 0 5px 22px;
+    position: relative;
+  }
+  .why-bullets li::before {
+    content: '●';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-size: 10px;
+    top: 7px;
+  }
+  .why-bullets li strong { color: var(--ink); font-weight: 600; }
+
+  .why-diff {
+    margin-top: auto;
+    padding-top: 14px;
+    border-top: 1px dashed var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--mid);
+    letter-spacing: 0.02em;
+    line-height: 1.55;
+    display: flex;
+    gap: 6px;
+    align-items: flex-start;
+  }
+  .why-diff::before {
+    content: '▸';
+    color: var(--accent);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .why-diff strong { color: var(--accent); font-weight: 700; }
+
+
+
+  /* ═══ DEMO · realistic UI showcase ═══ */
+  .demo {
+    background: var(--paper-2);
+    padding: 90px 0 100px;
+    position: relative;
+  }
+  .demo-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 18px;
+    max-width: 1180px;
+    margin: 50px auto 0;
+  }
+  .demo-card {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 18px 22px;
+    overflow: hidden;
+    position: relative;
+    transition: transform 0.2s;
+  }
+  .demo-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 18px 40px rgba(27,42,58,.10);
+  }
+  .demo-card.large { grid-column: span 4; min-height: 380px; }
+  .demo-card.tall { grid-column: span 2; min-height: 380px; }
+  .demo-card.wide { grid-column: span 4; min-height: 280px; }
+  .demo-card.square { grid-column: span 2; min-height: 280px; }
+  @media (max-width: 900px) {
+    .demo-grid { grid-template-columns: 1fr; }
+    .demo-card.large, .demo-card.tall, .demo-card.wide, .demo-card.square { grid-column: span 1; min-height: 0; }
+  }
+  .demo-card-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    color: var(--mid);
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+  .demo-card-label em {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* Browser frame */
+  .demo-browser {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--paper-2);
+  }
+  .db-bar {
+    background: var(--ink);
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .db-bar .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .db-bar .dot.r { background: #ff5f57; }
+  .db-bar .dot.y { background: #febc2e; }
+  .db-bar .dot.g { background: #28c840; }
+  .db-url {
+    margin-left: auto;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: rgba(246,241,231,0.5);
+  }
+  .db-url .db-host { color: rgba(246,241,231,0.85); }
+  .db-body { padding: 14px; background: var(--paper); }
+
+  /* Site mock (tenant website) */
+  .db-body.site { padding: 0; position: relative; min-height: 280px; }
+  .site-nav {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--paper);
+  }
+  .site-brand {
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--ink);
+    letter-spacing: -0.04em;
+    text-transform: lowercase;
+  }
+  .site-brand .dot { display: inline-block; width: 0.13em; height: 0.13em; border-radius: 50%; background: var(--accent); margin-left: 0.04em; vertical-align: 0.05em; }
+  .site-cart {
+    background: var(--accent);
+    color: var(--paper);
+    padding: 4px 11px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .site-cart .cart-count {
+    background: var(--paper);
+    color: var(--accent);
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 9px;
+    font-weight: 700;
+  }
+  .site-grid {
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+  .site-prod {
+    background: var(--paper-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px;
+  }
+  .prod-img {
+    width: 100%;
+    aspect-ratio: 4/3;
+    border-radius: 5px;
+    margin-bottom: 6px;
+  }
+  .prod-name {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.3;
+    margin-bottom: 2px;
+  }
+  .prod-price {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .site-drawer {
+    position: absolute;
+    top: 0; right: 0;
+    width: 200px;
+    height: 100%;
+    background: var(--paper);
+    border-left: 1px solid var(--border);
+    padding: 12px 14px;
+    box-shadow: -8px 0 24px rgba(27,42,58,0.08);
+  }
+  .drawer-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .drawer-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .drawer-x {
+    color: var(--mid);
+    font-size: 14px;
+  }
+  .drawer-item {
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    gap: 7px;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .d-img {
+    width: 28px; height: 28px;
+    border-radius: 4px;
+  }
+  .d-name { font-size: 10px; color: var(--ink); font-weight: 500; }
+  .d-price {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .drawer-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 12px 0 10px;
+    font-size: 11px;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .drawer-total .t-amt {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .drawer-cta {
+    width: 100%;
+    padding: 8px;
+    background: var(--accent);
+    color: var(--paper);
+    border: none;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* Phone mock */
+  .demo-phone {
+    background: #000;
+    border-radius: 24px;
+    padding: 10px;
+    max-width: 240px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .demo-phone::before {
+    content: '';
+    position: absolute;
+    top: 12px; left: 50%;
+    transform: translateX(-50%);
+    width: 70px;
+    height: 16px;
+    background: #000;
+    border-radius: 0 0 10px 10px;
+    z-index: 2;
+  }
+  .dp-screen {
+    background: #000;
+    border-radius: 18px;
+    padding-top: 30px;
+    color: #FFF;
+    overflow: hidden;
+  }
+  .dp-status {
+    padding: 0 14px 6px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    font-weight: 600;
+  }
+  .dp-line-head {
+    padding: 6px 12px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .line-ava {
+    width: 24px; height: 24px;
+    background: linear-gradient(135deg, #06C755, #04a548);
+    border-radius: 50%;
+  }
+  .line-name {
+    font-size: 11px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .badge-oa {
+    background: #06C755;
+    color: #FFF;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 7px;
+    padding: 1px 4px;
+    border-radius: 2px;
+    font-weight: 700;
+  }
+  .dp-chat { padding: 10px 12px; }
+  .line-bubble {
+    background: rgba(255,255,255,0.1);
+    padding: 8px 11px;
+    border-radius: 13px;
+    border-bottom-right-radius: 3px;
+    font-size: 10px;
+    line-height: 1.4;
+    margin-bottom: 8px;
+    max-width: 75%;
+    margin-left: auto;
+  }
+  .line-flex {
+    background: #FFF;
+    color: #1B2A3A;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+  .flex-head {
+    background: #1B2A3A;
+    color: #F6F1E7;
+    padding: 8px 11px;
+  }
+  .flex-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 0.15em;
+    color: #C8501F;
+    margin-bottom: 2px;
+    font-weight: 600;
+  }
+  .flex-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .flex-body { padding: 8px 11px; }
+  .flex-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    padding: 3px 0;
+    color: #6B7785;
+  }
+  .flex-row .v { color: #1B2A3A; font-weight: 500; }
+  .flex-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 6px 0 4px;
+    margin-top: 4px;
+    border-top: 1px solid #E5DDC9;
+  }
+  .flex-total span:first-child { font-size: 9px; color: #1B2A3A; font-weight: 600; }
+  .flex-total .v {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: #C8501F;
+    font-weight: 700;
+  }
+  .flex-foot {
+    padding: 6px 11px 9px;
+    display: flex;
+    gap: 5px;
+  }
+  .flex-btn {
+    flex: 1;
+    padding: 6px;
+    border-radius: 5px;
+    border: none;
+    font-family: inherit;
+    font-size: 9px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .flex-btn.primary { background: #C8501F; color: #FFF; }
+  .flex-btn.ghost { background: #FFF; color: #1B2A3A; border: 1px solid #E5DDC9; }
+  .line-time {
+    font-size: 8px;
+    color: rgba(255,255,255,0.4);
+    margin-left: 4px;
+    margin-top: 4px;
+  }
+
+  /* Inbox mock */
+  .db-body.inbox { padding: 12px 14px 14px; }
+  .inbox-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .inbox-h2 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .inbox-count {
+    background: var(--accent);
+    color: var(--paper);
+    padding: 1px 7px;
+    border-radius: 99px;
+    font-size: 9px;
+    font-weight: 700;
+    margin-left: 6px;
+    vertical-align: 1px;
+  }
+  .inbox-chips {
+    display: flex;
+    gap: 4px;
+  }
+  .chip {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    padding: 3px 8px;
+    background: var(--paper-2);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    color: var(--ink-2);
+    font-weight: 500;
+  }
+  .chip.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .chip.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+  .inbox-list { display: flex; flex-direction: column; gap: 6px; }
+  .inbox-row {
+    background: var(--paper-2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 8px 10px;
+    display: grid;
+    grid-template-columns: 65px 1fr 1fr 70px 70px;
+    gap: 8px;
+    align-items: center;
+    font-size: 10px;
+  }
+  .inbox-row.urgent { border-left: 2px solid var(--warn); background: var(--warn-soft); }
+  .inbox-row.new { border-left: 2px solid var(--accent); }
+  .row-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .row-customer { color: var(--ink); font-weight: 600; }
+  .row-items { color: var(--ink-2); font-size: 9px; }
+  .row-time { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--mid); }
+  .row-amt {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    font-weight: 700;
+    text-align: right;
+  }
+
+  /* Tracking mock */
+  .demo-ติดตามing {
+    padding: 8px;
+  }
+  .tk-quote {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-bottom: 10px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .tk-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .tk-amt {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .tk-channels { display: flex; flex-direction: column; gap: 6px; }
+  .tk-ch {
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    gap: 10px;
+    align-items: center;
+    padding: 8px 10px;
+    background: var(--paper-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .tk-ch.sent { border-left: 2px solid var(--good, #4A6B40); }
+  .tk-ch.skip { opacity: 0.6; border-style: dashed; }
+  .tk-ic {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    color: #FFF;
+    display: grid;
+    place-items: center;
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .tk-info { flex: 1; }
+  .tk-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 1px;
+  }
+  .tk-event {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: var(--mid);
+  }
+  .tk-status {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    padding: 2px 7px;
+    border-radius: 99px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+  .tk-status.ok { background: var(--good, #4A6B40); color: var(--paper); }
+  .tk-ai {
+    margin-top: 10px;
+    padding: 8px 10px;
+    background: var(--ai-soft, #E8EEDF);
+    border: 1px solid var(--ai, #7B8F6B);
+    border-radius: 7px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .tk-ai .ai-ic {
+    width: 22px; height: 22px;
+    background: var(--ai, #7B8F6B);
+    color: var(--paper);
+    border-radius: 5px;
+    display: grid;
+    place-items: center;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 11px;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .tk-ai .ai-txt {
+    font-size: 10px;
+    color: var(--ai-deep, #5A6D4D);
+    line-height: 1.45;
+  }
+
+  /* Onboarding mock */
+  .db-body.onboard { padding: 18px 16px; }
+  .onb-h2 {
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 14px;
+    text-align: center;
+  }
+  .onb-paths {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+  }
+  .onb-path {
+    background: var(--paper-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 6px;
+    text-align: center;
+  }
+  .onb-path.featured {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .op-ic {
+    width: 30px; height: 30px;
+    border-radius: 7px;
+    display: grid;
+    place-items: center;
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    margin: 0 auto 6px;
+  }
+  .op-name {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 2px;
+  }
+  .op-time {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8px;
+    color: var(--mid);
+  }
+
+
+  /* Manifesto แบรนด์ mark · prominent */
+  .manifesto-brand-mark {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  .manifesto-mark-d {
+    display: inline-block;
+    width: 56px;
+    height: 56px;
+    background: var(--paper);
+    border-radius: 13px;
+    position: relative;
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-weight: 700;
+    font-size: 38px;
+    color: var(--accent);
+    letter-spacing: -0.05em;
+    text-align: center;
+    line-height: 56px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  }
+  .manifesto-mark-d::after {
+    content: '';
+    position: absolute;
+    bottom: 9px;
+    right: 9px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+
+  /* ═══ LINE-style notification card · realistic ไลน์ UI ═══ */
+  .line-notif {
+    position: absolute;
+    top: -28px;
+    left: -32px;
+    width: 280px;
+    background: #FFFFFF;
+    border-radius: 14px;
+    box-shadow: 0 20px 50px rgba(0,0,0,.18), 0 6px 18px rgba(6,199,85,.15);
+    overflow: hidden;
+    z-index: 3;
+    border: 1px solid rgba(0,0,0,0.04);
+  }
+  .ln-head {
+    background: linear-gradient(180deg, #FFFFFF 0%, #FAFAFA 100%);
+    padding: 12px 14px 10px;
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    gap: 10px;
+    align-items: center;
+    border-bottom: 1px solid #F0F0F0;
+  }
+  .ln-ava-wrap {
+    position: relative;
+    width: 40px;
+    height: 40px;
+  }
+  .ln-ava {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #C8501F 0%, #9C3F18 100%);
+    color: #FFFFFF;
+    display: grid;
+    place-items: center;
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-weight: 600;
+    font-size: 17px;
+  }
+  .ln-oa-badge {
+    position: absolute;
+    bottom: -3px; right: -4px;
+    background: #06C755;
+    color: #FFFFFF;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8px;
+    font-weight: 800;
+    padding: 2px 5px;
+    border-radius: 4px;
+    border: 2px solid #FFFFFF;
+    letter-spacing: 0.05em;
+  }
+  .ln-meta { min-width: 0; }
+  .ln-name {
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    color: #1B2A3A;
+    line-height: 1.3;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ln-via {
+    font-size: 10px;
+    color: #6B7785;
+    line-height: 1.3;
+  }
+  .ln-time {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #06C755;
+    box-shadow: 0 0 0 0 rgba(6,199,85,0.6);
+    animation: ln-pulse-ring 1.6s infinite;
+  }
+  @keyframes ln-pulse-ring {
+    0% { box-shadow: 0 0 0 0 rgba(6,199,85,0.6); }
+    70% { box-shadow: 0 0 0 8px rgba(6,199,85,0); }
+    100% { box-shadow: 0 0 0 0 rgba(6,199,85,0); }
+  }
+  .ln-preview {
+    padding: 10px 14px 12px;
+    font-size: 12px;
+    color: #1B2A3A;
+    line-height: 1.5;
+    background: #FFFFFF;
+    border-bottom: 1px solid #F0F0F0;
+  }
+  .ln-action {
+    padding: 8px 14px;
+    background: rgba(6, 199, 85, 0.06);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-top: 1px solid rgba(6,199,85,0.1);
+  }
+  .ln-pulse {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #06C755;
+    flex-shrink: 0;
+    animation: pulse-dot 1.5s infinite;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .ln-action-text {
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: #06C755;
+    letter-spacing: 0.02em;
+  }
+  @media (max-width: 900px) {
+    .line-notif { left: -10px; top: -10px; width: 240px; }
+  }
+
+
+  /* ═══ WHY mini · compact differentiators ═══ */
+  .why-section {
+    background: var(--paper);
+    padding: 90px 0 100px;
+  }
+  .why-mini-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    max-width: 1080px;
+    margin: 50px auto 0;
+  }
+  @media (max-width: 768px) {
+    .why-mini-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 480px) {
+    .why-mini-grid { grid-template-columns: 1fr; }
+  }
+  .why-mini {
+    background: var(--paper-2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px 22px 26px;
+    transition: transform 0.18s, box-shadow 0.18s;
+  }
+  .why-mini:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(27,42,58,.08);
+  }
+  .why-mini.featured {
+    background: linear-gradient(160deg, var(--accent-soft) 0%, var(--paper-2) 100%);
+    border-color: var(--accent);
+    border-width: 2px;
+  }
+  .wm-ic {
+    width: 40px; height: 40px;
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .wm-ic svg { width: 20px; height: 20px; }
+  .why-mini.featured .wm-ic {
+    background: var(--accent);
+    color: var(--paper);
+    border-color: var(--accent);
+  }
+  .why-mini h3 {
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.3;
+    margin-bottom: 8px;
+    letter-spacing: -0.015em;
+  }
+  .why-mini h3 em {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    color: var(--accent);
+  }
+  .why-mini p {
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+</style>
+</head>
+<body>
+
+<!-- Icon definitions (used inline) -->
+<svg class="ico-set" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <symbol id="i-message" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+    </symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>
+    </symbol>
+    <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <line x1="9" y1="13" x2="15" y2="13"/>
+      <line x1="9" y1="17" x2="15" y2="17"/>
+    </symbol>
+    <symbol id="i-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="22" y1="2" x2="11" y2="13"/>
+      <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+    </symbol>
+    <symbol id="i-inbox" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
+      <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
+    </symbol>
+    <symbol id="i-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <circle cx="12" cy="12" r="6"/>
+      <circle cx="12" cy="12" r="2"/>
+    </symbol>
+    <symbol id="i-package" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/>
+      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+      <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+      <line x1="12" y1="22.08" x2="12" y2="12"/>
+    </symbol>
+    <symbol id="i-trend" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+      <polyline points="17 6 23 6 23 12"/>
+    </symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    </symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="5" y1="12" x2="19" y2="12"/>
+      <polyline points="12 5 19 12 12 19"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- ═══════════════════════════════════════════════
+     NAVIGATION
+     ═══════════════════════════════════════════════ -->
+<nav class="top">
+  <div class="nav-inner">
+    <a href="#" class="nav-brand">
+      <div class="ic" style="width: 32px; height: 32px;">
+        <span class="d" style="font-size: 22px;">d</span>
+        <span class="dot" style="width: 3px; height: 3px; bottom: 5px; right: 5px;"></span>
+      </div>
+      <span class="wm"><span class="sales">sales</span><span class="dee">dee</span><span class="dot"></span><span class="tld">com</span></span>
+    </a>
+
+    <div class="nav-links">
+      <a href="#how">วิธีทำงาน</a>
+      <a href="#features">ฟีเจอร์</a>
+      <a href="#pricing">ราคา</a>
+      <a href="#faq">คำถาม</a>
+    </div>
+
+    <div class="nav-cta">
+      <a href="#" class="btn btn-sm btn-paper" style="display: none;" id="login-btn">เข้าระบบ</a>
+      <a href="#signup" class="btn btn-sm btn-primary">ทดลองฟรี</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════
+     HERO
+     ═══════════════════════════════════════════════ -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+
+      <div class="hero-text">
+        <div class="eyebrow">Quote builder + CRM · สำหรับ SME ไทย</div>
+        <h1 class="display hero-headline">
+          ออก<em>ใบเสนอ</em><br>
+          ที่<em>ง่าย</em><br>
+          และ<em>ถูกต้อง</em>
+        </h1>
+        <p class="lead ตัวหลัก-sub">
+          ลูกค้าจะเข้ามาทาง<em>ไหน</em>ก็ตาม — เว็บ ·  · โทร · เดินมาที่ร้าน — ทีมเซลส์ออกใบเสนอที่ <em>สวย</em> และ <em>แม่นยำ</em> · ระบบช่วยให้แคตตาล็อกถูกต้อง · ราคาไม่พลาด · ขั้นตอนน้อยที่สุด
+        </p>
+        <div class="hero-ctas">
+          <a href="#signup" class="btn btn-primary btn-lg">
+            ทดลองใช้ฟรี 14 วัน
+            <svg width="18" height="18"><use href="#i-arrow"/></svg>
+          </a>
+          <a href="#demo" class="btn btn-ghost btn-lg">ดูตัวอย่างใน 2 นาที</a>
+        </div>
+        <div class="hero-microcopy">
+          <span><span class="check">✓</span> ไม่ต้องบัตรเครดิต</span>
+          <span><span class="check">✓</span> ตั้งค่า 10 นาที</span>
+          <span><span class="check">✓</span> ใช้กับ ไลน์ โอเอ ที่มีอยู่</span>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="line-notif">
+          <div class="ln-head">
+            <div class="ln-ava-wrap">
+              <div class="ln-ava">น</div>
+              <div class="ln-oa-badge">OA</div>
+            </div>
+            <div class="ln-meta">
+              <div class="ln-name">นริศ พรพิพัฒน์</div>
+              <div class="ln-via">via ไลน์ ออฟฟิเชียล · เดี๋ยวนี้</div>
+            </div>
+            <div class="ln-time"></div>
+          </div>
+          <div class="ln-preview">ขอใบเสนอราคาโต๊ะ 12 ตัว + เก้าอี้ เออร์โกโนมิก 14 ตัว...</div>
+          <div class="ln-action">
+            <span class="ln-pulse"></span>
+            <span class="ln-action-text">ลูกค้าใหม่ · กำลังเข้ามา</span>
+          </div>
+        </div>
+        <div class="app-mock">
+          <div class="app-mock-bar">
+            <div class="dot-row">
+              <span class="red"></span>
+              <span class="yellow"></span>
+              <span class="green"></span>
+            </div>
+            <span class="url">wandeedee.salesdee.com/inbox</span>
+          </div>
+          <div class="app-mock-body">
+            <div class="mock-chat">
+              <div class="chat-incoming">
+                <div class="avatar"></div>
+                <div class="bubble">
+                  ขอใบเสนอราคาโต๊ะ 12 ตัว + เก้าอี้ เออร์โกโนมิก 14 ตัว สำหรับออฟฟิศชั้น 7 ครับ
+                </div>
+              </div>
+
+              <div class="ai-card">
+                <div class="ai-card-head">
+                  <div class="ic-ai">D</div>
+                  <div class="label">ผู้ช่วยเสนอรายการที่ตรง</div>
+                </div>
+                <div class="text">เจอ 3 รายการตรงกับข้อความ · ยืนยันก่อนสร้างใบเสนอ</div>
+                <div class="ai-matched">
+                  <div class="ai-matched-item">
+                    <div class="img" style="background: linear-gradient(135deg, #8B7355, #4A3C2C);"></div>
+                    <div class="info">
+                      <div class="name">โต๊ะ วอลนัทพรีเมียม 180</div>
+                      <div class="price">฿ 85,000 × 12</div>
+                    </div>
+                    <span class="conf">98%</span>
+                  </div>
+                  <div class="ai-matched-item">
+                    <div class="img" style="background: linear-gradient(135deg, #2D3748, #1A202C);"></div>
+                    <div class="info">
+                      <div class="name">เก้าอี้ เออร์โกโนมิก Skyline</div>
+                      <div class="price">฿ 12,800 × 14</div>
+                    </div>
+                    <span class="conf">95%</span>
+                  </div>
+                  <div class="ai-matched-item">
+                    <div class="img" style="background: linear-gradient(135deg, #C0B097, #8A7A65);"></div>
+                    <div class="info">
+                      <div class="name">แผ่นกั้น acoustic 120 cm</div>
+                      <div class="price">฿ 4,800 × 6</div>
+                    </div>
+                    <span class="conf">82%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mock-cta-row">
+                <button class="mock-cta primary">สร้างใบเสนอ →</button>
+                <button class="mock-cta ghost">ปรับรายการ</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="timer-badge">
+          <div class="num">5<span style="font-size: 16px;"> นาที</span></div>
+          <div class="label">จาก request ถึงส่ง</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════
+     MANIFESTO · "What we believe"
+     ═══════════════════════════════════════════════ -->
+<section class="manifesto" id="manifesto">
+  <div class="manifesto-quote-mark">"</div>
+  <div class="manifesto-brand-mark">
+    <div class="manifesto-mark-d">d</div>
+  </div>
+  <div class="manifesto-inner">
+    <div class="manifesto-eyebrow">เราเชื่อว่า</div>
+    <h2 class="manifesto-h2">
+      ใบเสนอราคา = จุดที่ดีล<em>ปิด</em><br>
+      หรือดีล<em>ตก</em>
+    </h2>
+    <div class="manifesto-body">
+      <p>
+        ทุกธุรกิจ B2B ขายผ่านใบเสนอ · แต่ใบเสนอส่วนใหญ่ในไทยยังทำใน <strong>เอ็กเซล</strong> · ส่งทางอีเมล หรือไลน์ · ตามด้วยมือ · ไม่มี ติดตาม · บางทีหายในระหว่างทาง
+      </p>
+      <p>
+        เครื่องมือ<em>ขนาดใหญ่ระดับโลก</em>ออกแบบมาเพื่อบริษัทที่มีทีม ทีมงานขายระดับองค์กร · มี <em>งบประมาณ</em> · มี <em>ทีมติดตั้งระบบ</em> — <strong>SME ไทย 90% ไม่มีพวกนี้</strong>
+      </p>
+      <p class="manifesto-conclusion">
+        เราออกแบบ <strong>salesdee.com</strong> สำหรับ <em>SME ไทย</em>ที่ขายแบบ B2B จริง ๆ — <strong>ใบเสนอ-first</strong> · พูดภาษาไทย · ใช้กับไลน์ · เริ่มได้ 1 คน · ราคาที่จ่ายไหว
+      </p>
+      <div class="manifesto-signature">เพราะ<em>ใบเสนอ</em>คือจุดที่ดีลปิด · เราอยากให้คุณปิดได้สม่ำเสมอ</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SOCIAL PROOF
+     ═══════════════════════════════════════════════ -->
+<section class="social-proof">
+  <div class="container">
+    <div class="social-proof-label">บริษัทที่ใช้แล้ว</div>
+    <div class="logos-row">
+      <div class="logo-item">วัน.ดี.ดี.<small>Furniture</small></div>
+      <div class="logo-item">north / dot<small>Studio</small></div>
+      <div class="logo-item">Marwin Group<small>Trading</small></div>
+      <div class="logo-item">Riverside<small>Hospitality</small></div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-item">
+        <div class="stat-num"><span style="font-family: 'Fraunces', serif; font-style: italic;">เร็ว</span>ขึ้น</div>
+        <div class="stat-label">แคตตาล็อก + อัตโนมัติ + เอไอ<br><small style="color: var(--mid);">ไม่ต้องพิมพ์ใหม่ทุกใบ</small></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num"><span style="font-family: 'Fraunces', serif; font-style: italic;">แม่น</span>ขึ้น</div>
+        <div class="stat-label">ระบบคำนวณภาษี · ส่วนลด · เงื่อนไข<br><small style="color: var(--mid);">ไม่พลาด · ไม่ลืม</small></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num"><span style="font-family: 'Fraunces', serif; font-style: italic;">ครบ</span>วงจร</div>
+        <div class="stat-label">ตั้งแต่ลูกค้าทักจนปิดดีล<br><small style="color: var(--mid);">ในระบบเดียว</small></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     PROBLEM
+     ═══════════════════════════════════════════════ -->
+<section class="problem">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow mid">ปัญหาที่ทุก SME ไทยเจอ</div>
+      <h2 class="h1">ใบเสนอราคา<br><em>ช้า</em> · <em>ผิด</em> · <em>หาย</em></h2>
+      <p class="lead">ลูกค้าทักมาเยอะ · แต่ออกใบเสนอใช้เวลา · ราคาผิดบ่อย · เซลส์เหนื่อย · ดีลตกเพราะตอบช้า · <em>4 ปัญหา</em> เดียวกันที่ทุก SME ไทยเจอ</p>
+    </div>
+
+    <div class="pain-grid">
+      <div class="pain-card">
+        <div class="quote-mark">"</div>
+        <div class="quote">มีลูกค้าเข้าเว็บทุกวัน · แต่ขอใบเสนอผ่านอีเมล / โทรศัพท์ · ตอบช้า · ลูกค้าหาย · ไปหาคู่แข่งที่ตอบเร็วกว่า</div>
+        <div class="source">เจ้าของ · เฟอร์นิเจอร์สำนักงาน</div>
+      </div>
+      <div class="pain-card">
+        <div class="quote-mark">"</div>
+        <div class="quote">ใบเสนอราคาทำใน เอ็กเซล ทุกครั้ง · ราคาผิดบ่อย · ลูกค้าทักมาก็ต้องเปิด แคตตาล็อก ค้น SKU · ใช้เวลา 30 นาที</div>
+        <div class="source">เจ้าของบริษัท · ค้าวัสดุ</div>
+      </div>
+      <div class="pain-card">
+        <div class="quote-mark">"</div>
+        <div class="quote">ส่งใบเสนอไปแล้ว · ไม่รู้ว่าลูกค้าเปิดดูหรือเปล่า · ไม่กล้าตามเร็วเกินไป · พลาด timing บ่อย</div>
+        <div class="source">ทีมเซลส์ · บริษัทรับเหมา</div>
+      </div>
+      <div class="pain-card">
+        <div class="quote-mark">"</div>
+        <div class="quote">เซลส์ลาออกแล้วประวัติลูกค้าหายหมด · แชต  อยู่ในเครื่องตัวเอง · ทีมใหม่เริ่มจากศูนย์ทุกครั้ง</div>
+        <div class="source">เจ้าของ · บริษัทขายเครื่องใช้สำนักงาน</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════
+     WHY salesdee.com · compact differentiators
+     ═══════════════════════════════════════════════ -->
+<section class="why-section" id="why">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">ทำไม salesdee.com</div>
+      <h2 class="h1">6 อย่างที่<br>เครื่องมือทั่วไป<em>ไม่มี</em></h2>
+    </div>
+
+    <div class="why-mini-grid">
+
+      <div class="why-mini">
+        <div class="wm-ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <h3>เว็บคุณรับคำขอ<em>เอง</em></h3>
+        <p>ลูกค้าเลือกสินค้า · ส่งคำขอ · ทีมตอบ 1 วัน · ไม่ต้องโทรหาเซลส์</p>
+      </div>
+
+      <div class="why-mini">
+        <div class="wm-ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+        </div>
+        <h3>เริ่ม <em>1 คน</em> · ฟรี</h3>
+        <p>ไม่ต้องทีม 5+ คน · ไม่มีค่าติดตั้ง · ตั้งเสร็จใน 10 นาที</p>
+      </div>
+
+      <div class="why-mini">
+        <div class="wm-ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </div>
+        <h3>ส่ง <em>3 ช่องทาง</em> ครั้งเดียว</h3>
+        <p>อีเมล · ไลน์ · SMS · ติดตามทุกการเปิดในที่เดียว</p>
+      </div>
+
+      <div class="why-mini">
+        <div class="wm-ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 2a10 10 0 0 0-9.96 9.4c-.08 1.2.06 2.45.42 3.6a10 10 0 0 0 19.08 0c.36-1.15.5-2.4.42-3.6A10 10 0 0 0 12 2z"/></svg>
+        </div>
+        <h3>เว็บใน<em>แบรนด์</em>ของคุณ</h3>
+        <p>4 ธีม · ใส่โลโก้และสีของคุณ · โดเมนของคุณเอง</p>
+      </div>
+
+      <div class="why-mini">
+        <div class="wm-ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <h3>ติดตามใบเสนอ<em>จนปิดดีล</em></h3>
+        <p>เห็นเมื่อลูกค้าเปิด · กดอะไร · ตามจังหวะที่ถูก · ลูกค้ายอมรับออนไลน์ได้ ถ้าสะดวก</p>
+      </div>
+
+      <div class="why-mini featured">
+        <div class="wm-ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <h3>★ <em>แคตตาล็อก + อัตโนมัติ + เอไอ</em></h3>
+        <p>3 ขาทำงานคู่กัน · ไม่ใช่เอไอเดี่ยว · ทำให้ใบเสนอออกง่ายและถูกต้อง</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════
+     HOW IT WORKS
+     ═══════════════════════════════════════════════ -->
+<section class="how" id="how">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">ออกใบเสนอที่ดี · ทุกครั้ง</div>
+      <h2 class="h1">จาก<em>คำถาม</em>ของลูกค้า<br>ถึง<em>ใบเสนอ</em>ที่ส่งไป</h2>
+      <p class="lead">ทุก lead · ทุกใบเสนอ · <em>ระบบเดียว</em> · ระบบช่วย UX + อัตโนมัติ + AI ทำให้ขั้นตอนสั้นที่สุด · ราคาแม่นที่สุด · ไม่มีโอกาสพลาด</p>
+    </div>
+
+    <div class="workflow">
+
+      <div class="wf-step">
+        <div class="wf-num">01</div>
+        <div class="wf-ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="22" height="22">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </div>
+        <h3>Lead เข้ามา</h3>
+        <p>ลูกค้าทักผ่านช่องทางไหน ระบบรับได้ทุกทาง · เก็บใน inbox เดียวกัน · ไม่หาย · มอบหมายให้เซลส์ที่ดูแลทันที</p>
+        <div class="wf-detail">
+          <span class="ch-pill">เว็บของคุณ</span>
+          <span class="ch-pill">ไลน์ ออฟฟิเชียล</span>
+          <span class="ch-pill">โทรศัพท์</span>
+          <span class="ch-pill">Walk-in</span>
+          <span class="ch-pill">อีเมล · referral</span>
+        </div>
+      </div>
+
+      <div class="wf-step featured">
+        <div class="wf-num">02</div>
+        <div class="wf-ic accent">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="22" height="22">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="9" y1="14" x2="15" y2="14"/>
+            <line x1="9" y1="18" x2="15" y2="18"/>
+          </svg>
+        </div>
+        <h3>ออก<em>ใบเสนอ</em></h3>
+        <p>คลิก แคตตาล็อก · ใส่จำนวน · ระบบคำนวณภาษี ส่วนลด เงื่อนไขให้ · ผู้ช่วยเสนอสินค้าที่ตรงกับคำถามและราคาที่เหมาะสม · เซลส์ตรวจและตัดสิน</p>
+        <div class="wf-detail wf-bullets">
+          <div class="wf-bullet"><span class="b-ic">✓</span><span><strong>UX ดี</strong> · ขั้นตอนน้อยที่สุด · เห็นทุกอย่างในจอเดียว</span></div>
+          <div class="wf-bullet"><span class="b-ic">⚡</span><span><strong>Automated</strong> · คำนวณภาษี · ส่วนลด · จัดรูปแบบ เอง</span></div>
+          <div class="wf-bullet"><span class="b-ic ai">✱</span><span><strong>เอไอช่วย</strong> · เสนอ product · เสนอราคา · แจ้งเตือนความผิดพลาด</span></div>
+          <div class="wf-bullet"><span class="b-ic">📋</span><span><strong>เทมเพลตs</strong> · ลูกค้าใหม่/เก่า · เงื่อนไขมาตรฐาน</span></div>
+        </div>
+      </div>
+
+      <div class="wf-step">
+        <div class="wf-num">03</div>
+        <div class="wf-ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="22" height="22">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </div>
+        <h3>ส่ง · ตามที่ลูกค้าชอบ</h3>
+        <p>เลือกช่องทางที่ลูกค้าใช้จริง · ส่งครั้งเดียว ถึงหลาย ช่องทาง · PDF แนบเรียบร้อย · ลิงก์ดูออนไลน์ + ปุ่มยอมรับ</p>
+        <div class="wf-detail">
+          <span class="ch-pill">อีเมล + PDF</span>
+          <span class="ch-pill">ไลน์ Flex</span>
+          <span class="ch-pill">SMS + ลิงก์</span>
+        </div>
+      </div>
+
+      <div class="wf-step">
+        <div class="wf-num">04</div>
+        <div class="wf-ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="22" height="22">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+        </div>
+        <h3>Track · ปิดดีล</h3>
+        <p>เห็นทันทีเมื่อลูกค้าเปิดดู · กี่ครั้ง · กดอะไร · ใกล้หมดอายุระบบเตือนเอง · กดยอมรับออนไลน์ → ดีลปิด → activity บันทึก</p>
+        <div class="wf-detail wf-bullets">
+          <div class="wf-bullet"><span class="b-ic">👀</span><span>ติดตามการเปิด · ทุก ช่องทาง</span></div>
+          <div class="wf-bullet"><span class="b-ic">⏰</span><span>Reminder · ก่อนหมดอายุ 24 ชม</span></div>
+          <div class="wf-bullet"><span class="b-ic">✍</span><span>Accept ออนไลน์ · ดีลปิดเอง</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<style>
+  .workflow {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr 1fr 1fr;
+    gap: 16px;
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+  @media (max-width: 1024px) {
+    .workflow { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 640px) {
+    .workflow { grid-template-columns: 1fr; }
+  }
+  .wf-step {
+    background: var(--paper-2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 20px 24px;
+    position: relative;
+    transition: transform 0.2s;
+  }
+  .wf-step.featured {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    border-width: 2px;
+  }
+  .wf-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--mid);
+    letter-spacing: 0.15em;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .wf-step.featured .wf-num { color: var(--accent-deep); }
+  .wf-ic {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: var(--paper);
+    border: 1px solid var(--border);
+    display: grid;
+    place-items: center;
+    color: var(--ink);
+    margin-bottom: 14px;
+  }
+  .wf-ic.accent {
+    background: var(--accent);
+    color: var(--paper);
+    border-color: var(--accent);
+  }
+  .wf-step h3 {
+    font-family: 'IBM Plex Sans Thai';
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.25;
+    margin-bottom: 10px;
+    letter-spacing: -0.015em;
+  }
+  .wf-step h3 em {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    color: var(--accent);
+  }
+  .wf-step p {
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.6;
+    margin-bottom: 14px;
+  }
+  .wf-detail {
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .ch-pill {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    padding: 3px 9px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-2);
+    letter-spacing: 0.02em;
+  }
+  .wf-step.featured .ch-pill { background: var(--paper); }
+  .wf-bullets { flex-direction: column; gap: 6px; }
+  .wf-bullet {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--ink-2);
+    line-height: 1.5;
+    align-items: start;
+    padding: 2px 0;
+  }
+  .b-ic {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    text-align: center;
+    line-height: 1.4;
+  }
+  .b-ic.ai { color: var(--ai, #7B8F6B); }
+  .wf-bullet strong { color: var(--ink); font-weight: 600; }
+</style>
+
+<style>
+  .path-step {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 10px;
+    padding: 8px 0;
+    align-items: start;
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.5;
+  }
+  .ps-num {
+    width: 22px; height: 22px;
+    background: var(--accent-soft);
+    color: var(--accent-deep);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 1px;
+  }
+  .ps-txt {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--ink-2);
+  }
+  @media (max-width: 768px) {
+    .paths-wrap { grid-template-columns: 1fr !important; gap: 32px !important; }
+  }
+</style>
+
+<!-- ═══════════════════════════════════════════════
+     FEATURES
+     ═══════════════════════════════════════════════ -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow mid">ทุกอย่างในที่เดียว</div>
+      <h2 class="h1">เครื่องมือที่ทำให้<br>ใบเสนอ<em>ง่ายและถูกต้อง</em></h2>
+    </div>
+
+    <div class="features-grid">
+
+      <div class="feature-card">
+        <div class="icon-box">
+          <svg viewBox="0 0 24 24"><use href="#i-inbox"/></svg>
+        </div>
+        <h3>กล่องข้อความ<em>รวม</em></h3>
+        <p>ทุกแชตจากไลน์ ของทุกลูกค้ารวมในจอเดียว · มอบหมายให้เซลส์แต่ละคน · ดูประวัติย้อนหลังได้</p>
+        <div class="meta">ไลน์ โอเอ + เร็ว ๆ นี้: Messenger</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="icon-box">
+          <svg viewBox="0 0 24 24"><use href="#i-globe"/></svg>
+        </div>
+        <h3>เว็บของคุณ<em>รับคำขอ</em>เอง</h3>
+        <p>ลูกค้าเข้าเว็บ · เลือกสินค้า · ขอใบเสนอเอง · ทีมตรวจและส่งกลับใน 1 วันทำการ · ไม่ต้องนั่งรับโทรศัพท์</p>
+        <div class="meta">4 ธีม · ซับโดเมน · โดเมนของคุณเอง (แพ็คโปรขึ้นไป)</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="icon-box">
+          <svg viewBox="0 0 24 24"><use href="#i-file"/></svg>
+        </div>
+        <h3>ส่งใบเสนอ <em>3 ช่องทาง</em></h3>
+        <p>อีเมล + PDF (default B2B) · ไลน์ Flex Message (เมื่อลูกค้ามาทางไลน์) · SMS (สำรอง + reminder) · เลือกได้ทุกครั้งที่ส่ง · ติดตามสถานะแต่ละ ช่องทาง</p>
+        <div class="meta">SendGrid + ไลน์ API + THSMS</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="icon-box">
+          <svg viewBox="0 0 24 24"><use href="#i-target"/></svg>
+        </div>
+        <h3>Pipeline + CRM</h3>
+        <p>ดู deal ทั้งหมดเป็น Kanban · เห็นทันทีว่าอะไรค้าง อะไรใกล้ปิด · บันทึก call · visit · note ในที่เดียว</p>
+        <div class="meta">5 stages มาตรฐาน + กำหนดเอง ได้</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="icon-box">
+          <svg viewBox="0 0 24 24"><use href="#i-package"/></svg>
+        </div>
+        <h3>แคตตาล็อก · <em>เริ่มได้ใน 10 นาที</em></h3>
+        <p>5 ทางใส่สินค้า: เทมเพลต สำเร็จรูป · เอ็กเซล upload · PDF ดึงข้อมูล · URL ผู้ผลิต · ถ่ายรูปบนมือถือ · เลือกที่เหมาะกับคุณ</p>
+        <div class="meta">เทมเพลต เฟอร์นิเจอร์ · เครื่องเขียน · electronics</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="icon-box">
+          <svg viewBox="0 0 24 24"><use href="#i-trend"/></svg>
+        </div>
+        <h3>รายงานที่<em>เห็นภาพ</em></h3>
+        <p>ยอดขายเดือนนี้ vs เดือนก่อน · funnel แสดงจุดที่ดีลตก · ผลงานเซลส์รายคน · สินค้าและลูกค้าขายดี</p>
+        <div class="meta">รายงาน 8 มุมมอง + custom</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     DEMO SCREENSHOTS
+     ═══════════════════════════════════════════════ -->
+<section class="demo" id="demo">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">ภาพหน้าจอจริง · ออกแบบสำหรับไทย</div>
+      <h2 class="h1">UX ที่<em>เซลส์ไทย</em><br>ใช้ได้ในวันแรก</h2>
+      <p class="lead">ภาษาไทยทุกที่ · ตัวเลขแบบไทย · ราคาบาท · ปุ่มขนาดนิ้วโป้ง · ใช้ได้บนคอมและมือถือ · 5 หน้าจอจริงจากผลิตภัณฑ์</p>
+    </div>
+
+    <div class="demo-grid">
+
+      <!-- LARGE: Tenant website with quote drawer -->
+      <div class="demo-card large">
+        <div class="demo-card-label">เว็บของร้านคุณ · ลูกค้าเลือกสินค้าเอง</div>
+        <div class="demo-browser">
+          <div class="db-bar">
+            <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+            <span class="db-url"><span class="db-host">wandeedee.salesdee.com</span></span>
+          </div>
+          <div class="db-body site">
+            <div class="site-nav">
+              <span class="site-brand">wandeedee<span class="dot"></span></span>
+              <span class="site-cart">ใบเสนอ <span class="cart-count">3</span></span>
+            </div>
+            <div class="site-grid">
+              <div class="site-prod">
+                <div class="prod-img" style="background: linear-gradient(135deg, #8B7355, #4A3C2C);"></div>
+                <div class="prod-name">โต๊ะ วอลนัทพรีเมียม</div>
+                <div class="prod-price">฿85,000</div>
+              </div>
+              <div class="site-prod">
+                <div class="prod-img" style="background: linear-gradient(135deg, #2D3748, #1A202C);"></div>
+                <div class="prod-name">เก้าอี้ เออร์โกโนมิก</div>
+                <div class="prod-price">฿12,800</div>
+              </div>
+              <div class="site-prod">
+                <div class="prod-img" style="background: linear-gradient(135deg, #6B6B5C, #3F4A3F);"></div>
+                <div class="prod-name">Workstation 4 ที่</div>
+                <div class="prod-price">฿48,500</div>
+              </div>
+            </div>
+            <div class="site-drawer">
+              <div class="drawer-head">
+                <span class="drawer-title">ใบเสนอราคา (3)</span>
+                <span class="drawer-x">×</span>
+              </div>
+              <div class="drawer-item">
+                <div class="d-img" style="background: linear-gradient(135deg, #8B7355, #4A3C2C);"></div>
+                <span class="d-name">โต๊ะ วอลนัท · 12</span>
+                <span class="d-price">฿1.02M</span>
+              </div>
+              <div class="drawer-item">
+                <div class="d-img" style="background: linear-gradient(135deg, #2D3748, #1A202C);"></div>
+                <span class="d-name">เก้าอี้ ergo · 14</span>
+                <span class="d-price">฿179k</span>
+              </div>
+              <div class="drawer-total">
+                <span>รวม</span>
+                <span class="t-amt">฿1.19M</span>
+              </div>
+              <button class="drawer-cta">ขอใบเสนอราคา →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TALL: ไลน์ Flex Message ตัวอย่าง on phone -->
+      <div class="demo-card tall">
+        <div class="demo-card-label">ใบเสนอใน <em>ไลน์</em> · ลูกค้าได้ Flex Message</div>
+        <div class="demo-phone">
+          <div class="dp-screen">
+            <div class="dp-status">
+              <span>09:42</span>
+              <span>5G ▮▮▮</span>
+            </div>
+            <div class="dp-line-head">
+              <div class="line-ava"></div>
+              <div class="line-name">วัน.ดี.ดี. <span class="badge-oa">OA</span></div>
+            </div>
+            <div class="dp-chat">
+              <div class="line-bubble out">ขอใบเสนอราคาตามที่คุยกันค่ะ พี่นริศ 🙏</div>
+              <div class="line-flex">
+                <div class="flex-head">
+                  <div class="flex-eyebrow">ใบเสนอราคา</div>
+                  <div class="flex-num">QT-2026-0142</div>
+                </div>
+                <div class="flex-body">
+                  <div class="flex-row"><span>รายการ</span><span class="v">4 รายการ</span></div>
+                  <div class="flex-row"><span>ยืนราคา</span><span class="v">13 มิ.ย. 69</span></div>
+                  <div class="flex-total"><span>ยอดสุทธิ</span><span class="v">฿ 1,375,528</span></div>
+                </div>
+                <div class="flex-foot">
+                  <button class="flex-btn primary">ดูใบเสนอ</button>
+                  <button class="flex-btn ghost">ยอมรับ</button>
+                </div>
+              </div>
+              <div class="line-time">14:42 · เปิดอ่าน 14:45</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WIDE: Quote requests inbox in หลังบ้าน -->
+      <div class="demo-card wide">
+        <div class="demo-card-label">หลังบ้าน · กล่องคำขอใบเสนอจากเว็บ</div>
+        <div class="demo-browser">
+          <div class="db-bar">
+            <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+            <span class="db-url"><span class="db-host">wandeedee.salesdee.com</span>/quote-requests</span>
+          </div>
+          <div class="db-body inbox">
+            <div class="inbox-head">
+              <div class="inbox-h2">คำขอใบเสนอ <span class="inbox-count">3 ใหม่</span></div>
+              <div class="inbox-chips">
+                <span class="chip active">ทั้งหมด</span>
+                <span class="chip">ใหม่</span>
+                <span class="chip warn">ใกล้ครบ</span>
+              </div>
+            </div>
+            <div class="inbox-list">
+              <div class="inbox-row urgent">
+                <span class="row-num">REQ-0044</span>
+                <span class="row-customer">คุณนริศ · ABC จก.</span>
+                <span class="row-items">โต๊ะ + เก้าอี้ + 2 รายการ</span>
+                <span class="row-time">22 ชม.ที่แล้ว</span>
+                <span class="row-amt">฿511,500</span>
+              </div>
+              <div class="inbox-row new">
+                <span class="row-num">REQ-0045</span>
+                <span class="row-customer">คุณสุดารัตน์ · Greenpoint</span>
+                <span class="row-items">โซฟา + เก้าอี้ + 1 รายการ</span>
+                <span class="row-time">35 นาที</span>
+                <span class="row-amt">฿184,000</span>
+              </div>
+              <div class="inbox-row new">
+                <span class="row-num">REQ-0046</span>
+                <span class="row-customer">คุณประเสริฐ · Pawn</span>
+                <span class="row-items">โต๊ะทำงาน + ตู้</span>
+                <span class="row-time">12 นาที</span>
+                <span class="row-amt">฿78,400</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SQUARE: Delivery ติดตามing · หลายช่องทาง -->
+      <div class="demo-card square">
+        <div class="demo-card-label">ส่งใบเสนอ <em>3 ช่อง</em> · ติดตามทุกการเปิด</div>
+        <div class="demo-ติดตามing">
+          <div class="tk-quote">
+            <span class="tk-num">QT-2026-0142</span>
+            <span class="tk-amt">฿1,375,528</span>
+          </div>
+          <div class="tk-channels">
+            <div class="tk-ch sent">
+              <div class="tk-ic" style="background: #4A6FA5;">@</div>
+              <div class="tk-info">
+                <div class="tk-name">อีเมล</div>
+                <div class="tk-event">เปิดอ่าน 10:48 · กดลิงก์</div>
+              </div>
+              <span class="tk-status ok">✓ เปิด</span>
+            </div>
+            <div class="tk-ch sent">
+              <div class="tk-ic" style="background: #06C755;">L</div>
+              <div class="tk-info">
+                <div class="tk-name">ไลน์ Flex</div>
+                <div class="tk-event">เปิดอ่าน 10:45 · กดปุ่ม</div>
+              </div>
+              <span class="tk-status ok">✓ เปิด</span>
+            </div>
+            <div class="tk-ch skip">
+              <div class="tk-ic" style="background: #A5ACB5;">S</div>
+              <div class="tk-info">
+                <div class="tk-name">SMS</div>
+                <div class="tk-event">สำรองไว้สำหรับเตือน</div>
+              </div>
+              <span class="tk-status">—</span>
+            </div>
+          </div>
+          <div class="tk-ai">
+            <div class="ai-ic">D</div>
+            <div class="ai-txt">ลูกค้าเปิดไลน์ก่อน · แนะนำตามทางไลน์</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WIDE: Catalog การตั้งค่าเริ่มต้น -->
+      <div class="demo-card wide">
+        <div class="demo-card-label">เริ่ม catalog ใน 10 นาที · 5 ทางใส่สินค้า</div>
+        <div class="demo-browser">
+          <div class="db-bar">
+            <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+            <span class="db-url"><span class="db-host">wandeedee.salesdee.com</span>/การตั้งค่าเริ่มต้น</span>
+          </div>
+          <div class="db-body ใส่ข้อมูล">
+            <div class="onb-h2">เลือกทางที่เหมาะ · เริ่มได้ใน 10 นาที</div>
+            <div class="onb-paths">
+              <div class="onb-path">
+                <div class="op-ic" style="background: #E8EEDF; color: #5A6D4D;">T</div>
+                <div class="op-name">เทมเพลต</div>
+                <div class="op-time">5 นาที</div>
+              </div>
+              <div class="onb-path">
+                <div class="op-ic" style="background: #F4E2D3; color: #9C3F18;">X</div>
+                <div class="op-name">เอ็กเซล</div>
+                <div class="op-time">10 นาที</div>
+              </div>
+              <div class="onb-path featured">
+                <div class="op-ic" style="background: var(--accent); color: var(--paper);">P</div>
+                <div class="op-name">PDF + เอไอ</div>
+                <div class="op-time">2 นาที/ไฟล์</div>
+              </div>
+              <div class="onb-path">
+                <div class="op-ic" style="background: #ECE4D2; color: #6B7785;">U</div>
+                <div class="op-name">URL ผู้ผลิต</div>
+                <div class="op-time">30 วินาที</div>
+              </div>
+              <div class="onb-path">
+                <div class="op-ic" style="background: #F4E2D3; color: #9C3F18;">M</div>
+                <div class="op-name">มือถือ</div>
+                <div class="op-time">1 นาที/ชิ้น</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════
+     TESTIMONIAL
+     ═══════════════════════════════════════════════ -->
+<section class="testimonial">
+  <div class="container">
+    <div class="testimonial-card">
+      <div class="testimonial-content">
+        <p class="testimonial-quote">
+          เดิมเราทำใบเสนอใน เอ็กเซล กันทุกครั้ง · ราคาผิดบ่อย · เปิดหา SKU นาน · ตอนนี้ทำผ่าน salesdee.com ทีมเหลือเวลาไปคุยลูกค้าใหม่ได้มากขึ้น · ดีลใหญ่ ๆ ที่เคยตกหายเริ่มมีคนตามอย่างเป็นระบบ — รู้สึกเป็นมืออาชีพขึ้นเยอะ
+        </p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">ส</div>
+          <div class="testimonial-author-info">
+            <div class="name">สมชาย วงศ์ทอง</div>
+            <div class="role">เจ้าของ · บริษัท วัน.ดี.ดี.บิสซิเนส</div>
+          </div>
+        </div>
+        <div class="testimonial-metrics">
+          <div class="testimonial-metric">
+            <div class="value">5×</div>
+            <div class="label">เร็วกว่าเดิมในการทำใบเสนอ</div>
+          </div>
+          <div class="testimonial-metric">
+            <div class="value">+18%</div>
+            <div class="label">ยอดขายเดือนแรกหลังใช้</div>
+          </div>
+          <div class="testimonial-metric">
+            <div class="value">0</div>
+            <div class="label">ดีลที่หายไปในเดือน</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     PRICING
+     ═══════════════════════════════════════════════ -->
+<section class="pricing" id="pricing">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">ราคา</div>
+      <h2 class="h1">เริ่ม<em>ฟรี</em><br>เติบโตเมื่อพร้อม</h2>
+      <p class="lead">ทดลองทุกฟีเจอร์ฟรี 14 วัน · ไม่ต้องใส่บัตรเครดิต · ยกเลิกเมื่อไหร่ก็ได้</p>
+    </div>
+
+    <div class="pricing-grid">
+
+      <!-- FREE -->
+      <div class="price-card">
+        <div class="name">Free</div>
+        <div class="price-amount"><span class="currency">฿</span>0</div>
+        <div class="price-unit">/ เดือน · ตลอดไป</div>
+        <div class="price-desc">เหมาะกับ freelance หรือเริ่มต้นทดสอบระบบ</div>
+        <ul class="features-list">
+          <li><span class="check">✓</span> 1 user</li>
+          <li><span class="check">✓</span> 50 ข้อความไลน์ / เดือน</li>
+          <li><span class="check">✓</span> 10 ใบเสนอ / เดือน</li>
+          <li><span class="check">✓</span> เอไอ ดึงข้อมูล PDF + URL (basic)</li>
+          <li><span class="check">✓</span> แคตตาล็อก ไม่จำกัด</li>
+        </ul>
+        <a href="#signup" class="btn btn-ghost price-cta">เริ่มฟรี</a>
+      </div>
+
+      <!-- STARTER -->
+      <div class="price-card">
+        <div class="name">สตาร์ทเตอร์</div>
+        <div class="price-amount"><span class="currency">฿</span>990</div>
+        <div class="price-unit">/ เดือน · จ่ายรายปีลด 20%</div>
+        <div class="price-desc">SME ขนาดเล็ก · 1-3 คน · เริ่มเอาจริงเอาจัง</div>
+        <ul class="features-list">
+          <li><span class="check">✓</span> 3 ผู้ใช้</li>
+          <li><span class="check">✓</span> 1,000 ข้อความไลน์ / เดือน</li>
+          <li><span class="check">✓</span> ใบเสนอไม่จำกัด</li>
+          <li><span class="check">✓</span> ลบ ขับเคลื่อนโดย ออกจาก PDF</li>
+          <li><span class="check">✓</span> Logo และสีแบรนด์ของคุณ</li>
+        </ul>
+        <a href="#signup" class="btn btn-ghost price-cta">ทดลอง 14 วัน</a>
+      </div>
+
+      <!-- PRO · FEATURED -->
+      <div class="price-card featured">
+        <div class="badge">นิยมที่สุด</div>
+        <div class="name">Pro</div>
+        <div class="price-amount"><span class="currency">฿</span><em>2,490</em></div>
+        <div class="price-unit">/ เดือน · จ่ายรายปีลด 20%</div>
+        <div class="price-desc">ทีม 5-10 คน · core ของบริษัทที่ขายผ่านไลน์</div>
+        <ul class="features-list">
+          <li><span class="check">✓</span> 10 ผู้ใช้</li>
+          <li><span class="check">✓</span> 5,000 ข้อความไลน์ / เดือน</li>
+          <li><span class="check">✓</span> เอไอ ตัวช่วย <em>เต็มที่</em></li>
+          <li><span class="check">✓</span> รายงานละเอียด + funnel</li>
+          <li><span class="check">✓</span> ส่งออก ข้อมูล CSV</li>
+          <li><span class="check">✓</span> การสนับสนุนความสำคัญสูง + email</li>
+          <li class="more">+ ทุกอย่างใน สตาร์ทเตอร์</li>
+        </ul>
+        <a href="#signup" class="btn btn-primary price-cta">ทดลอง 14 วัน</a>
+      </div>
+
+      <!-- BUSINESS -->
+      <div class="price-card">
+        <div class="name">บิสซิเนส</div>
+        <div class="price-amount"><span class="currency">฿</span>7,990</div>
+        <div class="price-unit">/ เดือน · กำหนดเอง available</div>
+        <div class="price-desc">บริษัทกลาง · ต้องการ white-label และ API</div>
+        <ul class="features-list">
+          <li><span class="check">✓</span> ผู้ใช้ ไม่จำกัด</li>
+          <li><span class="check">✓</span> messages ไม่จำกัด (fair use)</li>
+          <li><span class="check">✓</span> White-label option</li>
+          <li><span class="check">✓</span> API access เต็มที่</li>
+          <li><span class="check">✓</span> 1-on-1 การตั้งค่าเริ่มต้น</li>
+          <li><span class="check">✓</span> SLA + สนับสนุน โทร</li>
+        </ul>
+        <a href="#contact" class="btn btn-ghost price-cta">ติดต่อทีมขาย</a>
+      </div>
+
+    </div>
+
+    <div style="text-align: center; margin-top: 40px; font-size: 13px; color: var(--mid);">
+      ราคาทั้งหมดยังไม่รวม VAT 7% · ชำระผ่านบัตรเครดิต / โอนธนาคาร / PromptPay
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     FAQ
+     ═══════════════════════════════════════════════ -->
+<section class="faq" id="faq">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow mid">คำถามที่ถามบ่อย</div>
+      <h2 class="h1">มีคำถาม?<br>มี<em>คำตอบ</em>ที่นี่</h2>
+    </div>
+
+    <div class="faq-list">
+      <details class="faq-item" open>
+        <summary class="faq-q">ใช้กับ ไลน์ ออฟฟิเชียล ที่มีอยู่ได้ไหม?</summary>
+        <p class="faq-a">ได้ครับ ไม่ต้องสร้างใหม่ · เชื่อมต่อ ไลน์ โอเอ ที่ใช้อยู่กับ salesdee. ผ่าน Channel Access Token ใช้เวลาไม่นาน · ทุกข้อความเก่าจะถูก import เข้าระบบให้ดูประวัติย้อนหลังได้</p>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">ข้อมูลปลอดภัยไหม · มี privacy ตามกฎหมายไทยหรือเปล่า?</summary>
+        <p class="faq-a">ปลอดภัยและเป็นไปตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล (PDPA) ของไทย · ข้อมูลถูกเก็บใน data center ที่มาตรฐาน ISO 27001 · เข้ารหัสทั้ง in-transit และ at-rest · ลูกค้าสามารถขอลบข้อมูลได้เมื่อต้องการ · เรามี Data Processing Agreement สำหรับลูกค้า บิสซิเนส แพ็ค</p>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">ขั้นตอนการตั้งค่าครั้งแรกใช้เวลานานไหม?</summary>
+        <p class="faq-a">ปกติประมาณ 10-15 นาที · 5 ขั้นง่าย ๆ: ข้อมูลบริษัท → โลโก้ → เพิ่มสินค้าแรก (import จาก PDF ได้) → เชิญทีม → เชื่อมต่อ  · ผู้ช่วยจะนำทางทุกขั้น · ถ้าติดขัด นัด การตั้งค่าเริ่มต้น 1-on-1 กับทีมเราฟรีได้ (paid แพ็ค)</p>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">เหมาะกับธุรกิจประเภทไหน?</summary>
+        <p class="faq-a">ตอนนี้ focus ที่ <strong>เฟอร์นิเจอร์สำนักงาน · อุปกรณ์ออฟฟิศ · เครื่องใช้ในบ้าน</strong> เพราะ เทมเพลต + แคตตาล็อก structure ออกแบบมาให้เหมาะ · แต่ใช้กับธุรกิจอื่นที่ขายผ่านไลน์ และต้องส่งใบเสนอราคาได้ทุกประเภท · ถ้าไม่แน่ใจ ลองคุยกับเราก่อน</p>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">ผู้ช่วยใช้เอไอ อะไร · ทำอะไรบ้าง?</summary>
+        <p class="faq-a">ใช้ Claude (จาก Anthropic) เป็น <strong>ตัวเสริม</strong> ให้เซลส์ทำงานเร็วขึ้น · ช่วย ดึงข้อมูล ข้อมูลจาก เอกสารสเปก ตอน ใส่ข้อมูล แคตตาล็อก · จับคู่สินค้าใน แชทไลน์ · เสนอราคาเริ่มต้นจากค่าเฉลี่ย · เซลส์ตรวจและตัดสินเองทุกครั้ง · เอไอไม่ส่งใบเสนอเอง · ไม่ตอบลูกค้าแทน · เป็น helpful assistant ไม่ใช่ autopilot</p>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">ผลตอบแทนการลงทุนเป็นอย่างไร?</summary>
+        <p class="faq-a">การลงทุนต่อเดือนเท่ากับเงินเดือนพนักงานครึ่งวัน · ถ้าระบบช่วยให้ทีมเหลือเวลาไปคุยลูกค้าใหม่ · หรือกู้ดีลที่เคยตกหาย 1 ดีลที่มูลค่า 200,000+ บาท · คืนทุนทันทีในเดือนแรก</p>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">ถ้าเลิกใช้ ข้อมูลทำอย่างไร?</summary>
+        <p class="faq-a">ดาวน์โหลดข้อมูลทั้งหมดเป็น CSV / PDF ได้ก่อนเลิกใช้ · ลูกค้า · ดีล · ใบเสนอ · ประวัติแชต — ทั้งหมด · เก็บไว้ใน ไลน์ โอเอ ก็ยังเข้าถึงได้เหมือนเดิม · ไม่มี ผู้ขายระบบ lock-in</p>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">มี API ให้เชื่อมต่อกับระบบบัญชี / ERP ของเราไหม?</summary>
+        <p class="faq-a">บิสซิเนส แพ็ค มี API เต็มที่สำหรับ ส่งออก ใบเสนอ · ลูกค้า · ดีล ไปยังระบบบัญชี (Express, FlowAccount, PEAK, Xero) · ใน แพ็คโปร ส่งออก ผ่าน CSV ได้ · ถ้าใช้ ERP ที่ specific มาก ๆ ทีมเรา customize ให้ได้</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     FINAL CTA
+     ═══════════════════════════════════════════════ -->
+<section class="final-cta" id="signup">
+  <div class="container">
+    <div class="eyebrow">เริ่มต้นวันนี้</div>
+    <h2 class="display">พร้อมออก<em>ใบเสนอ</em><br>ที่<em>ง่ายและถูกต้อง</em><br>ทุกครั้งแล้ว?</h2>
+    <p class="lead">ทดลองทุกฟีเจอร์ฟรี 14 วัน · ไม่ต้องใส่บัตรเครดิต · ตั้งค่าครบใน 10 นาที</p>
+    <div class="final-cta-ctas">
+      <a href="#" class="btn btn-primary btn-lg">
+        เริ่มทดลองใช้ฟรี
+        <svg width="18" height="18"><use href="#i-arrow"/></svg>
+      </a>
+      <a href="#contact" class="btn btn-ghost btn-lg">นัดคุยกับทีม</a>
+    </div>
+    <div style="margin-top: 32px; font-size: 13px; color: rgba(246,241,231,0.5);">
+      <span><svg width="14" height="14" style="vertical-align: -2px; margin-right: 6px;"><use href="#i-shield"/></svg></span>
+      ข้อมูลปลอดภัยตาม PDPA ไทย · ยกเลิกได้ทุกเมื่อ
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     FOOTER
+     ═══════════════════════════════════════════════ -->
+<footer class="site">
+  <div class="container">
+
+    <div class="footer-grid">
+
+      <div class="footer-brand">
+        <span class="wm"><span class="sales">sales</span><span class="dee">dee</span><span class="dot"></span><span class="tld">com</span></span>
+        <p class="tagline">Quote builder + CRM สำหรับ SME ไทย · ออกใบเสนอราคาง่ายและถูกต้อง · ทุก lead · ทุก ช่องทาง</p>
+        <div class="badges">
+          <span class="footer-badge">PDPA Compliant</span>
+          <span class="footer-badge">Made in Thailand</span>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4>สินค้า</h4>
+        <ul>
+          <li><a href="#features">ฟีเจอร์</a></li>
+          <li><a href="#how">วิธีทำงาน</a></li>
+          <li><a href="#pricing">ราคา</a></li>
+          <li><a href="#">การเปลี่ยนแปลง</a></li>
+          <li><a href="#">โรดแมป</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>บริษัท</h4>
+        <ul>
+          <li><a href="#">เกี่ยวกับเรา</a></li>
+          <li><a href="#">ลูกค้าของเรา</a></li>
+          <li><a href="#">บล็อก</a></li>
+          <li><a href="#">ร่วมงาน</a></li>
+          <li><a href="#contact">ติดต่อ</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>ช่วยเหลือ</h4>
+        <ul>
+          <li><a href="#">ศูนย์ช่วยเหลือ</a></li>
+          <li><a href="#">วิดีโอสอนใช้งาน</a></li>
+          <li><a href="#">สำหรับนักพัฒนา</a></li>
+          <li><a href="#">สถานะระบบ</a></li>
+          <li><a href="#">ติดต่อ support</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="footer-bottom">
+      <div>© 2569 บริษัท salesdee จำกัด · จดทะเบียนในประเทศไทย</div>
+      <div class="footer-legal">
+        <a href="#">ข้อกำหนดการใช้บริการ</a>
+        <a href="#">นโยบายความเป็นส่วนตัว</a>
+        <a href="#">นโยบาย Cookies</a>
+        <a href="#">PDPA</a>
+      </div>
+    </div>
+
+  </div>
+</footer>
+
+</body>
+</html>

@@ -14,12 +14,14 @@ def test_current_period_is_yyyymm_int() -> None:
     assert 1 <= p % 100 <= 12
 
 
-def test_trial_plan_caps_ai_drafts(tenant) -> None:
-    """Trial plan = 50 AI drafts/month. New tenant under cap."""
+def test_free_plan_caps_ai_drafts(tenant) -> None:
+    """Free plan = 10 AI drafts/month. New tenant under cap."""
+    tenant.plan = "free"
+    tenant.save(update_fields=["plan"])
     ok, used, limit = quota.check_quota(tenant, "ai_drafts")
     assert ok is True
     assert used == 0
-    assert limit == 50
+    assert limit == 10
 
 
 def test_business_plan_is_unlimited(tenant) -> None:
@@ -68,12 +70,14 @@ def test_gated_raises_quota_exceeded(tenant) -> None:
 
 
 def test_near_cap_returns_kinds_above_threshold(tenant) -> None:
-    # Trial: ai_drafts=50. Bump to 40 → 80%, should appear.
-    quota.increment_usage(tenant, "ai_drafts", 40)
+    # Free: ai_drafts=10. Bump to 8 → 80%, should appear.
+    tenant.plan = "free"
+    tenant.save(update_fields=["plan"])
+    quota.increment_usage(tenant, "ai_drafts", 8)
     warning = quota.near_cap(tenant)
     kinds = {c.kind for c in warning}
     assert "ai_drafts" in kinds
-    # tax_invoices is 0/10 — below threshold, not in warning
+    # tax_invoices is 0/0 on free (cap=0) — capped already, but ratio formula skips when limit==0
     assert "tax_invoices" not in kinds
 
 

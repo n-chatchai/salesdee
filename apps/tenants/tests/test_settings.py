@@ -151,7 +151,7 @@ def test_plan_change_owner_updates_tenant(client, owner, tenant) -> None:
 
     ev = AuditEvent.all_tenants.filter(action="tenant.plan_changed").latest("created_at")
     assert ev.changes["after"]["plan"] == "growth"
-    assert ev.changes["before"]["plan"] == "trial"
+    assert ev.changes["before"]["plan"] == "business"  # default test plan
 
 
 def test_plan_change_viewer_forbidden(client, viewer, tenant) -> None:
@@ -159,7 +159,7 @@ def test_plan_change_viewer_forbidden(client, viewer, tenant) -> None:
     resp = client.post(reverse("workspace:plan_change"), {"plan": "growth", "cycle": "monthly"})
     assert resp.status_code == 403
     tenant.refresh_from_db()
-    assert tenant.plan == "trial"
+    assert tenant.plan == "business"  # default test plan in conftest
 
 
 def test_plan_change_rejects_unknown_code(client, owner, tenant) -> None:
@@ -167,7 +167,7 @@ def test_plan_change_rejects_unknown_code(client, owner, tenant) -> None:
     resp = client.post(reverse("workspace:plan_change"), {"plan": "enterprise", "cycle": "monthly"})
     assert resp.status_code == 302  # back to billing with an error message
     tenant.refresh_from_db()
-    assert tenant.plan == "trial"
+    assert tenant.plan == "business"  # default test plan in conftest
 
 
 def test_modules_status_lists_core_and_plan_modules(client, owner) -> None:
@@ -292,12 +292,12 @@ def test_billing_middleware_respects_override(client, tenant) -> None:
     assert client.get(reverse("billing:invoices")).status_code == 200
 
 
-def test_plan_change_cannot_switch_to_trial(client, owner, tenant) -> None:
-    """Trial isn't a public tier — UI never offers it, view must reject too."""
+def test_plan_change_can_downgrade_to_free(client, owner, tenant) -> None:
+    """Free is a public tier and a valid downgrade target (no more Trial gating)."""
     tenant.plan = "growth"
     tenant.save(update_fields=["plan"])
     client.force_login(owner)
-    resp = client.post(reverse("workspace:plan_change"), {"plan": "trial", "cycle": "monthly"})
+    resp = client.post(reverse("workspace:plan_change"), {"plan": "free", "cycle": "monthly"})
     assert resp.status_code == 302
     tenant.refresh_from_db()
-    assert tenant.plan == "growth"
+    assert tenant.plan == "free"

@@ -70,22 +70,22 @@ class PlanSpec:
 # ─── tiers ──────────────────────────────────────────────────────────────────
 
 PLANS: dict[str, PlanSpec] = {
-    "trial": PlanSpec(
-        code="trial",
-        label_th="ทดลองใช้",
-        tagline_th="ฟรี 30 วัน · เปิดทุกอย่าง · ไม่ต้องใส่บัตร",
+    "free": PlanSpec(
+        code="free",
+        label_th="Free",
+        tagline_th="ทดลองทุกฟีเจอร์หลัก · ไม่ตัดบัตร · ใช้ได้ตลอด",
         monthly_thb=Decimal("0"),
         annual_thb=Decimal("0"),
         limits=PlanLimits(
-            users=PlanLimits.unlimited(),
-            line_msgs=PlanLimits.unlimited(),
-            ai_drafts=50,
-            tax_invoices=10,
+            users=1,
+            line_msgs=100,
+            ai_drafts=10,
+            tax_invoices=0,
             storage_gb=1,
-            audit_retention_days=30,
+            audit_retention_days=14,
         ),
         features=PlanFeatures(
-            billing_module=True,  # trial = full features for 30 days
+            billing_module=False,
             white_label_pdf=False,
             custom_domain=False,
             api_access="none",
@@ -93,10 +93,12 @@ PLANS: dict[str, PlanSpec] = {
             priority_support=False,
             sla=False,
         ),
-        is_public=False,
+        is_public=True,
         extras_th=[
+            "ผู้ใช้ 1 คน · ใบเสนอราคาไม่จำกัด",
+            "ไลน์ 100 ข้อความ/เดือน · ผู้ช่วยเอไอ 10 ดราฟต์/เดือน",
             "แสดง 'powered by salesdee.' บนใบเสนอราคา",
-            "หมดเขต 30 วัน · เลือกแพ็กต่อเอง (ไม่ตัดบัตรอัตโนมัติ)",
+            "ไม่รวมระบบบัญชี (อัปเกรดเป็น Pro)",
         ],
     ),
     "starter": PlanSpec(
@@ -216,16 +218,16 @@ PLANS: dict[str, PlanSpec] = {
 }
 
 
-PUBLIC_TIER_ORDER: tuple[str, ...] = ("starter", "growth", "pro", "business")
+PUBLIC_TIER_ORDER: tuple[str, ...] = ("free", "starter", "growth", "pro", "business")
 
 
 def get(code: str) -> PlanSpec:
-    """Return the spec for a plan code, falling back to trial for unknown codes."""
-    return PLANS.get(code, PLANS["trial"])
+    """Return the spec for a plan code, falling back to free for unknown codes."""
+    return PLANS.get(code, PLANS["free"])
 
 
 def public_tiers() -> list[PlanSpec]:
-    """Tiers shown on pricing pages (skips 'trial')."""
+    """Tiers shown on pricing pages."""
     return [PLANS[code] for code in PUBLIC_TIER_ORDER]
 
 

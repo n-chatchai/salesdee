@@ -466,7 +466,7 @@ def plan_change(request: HttpRequest) -> HttpResponse:
     tenant = _tenant(request)
     new_code = request.POST.get("plan", "").strip()
     new_cycle = request.POST.get("cycle", BillingCycle.MONTHLY).strip()
-    if new_code not in plan_registry.PLANS or new_code == "trial":
+    if new_code not in plan_registry.PLANS:
         messages.error(request, "เลือกแพ็กเกจไม่ถูกต้อง")
         return redirect("workspace:settings_billing")
     if new_cycle not in BillingCycle.values:

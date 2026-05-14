@@ -7,7 +7,7 @@ from apps.core.models import BaseModel, TenantScopedModel
 
 
 class Plan(models.TextChoices):
-    TRIAL = "trial", "ทดลองใช้"
+    FREE = "free", "Free"
     STARTER = "starter", "Starter"
     GROWTH = "growth", "Growth"
     PRO = "pro", "Pro"
@@ -30,7 +30,7 @@ class Tenant(BaseModel):
         max_length=63, unique=True, help_text="ใช้เป็น subdomain: <slug>.<APP_DOMAIN>"
     )
     is_active = models.BooleanField("เปิดใช้งาน", default=True)
-    plan = models.CharField("แพ็กเกจ", max_length=20, choices=Plan.choices, default=Plan.TRIAL)
+    plan = models.CharField("แพ็กเกจ", max_length=20, choices=Plan.choices, default=Plan.FREE)
     billing_cycle = models.CharField(
         "รอบบิล", max_length=20, choices=BillingCycle.choices, default=BillingCycle.MONTHLY
     )

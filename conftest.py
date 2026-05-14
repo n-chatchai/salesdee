@@ -19,9 +19,12 @@ def _stable_host_settings(settings):
 
 @pytest.fixture
 def tenant(db):
+    """Default test tenant on the Business plan — unlimited everything, so plan caps don't
+    accidentally fail tests that care about other behaviour. Tests that care about caps set
+    ``tenant.plan = "free"|"starter"|"growth"|"pro"`` explicitly."""
     from apps.tenants.models import Tenant
 
-    return Tenant.objects.create(name="วันดีดี เฟอร์นิเจอร์", slug="wandeedee")
+    return Tenant.objects.create(name="วันดีดี เฟอร์นิเจอร์", slug="wandeedee", plan="business")
 
 
 @pytest.fixture

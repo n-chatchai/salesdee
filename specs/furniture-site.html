@@ -1,0 +1,2710 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>วัน.ดี.ดี. · เฟอร์นิเจอร์สำนักงาน · powered by salesdee.</title>
+<meta name="description" content="เฟอร์นิเจอร์สำนักงานคุณภาพดี ออกแบบเพื่อการทำงาน · 12 ปีในวงการ · ติดตั้งทั่วกรุงเทพและปริมณฑล">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@200;300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,800;0,9..144,900;1,9..144,400;1,9..144,500;1,9..144,600&display=swap" rel="stylesheet">
+
+<style>
+  /* ═══════════════════════════════════════════════
+     BASE · shared across all themes
+     ═══════════════════════════════════════════════ */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+
+  body {
+    line-height: 1.5;
+    overflow-x: hidden;
+    transition: background 0.4s ease, color 0.4s ease;
+  }
+
+  /* ═══════════════════════════════════════════════
+     THEME 1 · CRAFT  (default · Thai Craft Modern)
+     ═══════════════════════════════════════════════ */
+  body.theme-craft {
+    --bg: #F6F1E7;
+    --bg-2: #FBF7EF;
+    --bg-3: #ECE4D2;
+    --text: #1B2A3A;
+    --text-2: #2D3D50;
+    --mid: #6B7785;
+    --accent: #C8501F;
+    --accent-soft: #F4E2D3;
+    --accent-deep: #9C3F18;
+    --border: #E5DDC9;
+    --line-green: #06C755;
+
+    --font-display: 'IBM Plex Sans Thai', sans-serif;
+    --font-display-italic: 'Fraunces', serif;
+    --font-body: 'IBM Plex Sans Thai', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+
+    --hero-rhythm: 100px;
+    --section-rhythm: 100px;
+    --card-radius: 16px;
+    --button-radius: 99px;
+    --button-style: pill;
+
+    font-family: var(--font-body);
+    color: var(--text);
+    background: var(--bg);
+  }
+  body.theme-craft .paper-grain::before {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='1' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.1 0 0 0 0 0.1 0 0 0 0.05 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+
+  /* ═══════════════════════════════════════════════
+     THEME 2 · ATELIER  (warm boutique · brass + espresso)
+     ═══════════════════════════════════════════════ */
+  body.theme-atelier {
+    --bg: #F2EAD7;
+    --bg-2: #E8DEC4;
+    --bg-3: #D8C9A6;
+    --text: #2D1F12;
+    --text-2: #4A3725;
+    --mid: #8A7355;
+    --accent: #B8965A;
+    --accent-soft: #EBD9B0;
+    --accent-deep: #8A6E3D;
+    --border: #D8C9A6;
+    --line-green: #06C755;
+
+    --font-display: 'Fraunces', serif;
+    --font-display-italic: 'Fraunces', serif;
+    --font-body: 'IBM Plex Sans Thai', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+
+    --hero-rhythm: 120px;
+    --section-rhythm: 110px;
+    --card-radius: 8px;
+    --button-radius: 6px;
+    --button-style: square;
+
+    font-family: var(--font-body);
+    color: var(--text);
+    background: var(--bg);
+  }
+  body.theme-atelier .paper-grain::before {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.18 0 0 0 0 0.12 0 0 0 0 0.06 0 0 0 0.1 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+
+  /* ═══════════════════════════════════════════════
+     THEME 3 · BAUHAUS  (bold modern · geometric)
+     ═══════════════════════════════════════════════ */
+  body.theme-bauhaus {
+    --bg: #FAFAF8;
+    --bg-2: #FFFFFF;
+    --bg-3: #F0F0EE;
+    --text: #0A0A0A;
+    --text-2: #1A1A1A;
+    --mid: #707070;
+    --accent: #E63946;
+    --accent-soft: #FDE5E7;
+    --accent-deep: #B82A35;
+    --border: #1A1A1A;
+    --line-green: #06C755;
+
+    --font-display: 'IBM Plex Sans Thai', sans-serif;
+    --font-display-italic: 'IBM Plex Sans Thai', sans-serif;
+    --font-body: 'IBM Plex Sans Thai', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+
+    --hero-rhythm: 80px;
+    --section-rhythm: 90px;
+    --card-radius: 0px;
+    --button-radius: 0px;
+    --button-style: square;
+
+    font-family: var(--font-body);
+    color: var(--text);
+    background: var(--bg);
+  }
+  body.theme-bauhaus .paper-grain::before { display: none; }
+
+  /* ═══════════════════════════════════════════════
+     THEME 4 · VELVET  (dark luxe · emerald + gold)
+     ═══════════════════════════════════════════════ */
+  body.theme-velvet {
+    --bg: #0F1715;
+    --bg-2: #1A2422;
+    --bg-3: #25332F;
+    --text: #F5E9D5;
+    --text-2: #DCC9A8;
+    --mid: #8A8074;
+    --accent: #C9A961;
+    --accent-soft: #3A3025;
+    --accent-deep: #A88944;
+    --emerald: #2D5F4F;
+    --border: #2A3835;
+    --line-green: #06C755;
+
+    --font-display: 'Fraunces', serif;
+    --font-display-italic: 'Fraunces', serif;
+    --font-body: 'IBM Plex Sans Thai', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+
+    --hero-rhythm: 120px;
+    --section-rhythm: 120px;
+    --card-radius: 4px;
+    --button-radius: 0px;
+    --button-style: square;
+
+    font-family: var(--font-body);
+    color: var(--text);
+    background: var(--bg);
+  }
+  body.theme-velvet .paper-grain::before {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.95 0 0 0 0 0.9 0 0 0 0 0.8 0 0 0 0.04 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+
+  /* ═══ Grain texture (applied selectively) ═══ */
+  .paper-grain {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 1000;
+  }
+  .paper-grain::before {
+    content: '';
+    position: absolute; inset: 0;
+    opacity: 0.5;
+    mix-blend-mode: multiply;
+  }
+
+  /* ═══════════════════════════════════════════════
+     SHARED LAYOUT + COMPONENTS (use vars)
+     ═══════════════════════════════════════════════ */
+  .container {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  .container-narrow {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ─── Theme switcher (floating bottom-right) ─── */
+  .theme-switcher {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 100;
+  }
+  .ts-toggle {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: var(--text);
+    color: var(--bg);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    box-shadow: 0 8px 30px rgba(0,0,0,.25);
+    transition: transform 0.2s;
+    position: relative;
+  }
+  .ts-toggle:hover { transform: scale(1.08); }
+  .ts-toggle svg { width: 22px; height: 22px; }
+  .ts-toggle::after {
+    content: '';
+    position: absolute;
+    bottom: 0; right: 0;
+    width: 14px; height: 14px;
+    background: var(--accent);
+    border-radius: 50%;
+    border: 2px solid var(--text);
+  }
+  .ts-pop {
+    position: absolute;
+    bottom: 72px;
+    right: 0;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    box-shadow: 0 16px 60px rgba(0,0,0,.18);
+    min-width: 280px;
+    display: none;
+  }
+  .ts-pop.open { display: block; }
+  .ts-pop-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .ts-pop-head h4 {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .ts-pop-head .lbl {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .ts-options {
+    display: grid;
+    gap: 8px;
+  }
+  .ts-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+    border: 1px solid transparent;
+  }
+  .ts-option:hover {
+    background: var(--bg-3);
+  }
+  .ts-option.active {
+    background: var(--bg-3);
+    border-color: var(--accent);
+  }
+  .ts-swatch {
+    display: flex;
+    flex-shrink: 0;
+  }
+  .ts-swatch span {
+    width: 14px; height: 28px;
+    display: block;
+  }
+  .ts-swatch span:first-child { border-radius: 4px 0 0 4px; }
+  .ts-swatch span:last-child { border-radius: 0 4px 4px 0; }
+  .ts-option-info { flex: 1; min-width: 0; }
+  .ts-option-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .ts-option-desc {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--mid);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .ts-foot {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--mid);
+    line-height: 1.5;
+  }
+  .ts-foot strong { color: var(--text); }
+
+  /* ─── Buttons ─── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 28px;
+    border-radius: var(--button-radius);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+  }
+  body.theme-velvet .btn-primary { color: var(--bg); }
+  .btn-primary:hover {
+    background: var(--accent-deep);
+    transform: translateY(-1px);
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text);
+    border: 1.5px solid var(--text);
+  }
+  .btn-ghost:hover {
+    background: var(--text);
+    color: var(--bg);
+  }
+  .btn-line {
+    background: var(--line-green);
+    color: white;
+  }
+  .btn-line:hover { background: #05b34c; }
+  .btn-lg {
+    padding: 18px 36px;
+    font-size: 16px;
+  }
+  .btn-sm {
+    padding: 10px 18px;
+    font-size: 13px;
+  }
+
+  /* ─── Typography ─── */
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 20px;
+  }
+  .display {
+    font-family: var(--font-display);
+    font-size: clamp(40px, 7vw, 92px);
+    font-weight: 600;
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+    color: var(--text);
+  }
+  .display em {
+    font-family: var(--font-display-italic);
+    font-style: italic;
+    font-weight: 500;
+    color: var(--accent);
+  }
+  body.theme-bauhaus .display {
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    text-transform: uppercase;
+    line-height: 0.95;
+  }
+  body.theme-bauhaus .display em {
+    font-style: normal;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+  body.theme-atelier .display { font-weight: 400; }
+  body.theme-atelier .display em { font-weight: 400; }
+  body.theme-velvet .display { font-weight: 500; }
+  body.theme-velvet .display em { font-weight: 400; }
+
+  .h1 {
+    font-family: var(--font-display);
+    font-size: clamp(32px, 4.5vw, 56px);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: var(--text);
+  }
+  .h1 em {
+    font-family: var(--font-display-italic);
+    font-style: italic;
+    font-weight: 500;
+    color: var(--accent);
+  }
+  body.theme-bauhaus .h1 { font-weight: 700; text-transform: uppercase; letter-spacing: -0.04em; }
+  body.theme-bauhaus .h1 em { font-style: normal; font-weight: 700; text-transform: uppercase; }
+  body.theme-atelier .h1 { font-weight: 400; }
+  body.theme-atelier .h1 em { font-weight: 400; }
+
+  .h2 {
+    font-family: var(--font-display);
+    font-size: clamp(22px, 2.5vw, 30px);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+  .h3 {
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--text);
+  }
+  body.theme-bauhaus .h2, body.theme-bauhaus .h3 { text-transform: uppercase; letter-spacing: -0.01em; }
+
+  .lead {
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--text-2);
+    font-weight: 400;
+  }
+  .lead em {
+    font-family: var(--font-display-italic);
+    font-style: italic;
+    color: var(--text);
+  }
+  body.theme-bauhaus .lead em { font-family: var(--font-body); font-style: normal; font-weight: 600; }
+
+  .body-text {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text-2);
+  }
+
+  /* ─── Top brand bar / nav ─── */
+  nav.top {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+  body.theme-velvet nav.top { background: rgba(15,23,21,0.92); backdrop-filter: blur(20px); }
+  body.theme-craft nav.top, body.theme-atelier nav.top {
+    background: color-mix(in srgb, var(--bg) 85%, transparent);
+    backdrop-filter: blur(20px);
+  }
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* Brand display per theme */
+  .brand-name {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+  body.theme-craft .brand-name {
+    font-family: var(--font-body);
+    font-weight: 700;
+    text-transform: lowercase;
+    letter-spacing: -0.04em;
+  }
+  body.theme-craft .brand-name em {
+    font-family: var(--font-body);
+    font-style: normal;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  body.theme-craft .brand-name .dot {
+    display: inline-block;
+    width: 0.13em; height: 0.13em;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-left: 0.04em;
+    vertical-align: 0.05em;
+  }
+  body.theme-atelier .brand-name {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-style: italic;
+    letter-spacing: 0.02em;
+    color: var(--accent);
+  }
+  body.theme-bauhaus .brand-name {
+    font-family: var(--font-body);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    font-size: 18px;
+  }
+  body.theme-velvet .brand-name {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-style: italic;
+    letter-spacing: 0.01em;
+    color: var(--accent);
+  }
+
+  .nav-links {
+    display: none;
+    gap: 32px;
+    font-size: 14px;
+    color: var(--text-2);
+  }
+  body.theme-bauhaus .nav-links { text-transform: uppercase; font-weight: 600; font-size: 12px; letter-spacing: 0.05em; }
+  .nav-links a:hover { color: var(--accent); }
+  @media (min-width: 900px) { .nav-links { display: flex; } }
+
+  /* ─── HERO ─── */
+  .hero {
+    padding: var(--hero-rhythm) 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -200px; right: -200px;
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, var(--accent-soft) 0%, transparent 65%);
+    z-index: -1;
+    opacity: 0.7;
+  }
+  body.theme-bauhaus .hero::before { display: none; }
+  body.theme-velvet .hero::before { background: radial-gradient(circle, rgba(201,169,97,0.15) 0%, transparent 65%); }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 60px;
+    align-items: center;
+  }
+  @media (min-width: 960px) {
+    .hero-grid { grid-template-columns: 1.05fr 0.95fr; gap: 80px; }
+  }
+
+  .hero-text { max-width: 600px; }
+  .hero-display { margin-bottom: 28px; }
+  .hero-sub { margin-bottom: 36px; max-width: 540px; }
+  .hero-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    font-size: 12px;
+    color: var(--mid);
+    font-family: var(--font-mono);
+    letter-spacing: 0.05em;
+  }
+
+  /* Hero visual (image placeholder) */
+  .hero-vis {
+    position: relative;
+    aspect-ratio: 4/5;
+    border-radius: var(--card-radius);
+    overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,.18);
+  }
+  body.theme-bauhaus .hero-vis { box-shadow: none; border: 2px solid var(--text); }
+  .hero-vis-img {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #8B7355 0%, #5A4632 50%, #3D2F1F 100%);
+  }
+  body.theme-velvet .hero-vis-img { background: linear-gradient(135deg, #4A6359 0%, #2D5F4F 50%, #1A2A24 100%); }
+  body.theme-bauhaus .hero-vis-img { background: linear-gradient(135deg, #2D2D2D 0%, #1A1A1A 100%); }
+  body.theme-atelier .hero-vis-img { background: linear-gradient(135deg, #B89968 0%, #8A6B3D 50%, #4D3923 100%); }
+
+  .hero-vis-tag {
+    position: absolute;
+    top: 24px; left: 24px;
+    background: rgba(255,255,255,0.9);
+    color: #1B2A3A;
+    backdrop-filter: blur(10px);
+    padding: 8px 16px;
+    border-radius: 99px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+  }
+  body.theme-bauhaus .hero-vis-tag { border-radius: 0; background: var(--text); color: var(--bg); }
+  body.theme-velvet .hero-vis-tag { background: var(--accent); color: var(--bg); }
+
+  .hero-vis-meta {
+    position: absolute;
+    bottom: 24px; left: 24px; right: 24px;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(20px);
+    color: white;
+    padding: 16px 20px;
+    border-radius: var(--card-radius);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  body.theme-bauhaus .hero-vis-meta { background: var(--text); color: var(--bg); }
+  .hero-vis-meta .vis-name {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.2;
+    margin-bottom: 2px;
+  }
+  .hero-vis-meta .vis-sub {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    opacity: 0.7;
+    letter-spacing: 0.05em;
+  }
+  .hero-vis-meta .vis-price {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  body.theme-bauhaus .hero-vis-meta .vis-price { color: var(--accent); }
+  body.theme-velvet .hero-vis-meta .vis-price { color: var(--accent); }
+
+  /* ─── Section heads ─── */
+  .section {
+    padding: var(--section-rhythm) 0;
+  }
+  .section-head {
+    margin-bottom: 60px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+  }
+  .section-head .left { max-width: 700px; }
+  .section-head .h1 { margin-bottom: 12px; }
+  .section-head .lead { max-width: 580px; }
+
+  /* ─── Product grid ─── */
+  .products-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  @media (min-width: 640px) {
+    .products-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (min-width: 1024px) {
+    .products-grid { grid-template-columns: repeat(4, 1fr); gap: 28px; }
+  }
+
+  .product-card {
+    cursor: pointer;
+    transition: transform 0.25s ease;
+  }
+  .product-card:hover { transform: translateY(-4px); }
+  .product-img {
+    aspect-ratio: 4/5;
+    border-radius: var(--card-radius);
+    overflow: hidden;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  body.theme-bauhaus .product-img { border: 1.5px solid var(--text); }
+  .product-img::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transition: opacity 0.3s;
+    opacity: 0;
+    background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.4));
+  }
+  .product-card:hover .product-img::before { opacity: 1; }
+  .product-tag {
+    position: absolute;
+    top: 12px; left: 12px;
+    padding: 4px 10px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    border-radius: 99px;
+    z-index: 1;
+  }
+  body.theme-bauhaus .product-tag { border-radius: 0; background: var(--text); color: var(--bg); }
+  .product-name {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+  body.theme-atelier .product-name { font-weight: 500; }
+  body.theme-bauhaus .product-name { text-transform: uppercase; font-weight: 700; font-size: 14px; letter-spacing: 0.01em; }
+  .product-meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--mid);
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+  .product-price {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  body.theme-bauhaus .product-price { font-weight: 700; }
+
+  /* ─── Categories ─── */
+  .categories-section {
+    background: var(--bg-2);
+    padding: var(--section-rhythm) 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .cats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (min-width: 768px) {
+    .cats-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (min-width: 1100px) {
+    .cats-grid { grid-template-columns: repeat(6, 1fr); }
+  }
+  .cat-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--card-radius);
+    padding: 24px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    aspect-ratio: 4/5;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .cat-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+  body.theme-bauhaus .cat-card:hover { background: var(--text); color: var(--bg); }
+  body.theme-bauhaus .cat-card:hover .cat-count { color: var(--accent); }
+  body.theme-bauhaus .cat-card:hover .cat-name { color: var(--bg); }
+
+  .cat-icon {
+    width: 56px; height: 56px;
+    margin: 0 auto 18px;
+    border-radius: 12px;
+    background: var(--accent-soft);
+    display: grid;
+    place-items: center;
+    color: var(--accent);
+  }
+  body.theme-bauhaus .cat-icon { border-radius: 0; background: var(--text); color: var(--bg); }
+  .cat-icon svg { width: 28px; height: 28px; }
+  .cat-name {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+  body.theme-atelier .cat-name { font-weight: 500; }
+  body.theme-bauhaus .cat-name { text-transform: uppercase; font-size: 12px; font-weight: 700; }
+  .cat-count {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--mid);
+    letter-spacing: 0.05em;
+  }
+
+  /* ─── Story section ─── */
+  .story {
+    padding: var(--section-rhythm) 0;
+  }
+  .story-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 60px;
+    align-items: center;
+  }
+  @media (min-width: 900px) {
+    .story-grid { grid-template-columns: 0.85fr 1fr; gap: 80px; }
+  }
+  .story-img {
+    aspect-ratio: 4/5;
+    border-radius: var(--card-radius);
+    background: linear-gradient(135deg, #C0B097 0%, #8A7A65 100%);
+    box-shadow: 0 30px 80px rgba(0,0,0,.18);
+    position: relative;
+    overflow: hidden;
+  }
+  body.theme-bauhaus .story-img { box-shadow: none; border: 2px solid var(--text); }
+  body.theme-velvet .story-img { background: linear-gradient(135deg, #3A4A45 0%, #1A2A24 100%); }
+  body.theme-atelier .story-img { background: linear-gradient(135deg, #B89968 0%, #6D5230 100%); }
+
+  .story-img::after {
+    content: '12';
+    position: absolute;
+    bottom: 24px; left: 24px;
+    font-family: var(--font-display-italic);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 200px;
+    color: rgba(255,255,255,0.25);
+    line-height: 0.7;
+  }
+  body.theme-bauhaus .story-img::after { color: var(--accent); font-style: normal; font-weight: 800; }
+  body.theme-velvet .story-img::after { color: rgba(201,169,97,0.4); }
+
+  .story-text .h1 { margin-bottom: 28px; }
+  .story-text .body-text { margin-bottom: 20px; max-width: 540px; }
+  .story-features {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 36px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+  }
+  .story-feature {
+    font-size: 13px;
+    color: var(--text-2);
+  }
+  .story-feature .feat-num {
+    font-family: var(--font-display-italic);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 36px;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  body.theme-bauhaus .story-feature .feat-num { font-family: var(--font-body); font-style: normal; font-weight: 700; }
+
+  /* ─── Inquiry CTA ─── */
+  .inquiry {
+    padding: var(--section-rhythm) 0;
+    background: var(--bg-3);
+    text-align: center;
+  }
+  body.theme-velvet .inquiry { background: var(--bg-2); }
+  body.theme-bauhaus .inquiry { background: var(--text); color: var(--bg); }
+  body.theme-bauhaus .inquiry .h1 { color: var(--bg); }
+  body.theme-bauhaus .inquiry .lead { color: rgba(250,250,248,0.7); }
+  .inquiry .h1 { margin-bottom: 24px; }
+  .inquiry .lead { margin-bottom: 40px; max-width: 580px; margin-left: auto; margin-right: auto; }
+  .inquiry-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+  }
+  .inquiry-meta {
+    margin-top: 40px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 32px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--mid);
+    letter-spacing: 0.05em;
+  }
+  body.theme-bauhaus .inquiry-meta { color: rgba(250,250,248,0.5); }
+
+  /* ─── Footer ─── */
+  footer.site {
+    padding: 80px 0 32px;
+    background: var(--bg-2);
+    border-top: 1px solid var(--border);
+  }
+  body.theme-velvet footer.site { background: var(--bg); border-top-color: var(--accent-soft); }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 40px;
+    margin-bottom: 48px;
+  }
+  @media (min-width: 768px) {
+    .footer-grid { grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 48px; }
+  }
+  .footer-brand h3 {
+    font-size: 28px;
+    margin-bottom: 14px;
+    line-height: 1;
+  }
+  .footer-tagline {
+    font-size: 14px;
+    color: var(--text-2);
+    line-height: 1.6;
+    max-width: 320px;
+  }
+  .footer-col h4 {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--mid);
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+  .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+  .footer-col a {
+    font-size: 14px;
+    color: var(--text-2);
+    transition: color 0.15s;
+  }
+  .footer-col a:hover { color: var(--accent); }
+  .footer-bot {
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 14px;
+    font-size: 12px;
+    color: var(--mid);
+  }
+  .footer-bot .powered {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
+  .powered-wm {
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    text-transform: lowercase;
+    color: var(--text);
+    font-size: 13px;
+  }
+  .powered-wm em {
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-style: normal;
+    color: #C8501F;
+  }
+  .powered-wm .dot {
+    display: inline-block;
+    width: 0.13em; height: 0.13em;
+    border-radius: 50%;
+    background: #C8501F;
+    margin-left: 0.04em;
+    vertical-align: 0.05em;
+  }
+
+  /* ═══════════════════════════════════════════════
+     QUOTE DRAWER + REQUEST FLOW
+     ═══════════════════════════════════════════════ */
+
+  /* Nav: quote button with count */
+  .nav-quote-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px 10px 14px;
+    border-radius: var(--button-radius);
+    background: var(--text);
+    color: var(--bg);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-right: 8px;
+  }
+  body.theme-bauhaus .nav-quote-btn { font-weight: 700; }
+  .nav-quote-btn:hover { transform: translateY(-1px); }
+  .nav-quote-btn svg { width: 18px; height: 18px; }
+  .nav-quote-count {
+    background: var(--accent);
+    color: var(--bg);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 99px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+  body.theme-bauhaus .nav-quote-count { border-radius: 0; }
+  .nav-quote-btn.empty .nav-quote-count { display: none; }
+
+  /* Product card: add to quote button */
+  .product-card { position: relative; }
+  .product-quote-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: var(--bg-3);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: var(--button-radius);
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid var(--border);
+  }
+  body.theme-bauhaus .product-quote-btn { font-weight: 700; text-transform: uppercase; font-size: 11px; }
+  .product-quote-btn:hover {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+  }
+  .product-quote-btn.added {
+    background: var(--accent-soft);
+    color: var(--accent-deep);
+    border-color: var(--accent);
+  }
+  body.theme-velvet .product-quote-btn.added { background: var(--accent-soft); color: var(--accent); }
+  .product-quote-btn svg { width: 14px; height: 14px; }
+
+  /* Quote drawer */
+  .qd-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .qd-overlay.open { opacity: 1; pointer-events: auto; }
+
+  .qd {
+    position: fixed;
+    top: 0; right: 0;
+    width: 420px;
+    max-width: 100vw;
+    height: 100vh;
+    background: var(--bg);
+    border-left: 1px solid var(--border);
+    z-index: 201;
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    box-shadow: -20px 0 60px rgba(0,0,0,0.18);
+  }
+  .qd.open { transform: translateX(0); }
+
+  .qd-head {
+    padding: 24px 24px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .qd-head h3 {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+  body.theme-atelier .qd-head h3 { font-style: italic; font-weight: 500; }
+  body.theme-bauhaus .qd-head h3 { text-transform: uppercase; font-weight: 700; }
+  .qd-close {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--bg-3);
+    color: var(--text);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  body.theme-bauhaus .qd-close { border-radius: 0; }
+  .qd-close:hover { background: var(--text); color: var(--bg); }
+  .qd-close svg { width: 16px; height: 16px; }
+
+  .qd-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 24px;
+  }
+  .qd-empty {
+    text-align: center;
+    padding: 80px 24px;
+    color: var(--mid);
+  }
+  .qd-empty .ic-empty {
+    width: 64px; height: 64px;
+    margin: 0 auto 20px;
+    background: var(--bg-3);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: var(--mid);
+  }
+  .qd-empty .ic-empty svg { width: 28px; height: 28px; }
+  .qd-empty h4 {
+    font-family: var(--font-display);
+    font-size: 17px;
+    color: var(--text);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .qd-empty p { font-size: 14px; line-height: 1.6; max-width: 280px; margin: 0 auto; }
+
+  .qd-item {
+    display: grid;
+    grid-template-columns: 72px 1fr auto;
+    gap: 14px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .qd-item:last-child { border-bottom: none; }
+  .qd-item-img {
+    width: 72px; height: 72px;
+    border-radius: 8px;
+    background-size: cover;
+  }
+  body.theme-bauhaus .qd-item-img { border-radius: 0; border: 1px solid var(--text); }
+  .qd-item-info {
+    min-width: 0;
+  }
+  .qd-item-name {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+    margin-bottom: 4px;
+  }
+  body.theme-bauhaus .qd-item-name { text-transform: uppercase; font-size: 12px; font-weight: 700; }
+  body.theme-atelier .qd-item-name { font-weight: 500; }
+  .qd-item-meta {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--mid);
+    letter-spacing: 0.03em;
+    margin-bottom: 8px;
+  }
+  .qd-item-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .qd-qty {
+    display: inline-flex;
+    align-items: center;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--button-radius);
+    overflow: hidden;
+  }
+  .qd-qty button {
+    width: 28px; height: 28px;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .qd-qty button:hover { background: var(--bg-3); }
+  .qd-qty span {
+    min-width: 32px;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .qd-item-remove {
+    color: var(--mid);
+    padding: 4px;
+    border-radius: 4px;
+    transition: color 0.15s;
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .qd-item-remove:hover { color: var(--accent); }
+  .qd-item-price {
+    text-align: right;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    align-self: flex-start;
+  }
+
+  .qd-foot {
+    padding: 20px 24px 24px;
+    border-top: 1px solid var(--border);
+    background: var(--bg-2);
+  }
+  .qd-foot-est {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--card-radius);
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+  .qd-foot-est-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: var(--text-2);
+  }
+  .qd-foot-est-row.total {
+    padding-top: 8px;
+    margin-top: 8px;
+    border-top: 1px solid var(--border);
+    margin-bottom: 0;
+  }
+  .qd-foot-est-row.total .value {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .qd-foot-est-row .value {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--text);
+  }
+  .qd-foot-note {
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--mid);
+    line-height: 1.5;
+  }
+  .qd-foot-submit {
+    width: 100%;
+    padding: 16px;
+    background: var(--accent);
+    color: var(--bg);
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: var(--button-radius);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  body.theme-bauhaus .qd-foot-submit { font-weight: 700; text-transform: uppercase; }
+  .qd-foot-submit:hover { background: var(--accent-deep); }
+  .qd-foot-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  @media (max-width: 480px) {
+    .qd { width: 100vw; }
+  }
+
+  /* ─── Quote request modal ─── */
+  .qm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(6px);
+    z-index: 300;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    display: grid;
+    place-items: center;
+    padding: 40px 20px;
+  }
+  .qm-overlay.open { opacity: 1; pointer-events: auto; }
+  .qm {
+    background: var(--bg);
+    border-radius: var(--card-radius);
+    max-width: 640px;
+    width: 100%;
+    max-height: calc(100vh - 80px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(20px);
+    transition: transform 0.3s;
+  }
+  .qm-overlay.open .qm { transform: translateY(0); }
+  body.theme-bauhaus .qm { border: 2px solid var(--text); }
+
+  .qm-head {
+    padding: 24px 28px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .qm-head-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+  .qm-head h3 {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+  body.theme-bauhaus .qm-head h3 { text-transform: uppercase; font-weight: 700; }
+  body.theme-atelier .qm-head h3 { font-style: italic; font-weight: 500; }
+
+  .qm-steps {
+    display: flex;
+    gap: 4px;
+  }
+  .qm-step {
+    flex: 1;
+    height: 4px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+    position: relative;
+  }
+  body.theme-bauhaus .qm-step { border-radius: 0; }
+  .qm-step.active {
+    background: var(--accent);
+  }
+  .qm-step.done {
+    background: var(--accent);
+  }
+  .qm-step-labels {
+    display: flex;
+    gap: 4px;
+    margin-top: 10px;
+  }
+  .qm-step-label {
+    flex: 1;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--mid);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    text-align: center;
+  }
+  .qm-step-label.active { color: var(--accent); font-weight: 600; }
+
+  .qm-body {
+    padding: 28px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .qm-field {
+    margin-bottom: 20px;
+  }
+  .qm-field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  body.theme-bauhaus .qm-field label { text-transform: uppercase; font-weight: 700; font-size: 11px; }
+  .qm-field label .req {
+    color: var(--accent);
+    margin-left: 2px;
+  }
+  .qm-field label .opt {
+    color: var(--mid);
+    font-weight: 400;
+    margin-left: 4px;
+    font-size: 11px;
+  }
+  .qm-field input, .qm-field textarea, .qm-field select {
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--button-radius);
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--text);
+    transition: border-color 0.15s;
+  }
+  body.theme-bauhaus .qm-field input,
+  body.theme-bauhaus .qm-field textarea,
+  body.theme-bauhaus .qm-field select { border-radius: 0; }
+  .qm-field input:focus, .qm-field textarea:focus, .qm-field select:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .qm-field textarea { resize: vertical; min-height: 80px; }
+  .qm-field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  @media (max-width: 540px) {
+    .qm-field-row { grid-template-columns: 1fr; }
+  }
+
+  .qm-radio-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .qm-radio-card {
+    padding: 14px;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--button-radius);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    font-family: var(--font-body);
+    color: var(--text);
+  }
+  body.theme-bauhaus .qm-radio-card { border-radius: 0; }
+  .qm-radio-card:hover { border-color: var(--text); }
+  .qm-radio-card.selected {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  body.theme-velvet .qm-radio-card.selected { background: var(--accent-soft); color: var(--accent); }
+  .qm-radio-card .title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .qm-radio-card .desc {
+    font-size: 11px;
+    color: var(--mid);
+    line-height: 1.4;
+  }
+
+  /* Review step */
+  .qm-review-section {
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .qm-review-section:last-child { border-bottom: none; padding-bottom: 0; }
+  .qm-review-section h4 {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--mid);
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+  .qm-review-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 6px 0;
+    font-size: 14px;
+  }
+  .qm-review-row .label { color: var(--mid); }
+  .qm-review-row .value { color: var(--text); font-weight: 500; text-align: right; }
+
+  .qm-review-item {
+    display: grid;
+    grid-template-columns: 48px 1fr auto;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+  }
+  .qm-review-item:last-child { border-bottom: none; }
+  .qm-review-item .img {
+    width: 48px; height: 48px;
+    border-radius: 6px;
+  }
+  body.theme-bauhaus .qm-review-item .img { border-radius: 0; }
+  .qm-review-item .info .name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+    margin-bottom: 2px;
+  }
+  .qm-review-item .info .meta {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--mid);
+  }
+  .qm-review-item .price {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  /* Modal footer with nav buttons */
+  .qm-foot {
+    padding: 16px 28px;
+    border-top: 1px solid var(--border);
+    background: var(--bg-2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .qm-foot-back {
+    padding: 10px 18px;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: var(--button-radius);
+    transition: background 0.15s;
+  }
+  .qm-foot-back:hover { background: var(--bg-3); }
+  .qm-foot-back:disabled { opacity: 0.3; cursor: not-allowed; }
+  .qm-foot-next {
+    padding: 12px 24px;
+    background: var(--accent);
+    color: var(--bg);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: var(--button-radius);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  body.theme-bauhaus .qm-foot-next { font-weight: 700; text-transform: uppercase; }
+  .qm-foot-next:hover { background: var(--accent-deep); }
+  .qm-foot-next:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Success state */
+  .qm-success {
+    padding: 60px 32px;
+    text-align: center;
+  }
+  .qm-success-ic {
+    width: 80px; height: 80px;
+    margin: 0 auto 28px;
+    background: var(--accent-soft);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: var(--accent);
+  }
+  body.theme-bauhaus .qm-success-ic { border-radius: 0; background: var(--accent); color: var(--bg); }
+  body.theme-velvet .qm-success-ic { background: var(--accent-soft); color: var(--accent); }
+  .qm-success-ic svg { width: 36px; height: 36px; }
+  .qm-success h3 {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+  }
+  body.theme-bauhaus .qm-success h3 { text-transform: uppercase; font-weight: 700; }
+  body.theme-atelier .qm-success h3 { font-style: italic; font-weight: 500; }
+  .qm-success-req {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    background: var(--bg-3);
+    color: var(--accent);
+    padding: 6px 14px;
+    border-radius: 99px;
+    margin-bottom: 24px;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }
+  body.theme-bauhaus .qm-success-req { border-radius: 0; }
+  .qm-success p {
+    font-size: 15px;
+    color: var(--text-2);
+    line-height: 1.65;
+    max-width: 420px;
+    margin: 0 auto 32px;
+  }
+  .qm-success-next {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--card-radius);
+    padding: 24px;
+    margin: 0 auto 28px;
+    max-width: 440px;
+    text-align: left;
+  }
+  .qm-success-next h4 {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--mid);
+    margin-bottom: 14px;
+    font-weight: 600;
+  }
+  .qm-success-next ul {
+    list-style: none;
+  }
+  .qm-success-next li {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 10px;
+    padding: 8px 0;
+    font-size: 13px;
+    color: var(--text-2);
+    line-height: 1.5;
+  }
+  .qm-success-next .step-num {
+    width: 22px; height: 22px;
+    background: var(--accent-soft);
+    color: var(--accent-deep);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 1px;
+  }
+  body.theme-bauhaus .qm-success-next .step-num { border-radius: 0; background: var(--accent); color: var(--bg); }
+  .qm-success-next li strong { color: var(--text); }
+
+  .qm-success-ctas {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* Toast notification when adding to quote */
+  .toast {
+    position: fixed;
+    bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--text);
+    color: var(--bg);
+    padding: 12px 20px;
+    border-radius: var(--button-radius);
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+    z-index: 250;
+    opacity: 0;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  body.theme-bauhaus .toast { border-radius: 0; }
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+  .toast svg { width: 18px; height: 18px; color: var(--accent); }
+
+
+  /* TLD suffix · added 2569-05-14 · brand evolved to salesdee.com */
+  .wm .tld {
+    color: var(--mid);
+    font-weight: 500;
+    margin-left: 0.02em;
+    letter-spacing: -0.02em;
+  }
+  .wm.reverse .tld { color: rgba(246, 241, 231, 0.6); }
+  .sb-brand .name .tld { color: rgba(246, 241, 231, 0.45); font-weight: 500; }
+  .powered-wm .tld { color: var(--mid); font-weight: 500; }
+  .brand-name .tld { color: var(--mid); font-weight: 500; margin-left: 0.02em; }
+</style>
+</head>
+<body class="theme-craft">
+
+<div class="paper-grain"></div>
+
+<!-- ═══════════════════════════════════════════════
+     THEME SWITCHER · floating bottom right
+     · จะไม่ปรากฏในเว็บจริง — เป็นเครื่องมือเลือก theme
+     ═══════════════════════════════════════════════ -->
+<div class="theme-switcher" id="ts">
+  <button class="ts-toggle" id="ts-toggle" aria-label="เลือก theme">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+      <path d="M2 12h20"/>
+    </svg>
+  </button>
+
+  <div class="ts-pop" id="ts-pop">
+    <div class="ts-pop-head">
+      <h4>เลือก Theme</h4>
+      <span class="lbl">4 แบบ</span>
+    </div>
+
+    <div class="ts-options">
+      <div class="ts-option active" data-theme="craft">
+        <div class="ts-swatch">
+          <span style="background: #F6F1E7;"></span>
+          <span style="background: #1B2A3A;"></span>
+          <span style="background: #C8501F;"></span>
+        </div>
+        <div class="ts-option-info">
+          <div class="ts-option-name">Craft</div>
+          <div class="ts-option-desc">Thai craft modern · default</div>
+        </div>
+      </div>
+
+      <div class="ts-option" data-theme="atelier">
+        <div class="ts-swatch">
+          <span style="background: #F2EAD7;"></span>
+          <span style="background: #2D1F12;"></span>
+          <span style="background: #B8965A;"></span>
+        </div>
+        <div class="ts-option-info">
+          <div class="ts-option-name">Atelier</div>
+          <div class="ts-option-desc">warm boutique · brass</div>
+        </div>
+      </div>
+
+      <div class="ts-option" data-theme="bauhaus">
+        <div class="ts-swatch">
+          <span style="background: #FAFAF8;"></span>
+          <span style="background: #0A0A0A;"></span>
+          <span style="background: #E63946;"></span>
+        </div>
+        <div class="ts-option-info">
+          <div class="ts-option-name">Bauhaus</div>
+          <div class="ts-option-desc">bold modern · geometric</div>
+        </div>
+      </div>
+
+      <div class="ts-option" data-theme="velvet">
+        <div class="ts-swatch">
+          <span style="background: #0F1715;"></span>
+          <span style="background: #F5E9D5;"></span>
+          <span style="background: #C9A961;"></span>
+        </div>
+        <div class="ts-option-info">
+          <div class="ts-option-name">Velvet</div>
+          <div class="ts-option-desc">dark luxe · gold</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ts-foot">
+      <strong>ปุ่มนี้จะไม่ปรากฏในเว็บจริง</strong> — ใช้สำหรับเลือก theme ของร้านเท่านั้น · เปลี่ยนได้ทุกเมื่อใน salesdee. settings
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     NAV · brand display เปลี่ยนตาม theme
+     ═══════════════════════════════════════════════ -->
+<nav class="top">
+  <div class="nav-inner">
+    <a href="#" class="brand-name" id="brand">
+      <span class="b-craft">wan<em>dee</em><em>dee</em><span class="dot"></span><span class="tld">com</span></span>
+    </a>
+    <div class="nav-links">
+      <a href="#products">สินค้า</a>
+      <a href="#cats">หมวด</a>
+      <a href="#story">เรื่องราว</a>
+      <a href="#inquiry">ติดต่อ</a>
+    </div>
+    <div style="display: flex; align-items: center; gap: 4px;">
+      <button class="nav-quote-btn empty" id="quote-btn" aria-label="ดูใบเสนอ">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+          <rect x="9" y="3" width="6" height="4" rx="1"/>
+        </svg>
+        <span>ใบเสนอ</span>
+        <span class="nav-quote-count" id="quote-count">0</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════
+     HERO
+     ═══════════════════════════════════════════════ -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+
+      <div class="hero-text">
+        <div class="eyebrow">เฟอร์นิเจอร์สำนักงาน · 12 ปี</div>
+        <h1 class="display hero-display">
+          ออกแบบเพื่อ<br>
+          <em>การทำงาน</em><br>
+          ไม่ใช่แค่<em>ความสวย</em>
+        </h1>
+        <p class="lead hero-sub">
+          เราเป็นเฟอร์นิเจอร์สำนักงานที่ออกแบบและประกอบในประเทศไทย · ใช้ <em>วัสดุคุณภาพดี</em> · รับประกัน 1 ปี · ติดตั้งครบโดยทีมช่างของเรา
+        </p>
+        <div class="hero-ctas">
+          <a href="#products" class="btn btn-primary btn-lg">ดูคอลเลกชัน</a>
+          <a href="#inquiry" class="btn btn-line btn-lg">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19.365 9.863c.349 0 .63.285.631.631 0 .345-.282.63-.631.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.282.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/>
+            </svg>
+            ทาง LINE
+          </a>
+        </div>
+        <div class="hero-meta">
+          <span>★ 4.9 / 5</span>
+          <span>200+ บริษัท</span>
+          <span>รับประกัน 1 ปี</span>
+        </div>
+      </div>
+
+      <div class="hero-vis">
+        <div class="hero-vis-img"></div>
+        <span class="hero-vis-tag">NEW · 2026</span>
+        <div class="hero-vis-meta">
+          <div>
+            <div class="vis-name">Walnut Executive</div>
+            <div class="vis-sub">TWB-180 · 180 × 80 × 75 cm</div>
+          </div>
+          <div class="vis-price">฿85,000</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     FEATURED PRODUCTS
+     ═══════════════════════════════════════════════ -->
+<section class="section" id="products">
+  <div class="container">
+    <div class="section-head">
+      <div class="left">
+        <div class="eyebrow">สินค้าใหม่</div>
+        <h2 class="h1">คอลเลกชัน<br><em>ฤดูใบไม้ผลิ 2569</em></h2>
+        <p class="lead">เลือกสรรจากผู้ผลิตที่เราเชื่อใจ · ราคาที่เป็นกันเอง · พร้อมส่งและติดตั้งภายใน 14 วัน</p>
+      </div>
+      <a href="#" class="btn btn-ghost">ดูทั้งหมด →</a>
+    </div>
+
+    <div class="products-grid">
+
+      <div class="product-card" data-sku="TWB-180" data-name="โต๊ะ Walnut Premium 180" data-meta="TWB-180 · ขนาด 180 cm" data-price="85000" data-bg="linear-gradient(135deg, #8B7355 0%, #4A3C2C 100%)">
+        <div class="product-img" style="background: linear-gradient(135deg, #8B7355 0%, #4A3C2C 100%);">
+          <span class="product-tag">EXECUTIVE</span>
+        </div>
+        <div class="product-name">โต๊ะ Walnut Premium 180</div>
+        <div class="product-meta">TWB-180 · ขนาด 180 cm</div>
+        <div class="product-price">฿ 85,000</div>
+        <button class="product-quote-btn add-to-quote">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          เพิ่มในใบเสนอ
+        </button>
+      </div>
+
+      <div class="product-card" data-sku="ERG-S5" data-name="เก้าอี้ Skyline 5D" data-meta="ERG-S5 · เบาะตาข่าย" data-price="12800" data-bg="linear-gradient(135deg, #2D3748, #1A202C 100%)">
+        <div class="product-img" style="background: linear-gradient(135deg, #2D3748, #1A202C 100%);">
+          <span class="product-tag">ERGONOMIC</span>
+        </div>
+        <div class="product-name">เก้าอี้ Skyline 5D</div>
+        <div class="product-meta">ERG-S5 · เบาะตาข่าย</div>
+        <div class="product-price">฿ 12,800</div>
+        <button class="product-quote-btn add-to-quote">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          เพิ่มในใบเสนอ
+        </button>
+      </div>
+
+      <div class="product-card" data-sku="WS-4P" data-name="Workstation Acoustic 4 ที่" data-meta="WS-4P · พร้อม partition" data-price="48500" data-bg="linear-gradient(135deg, #6B6B5C, #3F4A3F 100%)">
+        <div class="product-img" style="background: linear-gradient(135deg, #6B6B5C, #3F4A3F 100%);">
+          <span class="product-tag">4 SEATS</span>
+        </div>
+        <div class="product-name">Workstation Acoustic 4 ที่</div>
+        <div class="product-meta">WS-4P · พร้อม partition</div>
+        <div class="product-price">฿ 48,500</div>
+        <button class="product-quote-btn add-to-quote">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          เพิ่มในใบเสนอ
+        </button>
+      </div>
+
+      <div class="product-card" data-sku="SOF-MD" data-name="โซฟา Modular Lobby" data-meta="SOF-MD · 3 + 2 ที่" data-price="64000" data-bg="linear-gradient(135deg, #C0B097, #8A7A65 100%)">
+        <div class="product-img" style="background: linear-gradient(135deg, #C0B097, #8A7A65 100%);">
+          <span class="product-tag">LOBBY</span>
+        </div>
+        <div class="product-name">โซฟา Modular Lobby</div>
+        <div class="product-meta">SOF-MD · 3 + 2 ที่</div>
+        <div class="product-price">฿ 64,000</div>
+        <button class="product-quote-btn add-to-quote">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          เพิ่มในใบเสนอ
+        </button>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     CATEGORIES
+     ═══════════════════════════════════════════════ -->
+<section class="categories-section" id="cats">
+  <div class="container">
+    <div class="section-head">
+      <div class="left">
+        <div class="eyebrow">หมวดสินค้า</div>
+        <h2 class="h1">ทุกอย่างที่<em>ออฟฟิศต้องการ</em></h2>
+      </div>
+    </div>
+
+    <div class="cats-grid">
+
+      <div class="cat-card">
+        <div class="cat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="9" width="18" height="3"/>
+            <line x1="5" y1="12" x2="5" y2="20"/>
+            <line x1="19" y1="12" x2="19" y2="20"/>
+          </svg>
+        </div>
+        <div>
+          <div class="cat-name">โต๊ะทำงาน</div>
+          <div class="cat-count">42 รายการ</div>
+        </div>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 19v3"/>
+            <path d="M18 19v3"/>
+            <path d="M6 5a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3v12H6V5z"/>
+            <path d="M6 17h12"/>
+          </svg>
+        </div>
+        <div>
+          <div class="cat-name">เก้าอี้สำนักงาน</div>
+          <div class="cat-count">28 รายการ</div>
+        </div>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="3" width="16" height="18"/>
+            <line x1="4" y1="9" x2="20" y2="9"/>
+            <line x1="4" y1="15" x2="20" y2="15"/>
+          </svg>
+        </div>
+        <div>
+          <div class="cat-name">ตู้เอกสาร</div>
+          <div class="cat-count">19 รายการ</div>
+        </div>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <ellipse cx="12" cy="12" rx="9" ry="4"/>
+            <path d="M3 16v-4"/>
+            <path d="M21 16v-4"/>
+          </svg>
+        </div>
+        <div>
+          <div class="cat-name">โต๊ะประชุม</div>
+          <div class="cat-count">14 รายการ</div>
+        </div>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 13h18v6H3z"/>
+            <path d="M5 13V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v5"/>
+          </svg>
+        </div>
+        <div>
+          <div class="cat-name">โซฟา lounge</div>
+          <div class="cat-count">11 รายการ</div>
+        </div>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18"/>
+            <path d="M9 3v18"/>
+            <path d="M15 3v18"/>
+          </svg>
+        </div>
+        <div>
+          <div class="cat-name">แผ่นกั้น acoustic</div>
+          <div class="cat-count">8 รายการ</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     STORY
+     ═══════════════════════════════════════════════ -->
+<section class="story" id="story">
+  <div class="container">
+    <div class="story-grid">
+
+      <div class="story-img"></div>
+
+      <div class="story-text">
+        <div class="eyebrow">เรื่องราว · ตั้งแต่ปี 2557</div>
+        <h2 class="h1">12 ปี · <em>ทำเฟอร์นิเจอร์</em><br>ที่ทำงานด้วยได้จริง</h2>
+        <p class="body-text">
+          วัน.ดี.ดี. เริ่มจากความเชื่อง่าย ๆ ว่า — เฟอร์นิเจอร์สำนักงานที่ดี ต้องทำให้คนทำงานสบาย ไม่ใช่แค่ดูดีในรูป
+        </p>
+        <p class="body-text">
+          เราเลือกผู้ผลิตที่เราเชื่อใจ · ตรวจคุณภาพทุกชิ้นก่อนส่ง · ติดตั้งโดยทีมช่างของเรา · รับประกัน 1 ปีและซ่อมให้ฟรีไม่จำกัด
+        </p>
+
+        <div class="story-features">
+          <div class="story-feature">
+            <div class="feat-num">200+</div>
+            <div>บริษัทไว้ใจ · ทั่วกรุงเทพและปริมณฑล</div>
+          </div>
+          <div class="story-feature">
+            <div class="feat-num">14<span style="font-size: 0.5em;"> วัน</span></div>
+            <div>ส่งและติดตั้งภายใน · ไม่มีค่าใช้จ่ายเพิ่ม</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     INQUIRY CTA
+     ═══════════════════════════════════════════════ -->
+<section class="inquiry" id="inquiry">
+  <div class="container-narrow">
+    <div class="eyebrow">ขอใบเสนอราคา</div>
+    <h2 class="h1">มีโปรเจกต์<br><em>ในใจอยู่แล้ว?</em></h2>
+    <p class="lead">ทักผ่าน LINE Official ของเรา · ใบเสนอราคาภายใน <em>1 วันทำการ</em> · ไม่มีค่าออกแบบ · ไม่มีค่าประเมินหน้างาน</p>
+
+    <div class="inquiry-ctas">
+      <a href="#" class="btn btn-line btn-lg">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19.365 9.863c.349 0 .63.285.631.631 0 .345-.282.63-.631.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.282.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/>
+        </svg>
+        ทักผ่าน LINE
+      </a>
+      <a href="tel:+66xx" class="btn btn-ghost btn-lg">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+        </svg>
+        โทร 02 xxx xxxx
+      </a>
+    </div>
+
+    <div class="inquiry-meta">
+      <span>★ ตอบกลับใน 1 ชั่วโมง</span>
+      <span>★ ใบเสนอใน 1 วันทำการ</span>
+      <span>★ ติดตั้งภายใน 14 วัน</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     FOOTER
+     ═══════════════════════════════════════════════ -->
+<footer class="site">
+  <div class="container">
+
+    <div class="footer-grid">
+
+      <div class="footer-brand">
+        <h3 class="brand-name">
+          <span class="b-craft">wan<em>dee</em><em>dee</em><span class="dot"></span><span class="tld">com</span></span>
+        </h3>
+        <p class="footer-tagline">บริษัท วัน.ดี.ดี.บิสซิเนส จำกัด · เฟอร์นิเจอร์สำนักงาน · ตั้งแต่ปี 2557</p>
+      </div>
+
+      <div class="footer-col">
+        <h4>สินค้า</h4>
+        <ul>
+          <li><a href="#">โต๊ะทำงาน</a></li>
+          <li><a href="#">เก้าอี้สำนักงาน</a></li>
+          <li><a href="#">ตู้เอกสาร</a></li>
+          <li><a href="#">โต๊ะประชุม</a></li>
+          <li><a href="#">อุปกรณ์ acoustic</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>บริษัท</h4>
+        <ul>
+          <li><a href="#story">เรื่องราว</a></li>
+          <li><a href="#">ผลงานที่ผ่านมา</a></li>
+          <li><a href="#">ร่วมงานกับเรา</a></li>
+          <li><a href="#">บล็อก</a></li>
+          <li><a href="#inquiry">ติดต่อ</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>ติดต่อ</h4>
+        <ul>
+          <li><a href="#">LINE Official · @wandeedee</a></li>
+          <li><a href="tel:+66xx">02 xxx xxxx</a></li>
+          <li><a href="mailto:hello@wandeedee.co.th">hello@wandeedee.co.th</a></li>
+          <li>เลขที่ 12 ตึก SCB Park ชั้น 14<br>จตุจักร กรุงเทพ 10900</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="footer-bot">
+      <div>© 2569 บริษัท วัน.ดี.ดี.บิสซิเนส จำกัด · ทุกสิทธิ์สงวน</div>
+      <div class="powered">
+        <span>powered by</span>
+        <span class="powered-wm">sales<em>dee</em><span class="dot"></span><span class="tld">com</span></span>
+      </div>
+    </div>
+
+  </div>
+</footer>
+
+<script>
+  // Theme switcher
+  const tsToggle = document.getElementById('ts-toggle');
+  const tsPop = document.getElementById('ts-pop');
+  const tsOptions = document.querySelectorAll('.ts-option');
+  const body = document.body;
+  const brandEl = document.querySelector('.brand-name .b-craft');
+
+  // Brand variants per theme
+  const brandVariants = {
+    craft:    'wan<em>dee</em><em>dee</em><span class="dot"></span>',
+    atelier:  'Wan · Dee · Dee',
+    bauhaus:  'WANDEEDEE',
+    velvet:   'Wandeedee',
+  };
+
+  tsToggle.addEventListener('click', () => {
+    tsPop.classList.toggle('open');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#ts')) {
+      tsPop.classList.remove('open');
+    }
+  });
+
+  tsOptions.forEach(opt => {
+    opt.addEventListener('click', () => {
+      const theme = opt.dataset.theme;
+
+      // Update body class
+      body.className = `theme-${theme}`;
+
+      // Update active state
+      tsOptions.forEach(o => o.classList.remove('active'));
+      opt.classList.add('active');
+
+      // Update brand display
+      const allBrandEls = document.querySelectorAll('.brand-name .b-craft, .brand-name');
+      document.querySelectorAll('.b-craft').forEach(el => {
+        el.innerHTML = brandVariants[theme];
+      });
+    });
+  });
+</script>
+
+
+<!-- ═══════════════════════════════════════════════
+     TOAST · ใช้แสดง "เพิ่มแล้ว" สั้น ๆ
+     ═══════════════════════════════════════════════ -->
+<div class="toast" id="toast">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="20 6 9 17 4 12"/>
+  </svg>
+  <span id="toast-text">เพิ่มในใบเสนอแล้ว</span>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     QUOTE DRAWER · slide-out จากขวา
+     ═══════════════════════════════════════════════ -->
+<div class="qd-overlay" id="qd-overlay"></div>
+<aside class="qd" id="qd" aria-label="ใบเสนอราคาของคุณ">
+
+  <div class="qd-head">
+    <h3>ใบเสนอราคา</h3>
+    <button class="qd-close" id="qd-close" aria-label="ปิด">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="qd-body" id="qd-body">
+    <!-- populated by JS -->
+  </div>
+
+  <div class="qd-foot" id="qd-foot" style="display: none;">
+    <div class="qd-foot-est">
+      <div class="qd-foot-est-row">
+        <span>รายการ</span>
+        <span class="value" id="qd-count">0</span>
+      </div>
+      <div class="qd-foot-est-row total">
+        <span>ราคาโดยประมาณ</span>
+        <span class="value" id="qd-total">฿ 0</span>
+      </div>
+    </div>
+    <div class="qd-foot-note">
+      ราคาสุดท้ายจะมาจากใบเสนอจริงที่ทีมส่งให้ใน 1 วันทำการ · รวมส่วนลด + ค่าติดตั้ง
+    </div>
+    <button class="qd-foot-submit" id="qd-submit">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+      </svg>
+      ขอใบเสนอราคา
+    </button>
+  </div>
+</aside>
+
+<!-- ═══════════════════════════════════════════════
+     QUOTE REQUEST MODAL · 3 ขั้น
+     ═══════════════════════════════════════════════ -->
+<div class="qm-overlay" id="qm-overlay">
+  <div class="qm">
+    <div class="qm-head">
+      <div class="qm-head-top">
+        <h3 id="qm-title">ขอใบเสนอราคา</h3>
+        <button class="qd-close" id="qm-close" aria-label="ปิด">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="qm-steps">
+        <div class="qm-step active" id="qm-step-1"></div>
+        <div class="qm-step" id="qm-step-2"></div>
+        <div class="qm-step" id="qm-step-3"></div>
+      </div>
+      <div class="qm-step-labels">
+        <span class="qm-step-label active">ตรวจรายการ</span>
+        <span class="qm-step-label">ข้อมูลคุณ</span>
+        <span class="qm-step-label">ยืนยัน</span>
+      </div>
+    </div>
+
+    <div class="qm-body" id="qm-body">
+      <!-- populated by JS per step -->
+    </div>
+
+    <div class="qm-foot" id="qm-foot">
+      <button class="qm-foot-back" id="qm-back" disabled>← ย้อน</button>
+      <button class="qm-foot-next" id="qm-next">
+        ถัดไป
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"/>
+          <polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ═══════ STATE ═══════
+  let items = [];
+  let formData = {
+    name: '',
+    company: '',
+    phone: '',
+    email: '',
+    line_id: '',
+    address: '',
+    deadline: '',
+    install: 'yes',
+    notes: ''
+  };
+  let modalStep = 1;
+
+  // ═══════ ADD TO QUOTE ═══════
+  document.querySelectorAll('.add-to-quote').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const card = e.target.closest('.product-card');
+      const item = {
+        sku: card.dataset.sku,
+        name: card.dataset.name,
+        meta: card.dataset.meta,
+        price: parseInt(card.dataset.price),
+        bg: card.dataset.bg,
+        qty: 1
+      };
+      addItem(item);
+      btn.classList.add('added');
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>เพิ่มแล้ว';
+      setTimeout(() => {
+        btn.classList.remove('added');
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>เพิ่มในใบเสนอ';
+      }, 1500);
+    });
+  });
+
+  function addItem(item) {
+    const existing = items.find(i => i.sku === item.sku);
+    if (existing) {
+      existing.qty++;
+    } else {
+      items.push(item);
+    }
+    renderDrawer();
+    showToast(`เพิ่ม ${item.name}`);
+  }
+
+  function increaseQty(sku) {
+    const item = items.find(i => i.sku === sku);
+    if (item) { item.qty++; renderDrawer(); }
+  }
+
+  function decreaseQty(sku) {
+    const item = items.find(i => i.sku === sku);
+    if (item) {
+      item.qty--;
+      if (item.qty <= 0) items = items.filter(i => i.sku !== sku);
+      renderDrawer();
+    }
+  }
+
+  function removeItem(sku) {
+    items = items.filter(i => i.sku !== sku);
+    renderDrawer();
+  }
+
+  // ═══════ DRAWER RENDER ═══════
+  function renderDrawer() {
+    const count = items.reduce((s, i) => s + i.qty, 0);
+    const total = items.reduce((s, i) => s + (i.price * i.qty), 0);
+
+    document.getElementById('quote-count').textContent = count;
+    document.getElementById('quote-btn').classList.toggle('empty', count === 0);
+
+    const body = document.getElementById('qd-body');
+    const foot = document.getElementById('qd-foot');
+
+    if (items.length === 0) {
+      body.innerHTML = `
+        <div class="qd-empty">
+          <div class="ic-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="28" height="28">
+              <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+              <rect x="9" y="3" width="6" height="4" rx="1"/>
+            </svg>
+          </div>
+          <h4>ใบเสนอของคุณยังว่าง</h4>
+          <p>เลือกสินค้าจากหน้าแคตตาล็อก · กด "เพิ่มในใบเสนอ" · เมื่อพร้อมส่งทีมจะติดต่อกลับใน 1 วันทำการ</p>
+        </div>
+      `;
+      foot.style.display = 'none';
+      return;
+    }
+
+    body.innerHTML = items.map(item => `
+      <div class="qd-item" data-sku="${item.sku}">
+        <div class="qd-item-img" style="background: ${item.bg};"></div>
+        <div class="qd-item-info">
+          <div class="qd-item-name">${item.name}</div>
+          <div class="qd-item-meta">${item.meta}</div>
+          <div class="qd-item-controls">
+            <div class="qd-qty">
+              <button onclick="decreaseQty('${item.sku}')">−</button>
+              <span>${item.qty}</span>
+              <button onclick="increaseQty('${item.sku}')">+</button>
+            </div>
+            <span class="qd-item-remove" onclick="removeItem('${item.sku}')">ลบ</span>
+          </div>
+        </div>
+        <div class="qd-item-price">฿ ${(item.price * item.qty).toLocaleString('en-US')}</div>
+      </div>
+    `).join('');
+
+    document.getElementById('qd-count').textContent = `${count} หน่วย · ${items.length} รายการ`;
+    document.getElementById('qd-total').textContent = `฿ ${total.toLocaleString('en-US')}`;
+    foot.style.display = 'block';
+  }
+
+  // ═══════ DRAWER OPEN/CLOSE ═══════
+  document.getElementById('quote-btn').addEventListener('click', () => {
+    document.getElementById('qd').classList.add('open');
+    document.getElementById('qd-overlay').classList.add('open');
+  });
+
+  function closeDrawer() {
+    document.getElementById('qd').classList.remove('open');
+    document.getElementById('qd-overlay').classList.remove('open');
+  }
+  document.getElementById('qd-close').addEventListener('click', closeDrawer);
+  document.getElementById('qd-overlay').addEventListener('click', closeDrawer);
+
+  // ═══════ TOAST ═══════
+  function showToast(text) {
+    const toast = document.getElementById('toast');
+    document.getElementById('toast-text').textContent = text;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+  }
+
+  // ═══════ MODAL ═══════
+  document.getElementById('qd-submit').addEventListener('click', () => {
+    closeDrawer();
+    openModal();
+  });
+
+  function openModal() {
+    modalStep = 1;
+    document.getElementById('qm-overlay').classList.add('open');
+    renderModal();
+  }
+
+  function closeModal() {
+    document.getElementById('qm-overlay').classList.remove('open');
+  }
+  document.getElementById('qm-close').addEventListener('click', closeModal);
+
+  // Render modal step
+  function renderModal() {
+    const body = document.getElementById('qm-body');
+    const back = document.getElementById('qm-back');
+    const next = document.getElementById('qm-next');
+
+    // Update step progress
+    for (let i = 1; i <= 3; i++) {
+      const stepEl = document.getElementById(`qm-step-${i}`);
+      stepEl.classList.toggle('active', i === modalStep);
+      stepEl.classList.toggle('done', i < modalStep);
+    }
+    document.querySelectorAll('.qm-step-label').forEach((el, idx) => {
+      el.classList.toggle('active', idx + 1 === modalStep);
+    });
+
+    back.disabled = modalStep === 1;
+
+    if (modalStep === 1) {
+      // STEP 1: Review items
+      const total = items.reduce((s, i) => s + (i.price * i.qty), 0);
+      body.innerHTML = `
+        <div class="sm-section-label" style="margin-bottom: 16px;">รายการที่เลือก · ${items.length} รายการ</div>
+        ${items.map(item => `
+          <div class="qm-review-item">
+            <div class="img" style="background: ${item.bg};"></div>
+            <div class="info">
+              <div class="name">${item.name}</div>
+              <div class="meta">${item.meta} · ${item.qty} หน่วย</div>
+            </div>
+            <div class="price">฿ ${(item.price * item.qty).toLocaleString('en-US')}</div>
+          </div>
+        `).join('')}
+        <div style="margin-top: 16px; padding: 14px 16px; background: var(--bg-3); border-radius: 8px; font-size: 12px; color: var(--mid); line-height: 1.6;">
+          <strong style="color: var(--text);">ราคารวมโดยประมาณ: ฿ ${total.toLocaleString('en-US')}</strong><br>
+          ราคาสุดท้ายอาจปรับตามจำนวน · ขอบเขตการติดตั้ง · ส่วนลดลูกค้าใหม่ · ทีมจะส่งใบเสนอจริงให้คุณภายใน 1 วันทำการ
+        </div>
+      `;
+      next.innerHTML = 'ถัดไป · ข้อมูลคุณ <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+    } else if (modalStep === 2) {
+      // STEP 2: Contact info + project details
+      body.innerHTML = `
+        <div class="sm-section-label" style="margin-bottom: 14px;">ข้อมูลผู้ติดต่อ</div>
+        <div class="qm-field">
+          <label>ชื่อ-นามสกุล<span class="req">*</span></label>
+          <input type="text" id="f-name" value="${formData.name}" placeholder="เช่น คุณนริศ พรพิพัฒน์" />
+        </div>
+        <div class="qm-field-row">
+          <div class="qm-field">
+            <label>บริษัท<span class="opt">(ถ้ามี)</span></label>
+            <input type="text" id="f-company" value="${formData.company}" placeholder="บริษัทของคุณ" />
+          </div>
+          <div class="qm-field">
+            <label>เบอร์โทร<span class="req">*</span></label>
+            <input type="text" id="f-phone" value="${formData.phone}" placeholder="08x xxx xxxx" />
+          </div>
+        </div>
+        <div class="qm-field-row">
+          <div class="qm-field">
+            <label>อีเมล<span class="req">*</span></label>
+            <input type="email" id="f-email" value="${formData.email}" placeholder="you@company.com" />
+          </div>
+          <div class="qm-field">
+            <label>LINE ID<span class="opt">(ถ้ามี)</span></label>
+            <input type="text" id="f-line" value="${formData.line_id}" placeholder="@yourid" />
+          </div>
+        </div>
+
+        <div class="sm-section-label" style="margin: 28px 0 14px;">รายละเอียดโปรเจกต์</div>
+        <div class="qm-field">
+          <label>ที่อยู่จัดส่ง / ติดตั้ง<span class="req">*</span></label>
+          <textarea id="f-address" placeholder="เลขที่ · อาคาร · ชั้น · ถนน · เขต · จังหวัด · รหัสไปรษณีย์">${formData.address}</textarea>
+        </div>
+        <div class="qm-field-row">
+          <div class="qm-field">
+            <label>กำหนดเวลา<span class="opt">(ถ้ามี)</span></label>
+            <input type="text" id="f-deadline" value="${formData.deadline}" placeholder="เช่น กลางมิ.ย. 2569" />
+          </div>
+          <div class="qm-field">
+            <label>ต้องการบริการติดตั้ง?</label>
+            <div class="qm-radio-grid">
+              <div class="qm-radio-card ${formData.install === 'yes' ? 'selected' : ''}" data-val="yes">
+                <div class="title">ใช่ · ขอบริการติดตั้ง</div>
+                <div class="desc">ทีมช่างของเรามาติดตั้งให้</div>
+              </div>
+              <div class="qm-radio-card ${formData.install === 'no' ? 'selected' : ''}" data-val="no">
+                <div class="title">ไม่ · ติดตั้งเอง</div>
+                <div class="desc">ส่งสินค้าให้ที่อยู่</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="qm-field">
+          <label>หมายเหตุเพิ่มเติม<span class="opt">(ถ้ามี)</span></label>
+          <textarea id="f-notes" placeholder="ข้อมูลเพิ่มเติม · spec พิเศษ · คำถาม · ฯลฯ">${formData.notes}</textarea>
+        </div>
+      `;
+
+      // Wire radio cards
+      body.querySelectorAll('.qm-radio-card').forEach(card => {
+        card.addEventListener('click', () => {
+          body.querySelectorAll('.qm-radio-card').forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
+          formData.install = card.dataset.val;
+        });
+      });
+
+      next.innerHTML = 'ถัดไป · ยืนยัน <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+    } else if (modalStep === 3) {
+      // STEP 3: Confirm
+      const total = items.reduce((s, i) => s + (i.price * i.qty), 0);
+      body.innerHTML = `
+        <div class="qm-review-section">
+          <h4>ผู้ติดต่อ</h4>
+          <div class="qm-review-row"><span class="label">ชื่อ</span><span class="value">${formData.name || '—'}</span></div>
+          ${formData.company ? `<div class="qm-review-row"><span class="label">บริษัท</span><span class="value">${formData.company}</span></div>` : ''}
+          <div class="qm-review-row"><span class="label">เบอร์</span><span class="value">${formData.phone || '—'}</span></div>
+          <div class="qm-review-row"><span class="label">อีเมล</span><span class="value">${formData.email || '—'}</span></div>
+          ${formData.line_id ? `<div class="qm-review-row"><span class="label">LINE</span><span class="value">${formData.line_id}</span></div>` : ''}
+        </div>
+
+        <div class="qm-review-section">
+          <h4>โปรเจกต์</h4>
+          <div class="qm-review-row"><span class="label">ที่อยู่</span><span class="value">${formData.address || '—'}</span></div>
+          ${formData.deadline ? `<div class="qm-review-row"><span class="label">กำหนด</span><span class="value">${formData.deadline}</span></div>` : ''}
+          <div class="qm-review-row"><span class="label">ติดตั้ง</span><span class="value">${formData.install === 'yes' ? 'ขอบริการ' : 'ทำเอง'}</span></div>
+        </div>
+
+        <div class="qm-review-section">
+          <h4>รายการ · ${items.length} รายการ · ${items.reduce((s,i)=>s+i.qty,0)} หน่วย</h4>
+          ${items.map(item => `
+            <div class="qm-review-item">
+              <div class="img" style="background: ${item.bg};"></div>
+              <div class="info">
+                <div class="name">${item.name}</div>
+                <div class="meta">${item.meta} · ${item.qty} หน่วย</div>
+              </div>
+              <div class="price">฿ ${(item.price * item.qty).toLocaleString('en-US')}</div>
+            </div>
+          `).join('')}
+          <div style="margin-top: 14px; padding: 12px 14px; background: var(--bg-3); border-radius: 8px; display: flex; justify-content: space-between; align-items: baseline;">
+            <span style="font-size: 13px; color: var(--mid); font-weight: 600;">ราคารวมโดยประมาณ</span>
+            <span style="font-family: var(--font-mono); font-size: 18px; font-weight: 700; color: var(--accent);">฿ ${total.toLocaleString('en-US')}</span>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px; padding: 14px 16px; background: var(--accent-soft); border-radius: 8px; font-size: 12px; color: var(--text-2); line-height: 1.6;">
+          กดส่ง = ทีมเซลส์ของเราได้รับคำขอ · ตรวจ stock + ปรับราคาตามโปรเจกต์ · ส่งใบเสนอจริงให้คุณภายใน <strong style="color: var(--accent);">1 วันทำการ</strong> · ไม่มีค่าใช้จ่ายในการขอใบเสนอ
+        </div>
+      `;
+      next.innerHTML = 'ส่งคำขอใบเสนอ <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>';
+    } else if (modalStep === 4) {
+      // STEP 4: Success
+      const reqNum = 'REQ-2026-' + String(Math.floor(Math.random() * 9000) + 1000).padStart(4, '0');
+      body.innerHTML = `
+        <div class="qm-success">
+          <div class="qm-success-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <h3>ส่งคำขอเรียบร้อย</h3>
+          <div class="qm-success-req">${reqNum}</div>
+          <p>ขอบคุณ <strong>${formData.name}</strong> · ทีมเซลส์ของวัน.ดี.ดี. ได้รับคำขอแล้ว · จะส่งใบเสนอราคาให้คุณทาง <strong>${formData.email}</strong>${formData.line_id ? ' และ <strong>LINE</strong>' : ''} ภายใน 1 วันทำการ</p>
+
+          <div class="qm-success-next">
+            <h4>ขั้นถัดไป</h4>
+            <ul>
+              <li><span class="step-num">1</span><div><strong>ภายใน 1 ชม.</strong> · เราตอบรับการขอใบเสนอ + กำหนดเซลส์ที่ดูแล</div></li>
+              <li><span class="step-num">2</span><div><strong>ภายใน 1 วันทำการ</strong> · ใบเสนอจริงส่งให้ทาง email + LINE</div></li>
+              <li><span class="step-num">3</span><div><strong>คุณกดยอมรับออนไลน์</strong> · เริ่ม production และส่งและติดตั้ง</div></li>
+            </ul>
+          </div>
+
+          <div class="qm-success-ctas">
+            <button class="btn btn-primary" onclick="resetAll()">ส่งคำขอใหม่</button>
+            <button class="btn btn-ghost" onclick="closeModal()">เสร็จแล้ว</button>
+          </div>
+        </div>
+      `;
+      // Hide footer on success
+      document.getElementById('qm-foot').style.display = 'none';
+      return;
+    }
+
+    document.getElementById('qm-foot').style.display = 'flex';
+  }
+
+  // Modal nav
+  document.getElementById('qm-back').addEventListener('click', () => {
+    if (modalStep > 1) {
+      collectFormData();
+      modalStep--;
+      renderModal();
+    }
+  });
+
+  document.getElementById('qm-next').addEventListener('click', () => {
+    if (modalStep === 2) collectFormData();
+    if (modalStep < 4) {
+      modalStep++;
+      renderModal();
+    }
+  });
+
+  function collectFormData() {
+    const fields = ['name', 'company', 'phone', 'email', 'line_id', 'address', 'deadline', 'notes'];
+    fields.forEach(key => {
+      const id = key === 'line_id' ? 'f-line' : 'f-' + key;
+      const el = document.getElementById(id);
+      if (el) formData[key] = el.value;
+    });
+  }
+
+  function resetAll() {
+    items = [];
+    formData = {name: '', company: '', phone: '', email: '', line_id: '', address: '', deadline: '', install: 'yes', notes: ''};
+    modalStep = 1;
+    closeModal();
+    renderDrawer();
+  }
+
+  // ═══════ INITIAL RENDER ═══════
+  renderDrawer();
+</script>
+
+</body>
+</html>

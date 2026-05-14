@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>salesdee. · PDF + LINE Flex templates</title>
+<title>salesdee.com · Delivery Templates · PDF + Email + LINE + SMS</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@200;300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -887,6 +887,367 @@
     margin-top: 14px;
   }
 
+
+  /* TLD suffix · added 2569-05-14 · brand evolved to salesdee.com */
+  .wm .tld {
+    color: var(--mid);
+    font-weight: 500;
+    margin-left: 0.02em;
+    letter-spacing: -0.02em;
+  }
+  .wm.reverse .tld { color: rgba(246, 241, 231, 0.6); }
+  .sb-brand .name .tld { color: rgba(246, 241, 231, 0.45); font-weight: 500; }
+  .powered-wm .tld { color: var(--mid); font-weight: 500; }
+  .brand-name .tld { color: var(--mid); font-weight: 500; margin-left: 0.02em; }
+
+  /* ═══════ EMAIL TEMPLATE ═══════ */
+  .email-stage {
+    background: linear-gradient(160deg, #E8EDF2 0%, #D5DDE5 100%);
+    padding: 40px 30px;
+    border-radius: 12px;
+  }
+  .email-client {
+    max-width: 640px;
+    margin: 0 auto;
+    background: #FFFFFF;
+    border-radius: 8px;
+    box-shadow: 0 16px 50px rgba(27,42,58,.18);
+    overflow: hidden;
+  }
+  .email-toolbar {
+    background: #F5F7FA;
+    padding: 12px 20px;
+    border-bottom: 1px solid #E1E5EA;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    color: #6B7785;
+  }
+  .email-toolbar .star { color: #FFC857; }
+  .email-toolbar .from-pill {
+    background: #FFFFFF;
+    border: 1px solid #E1E5EA;
+    padding: 3px 10px;
+    border-radius: 99px;
+    color: #1B2A3A;
+    font-weight: 500;
+  }
+  .email-header {
+    padding: 24px 30px 18px;
+    border-bottom: 1px solid #E1E5EA;
+  }
+  .email-subject {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1B2A3A;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+    line-height: 1.3;
+  }
+  .email-from-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .email-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--paper);
+    display: grid;
+    place-items: center;
+    font-family: 'IBM Plex Sans Thai';
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: -0.05em;
+  }
+  .email-from {
+    flex: 1;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #1B2A3A;
+  }
+  .email-from .name { font-weight: 600; }
+  .email-from .addr { color: #6B7785; font-size: 11px; }
+  .email-time {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: #6B7785;
+  }
+  .email-body {
+    padding: 28px 30px 24px;
+    font-size: 14px;
+    color: #1B2A3A;
+    line-height: 1.7;
+  }
+  .email-body p { margin-bottom: 14px; }
+  .email-body .greeting {
+    font-size: 15px;
+    font-weight: 500;
+    margin-bottom: 18px;
+  }
+  .email-quote-card {
+    background: #FBF7EF;
+    border: 1px solid #E5DDC9;
+    border-radius: 10px;
+    padding: 20px 22px;
+    margin: 22px 0;
+  }
+  .email-quote-row {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 12px;
+    padding: 5px 0;
+    font-size: 13px;
+  }
+  .email-quote-row .lbl { color: #6B7785; font-family: 'IBM Plex Mono'; font-size: 11px; letter-spacing: 0.05em; }
+  .email-quote-row .val { color: #1B2A3A; font-weight: 500; }
+  .email-quote-row .val.mono { font-family: 'IBM Plex Mono'; }
+  .email-quote-row.total {
+    padding-top: 10px; margin-top: 10px;
+    border-top: 2px solid #1B2A3A;
+    align-items: baseline;
+  }
+  .email-quote-row.total .lbl { color: #1B2A3A; font-weight: 600; font-family: 'IBM Plex Sans Thai'; font-size: 13px; text-transform: none; letter-spacing: 0; }
+  .email-quote-row.total .val { font-size: 22px; font-weight: 700; color: var(--accent); font-family: 'IBM Plex Mono'; }
+  .email-cta-row {
+    text-align: center;
+    margin: 26px 0;
+  }
+  .email-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 36px;
+    background: var(--accent);
+    color: #FFFFFF;
+    text-decoration: none;
+    border-radius: 99px;
+    font-weight: 600;
+    font-size: 15px;
+  }
+  .email-cta svg { width: 18px; height: 18px; }
+  .email-attach {
+    background: #F5F7FA;
+    border: 1px solid #E1E5EA;
+    border-radius: 8px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 18px 0;
+  }
+  .email-attach .ic {
+    width: 36px; height: 36px;
+    background: #FFFFFF;
+    border: 1px solid #E1E5EA;
+    border-radius: 6px;
+    display: grid;
+    place-items: center;
+    color: #B45A3C;
+    font-weight: 700;
+    font-family: 'IBM Plex Mono';
+    font-size: 10px;
+    letter-spacing: 0.05em;
+  }
+  .email-attach .info { flex: 1; }
+  .email-attach .name {
+    font-size: 13px;
+    color: #1B2A3A;
+    font-weight: 500;
+  }
+  .email-attach .meta {
+    font-size: 11px;
+    color: #6B7785;
+    font-family: 'IBM Plex Mono';
+  }
+  .email-attach .download {
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .email-signature {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #E1E5EA;
+    font-size: 13px;
+    color: #1B2A3A;
+    line-height: 1.6;
+  }
+  .email-signature .sig-name { font-weight: 600; font-size: 14px; }
+  .email-signature .sig-meta { color: #6B7785; font-size: 12px; margin-top: 2px; }
+  .email-signature .sig-brand {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #E5DDC9;
+    font-family: 'IBM Plex Sans Thai';
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--ink);
+    letter-spacing: -0.04em;
+    text-transform: lowercase;
+  }
+  .email-signature .sig-brand em { font-style: normal; color: var(--accent); }
+  .email-signature .sig-brand .dot { display: inline-block; width: 0.13em; height: 0.13em; border-radius: 50%; background: var(--accent); margin-left: 0.04em; vertical-align: 0.05em; }
+  .email-signature .sig-brand .tld { color: var(--mid); font-weight: 500; }
+
+  .email-footer-meta {
+    padding: 16px 30px;
+    background: #F5F7FA;
+    border-top: 1px solid #E1E5EA;
+    font-family: 'IBM Plex Mono';
+    font-size: 10px;
+    color: #6B7785;
+    line-height: 1.6;
+    letter-spacing: 0.03em;
+  }
+  .email-footer-meta a { color: var(--accent); }
+  .email-footer-meta .row { display: flex; justify-content: space-between; }
+
+  /* ═══════ SMS TEMPLATE ═══════ */
+  .sms-stage {
+    background: linear-gradient(160deg, #2C2C2E 0%, #1C1C1E 100%);
+    padding: 50px 30px;
+    border-radius: 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    align-items: center;
+  }
+  .sms-phone {
+    background: #000000;
+    border-radius: 36px;
+    padding: 12px;
+    box-shadow: 0 24px 60px rgba(0,0,0,.5);
+    max-width: 320px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .sms-phone::before {
+    content: '';
+    position: absolute;
+    top: 14px; left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 22px;
+    background: #000;
+    border-radius: 0 0 14px 14px;
+    z-index: 2;
+  }
+  .sms-screen {
+    background: #000000;
+    border-radius: 26px;
+    padding-top: 36px;
+    color: #FFFFFF;
+    overflow: hidden;
+  }
+  .sms-status {
+    padding: 0 20px 8px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 600;
+    color: #FFFFFF;
+  }
+  .sms-header {
+    padding: 6px 18px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    text-align: center;
+  }
+  .sms-header .name {
+    font-size: 13px;
+    color: #FFFFFF;
+    font-weight: 500;
+  }
+  .sms-header .meta {
+    font-size: 10px;
+    color: rgba(255,255,255,0.5);
+    margin-top: 2px;
+  }
+  .sms-msgs {
+    padding: 14px 16px;
+    min-height: 300px;
+  }
+  .sms-day-stamp {
+    text-align: center;
+    font-size: 10px;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 14px;
+    letter-spacing: 0.05em;
+  }
+  .sms-bubble {
+    max-width: 78%;
+    background: #2C2C2E;
+    padding: 9px 13px;
+    border-radius: 17px;
+    border-bottom-left-radius: 4px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: #FFFFFF;
+    margin-bottom: 5px;
+  }
+  .sms-bubble a {
+    color: #4A9CFF;
+    text-decoration: underline;
+  }
+  .sms-time {
+    font-size: 10px;
+    color: rgba(255,255,255,0.45);
+    margin-left: 14px;
+  }
+
+  .sms-info {
+    color: var(--paper);
+  }
+  .sms-info h3 {
+    font-family: 'Fraunces';
+    font-style: italic;
+    font-weight: 500;
+    font-size: 26px;
+    margin-bottom: 12px;
+    line-height: 1.2;
+  }
+  .sms-info p {
+    font-size: 13px;
+    line-height: 1.6;
+    color: rgba(246,241,231,0.75);
+    margin-bottom: 16px;
+  }
+  .sms-info ul {
+    list-style: none;
+    padding: 0;
+  }
+  .sms-info ul li {
+    padding: 6px 0 6px 20px;
+    position: relative;
+    font-size: 12px;
+    color: rgba(246,241,231,0.8);
+    line-height: 1.5;
+  }
+  .sms-info ul li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .sms-info ul li strong { color: var(--paper); font-weight: 600; }
+
+  .sms-cost-card {
+    background: rgba(246,241,231,0.06);
+    border: 1px solid rgba(246,241,231,0.12);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-top: 18px;
+    font-family: 'IBM Plex Mono';
+    font-size: 11px;
+    color: rgba(246,241,231,0.7);
+    line-height: 1.6;
+  }
+  .sms-cost-card strong { color: var(--accent); }
+
 </style>
 </head>
 <body>
@@ -895,15 +1256,15 @@
 
   <header class="doc-header">
     <div>
-      <div class="doc-eyebrow">salesdee. · External Templates</div>
-      <h1 class="doc-title">PDF + <em>LINE</em><br>ที่ลูกค้าได้รับ</h1>
+      <div class="doc-eyebrow">salesdee.com · Delivery Templates · 4 channels</div>
+      <h1 class="doc-title">4 channel<br>ที่<em>ลูกค้า</em>ได้รับ</h1>
       <p class="doc-lead">
-        ทุกครั้งที่ salesdee. "ออกไปข้างนอก" — ส่งให้ลูกค้าผ่าน LINE หรือ download เป็น PDF · เอกสารนี้แสดงทุก template ที่ลูกค้าเห็น
+        ทุก quote ส่งผ่าน 1-3 channel ที่เซลส์เลือก: <strong>PDF</strong> (attachment ใน email), <strong>Email</strong> (default for B2B), <strong>LINE Flex</strong> (ถ้าลูกค้ามาทาง LINE), <strong>SMS</strong> (สำรองและ reminder) · เอกสารนี้แสดงทั้ง 4 template + spec สำหรับ dev
       </p>
     </div>
     <div class="doc-meta">
       <div>12 พฤษภาคม 2569</div>
-      <div>2 channels · 1 PDF · 4 LINE</div>
+      <div>4 channels · all templates</div>
       <div>spec for WeasyPrint + LINE API</div>
     </div>
   </header>
@@ -1106,12 +1467,12 @@
           <div class="pdf-qr"></div>
           <div class="pdf-foot-text">
             <strong>ดูออนไลน์ + ยอมรับใบเสนอ</strong><br>
-            สแกน QR หรือไปที่ <span class="link">salesdee.app/q/abc-narit-0142</span><br>
+            สแกน QR หรือไปที่ <span class="link">salesdee.com/q/abc-narit-0142</span><br>
             กดยืนยันได้ใน 30 วินาที · ไม่ต้องพิมพ์
           </div>
           <div class="pdf-powered">
             powered by<br>
-            <span class="wm"><span class="sales">sales</span><span class="dee">dee</span><span class="dot"></span></span>
+            <span class="wm"><span class="sales">sales</span><span class="dee">dee</span><span class="dot"></span><span class="tld">com</span></span>
           </div>
         </div>
 
@@ -1379,7 +1740,7 @@
       <span class="key">"contents"</span>: [
         { <span class="key">"type"</span>: <span class="str">"button"</span>, <span class="key">"style"</span>: <span class="str">"primary"</span>, <span class="key">"color"</span>: <span class="str">"#C8501F"</span>,
           <span class="key">"action"</span>: { <span class="key">"type"</span>: <span class="str">"uri"</span>, <span class="key">"label"</span>: <span class="str">"ดูใบเสนอเต็ม · ยอมรับ"</span>,
-            <span class="key">"uri"</span>: <span class="str">"https://salesdee.app/q/abc-narit-0142"</span> } },
+            <span class="key">"uri"</span>: <span class="str">"https://salesdee.com/q/abc-narit-0142"</span> } },
         { <span class="key">"type"</span>: <span class="str">"button"</span>, <span class="key">"style"</span>: <span class="str">"secondary"</span>,
           <span class="key">"action"</span>: { <span class="key">"type"</span>: <span class="str">"postback"</span>, <span class="key">"label"</span>: <span class="str">"ขอแก้ไข · แชตต่อ"</span>,
             <span class="key">"data"</span>: <span class="str">"action=revise&amp;quote=QT-2026-0142"</span> } }
@@ -1391,6 +1752,203 @@
 
   </section>
 
+
+  <!-- ═══ EMAIL TEMPLATE ═══ -->
+  <section class="section">
+    <div class="section-head">
+      <div class="section-num">03</div>
+      <div>
+        <h2 class="section-title">Email · <em>HTML</em> + PDF attachment</h2>
+        <p class="section-desc">ส่งใบเสนอผ่าน <strong>email</strong> สำหรับ formal record · ลูกค้าได้ HTML email + PDF แนบ + ลิงก์ดูออนไลน์ · ใช้ SendGrid · template เดียวสำหรับทุก tenant · ปรับ logo + accent color ตาม tenant</p>
+      </div>
+      <div class="section-side">
+        <div class="key">tech</div>
+        <strong>SendGrid</strong> dynamic templates<br>
+        <strong>open tracking</strong> · pixel<br>
+        <strong>click tracking</strong> · redirect URL<br>
+        <strong>bounce</strong> · webhook → DeliveryLog
+      </div>
+    </div>
+
+    <div class="email-stage">
+      <div class="email-client">
+
+        <div class="email-toolbar">
+          <span class="star">★</span>
+          <span class="from-pill">📥 Inbox</span>
+          <span style="margin-left: auto;">1 of 247</span>
+        </div>
+
+        <div class="email-header">
+          <div class="email-subject">ใบเสนอราคา QT-2026-0142 · บริษัทวัน.ดี.ดี.บิสซิเนส</div>
+          <div class="email-from-row">
+            <div class="email-avatar">วด</div>
+            <div class="email-from">
+              <div class="name">วัน.ดี.ดี.บิสซิเนส · ทีมเซลส์</div>
+              <div class="addr">quote@wandeedee.salesdee.com</div>
+            </div>
+            <div class="email-time">14 พ.ค. 10:42</div>
+          </div>
+        </div>
+
+        <div class="email-body">
+          <p class="greeting">เรียน คุณนริศ พรพิพัฒน์ ที่นับถือ</p>
+
+          <p>ทีมวัน.ดี.ดี. ได้รับคำขอใบเสนอราคาจากคุณผ่านเว็บไซต์ของเราเมื่อวานนี้ · ตามที่ได้ทบทวนความต้องการของโปรเจกต์ <strong>"ปรับปรุงออฟฟิศชั้น 7"</strong> เรียบร้อยแล้ว ขอส่งใบเสนอราคาดังนี้</p>
+
+          <div class="email-quote-card">
+            <div class="email-quote-row">
+              <span class="lbl">เลขที่</span>
+              <span class="val mono">QT-2026-0142</span>
+            </div>
+            <div class="email-quote-row">
+              <span class="lbl">รายการ</span>
+              <span class="val">4 รายการ · 30 หน่วย</span>
+            </div>
+            <div class="email-quote-row">
+              <span class="lbl">ยืนราคา</span>
+              <span class="val">ถึง 13 มิ.ย. 2569</span>
+            </div>
+            <div class="email-quote-row">
+              <span class="lbl">ส่งและติดตั้ง</span>
+              <span class="val">25-30 มิ.ย. 2569</span>
+            </div>
+            <div class="email-quote-row total">
+              <span class="lbl">ยอดสุทธิ</span>
+              <span class="val">฿ 1,375,528</span>
+            </div>
+          </div>
+
+          <p style="text-align: center; color: #6B7785; font-size: 13px;">ราคารวมส่วนลด 5% ลูกค้าใหม่ + บริการติดตั้งโดยทีมช่างของเรา</p>
+
+          <div class="email-cta-row">
+            <a href="#" class="email-cta">
+              ดูใบเสนอ + ยอมรับออนไลน์
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+            <div style="font-size: 11px; color: #6B7785; margin-top: 10px; font-family: 'IBM Plex Mono';">หรือ wandeedee.salesdee.com/q/abc-narit-0142</div>
+          </div>
+
+          <div class="email-attach">
+            <div class="ic">PDF</div>
+            <div class="info">
+              <div class="name">ใบเสนอราคา · QT-2026-0142.pdf</div>
+              <div class="meta">182 KB · 1 หน้า · A4</div>
+            </div>
+            <a href="#" class="download">ดาวน์โหลด</a>
+          </div>
+
+          <p>หากต้องการคำถามหรือปรับเปลี่ยนใด ๆ · ทักผมได้ทาง LINE Official ของเราที่ <strong>@wandeedee</strong> หรือโทร 02 xxx xxxx · ผมจะตอบกลับให้คุณภายใน 1 ชั่วโมง</p>
+
+          <p>ขอบคุณที่ให้โอกาสวัน.ดี.ดี. ในการนำเสนอครั้งนี้</p>
+
+          <div class="email-signature">
+            <div class="sig-name">มะลิ สมิตา</div>
+            <div class="sig-meta">เซลส์อาวุโส · บริษัท วัน.ดี.ดี.บิสซิเนส จำกัด</div>
+            <div class="sig-meta">📞 081 234 5678 · 💬 LINE @wandeedee · ✉ malee@wandeedee.co.th</div>
+            <div class="sig-brand">wan<em>dee</em><em>dee</em><span class="dot"></span><span style="color: #6B7785; font-weight: 500;">.co.th</span></div>
+          </div>
+        </div>
+
+        <div class="email-footer-meta">
+          <div class="row">
+            <span>ส่งผ่าน <span style="color: var(--ink);">sales<em style="font-style: normal; color: var(--accent);">dee</em><span style="display: inline-block; width: 3px; height: 3px; background: var(--accent); border-radius: 50%; vertical-align: 1px; margin: 0 1px;"></span>com</span> · บริการ CRM สำหรับ SME ไทย</span>
+            <span><a href="#">ตั้งค่า</a> · <a href="#">ยกเลิกรับเมล</a></span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="pdf-annot">
+      <div class="title">Email template · spec สำหรับ SendGrid</div>
+      <ul>
+        <li><strong>Provider:</strong> SendGrid (Phase 1) · option: SMTP ของ tenant (Pro+ tier)</li>
+        <li><strong>From:</strong> <code>quote@{tenant_slug}.salesdee.com</code> หรือ custom domain (Pro+)</li>
+        <li><strong>Subject:</strong> <code>ใบเสนอราคา {quote_number} · {tenant_name}</code></li>
+        <li><strong>Template ID:</strong> SendGrid dynamic template · variables: customer_name, quote_number, total, items_count, valid_until, cta_url, pdf_url</li>
+        <li><strong>Attachment:</strong> PDF generated via WeasyPrint · cached in S3 · file size ~150-300 KB</li>
+        <li><strong>Open tracking:</strong> 1×1 transparent pixel · webhook → DeliveryLog.opened_at</li>
+        <li><strong>Click tracking:</strong> redirect URL <code>https://s.salesdee.com/c/{token}</code> → log click → 302 to public quote page</li>
+        <li><strong>Bounce/complaint:</strong> SendGrid webhook → mark email invalid + notify sales</li>
+        <li><strong>Reply-to:</strong> เซลส์ผู้ดูแล direct email (เพื่อให้ reply กลับเข้าตัวเซลส์ ไม่ใช่ระบบ)</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══ SMS TEMPLATE ═══ -->
+  <section class="section">
+    <div class="section-head">
+      <div class="section-num">04</div>
+      <div>
+        <h2 class="section-title">SMS · <em>สั้น</em> + short link</h2>
+        <p class="section-desc">SMS เป็น <strong>channel สำรอง</strong> · ส่งตอน reminder ใกล้หมดอายุ · หรือเมื่อลูกค้าไม่เปิด email/LINE ใน 24 ชม · ข้อความสั้น + short link ไปหน้าใบเสนอ · ใช้ THSMS gateway สำหรับเบอร์ไทย</p>
+      </div>
+      <div class="section-side">
+        <div class="key">tech</div>
+        <strong>THSMS</strong> หรือ ThaiBulkSMS<br>
+        <strong>fallback:</strong> Twilio (intl)<br>
+        <strong>max 70 char</strong> Thai · 160 ASCII<br>
+        <strong>~฿0.50/SMS</strong> · เก็บค่าใช้ตาม tier
+    </div>
+    </div>
+
+    <div class="sms-stage">
+
+      <div class="sms-phone">
+        <div class="sms-screen">
+          <div class="sms-status">
+            <span>10:42</span>
+            <span>5G ▮▮▮▮</span>
+          </div>
+          <div class="sms-header">
+            <div class="name">+66 88 765 4321</div>
+            <div class="meta">วัน.ดี.ดี.บิสซิเนส</div>
+          </div>
+          <div class="sms-msgs">
+            <div class="sms-day-stamp">วันนี้ · 10:42</div>
+            <div class="sms-bubble">
+              ใบเสนอราคา QT-2026-0142 จากวัน.ดี.ดี. พร้อมแล้วครับ ยอด ฿1.37M ดูที่ <a href="#">s.salesdee.com/q/abc4</a> · ยืน 30 วัน · ติดต่อ 02xxxxxxx
+            </div>
+            <div class="sms-time">10:42 · ส่งจาก SMS</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sms-info">
+        <h3>เมื่อ <em style="font-family: 'Fraunces'; font-style: italic; color: var(--accent);">SMS</em> ใช้ดีที่สุด</h3>
+        <p>ลูกค้าหลายรายไม่เช็ค email ทุกวัน · LINE บางที่ block notification · SMS ถึงเครื่องโดยตรง · เห็นทันที</p>
+        <ul>
+          <li><strong>Reminder ใกล้หมดอายุ</strong> — 24 ชม. ก่อนใบเสนอหมด · ตามว่ายอมรับยัง</li>
+          <li><strong>เมื่อ email/LINE ไม่เปิดใน 24 ชม</strong> — fallback channel · ตามถึง</li>
+          <li><strong>Confirmation หลังยอมรับ</strong> — "ดีลปิดแล้ว · ขอบคุณ" + เลข ref</li>
+          <li><strong>OTP สำหรับ signature</strong> — ลูกค้ายืนยันก่อน accept ออนไลน์</li>
+        </ul>
+        <div class="sms-cost-card">
+          <strong>cost · ฿0.50 ต่อ SMS</strong><br>
+          Free tier: ไม่มี SMS · Starter: 100/เดือน · Pro: 500/เดือน · Business: unlimited (fair use)
+        </div>
+      </div>
+
+    </div>
+
+    <div class="pdf-annot">
+      <div class="title">SMS template · spec</div>
+      <ul>
+        <li><strong>Provider:</strong> THSMS (Thai SMS gateway) · option: ThaiBulkSMS · Twilio สำหรับเบอร์ต่างประเทศ</li>
+        <li><strong>Format:</strong> <code>ใบเสนอราคา {quote_number} จาก{tenant} พร้อมแล้ว ยอด ฿{total} ดูที่ s.salesdee.com/q/{short_token}</code></li>
+        <li><strong>Short link:</strong> <code>s.salesdee.com/q/abc4</code> → 302 redirect to full URL → log click</li>
+        <li><strong>Sender ID:</strong> short code "WANDEEDEE" หรือ "SALESDEE" (ต้อง register กับ operator)</li>
+        <li><strong>Char limit:</strong> Thai 70 chars · ตัด text ที่จำเป็นเท่านั้น · ใช้ short link เสมอ</li>
+        <li><strong>Delivery report:</strong> webhook → DeliveryLog.delivered_at</li>
+        <li><strong>Click tracking:</strong> redirect log → DeliveryLog.clicked_at · update Quote.viewed_count</li>
+        <li><strong>Cost handling:</strong> bill ต่อ tenant ตาม plan · alert เมื่อใกล้ limit</li>
+        <li><strong>Opt-out:</strong> ลูกค้าต้อง opt-out ได้ · STOP keyword → mark phone do-not-text</li>
+      </ul>
+    </div>
+  </section>
+
+
   <!-- Footer -->
   <footer class="doc-footer">
     <div class="doc-footer-text">
@@ -1399,7 +1957,7 @@
     <div class="doc-footer-text" style="margin-top: 14px;">
       ส่วนตัวคิดว่า — ตัว <strong>template 2 (customer activity)</strong> เป็นสิ่งที่ทำให้ salesdee. ต่างจาก SaaS อื่น · เซลส์ได้รู้ <em style="font-family: 'Fraunces', serif; font-style: italic;">เมื่อใด</em> ลูกค้ากำลังคิด ไม่ใช่แค่ <em style="font-family: 'Fraunces', serif; font-style: italic;">ส่งแล้วรอ</em>
     </div>
-    <div class="doc-footer-meta">salesdee. · PDF + LINE templates · 12 พฤษภาคม 2569</div>
+    <div class="doc-footer-meta">salesdee.com · PDF + Email + LINE + SMS templates · 14 พฤษภาคม 2569</div>
   </footer>
 
 </div>
