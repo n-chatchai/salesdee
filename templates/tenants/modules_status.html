@@ -39,11 +39,12 @@
         <div class="ms-info">
           <div class="ms-name">
             {{ m.label_th }}
-            {% if m.overridden %}<span class="ms-override-badge" title="{{ m.override_reason }}">override</span>{% endif %}
+            {% if m.platform_disabled %}<span class="ms-platform-badge" title="kill switch">platform off</span>
+            {% elif m.overridden %}<span class="ms-override-badge" title="{{ m.override_reason }}">override</span>{% endif %}
           </div>
           <div class="ms-note muted">
             {{ m.note_th }}
-            {% if m.overridden %}<span class="ms-override-reason"> · ระบบกำหนด: {{ m.override_reason }}</span>{% endif %}
+            {% if m.overridden and not m.platform_disabled %}<span class="ms-override-reason"> · ระบบกำหนด: {{ m.override_reason }}</span>{% endif %}
           </div>
         </div>
         <div class="ms-action">

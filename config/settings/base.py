@@ -176,6 +176,13 @@ PLATFORM_HOSTS = env.list(
 # known platform host or verified TenantDomain, or front the app with a proxy that does it.
 # DNS (CNAME) + on-demand TLS for tenant custom domains is a deployment concern.
 
+# Platform-wide kill switch: module codes here are disabled for EVERY tenant on EVERY plan,
+# regardless of any TenantFeatureOverride row. Use for incidents (e.g. "tax invoice numbering
+# bug — pause issuance across the platform until fix ships"). Empty = no kill switches.
+# Module codes match apps/tenants/modules.py (billing, e_tax, white_label, custom_domain, api,
+# priority_support, sla).
+PLATFORM_DISABLED_MODULES = env.list("PLATFORM_DISABLED_MODULES", default=[])
+
 # --- Static / media -----------------------------------------------------------
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]

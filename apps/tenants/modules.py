@@ -36,6 +36,7 @@ class ModuleStatus:
     fix_url: str | None = None
     overridden: bool = False  # True if a TenantFeatureOverride is overriding the plan default
     override_reason: str = ""
+    platform_disabled: bool = False  # True if PLATFORM_DISABLED_MODULES kill-switches this code
 
 
 def _line_configured(tenant) -> bool:
@@ -61,7 +62,7 @@ def get_modules(request: HttpRequest) -> list[ModuleStatus]:
     tenant = getattr(request, "tenant", None)
     if tenant is None:
         return []
-    from .features import feature_enabled, get_override
+    from .features import feature_enabled, get_override, is_platform_disabled
 
     plan = plan_registry.get(tenant.plan)
     L = plan.limits
@@ -70,11 +71,12 @@ def get_modules(request: HttpRequest) -> list[ModuleStatus]:
     ai_ok = _ai_configured()
     members = _users_active(tenant)
 
-    def _plan(code: str) -> tuple[bool, bool, str]:
-        """Return (enabled, overridden, override_reason) for a plan-gated module."""
+    def _plan(code: str) -> tuple[bool, bool, str, bool]:
+        """Return (enabled, overridden, override_reason, platform_disabled) for a plan-gated module."""
+        platform_off = is_platform_disabled(code)
         enabled = feature_enabled(tenant, code)
         ov = get_override(tenant, code)
-        return enabled, bool(ov), (ov.reason if ov else "")
+        return enabled, bool(ov), (ov.reason if ov else ""), platform_off
 
     # cap_note: e.g. "200 ดราฟต์/เดือน" / "ไม่จำกัด"
     def cap(kind: str, unit_th: str) -> str:
@@ -285,18 +287,31 @@ def _plan_module(
     upgrade_url: str | None = None,
     _plan,
 ) -> ModuleStatus:
-    """Build a plan-gated ModuleStatus honouring overrides."""
-    enabled, overridden, reason = _plan(code)
+    """Build a plan-gated ModuleStatus honouring overrides + platform kill switch."""
+    enabled, overridden, reason, platform_off = _plan(code)
+    if platform_off:
+        note = "ปิดทั้งระบบโดยผู้ดูแลแพลตฟอร์ม (incident / maintenance)"
+        fix = ""
+        url = None
+    elif enabled:
+        note = on_note
+        fix = ""
+        url = None
+    else:
+        note = off_note
+        fix = off_fix
+        url = upgrade_url
     return ModuleStatus(
         code=code,
         label_th=label_th,
         category="plan",
         enabled=enabled,
-        note_th=on_note if enabled else off_note,
-        fix_th=off_fix if (not enabled and off_fix) else "",
-        fix_url=upgrade_url if (not enabled and upgrade_url) else None,
-        overridden=overridden,
-        override_reason=reason,
+        note_th=note,
+        fix_th=fix,
+        fix_url=url,
+        overridden=overridden and not platform_off,
+        override_reason=reason if not platform_off else "",
+        platform_disabled=platform_off,
     )
 
 

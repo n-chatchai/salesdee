@@ -1,8 +1,9 @@
 """Single source of truth for "is feature X enabled for tenant Y?".
 
-Resolution order:
-1. Active ``TenantFeatureOverride`` row → use its mode (FORCE_ON / FORCE_OFF)
-2. Otherwise fall back to the tenant's plan defaults (apps/tenants/plans.py)
+Resolution order (first match wins):
+1. ``settings.PLATFORM_DISABLED_MODULES`` — platform-wide kill switch (incident handling)
+2. Active ``TenantFeatureOverride`` row → use its mode (FORCE_ON / FORCE_OFF)
+3. Otherwise fall back to the tenant's plan defaults (apps/tenants/plans.py)
 
 Module codes accepted (must match ``apps/tenants/modules.py``):
 - billing · e_tax · white_label · custom_domain · api · priority_support · sla
@@ -17,8 +18,15 @@ from __future__ import annotations
 
 from datetime import date
 
+from django.conf import settings
+
 from . import plans as plan_registry
 from .models import FeatureOverrideMode, TenantFeatureOverride
+
+
+def is_platform_disabled(code: str) -> bool:
+    """``True`` if this module is kill-switched at the platform level."""
+    return code in getattr(settings, "PLATFORM_DISABLED_MODULES", [])
 
 
 def _from_plan(tenant, code: str) -> bool:
@@ -60,9 +68,11 @@ def models_Q_active(today):
 def feature_enabled(tenant, code: str) -> bool:
     """``True`` if the tenant should currently have access to this feature.
 
-    Override wins over plan; if no override, plan defaults apply.
+    Platform kill switch wins over everything; then override; then plan defaults.
     """
     if tenant is None:
+        return False
+    if is_platform_disabled(code):
         return False
     ov = _override(tenant, code)
     if ov is not None:

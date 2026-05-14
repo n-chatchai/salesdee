@@ -242,6 +242,35 @@ def test_feature_override_expired_ignored(tenant) -> None:
     assert feature_enabled(tenant, "billing") is False
 
 
+def test_platform_disabled_modules_wins_over_plan(tenant, settings) -> None:
+    """PLATFORM_DISABLED_MODULES kills a feature for every tenant on every plan."""
+    from apps.tenants.features import feature_enabled
+
+    tenant.plan = "business"  # business normally has billing
+    tenant.save(update_fields=["plan"])
+    assert feature_enabled(tenant, "billing") is True
+    settings.PLATFORM_DISABLED_MODULES = ["billing"]
+    assert feature_enabled(tenant, "billing") is False
+
+
+def test_platform_disabled_modules_wins_over_force_on_override(tenant, settings) -> None:
+    """A FORCE_ON override cannot re-enable a feature the platform has killed."""
+    from apps.tenants.features import feature_enabled
+    from apps.tenants.models import FeatureOverrideMode, TenantFeatureOverride
+
+    tenant.plan = "growth"
+    tenant.save(update_fields=["plan"])
+    TenantFeatureOverride.objects.create(
+        tenant=tenant,
+        module_code="billing",
+        mode=FeatureOverrideMode.FORCE_ON,
+        reason="anchor",
+    )
+    assert feature_enabled(tenant, "billing") is True
+    settings.PLATFORM_DISABLED_MODULES = ["billing"]
+    assert feature_enabled(tenant, "billing") is False
+
+
 def test_billing_middleware_respects_override(client, tenant) -> None:
     """Growth tenant with a billing override can hit /billing/invoices/."""
     from django.contrib.auth import get_user_model
