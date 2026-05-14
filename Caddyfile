@@ -1,0 +1,15 @@
+# Local-dev TLS terminator. Run from repo root: `caddy run --config Caddyfile`
+# Generate certs once (in repo root):
+#   mkcert -install
+#   mkdir -p certs && cd certs && mkcert salesdee.local '*.salesdee.local'
+# certs/ is gitignored.
+
+{
+	auto_https off
+	admin off
+}
+
+salesdee.local, *.salesdee.local {
+	tls ./certs/salesdee.local+1.pem ./certs/salesdee.local+1-key.pem
+	reverse_proxy localhost:8000
+}

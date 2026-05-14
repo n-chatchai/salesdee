@@ -38,3 +38,8 @@ node_modules/
 graphify-out/
 
 test-results/
+# Local-dev TLS certs (mkcert)
+certs/
+
+# dev.sh background logs
+.dev-logs/
