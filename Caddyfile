@@ -20,7 +20,8 @@
 
 {
 	auto_https off
-	admin off
+	# admin API on localhost:2019 — required by `caddy trust` and `caddy reload`.
+	# Localhost-only by default, so it's safe in dev.
 	on_demand_tls {
 		ask http://localhost:8000/_caddy/ask
 	}
