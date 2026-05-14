@@ -43,7 +43,7 @@
   {% if not editable and document.status != 'cancelled' %}<form method="post" action="{% url 'quotes:quotation_reopen' document.pk %}">{% csrf_token %}<button class="btn btn-sm">เปิดแก้ไขใหม่ (Rev.)</button></form>{% endif %}
   {% if document.status != 'cancelled' %}<form method="post" action="{% url 'quotes:quotation_cancel' document.pk %}">{% csrf_token %}<button class="btn btn-sm btn-ghost" hx-confirm="ยกเลิกใบเสนอราคานี้?">ยกเลิกเอกสาร</button></form>{% endif %}
   {% if revisions %}<a class="btn btn-sm btn-ghost" href="{% url 'quotes:quotation_revisions' document.pk %}">ประวัติเวอร์ชัน ({{ revisions|length }})</a>{% endif %}
-  {% if document.status == 'accepted' %}<form method="post" action="{% url 'billing:quotation_to_invoice' document.pk %}">{% csrf_token %}<button class="btn btn-sm btn-primary">สร้างใบแจ้งหนี้</button></form>{% endif %}
+  {% if document.status == 'accepted' and plan_has_billing %}<form method="post" action="{% url 'billing:quotation_to_invoice' document.pk %}">{% csrf_token %}<button class="btn btn-sm btn-primary">สร้างใบแจ้งหนี้</button></form>{% endif %}
 </div>
 
 <div class="qb-section-label">หัวเอกสาร</div>

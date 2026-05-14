@@ -161,6 +161,39 @@ def test_member_invite_blocked_at_user_cap(client, tenant) -> None:
     assert not get_user_model().objects.filter(email="third@x.test").exists()
 
 
+def test_billing_gate_blocks_growth_plan(client, tenant) -> None:
+    """Growth plan = no billing module. /billing/invoices/ returns 402 + upgrade page."""
+    from django.contrib.auth import get_user_model
+    from django.urls import reverse
+
+    from apps.accounts.models import Membership, Role
+
+    tenant.plan = "growth"
+    tenant.save(update_fields=["plan"])
+    owner = get_user_model().objects.create_user(email="o@x.test", password="pw-123456789")
+    Membership.objects.create(user=owner, tenant=tenant, role=Role.OWNER)
+    client.force_login(owner)
+    resp = client.get(reverse("billing:invoices"))
+    assert resp.status_code == 402
+    assert "อัปเกรดเป็น Pro" in resp.content.decode()
+
+
+def test_billing_gate_allows_pro_plan(client, tenant) -> None:
+    """Pro plan = billing module enabled. /billing/invoices/ renders normally."""
+    from django.contrib.auth import get_user_model
+    from django.urls import reverse
+
+    from apps.accounts.models import Membership, Role
+
+    tenant.plan = "pro"
+    tenant.save(update_fields=["plan"])
+    owner = get_user_model().objects.create_user(email="o@x.test", password="pw-123456789")
+    Membership.objects.create(user=owner, tenant=tenant, role=Role.OWNER)
+    client.force_login(owner)
+    resp = client.get(reverse("billing:invoices"))
+    assert resp.status_code == 200
+
+
 def test_member_invite_growth_plan_allows_more(client, tenant) -> None:
     """Growth caps users=5 — a third invite succeeds (still under cap)."""
     from django.contrib.auth import get_user_model

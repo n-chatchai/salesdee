@@ -64,6 +64,7 @@
       <span class="icon"><svg><use href="#i-tag"/></svg></span> หมวดสินค้า
     </a>
 
+    {% if plan_has_billing %}
     <div class="sb-section-label">บัญชี / การเงิน</div>
     <a class="sb-item {% if un == 'invoices' or un == 'invoice_detail' %}active{% endif %}" href="{% url 'billing:invoices' %}">
       <span class="icon"><svg><use href="#i-package"/></svg></span> ใบแจ้งหนี้
@@ -83,6 +84,7 @@
     <a class="sb-item {% if un == 'sales_tax_report' %}active{% endif %}" href="{% url 'billing:sales_tax_report' %}">
       <span class="icon"><svg><use href="#i-chart"/></svg></span> รายงานภาษีขาย
     </a>
+    {% endif %}
 
     <div class="sb-section-label">ภาพรวม</div>
     <a class="sb-item {% if un == 'reports' %}active{% endif %}" href="{% url 'crm:reports' %}">

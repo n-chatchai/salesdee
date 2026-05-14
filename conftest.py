@@ -7,6 +7,15 @@ import pytest
 from apps.core.current_tenant import tenant_context
 
 
+@pytest.fixture(autouse=True)
+def _stable_host_settings(settings):
+    """Pin host-resolution settings so tests don't depend on the developer's .env values
+    (e.g. APP_DOMAIN=salesdee.local for local dev would break ``<slug>.localhost`` test hosts).
+    """
+    settings.APP_DOMAIN = "localhost"
+    settings.PLATFORM_HOSTS = ["localhost", "127.0.0.1", "app.localhost", "www.localhost"]
+
+
 @pytest.fixture
 def tenant(db):
     from apps.tenants.models import Tenant

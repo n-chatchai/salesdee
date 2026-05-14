@@ -62,6 +62,8 @@ MIDDLEWARE = [
     "django_htmx.middleware.HtmxMiddleware",
     # Resolves & activates the current tenant; sets the Postgres session var used by RLS.
     "apps.core.middleware.CurrentTenantMiddleware",
+    # Gates /billing/* behind the plan's billing_module feature flag.
+    "apps.billing.middleware.BillingFeatureGateMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"

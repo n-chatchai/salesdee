@@ -7,12 +7,10 @@ def current_tenant(request: HttpRequest) -> dict:
 
     notif_count = 0
     quota_warning: list = []
+    plan_has_billing = False
+    tenant = getattr(request, "tenant", None)
     user = getattr(request, "user", None)
-    if (
-        getattr(request, "tenant", None) is not None
-        and user is not None
-        and getattr(user, "is_authenticated", False)
-    ):
+    if tenant is not None and user is not None and getattr(user, "is_authenticated", False):
         try:
             from apps.crm.dashboard import build_notifications
 
@@ -22,14 +20,20 @@ def current_tenant(request: HttpRequest) -> dict:
         try:
             from apps.tenants.quota import near_cap
 
-            # request.tenant is set by CurrentTenantMiddleware (see apps/core/middleware.py).
-            quota_warning = near_cap(request.tenant)  # type: ignore[attr-defined]
+            quota_warning = near_cap(tenant)
         except Exception:  # noqa: BLE001 — quota glitch must never break the page
             quota_warning = []
+        try:
+            from apps.tenants import plans as plan_registry
+
+            plan_has_billing = plan_registry.get(tenant.plan).features.billing_module
+        except Exception:  # noqa: BLE001 — bad config must never break the page
+            plan_has_billing = False
     return {
-        "current_tenant": getattr(request, "tenant", None),
+        "current_tenant": tenant,
         "can_view_reports": can_view_reports(request),
         "is_manager": is_manager(request),
         "notif_count": notif_count,
         "quota_warning": quota_warning,
+        "plan_has_billing": plan_has_billing,
     }

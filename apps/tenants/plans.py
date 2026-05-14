@@ -40,6 +40,7 @@ class PlanLimits:
 class PlanFeatures:
     """Boolean / categorical feature gates."""
 
+    billing_module: bool = False  # tax invoice / receipt / CN / DN / AR / statements
     white_label_pdf: bool = False  # remove "powered by salesdee." from PDFs
     custom_domain: bool = False  # TenantDomain visible / verifiable
     api_access: str = "none"  # "none" | "read" | "full"
@@ -84,6 +85,7 @@ PLANS: dict[str, PlanSpec] = {
             audit_retention_days=30,
         ),
         features=PlanFeatures(
+            billing_module=True,  # trial = full features for 30 days
             white_label_pdf=False,
             custom_domain=False,
             api_access="none",
@@ -122,14 +124,14 @@ PLANS: dict[str, PlanSpec] = {
     "growth": PlanSpec(
         code="growth",
         label_th="Growth",
-        tagline_th="ทีมขาย 3-5 คน · ใช้ไลน์หนัก",
+        tagline_th="ทีมขาย 3-5 คน · ปิดดีลเร็วผ่านไลน์",
         monthly_thb=Decimal("1890"),
         annual_thb=Decimal("18900"),
         limits=PlanLimits(
             users=5,
             line_msgs=3000,
             ai_drafts=200,
-            tax_invoices=50,
+            tax_invoices=0,
             storage_gb=20,
             audit_retention_days=90,
         ),
@@ -138,16 +140,16 @@ PLANS: dict[str, PlanSpec] = {
         extras_th=[
             "ไลน์ OA 1 บัญชี · 3,000 ข้อความ/เดือน",
             "ผู้ช่วยเอไอเต็มที่ · 200 ดราฟต์/เดือน",
-            "ใบกำกับภาษีเต็มรูป (ม.86/4) · 50 ใบ/เดือน",
-            "ใบเสร็จ · ใบลดหนี้ · ใบเพิ่มหนี้ · ใบแจ้งยอด",
-            "ลูกหนี้คงค้าง · รายงานภาษีขาย",
+            "ใบเสนอราคาไม่จำกัด · ส่งกลับเข้าไลน์อัตโนมัติ",
+            "ทีม 5 คน · ลบ 'powered by salesdee.' บนใบเสนอราคา",
+            "ระบบบัญชี (ใบกำกับภาษี · ใบเสร็จ · ลูกหนี้) — ยังไม่รวม (อัปเกรดเป็น Pro)",
             "บันทึกตรวจสอบ 90 วัน",
         ],
     ),
     "pro": PlanSpec(
         code="pro",
         label_th="Pro",
-        tagline_th="บริษัทกลาง 5-12 คน · ขายโครงการ",
+        tagline_th="บริษัทกลาง 5-12 คน · ใบกำกับภาษี + ลูกหนี้ครบ",
         monthly_thb=Decimal("3890"),
         annual_thb=Decimal("38900"),
         limits=PlanLimits(
@@ -159,15 +161,19 @@ PLANS: dict[str, PlanSpec] = {
             audit_retention_days=365,
         ),
         features=PlanFeatures(
+            billing_module=True,
             white_label_pdf=True,
             custom_domain=True,
             api_access="read",
             priority_support=True,
         ),
         extras_th=[
+            "ทุกอย่างใน Growth + ระบบบัญชีเต็มชุด:",
+            "ใบกำกับภาษีเต็มรูป (ม.86/4) · 500 ใบ/เดือน",
+            "ใบเสร็จ · ใบลดหนี้ · ใบเพิ่มหนี้ · ใบแจ้งยอด",
+            "ลูกหนี้คงค้าง · รายงานภาษีขาย (ภ.พ.30)",
             "ไลน์ OA สูงสุด 3 บัญชี · 10,000 ข้อความ/เดือน",
             "ผู้ช่วยเอไอ · 800 ดราฟต์/เดือน",
-            "ใบกำกับภาษี · 500 ใบ/เดือน",
             "โดเมนของตัวเอง (crm.บริษัทคุณ.com)",
             "API อ่านข้อมูล + webhook",
             "บันทึกตรวจสอบ 1 ปี",
@@ -189,6 +195,7 @@ PLANS: dict[str, PlanSpec] = {
             audit_retention_days=1825,  # 5 ปี (PDPA + Revenue Code)
         ),
         features=PlanFeatures(
+            billing_module=True,
             white_label_pdf=True,
             custom_domain=True,
             api_access="full",

@@ -109,3 +109,19 @@
 .bt-usage-row .lbl { color: var(--ink); font-weight: 500; }
 .bt-usage-row .unlim { color: var(--mid); }
 
+
+/* Upgrade-required page shown when a tenant on Starter/Growth hits /billing/*. */
+.upgrade-required {
+  max-width: 720px; margin: 32px auto; padding: 32px;
+  background: var(--paper-2); border: 1px solid var(--border); border-radius: var(--radius);
+}
+.upgrade-required h1 { font-size: 28px; line-height: 1.25; margin: 6px 0 16px; color: var(--ink); }
+.upgrade-required p { color: var(--ink-2); margin: 0 0 18px; line-height: 1.55; }
+.upgrade-features {
+  list-style: none; padding: 16px 20px; margin: 16px 0 24px;
+  background: var(--paper); border: 1px solid var(--border); border-radius: var(--radius);
+  font-size: 14px; line-height: 1.7; color: var(--ink);
+}
+.upgrade-features li::before {
+  content: "✓"; color: var(--ai); margin-right: 8px; font-weight: 600;
+}
