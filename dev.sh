@@ -44,6 +44,10 @@ trap cleanup INT TERM
 # ── run ─────────────────────────────────────────────────────────────────────
 mkdir -p .dev-logs
 
+echo "→ migrate (pending DB schema)"
+uv run python manage.py migrate --noinput 2>&1 | tee .dev-logs/migrate.log | tail -3
+echo
+
 echo "→ Django runserver  http://127.0.0.1:8000     log: .dev-logs/web.log"
 uv run python manage.py runserver 127.0.0.1:8000 >.dev-logs/web.log 2>&1 &
 pids+=($!)
