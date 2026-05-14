@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 # Local dev runner: Django runserver (auto-reload) + django-q2 qcluster + caddy TLS proxy.
+# Caddy binds :80 + :443 → needs sudo (cached at the top so the rest runs unattended).
 # Stops everything on Ctrl-C.
 #
 # Pre-reqs (one-time):
-#   /etc/hosts:   127.0.0.1 salesdee.local wandeedee.salesdee.local
+#   /etc/hosts:  127.0.0.1 salesdee.local wandeedee.salesdee.local wandeedee.local
+#   brew install caddy
 #   mkcert -install
 #   mkdir -p certs && (cd certs && mkcert salesdee.local '*.salesdee.local')
-#   brew install caddy
+#   sudo caddy trust   # trusts Caddy's internal CA so custom-domain certs are accepted
 #
 # Then:  ./dev.sh
 
@@ -24,9 +26,12 @@ command -v caddy >/dev/null || { echo "caddy not found — brew install caddy"; 
 }
 grep -q '^127\.0\.0\.1[[:space:]].*salesdee\.local' /etc/hosts || {
 	echo "/etc/hosts entry missing — run:"
-	echo "  sudo sh -c 'printf \"\\n127.0.0.1 salesdee.local wandeedee.salesdee.local\\n\" >> /etc/hosts'"
+	echo "  sudo sh -c 'printf \"\\n127.0.0.1 salesdee.local wandeedee.salesdee.local wandeedee.local\\n\" >> /etc/hosts'"
 	exit 1
 }
+
+echo "→ caddy binds :80 + :443 → caching sudo creds upfront"
+sudo -v
 
 # ── cleanup ─────────────────────────────────────────────────────────────────
 pids=()
@@ -36,6 +41,8 @@ cleanup() {
 	for pid in "${pids[@]}"; do
 		kill "$pid" 2>/dev/null || true
 	done
+	# caddy was spawned via sudo so its actual PID may need sudo to kill
+	sudo pkill -f "caddy run --config $(pwd)/Caddyfile" 2>/dev/null || true
 	wait 2>/dev/null || true
 	exit 0
 }
@@ -57,17 +64,17 @@ uv run python manage.py qcluster >.dev-logs/worker.log 2>&1 &
 pids+=($!)
 
 echo "→ caddy TLS proxy   https://salesdee.local    log: .dev-logs/caddy.log"
-caddy run --config Caddyfile >.dev-logs/caddy.log 2>&1 &
+sudo -E caddy run --config "$(pwd)/Caddyfile" >.dev-logs/caddy.log 2>&1 &
 pids+=($!)
 
 echo
 echo "──────────────────────────────────────────────────────"
 echo "  https://salesdee.local              (platform host)"
-echo "  https://wandeedee.salesdee.local    (tenant)"
+echo "  https://wandeedee.salesdee.local    (built-in subdomain)"
+echo "  https://wandeedee.local             (custom domain · on-demand TLS)"
 echo "  login: admin@salesdee.local / salesdee-dev"
 echo "──────────────────────────────────────────────────────"
 echo "  Ctrl-C to stop everything"
 echo
 
-# follow logs interleaved
 tail -F .dev-logs/web.log .dev-logs/worker.log .dev-logs/caddy.log

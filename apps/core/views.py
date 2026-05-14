@@ -16,6 +16,41 @@ def healthz(_request: HttpRequest) -> JsonResponse:
         return JsonResponse({"status": "error", "detail": type(exc).__name__}, status=503)
 
 
+def caddy_ask(request: HttpRequest) -> HttpResponse:
+    """Caddy's on-demand TLS ``ask`` endpoint.
+
+    Caddy calls this before minting a cert for a hostname it hasn't seen — we return 200 if
+    the host maps to a known tenant (a platform host, a built-in ``<slug>.<APP_DOMAIN>``
+    subdomain, or a verified ``TenantDomain`` row), else 404. This stops Caddy from issuing
+    certs for random hostnames pointed at us by attackers.
+
+    Wired at ``/_caddy/ask?domain=X``. No CSRF, no auth, no tenant resolution — it's a
+    server-to-server call from Caddy on the same host.
+    """
+    from django.conf import settings as dj_settings
+
+    from apps.tenants.models import Tenant, TenantDomain
+
+    host = (request.GET.get("domain") or "").strip().lower()
+    if not host:
+        return HttpResponse(status=400)
+
+    platform_hosts = {h.lower() for h in getattr(dj_settings, "PLATFORM_HOSTS", [])}
+    if host in platform_hosts:
+        return HttpResponse(status=200)
+
+    app_domain = getattr(dj_settings, "APP_DOMAIN", "").lower()
+    if app_domain and host.endswith("." + app_domain):
+        slug = host[: -(len(app_domain) + 1)]
+        if slug and "." not in slug and Tenant.objects.filter(slug=slug, is_active=True).exists():
+            return HttpResponse(status=200)
+
+    if TenantDomain.objects.filter(domain=host, verified=True, tenant__is_active=True).exists():
+        return HttpResponse(status=200)
+
+    return HttpResponse(status=404)
+
+
 def home(request: HttpRequest) -> HttpResponse:
     """Landing page.
 

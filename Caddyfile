@@ -1,15 +1,43 @@
-# Local-dev TLS terminator. Run from repo root: `caddy run --config Caddyfile`
-# Generate certs once (in repo root):
+# Local-dev TLS terminator — production-shape, with on-demand TLS for customer custom
+# domains (matches the prod flow described in CLAUDE.md §5). Run from repo root:
+#
+#   sudo caddy run --config Caddyfile      # sudo because we bind :80 + :443
+#
+# One-time prereqs:
 #   mkcert -install
-#   mkdir -p certs && cd certs && mkcert salesdee.local '*.salesdee.local'
-# certs/ is gitignored.
+#   mkdir -p certs && (cd certs && mkcert salesdee.local '*.salesdee.local')
+#   sudo caddy trust              # trusts Caddy's internal CA (for custom domains)
+#
+# How it works:
+# - salesdee.local + *.salesdee.local are served with the mkcert wildcard cert (already trusted
+#   because `mkcert -install` put its CA into the system keychain).
+# - Any OTHER hostname is matched by the catch-all site below; on-demand TLS asks Django
+#   (GET /_caddy/ask?domain=X) whether the hostname is a verified TenantDomain — if yes,
+#   Caddy mints a cert from its internal CA and serves it. Browsers trust those once
+#   `sudo caddy trust` has installed the Caddy root CA.
+# - In prod, the catch-all uses `tls cert@example.com` (ACME / Let's Encrypt) instead of
+#   `tls internal` — code shape is the same.
 
 {
 	auto_https off
 	admin off
+	on_demand_tls {
+		ask http://localhost:8000/_caddy/ask
+	}
 }
 
+# Platform + built-in tenant subdomains — static mkcert wildcard cert.
 salesdee.local, *.salesdee.local {
 	tls ./certs/salesdee.local+1.pem ./certs/salesdee.local+1-key.pem
+	reverse_proxy localhost:8000
+}
+
+# Customer custom domains (anything else) — on-demand TLS via Caddy's internal CA.
+# Caddy queries /_caddy/ask first and only mints a cert if the host maps to a verified
+# TenantDomain row. The catch-all matcher ``:443`` runs after the named sites above.
+https:// {
+	tls internal {
+		on_demand
+	}
 	reverse_proxy localhost:8000
 }
