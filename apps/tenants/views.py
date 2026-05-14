@@ -159,6 +159,44 @@ def system_status(request: HttpRequest) -> HttpResponse:
     )
 
 
+# --------------------------------------------------------------------------- modules
+
+
+@login_required
+def modules_status(request: HttpRequest) -> HttpResponse:
+    """Read-only inventory of every module + its on/off state for this tenant. Phase A of
+    the feature-switch story (see apps/tenants/modules.py). Owner/manager only — sales/viewer
+    don't need to read SLA / API / e-Tax flags."""
+    if not _can_admin(request):
+        return HttpResponseForbidden("ต้องเป็นเจ้าของหรือผู้จัดการ")
+    from collections import defaultdict
+
+    from .modules import CATEGORY_LABELS_TH, get_modules
+
+    mods = get_modules(request)
+    grouped: dict[str, list] = defaultdict(list)
+    for m in mods:
+        grouped[m.category].append(m)
+    # ordered: core → config → plan → per-user → future
+    order = ("core", "config", "plan", "per-user", "future")
+    sections = [(CATEGORY_LABELS_TH[c], grouped[c]) for c in order if grouped[c]]
+    counts = {
+        "on": sum(1 for m in mods if m.enabled),
+        "off": sum(1 for m in mods if not m.enabled and m.category != "future"),
+        "future": sum(1 for m in mods if m.category == "future"),
+        "total": len(mods),
+    }
+    return render(
+        request,
+        "tenants/modules_status.html",
+        {
+            "sections": sections,
+            "counts": counts,
+            "tenant": _tenant(request),
+        },
+    )
+
+
 # --------------------------------------------------------------------------- company
 
 

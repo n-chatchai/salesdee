@@ -24,8 +24,9 @@ class BillingFeatureGateMiddleware:
             tenant = getattr(request, "tenant", None)
             if tenant is not None:
                 from apps.tenants import plans as plan_registry
+                from apps.tenants.features import feature_enabled
 
-                if not plan_registry.get(tenant.plan).features.billing_module:
+                if not feature_enabled(tenant, "billing"):
                     return render(
                         request,
                         "billing/upgrade_required.html",

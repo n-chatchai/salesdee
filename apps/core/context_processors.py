@@ -24,9 +24,9 @@ def current_tenant(request: HttpRequest) -> dict:
         except Exception:  # noqa: BLE001 — quota glitch must never break the page
             quota_warning = []
         try:
-            from apps.tenants import plans as plan_registry
+            from apps.tenants.features import feature_enabled
 
-            plan_has_billing = plan_registry.get(tenant.plan).features.billing_module
+            plan_has_billing = feature_enabled(tenant, "billing")
         except Exception:  # noqa: BLE001 — bad config must never break the page
             plan_has_billing = False
     return {

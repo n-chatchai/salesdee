@@ -120,6 +120,57 @@ class CompanyProfile(BaseModel):
         return f"สาขาที่ {self.branch_code}".strip()
 
 
+class FeatureOverrideMode(models.TextChoices):
+    FORCE_ON = "on", "บังคับเปิด"
+    FORCE_OFF = "off", "บังคับปิด"
+
+
+class TenantFeatureOverride(BaseModel):
+    """Platform-admin override of a plan-gated module for a specific tenant.
+
+    Use sparingly — most "this customer is special" cases should be handled by giving them a
+    higher plan via ``Tenant.plan``. Overrides exist for narrow cases:
+    - granting an anchor customer a feature for free during onboarding (FORCE_ON + expires_at)
+    - disabling a feature for a tenant in dispute or violation (FORCE_OFF)
+    - rolling out a beta feature to early adopters before raising it to the plan
+
+    Global model (not TenantScopedModel) — only platform admins (Django superusers) manage these
+    via ``/admin/tenants/tenantfeatureoverride/``. Tenant members never see or edit them.
+    """
+
+    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, related_name="feature_overrides")
+    module_code = models.CharField(
+        "รหัสโมดูล",
+        max_length=64,
+        help_text="เช่น billing, e_tax, white_label, custom_domain, api, priority_support, sla",
+    )
+    mode = models.CharField(
+        "โหมด",
+        max_length=10,
+        choices=FeatureOverrideMode.choices,
+        default=FeatureOverrideMode.FORCE_ON,
+    )
+    reason = models.TextField("เหตุผล", help_text="ลูกค้า anchor, รางวัล, รอ release ฯลฯ")
+    expires_at = models.DateField("หมดอายุ", null=True, blank=True, help_text="เว้นว่าง = ถาวร")
+
+    class Meta:
+        verbose_name = "การ override โมดูล"
+        verbose_name_plural = "การ override โมดูล"
+        unique_together = (("tenant", "module_code"),)
+        ordering = ("tenant", "module_code")
+
+    def __str__(self) -> str:
+        return f"{self.tenant.slug}: {self.module_code} → {self.get_mode_display()}"
+
+    @property
+    def is_active(self) -> bool:
+        if self.expires_at is None:
+            return True
+        from datetime import date
+
+        return self.expires_at >= date.today()
+
+
 class Usage(TenantScopedModel):
     """Monthly usage counter, one row per (tenant, period, kind) — bumped by `quota.increment_usage`.
 

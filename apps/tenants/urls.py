@@ -8,6 +8,7 @@ urlpatterns = [
     path("", views.settings_hub, name="settings_hub"),
     path("welcome/", views.onboarding, name="onboarding"),
     path("status/", views.system_status, name="system_status"),
+    path("modules/", views.modules_status, name="modules_status"),
     path("company/", views.settings_company, name="settings_company"),
     path("line/", views.settings_line, name="settings_line"),
     path("pipeline/", views.settings_pipeline, name="settings_pipeline"),

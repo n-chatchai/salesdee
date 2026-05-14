@@ -2,7 +2,13 @@ from django.contrib import admin
 
 from apps.core.admin import TenantScopedAdmin
 
-from .models import BankAccount, CompanyProfile, Tenant, TenantDomain
+from .models import (
+    BankAccount,
+    CompanyProfile,
+    Tenant,
+    TenantDomain,
+    TenantFeatureOverride,
+)
 
 
 class TenantDomainInline(admin.TabularInline):
@@ -40,3 +46,16 @@ class BankAccountAdmin(TenantScopedAdmin):
     list_display = ("bank_name", "account_number", "account_name", "is_default")
     list_filter = ("bank_name", "is_default")
     search_fields = ("bank_name", "account_number", "account_name")
+
+
+@admin.register(TenantFeatureOverride)
+class TenantFeatureOverrideAdmin(admin.ModelAdmin):
+    """Platform-admin only: override plan-gated module access for a specific tenant.
+    Module codes: billing · e_tax · white_label · custom_domain · api · priority_support · sla.
+    """
+
+    list_display = ("tenant", "module_code", "mode", "expires_at", "is_active", "updated_at")
+    list_filter = ("module_code", "mode")
+    search_fields = ("tenant__name", "tenant__slug", "module_code", "reason")
+    autocomplete_fields = ("tenant",)
+    readonly_fields = ("created_at", "updated_at")

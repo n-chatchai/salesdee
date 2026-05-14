@@ -35,6 +35,7 @@ SETTINGS_PAGES = [
     "workspace:settings_members",
     "workspace:settings_billing",
     "workspace:system_status",
+    "workspace:modules_status",
     "workspace:onboarding",
 ]
 
@@ -167,6 +168,99 @@ def test_plan_change_rejects_unknown_code(client, owner, tenant) -> None:
     assert resp.status_code == 302  # back to billing with an error message
     tenant.refresh_from_db()
     assert tenant.plan == "trial"
+
+
+def test_modules_status_lists_core_and_plan_modules(client, owner) -> None:
+    client.force_login(owner)
+    resp = client.get(reverse("workspace:modules_status"))
+    assert resp.status_code == 200
+    body = resp.content.decode()
+    # core always on
+    assert "ลูกค้าและดีล (CRM)" in body
+    assert "ใบเสนอราคา" in body
+    # plan-gated visible
+    assert "ระบบบัญชี" in body
+    # future bucket present
+    assert "ยังไม่พัฒนา" in body
+
+
+def test_modules_status_forbidden_for_viewer(client, viewer) -> None:
+    client.force_login(viewer)
+    assert client.get(reverse("workspace:modules_status")).status_code == 403
+
+
+def test_feature_override_force_on(tenant) -> None:
+    """A FORCE_ON override grants a plan-gated feature on a tier that wouldn't normally have it."""
+    from apps.tenants.features import feature_enabled
+    from apps.tenants.models import FeatureOverrideMode, TenantFeatureOverride
+
+    tenant.plan = "growth"
+    tenant.save(update_fields=["plan"])
+    assert feature_enabled(tenant, "billing") is False
+    TenantFeatureOverride.objects.create(
+        tenant=tenant,
+        module_code="billing",
+        mode=FeatureOverrideMode.FORCE_ON,
+        reason="anchor customer — free billing for 6 months",
+    )
+    assert feature_enabled(tenant, "billing") is True
+
+
+def test_feature_override_force_off(tenant) -> None:
+    """A FORCE_OFF override hides a feature even when the plan would grant it."""
+    from apps.tenants.features import feature_enabled
+    from apps.tenants.models import FeatureOverrideMode, TenantFeatureOverride
+
+    tenant.plan = "pro"
+    tenant.save(update_fields=["plan"])
+    assert feature_enabled(tenant, "billing") is True
+    TenantFeatureOverride.objects.create(
+        tenant=tenant,
+        module_code="billing",
+        mode=FeatureOverrideMode.FORCE_OFF,
+        reason="customer in dispute — billing access suspended",
+    )
+    assert feature_enabled(tenant, "billing") is False
+
+
+def test_feature_override_expired_ignored(tenant) -> None:
+    """An expired override does not affect resolution; plan defaults apply."""
+    from datetime import date, timedelta
+
+    from apps.tenants.features import feature_enabled
+    from apps.tenants.models import FeatureOverrideMode, TenantFeatureOverride
+
+    tenant.plan = "growth"
+    tenant.save(update_fields=["plan"])
+    TenantFeatureOverride.objects.create(
+        tenant=tenant,
+        module_code="billing",
+        mode=FeatureOverrideMode.FORCE_ON,
+        reason="6-month trial",
+        expires_at=date.today() - timedelta(days=1),
+    )
+    assert feature_enabled(tenant, "billing") is False
+
+
+def test_billing_middleware_respects_override(client, tenant) -> None:
+    """Growth tenant with a billing override can hit /billing/invoices/."""
+    from django.contrib.auth import get_user_model
+
+    from apps.accounts.models import Membership, Role
+    from apps.tenants.models import FeatureOverrideMode, TenantFeatureOverride
+
+    tenant.plan = "growth"
+    tenant.save(update_fields=["plan"])
+    TenantFeatureOverride.objects.create(
+        tenant=tenant,
+        module_code="billing",
+        mode=FeatureOverrideMode.FORCE_ON,
+        reason="anchor",
+    )
+    owner = get_user_model().objects.create_user(email="o@x.test", password="pw-123456789")
+    Membership.objects.create(user=owner, tenant=tenant, role=Role.OWNER)
+    client.force_login(owner)
+    assert client.get(reverse("billing:invoices")).status_code == 200
 
 
 def test_plan_change_cannot_switch_to_trial(client, owner, tenant) -> None:
