@@ -1,5 +1,4 @@
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.views import redirect_to_login
 from django.db import connection
 from django.db.models import Q
 from django.http import HttpRequest, HttpResponse, JsonResponse
@@ -57,7 +56,7 @@ def home(request: HttpRequest) -> HttpResponse:
     On a tenant host (a verified custom domain or ``<slug>.<APP_DOMAIN>``) an anonymous
     visitor sees that tenant's public catalog/showroom — so ``wandeedee.com/`` shows
     Wandeedee's products with no login. Logged-in staff get the dashboard. On a platform
-    host an anonymous visitor is sent to the login page (same as ``@login_required``).
+    host an anonymous visitor sees the salesdee.com marketing landing page.
     """
     if not request.user.is_authenticated:
         tenant = getattr(request, "tenant", None)
@@ -65,7 +64,7 @@ def home(request: HttpRequest) -> HttpResponse:
             from apps.catalog.views import public_home
 
             return public_home(request, tenant=tenant)
-        return redirect_to_login(request.get_full_path())
+        return render(request, "core/landing.html")
     ctx: dict = {}
     if getattr(request, "tenant", None) is not None:
         from apps.crm.dashboard import build_dashboard

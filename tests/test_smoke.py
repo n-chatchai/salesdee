@@ -12,11 +12,13 @@ def test_django_check_passes() -> None:
     call_command("check")  # raises SystemCheckError on problems
 
 
-def test_home_redirects_anonymous_to_login(client, db) -> None:
+def test_home_renders_landing_for_anonymous(client, db) -> None:
     # CurrentTenantMiddleware queries TenantDomain on every request -> needs the DB.
+    # Anonymous visitor to the platform host sees the marketing landing page.
     resp = client.get("/")
-    assert resp.status_code == 302
-    assert reverse("accounts:login") in resp.url
+    assert resp.status_code == 200
+    body = resp.content.decode()
+    assert "ทดลองฟรี" in body or "เริ่มฟรี" in body
 
 
 def test_login_page_renders(client, db) -> None:

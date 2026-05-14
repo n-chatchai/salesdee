@@ -164,10 +164,13 @@ def test_root_on_tenant_host_shows_public_home(client, tenant) -> None:
     assert "ดูสินค้าทั้งหมด" in body
 
 
-def test_root_on_platform_host_redirects_to_login(client) -> None:
+def test_root_on_platform_host_renders_landing(client) -> None:
+    """Anonymous visitor on the platform host (no tenant) sees the salesdee.com landing page,
+    not a redirect to login (landing has its own login/signup CTAs)."""
     resp = client.get("/", HTTP_HOST="localhost")
-    assert resp.status_code == 302
-    assert "/accounts/login/" in resp.url
+    assert resp.status_code == 200
+    body = resp.content.decode()
+    assert "ทดลองฟรี" in body or "เริ่มฟรี" in body
 
 
 def test_lead_intake_prefills_product(client, tenant) -> None:
