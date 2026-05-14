@@ -132,10 +132,15 @@ def conversation_ai_reply(request: HttpRequest, pk: int) -> HttpResponse:
             company = profile.name_th if profile else ""
         except Exception:
             pass
+        from apps.tenants.quota import QuotaExceeded, gated
+
         try:
-            reply = draft_reply_from_text(transcript, company_name=company)
+            with gated(conv.tenant, "ai_drafts"):
+                reply = draft_reply_from_text(transcript, company_name=company)
             if reply:
                 suggestions = [reply]
+        except QuotaExceeded as exc:
+            error = str(exc)
         except AINotConfigured:
             error = "ยังไม่ได้ตั้งค่าผู้ช่วย AI"
         except Exception:
@@ -170,8 +175,13 @@ def conversation_ai_summary(request: HttpRequest, pk: int) -> HttpResponse:
             name = conv.display_name or (
                 conv.customer.name if conv.customer else (conv.lead.name if conv.lead else "")
             )
+            from apps.tenants.quota import QuotaExceeded, gated
+
             try:
-                summary = summarize_conversation(transcript, customer_name=name)
+                with gated(conv.tenant, "ai_drafts"):
+                    summary = summarize_conversation(transcript, customer_name=name)
+            except QuotaExceeded as exc:
+                error = str(exc)
             except AINotConfigured:
                 error = "ยังไม่ได้ตั้งค่าผู้ช่วย AI"
             except Exception:
@@ -208,8 +218,14 @@ def conversation_make_quote(request: HttpRequest, pk: int) -> HttpResponse:
         {"code": p.code, "name": p.name, "unit": p.unit, "price": str(p.default_price)}
         for p in Product.objects.filter(is_active=True).order_by("name")[:300]
     ]
+    from apps.tenants.quota import QuotaExceeded, gated
+
     try:
-        draft = draft_quotation_from_text(transcript, catalog=catalog)
+        with gated(conv.tenant, "ai_drafts"):
+            draft = draft_quotation_from_text(transcript, catalog=catalog)
+    except QuotaExceeded as exc:
+        messages.error(request, str(exc))
+        return redirect("integrations:conversation", pk=conv.pk)
     except AINotConfigured as exc:
         messages.error(request, str(exc))
         return redirect("integrations:conversation", pk=conv.pk)

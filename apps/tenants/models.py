@@ -9,9 +9,14 @@ from apps.core.models import BaseModel, TenantScopedModel
 class Plan(models.TextChoices):
     TRIAL = "trial", "ทดลองใช้"
     STARTER = "starter", "Starter"
+    GROWTH = "growth", "Growth"
     PRO = "pro", "Pro"
     BUSINESS = "business", "Business"
-    ENTERPRISE = "enterprise", "Enterprise"
+
+
+class BillingCycle(models.TextChoices):
+    MONTHLY = "monthly", "รายเดือน"
+    ANNUAL = "annual", "รายปี"
 
 
 class Tenant(BaseModel):
@@ -26,7 +31,12 @@ class Tenant(BaseModel):
     )
     is_active = models.BooleanField("เปิดใช้งาน", default=True)
     plan = models.CharField("แพ็กเกจ", max_length=20, choices=Plan.choices, default=Plan.TRIAL)
+    billing_cycle = models.CharField(
+        "รอบบิล", max_length=20, choices=BillingCycle.choices, default=BillingCycle.MONTHLY
+    )
     trial_ends_at = models.DateField("วันสิ้นสุดทดลองใช้", null=True, blank=True)
+    subscription_started_at = models.DateField("วันเริ่มแพ็กเกจ", null=True, blank=True)
+    current_period_ends_at = models.DateField("รอบปัจจุบันสิ้นสุด", null=True, blank=True)
 
     class Meta:
         verbose_name = "Workspace"
@@ -108,6 +118,28 @@ class CompanyProfile(BaseModel):
         if self.branch_kind == Branch.HEAD_OFFICE:
             return "สำนักงานใหญ่"
         return f"สาขาที่ {self.branch_code}".strip()
+
+
+class Usage(TenantScopedModel):
+    """Monthly usage counter, one row per (tenant, period, kind) — bumped by `quota.increment_usage`.
+
+    ``period`` is YYYYMM (Asia/Bangkok local month — see ``quota.current_period``). ``kind`` is
+    one of ``apps.tenants.plans.USAGE_KINDS``. The cap is read from the tenant's plan; this row
+    only tracks the counter, never the cap (which is config, not data).
+    """
+
+    period = models.PositiveIntegerField("รอบเดือน (YYYYMM)")
+    kind = models.CharField("ประเภท", max_length=32)
+    count = models.PositiveIntegerField("จำนวน", default=0)
+
+    class Meta:
+        verbose_name = "การใช้งาน"
+        verbose_name_plural = "การใช้งาน"
+        unique_together = (("tenant", "period", "kind"),)
+        indexes = [models.Index(fields=("tenant", "period"))]
+
+    def __str__(self) -> str:
+        return f"{self.tenant_id}/{self.period}/{self.kind}={self.count}"
 
 
 class BankAccount(TenantScopedModel):

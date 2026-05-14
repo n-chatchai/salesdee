@@ -130,6 +130,18 @@
 
     {% block body %}
     <div class="app-page">
+      {% if quota_warning %}
+      <div class="quota-banner">
+        {% for cap in quota_warning %}
+        <div class="quota-row">
+          <span class="lbl">{{ cap.label_th }}</span>
+          <span class="bar"><span style="width:{{ cap.pct }}%"></span></span>
+          <span class="num">{{ cap.used }}/{{ cap.limit }} ({{ cap.pct }}%)</span>
+        </div>
+        {% endfor %}
+        <a class="upgrade" href="{% url 'workspace:settings_billing' %}">อัปเกรดแพ็กเกจ →</a>
+      </div>
+      {% endif %}
       {% if messages %}
       <ul class="messages">
         {% for m in messages %}<li class="{{ m.tags }}">{{ m }}</li>{% endfor %}

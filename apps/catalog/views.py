@@ -273,8 +273,15 @@ def public_catalog_match(request: HttpRequest, tenant_slug: str) -> HttpResponse
             {"code": p.code, "name": p.name, "unit": p.unit, "price": str(p.default_price)}
             for p in products
         ]
+        from apps.tenants.quota import QuotaExceeded, gated
+
         try:
-            draft = draft_quotation_from_text(text, catalog=catalog)
+            with gated(tenant, "ai_drafts"):
+                draft = draft_quotation_from_text(text, catalog=catalog)
+        except QuotaExceeded:
+            ctx["fallback"] = True
+            ctx["ai_error"] = "ผู้ช่วยเอไอเต็มโควต้าเดือนนี้"
+            return render(request, "catalog/_match_results.html", ctx)
         except AINotConfigured:
             ctx["fallback"] = True
             return render(request, "catalog/_match_results.html", ctx)

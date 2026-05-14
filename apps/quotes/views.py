@@ -271,8 +271,15 @@ def quotation_from_lead_ai(request: HttpRequest, lead_pk: int) -> HttpResponse:
         {"code": p.code, "name": p.name, "unit": p.unit, "price": str(p.default_price)}
         for p in Product.objects.filter(is_active=True).order_by("name")[:300]
     ]
+    from apps.tenants.quota import QuotaExceeded, gated
+
     try:
-        draft = draft_quotation_from_text(conversation, catalog=catalog)
+        # request.tenant is set by CurrentTenantMiddleware (see apps/core/middleware.py).
+        with gated(request.tenant, "ai_drafts"):  # type: ignore[attr-defined]
+            draft = draft_quotation_from_text(conversation, catalog=catalog)
+    except QuotaExceeded as exc:
+        messages.error(request, str(exc))
+        return redirect("crm:lead_detail", pk=lead.pk)
     except AINotConfigured as exc:
         messages.error(request, str(exc))
         return redirect("crm:lead_detail", pk=lead.pk)

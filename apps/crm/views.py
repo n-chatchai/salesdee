@@ -365,8 +365,14 @@ def lead_suggest_reply(request: HttpRequest, pk: int) -> HttpResponse:
         return render(
             request, "crm/_ai_reply.html", {"lead": lead, "error": "ยังไม่มีบทสนทนาให้ AI ใช้"}
         )
+    from apps.tenants.quota import QuotaExceeded, gated
+
     try:
-        text = draft_reply_from_text(conversation, company_name=_company_name(request))
+        # request.tenant is set by CurrentTenantMiddleware (see apps/core/middleware.py).
+        with gated(request.tenant, "ai_drafts"):  # type: ignore[attr-defined]
+            text = draft_reply_from_text(conversation, company_name=_company_name(request))
+    except QuotaExceeded as exc:
+        return render(request, "crm/_ai_reply.html", {"lead": lead, "error": str(exc)})
     except AINotConfigured as exc:
         return render(request, "crm/_ai_reply.html", {"lead": lead, "error": str(exc)})
     except Exception as exc:  # noqa: BLE001 — surface API/network errors instead of 500

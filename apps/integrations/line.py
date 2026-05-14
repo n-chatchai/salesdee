@@ -244,6 +244,7 @@ def _record_inbound(line_user_id: str, *, text: str, kind=None, external_id: str
     conversation + linked lead if needed); for text, also mirror it onto the lead's activity
     timeline. ``kind`` defaults to ``MessageKind.TEXT``."""
     from apps.crm.models import Activity, ActivityKind
+    from apps.tenants.quota import increment_usage
 
     from .models import MessageDirection, MessageKind
 
@@ -251,6 +252,7 @@ def _record_inbound(line_user_id: str, *, text: str, kind=None, external_id: str
     _append_message(
         conv, direction=MessageDirection.IN, text=text, kind=kind, external_id=external_id
     )
+    increment_usage(conv.tenant, "line_msgs")
     if conv.lead_id and kind in (None, MessageKind.TEXT) and text:
         if not conv.lead.message:
             conv.lead.message = text

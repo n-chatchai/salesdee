@@ -16,6 +16,7 @@ from apps.core.permissions import membership_of
 from apps.crm.models import PipelineStage
 from apps.integrations.models import LineIntegration
 
+from . import plans as plan_registry
 from .forms import (
     CompanyProfileForm,
     DocumentNumberSequenceForm,
@@ -24,17 +25,9 @@ from .forms import (
     MemberRoleForm,
     PipelineStageForm,
 )
-from .models import CompanyProfile
+from .models import BillingCycle, CompanyProfile
 
 User = get_user_model()
-
-# Plan tiers (specs/salesdee-prd.md §12). Configuration/display only — no payment integration.
-PLAN_TIERS = [
-    ("free", "Free", 0, "ทดลองใช้ฟรี — ฟีเจอร์พื้นฐาน"),
-    ("starter", "Starter", 990, "ทีมเล็ก — CRM + ใบเสนอราคา + LINE"),
-    ("pro", "Pro", 2490, "ทีมโต — ผู้ช่วย AI + รายงาน"),
-    ("business", "Business", 7990, "หลายสาขา — ทุกฟีเจอร์ + ซัพพอร์ต"),
-]
 
 
 def _tenant(request: HttpRequest):
@@ -308,6 +301,18 @@ def settings_members(request: HttpRequest) -> HttpResponse:
         form = MemberInviteForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data["email"].lower().strip()
+            # Plan user-cap (Phase B). Only counts NEW members — re-activating an existing
+            # membership of the same workspace stays under cap.
+            user_limit = plan_registry.get(tenant.plan).limits.cap("users")
+            active_count = Membership.objects.filter(tenant=tenant, is_active=True).count()
+            already_member = Membership.objects.filter(tenant=tenant, user__email=email).exists()
+            if user_limit != -1 and not already_member and active_count >= user_limit:
+                messages.error(
+                    request,
+                    f"แพ็กเกจปัจจุบันรองรับ {user_limit} ผู้ใช้ "
+                    f"({active_count}/{user_limit}) — อัปเกรดเพื่อเพิ่มสมาชิก",
+                )
+                return redirect("workspace:settings_members")
             user, created = User.objects.get_or_create(
                 email=email, defaults={"full_name": form.cleaned_data.get("full_name", "")}
             )
@@ -398,8 +403,53 @@ def member_edit(request: HttpRequest, pk: int) -> HttpResponse:
 
 @login_required
 def settings_billing(request: HttpRequest) -> HttpResponse:
+    from .quota import caps_for_tenant
+
     tenant = _tenant(request)
-    return render(request, "tenants/settings_billing.html", {"tenant": tenant, "tiers": PLAN_TIERS})
+    current = plan_registry.get(tenant.plan)
+    ctx = {
+        "tenant": tenant,
+        "current_plan": current,
+        "tiers": plan_registry.public_tiers(),
+        "cycles": BillingCycle,
+        "can_admin": _can_admin(request),
+        "usage": caps_for_tenant(tenant),
+    }
+    return render(request, "tenants/settings_billing.html", ctx)
+
+
+@login_required
+@require_POST
+def plan_change(request: HttpRequest) -> HttpResponse:
+    """Owner/manager picks a plan tier and billing cycle. No payment integration yet — this
+    just updates the tenant record and writes an audit event. Stripe wiring is Phase D."""
+    if not _can_admin(request):
+        return HttpResponseForbidden("ต้องเป็นเจ้าของหรือผู้จัดการเท่านั้น")
+    tenant = _tenant(request)
+    new_code = request.POST.get("plan", "").strip()
+    new_cycle = request.POST.get("cycle", BillingCycle.MONTHLY).strip()
+    if new_code not in plan_registry.PLANS or new_code == "trial":
+        messages.error(request, "เลือกแพ็กเกจไม่ถูกต้อง")
+        return redirect("workspace:settings_billing")
+    if new_cycle not in BillingCycle.values:
+        new_cycle = BillingCycle.MONTHLY
+    before = {"plan": tenant.plan, "cycle": tenant.billing_cycle}
+    tenant.plan = new_code
+    tenant.billing_cycle = new_cycle
+    tenant.save(update_fields=["plan", "billing_cycle", "updated_at"])
+    messages.success(request, f"เปลี่ยนแพ็กเกจเป็น {plan_registry.get(new_code).label_th} แล้ว")
+    from apps.audit.services import record as audit_record
+
+    audit_record(
+        request.user,
+        action="tenant.plan_changed",
+        obj=tenant,
+        object_repr=tenant.name,
+        changes={"before": before, "after": {"plan": new_code, "cycle": new_cycle}},
+        ip=request.META.get("REMOTE_ADDR"),
+        tenant=tenant,
+    )
+    return redirect("workspace:settings_billing")
 
 
 # --------------------------------------------------------------------------- onboarding wizard

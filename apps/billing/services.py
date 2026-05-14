@@ -95,7 +95,10 @@ def create_invoice_from_quotation(quote: SalesDocument, *, user=None) -> SalesDo
 @transaction.atomic
 def issue_tax_invoice(invoice: SalesDocument, *, user=None) -> SalesDocument:
     """Issue a full-form tax invoice (Revenue Code §86/4) from an invoice. **Assigns the gap-free
-    TAX number inside this transaction** and stamps ``issued_at`` — this is the immutability point."""
+    TAX number inside this transaction** and stamps ``issued_at`` — this is the immutability point.
+
+    Hard-blocked by the plan's monthly tax-invoice quota (e.g. Starter: 0, Growth: 50). Raises
+    ``QuotaExceeded`` when the cap is hit; the view layer surfaces an upgrade prompt."""
     if invoice.doc_type != DocType.INVOICE:
         raise WorkflowError("ออกใบกำกับภาษีได้จากใบแจ้งหนี้เท่านั้น")
     existing = SalesDocument.objects.filter(
@@ -103,6 +106,9 @@ def issue_tax_invoice(invoice: SalesDocument, *, user=None) -> SalesDocument:
     ).exclude(status=DocStatus.CANCELLED)
     if existing.exists():
         raise WorkflowError("ใบแจ้งหนี้นี้ออกใบกำกับภาษีไปแล้ว")
+    from apps.tenants.quota import enforce_quota, increment_usage
+
+    enforce_quota(invoice.tenant, "tax_invoices")
     tax = SalesDocument(
         doc_type=DocType.TAX_INVOICE,
         status=DocStatus.SENT,
@@ -115,6 +121,7 @@ def issue_tax_invoice(invoice: SalesDocument, *, user=None) -> SalesDocument:
     tax.doc_number = next_document_number(DocType.TAX_INVOICE, prefix="TAX")
     tax.issued_at = timezone.now()
     tax.save()  # DB still has doc_number="" at this point, so the immutability guard allows it
+    increment_usage(invoice.tenant, "tax_invoices")
     from apps.audit.services import record as audit_record
 
     audit_record(

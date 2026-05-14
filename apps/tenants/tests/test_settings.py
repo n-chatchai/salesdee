@@ -125,3 +125,56 @@ def test_public_home_renders_for_anon(client, tenant) -> None:
     resp = client.get("/", HTTP_HOST=f"{tenant.slug}.localhost")
     assert resp.status_code == 200
     assert "ดูสินค้าทั้งหมด" in resp.content.decode()
+
+
+def test_billing_page_shows_all_public_tiers(client, owner) -> None:
+    client.force_login(owner)
+    resp = client.get(reverse("workspace:settings_billing"))
+    assert resp.status_code == 200
+    body = resp.content.decode()
+    for label in ("Starter", "Growth", "Pro", "Business"):
+        assert label in body
+    # Featured ribbon on Growth.
+    assert "แนะนำ" in body
+
+
+def test_plan_change_owner_updates_tenant(client, owner, tenant) -> None:
+    client.force_login(owner)
+    resp = client.post(reverse("workspace:plan_change"), {"plan": "growth", "cycle": "annual"})
+    assert resp.status_code == 302
+    tenant.refresh_from_db()
+    assert tenant.plan == "growth"
+    assert tenant.billing_cycle == "annual"
+
+    from apps.audit.models import AuditEvent
+
+    ev = AuditEvent.all_tenants.filter(action="tenant.plan_changed").latest("created_at")
+    assert ev.changes["after"]["plan"] == "growth"
+    assert ev.changes["before"]["plan"] == "trial"
+
+
+def test_plan_change_viewer_forbidden(client, viewer, tenant) -> None:
+    client.force_login(viewer)
+    resp = client.post(reverse("workspace:plan_change"), {"plan": "growth", "cycle": "monthly"})
+    assert resp.status_code == 403
+    tenant.refresh_from_db()
+    assert tenant.plan == "trial"
+
+
+def test_plan_change_rejects_unknown_code(client, owner, tenant) -> None:
+    client.force_login(owner)
+    resp = client.post(reverse("workspace:plan_change"), {"plan": "enterprise", "cycle": "monthly"})
+    assert resp.status_code == 302  # back to billing with an error message
+    tenant.refresh_from_db()
+    assert tenant.plan == "trial"
+
+
+def test_plan_change_cannot_switch_to_trial(client, owner, tenant) -> None:
+    """Trial isn't a public tier — UI never offers it, view must reject too."""
+    tenant.plan = "growth"
+    tenant.save(update_fields=["plan"])
+    client.force_login(owner)
+    resp = client.post(reverse("workspace:plan_change"), {"plan": "trial", "cycle": "monthly"})
+    assert resp.status_code == 302
+    tenant.refresh_from_db()
+    assert tenant.plan == "growth"

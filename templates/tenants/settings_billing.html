@@ -1,23 +1,120 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}แพ็กเกจ · ตั้งค่า{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{% static 'css/settings.css' %}">{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/settings.css' %}">
+<link rel="stylesheet" href="{% static 'css/billing-tiers.css' %}">
+{% endblock %}
 {% block content %}
-<div class="set-page-head"><div class="eyebrow">ตั้งค่า</div><h1>แพ็กเกจ</h1></div>
+<div class="set-page-head"><div class="eyebrow">ตั้งค่า</div><h1>แพ็กเกจและการชำระเงิน</h1></div>
 <div class="set-layout">
   {% include "tenants/_settings_nav.html" %}
   <div class="set-main">
-    <div class="card" style="margin-bottom:16px"><strong>แพ็กเกจปัจจุบัน:</strong> {{ tenant.get_plan_display }} — <span class="muted">ติดต่อทีมงานเพื่อเปลี่ยนแพ็กเกจ</span></div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px">
-      {% for code,name,price,desc in tiers %}
-      <div class="card" style="{% if code == tenant.plan %}border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft,rgba(210,85,42,.15)){% endif %}">
-        <div class="card-head"><span class="title">{{ name }}</span>{% if code == tenant.plan %}<span class="chip chip-accent ml-auto">ปัจจุบัน</span>{% endif %}</div>
-        <div class="h2">{% if price %}{{ price }} <span class="muted" style="font-size:14px">บาท/เดือน</span>{% else %}ฟรี{% endif %}</div>
-        <p class="muted">{{ desc }}</p>
+
+    <div class="bt-current">
+      <div class="bt-current-row">
+        <div>
+          <div class="bt-current-label">แพ็กเกจปัจจุบัน</div>
+          <div class="bt-current-name">{{ current_plan.label_th }}</div>
+          <div class="bt-current-tag muted">{{ current_plan.tagline_th }}</div>
+        </div>
+        <div class="bt-current-meta">
+          {% if current_plan.monthly_thb %}
+          <div class="bt-current-price">
+            <span class="num">{{ current_plan.monthly_thb|floatformat:0 }}</span>
+            <span class="muted">฿/เดือน</span>
+          </div>
+          {% else %}
+          <div class="bt-current-price">ฟรี</div>
+          {% endif %}
+          <div class="muted">รอบบิล: {{ tenant.get_billing_cycle_display }}</div>
+          {% if tenant.trial_ends_at %}
+          <div class="muted">ทดลองใช้ถึง: {{ tenant.trial_ends_at|date:"j M Y" }}</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="bt-usage">
+      <h3>การใช้งานเดือนนี้</h3>
+      {% for cap in usage %}
+      <div class="bt-usage-row {% if not cap.is_unlimited %}{% if cap.ratio >= 1.0 %}over{% elif cap.ratio >= 0.8 %}warn{% endif %}{% endif %}">
+        <div class="lbl">{{ cap.label_th }}</div>
+        {% if cap.is_unlimited %}
+        <div class="bar"></div>
+        <div class="num unlim">{{ cap.used }} · ไม่จำกัด</div>
+        {% else %}
+        <div class="bar"><span style="width:{{ cap.pct }}%"></span></div>
+        <div class="num">{{ cap.used }}/{{ cap.limit }} ({{ cap.pct }}%)</div>
+        {% endif %}
       </div>
       {% endfor %}
     </div>
-    <p class="muted" style="margin-top:16px">ยังไม่มีระบบชำระเงินอัตโนมัติ — ติดต่อทีมงาน salesdee เพื่อเปลี่ยนแพ็กเกจ</p>
+
+    <h2 class="bt-section-label">เปลี่ยนแพ็กเกจ</h2>
+
+    <div class="bt-grid">
+      {% for tier in tiers %}
+      <div class="bt-card {% if tier.code == tenant.plan %}is-current{% endif %} {% if tier.is_featured %}is-featured{% endif %}">
+        {% if tier.is_featured %}<div class="bt-ribbon">แนะนำ</div>{% endif %}
+        <div class="bt-card-head">
+          <div class="bt-tier-name">{{ tier.label_th }}</div>
+          <div class="bt-tier-tag">{{ tier.tagline_th }}</div>
+        </div>
+        <div class="bt-price">
+          <span class="num">{{ tier.monthly_thb|floatformat:0 }}</span>
+          <span class="muted">฿/เดือน</span>
+        </div>
+        <div class="bt-price-annual muted">
+          {{ tier.annual_monthly_equivalent|floatformat:0 }} ฿/เดือน เมื่อจ่ายรายปี
+          ({{ tier.annual_thb|floatformat:0 }} ฿/ปี · ประหยัด 2 เดือน)
+        </div>
+        <ul class="bt-features">
+          <li><strong>ผู้ใช้:</strong> {% if tier.limits.users == -1 %}ไม่จำกัด{% else %}{{ tier.limits.users }} คน{% endif %}</li>
+          <li><strong>ข้อความไลน์:</strong> {% if tier.limits.line_msgs == -1 %}ไม่จำกัด{% else %}{{ tier.limits.line_msgs }}/เดือน{% endif %}</li>
+          <li><strong>ผู้ช่วยเอไอ:</strong> {% if tier.limits.ai_drafts == -1 %}ไม่จำกัด{% else %}{{ tier.limits.ai_drafts }} ดราฟต์/เดือน{% endif %}</li>
+          <li><strong>ใบกำกับภาษี:</strong> {% if tier.limits.tax_invoices == -1 %}ไม่จำกัด{% elif tier.limits.tax_invoices == 0 %}ยังไม่รวม{% else %}{{ tier.limits.tax_invoices }} ใบ/เดือน{% endif %}</li>
+          {% for bullet in tier.extras_th %}<li>{{ bullet }}</li>{% endfor %}
+        </ul>
+        {% if tier.code == tenant.plan %}
+        <button class="btn btn-disabled" disabled>แพ็กเกจปัจจุบัน</button>
+        {% elif can_admin %}
+        <form method="post" action="{% url 'workspace:plan_change' %}">
+          {% csrf_token %}
+          <input type="hidden" name="plan" value="{{ tier.code }}">
+          <input type="hidden" name="cycle" value="{{ tenant.billing_cycle }}">
+          <button class="btn btn-primary" type="submit">เลือก {{ tier.label_th }}</button>
+        </form>
+        {% else %}
+        <div class="muted bt-locked">ต้องเป็นเจ้าของหรือผู้จัดการ</div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+
+    {% if can_admin %}
+    <div class="bt-cycle">
+      <h3 class="sec-label">รอบบิล</h3>
+      <form method="post" action="{% url 'workspace:plan_change' %}" class="bt-cycle-form">
+        {% csrf_token %}
+        <input type="hidden" name="plan" value="{{ tenant.plan }}">
+        <label class="bt-cycle-opt">
+          <input type="radio" name="cycle" value="monthly" {% if tenant.billing_cycle == 'monthly' %}checked{% endif %}>
+          รายเดือน
+        </label>
+        <label class="bt-cycle-opt">
+          <input type="radio" name="cycle" value="annual" {% if tenant.billing_cycle == 'annual' %}checked{% endif %}>
+          รายปี <span class="muted">(ประหยัด 2 เดือน)</span>
+        </label>
+        <button class="btn btn-secondary" type="submit">บันทึกรอบบิล</button>
+      </form>
+    </div>
+    {% endif %}
+
+    <div class="bt-note muted">
+      ยังไม่ตัดบัตรอัตโนมัติ — หลังเปลี่ยนแพ็กเกจ ทีมงานขายดีจะส่งใบแจ้งหนี้ไปที่อีเมลของเจ้าของบัญชี
+    </div>
+
   </div>
 </div>
 {% endblock %}

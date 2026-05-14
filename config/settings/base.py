@@ -198,8 +198,8 @@ if USE_R2:
                 "region_name": env("R2_REGION", default="auto"),
                 "addressing_style": "virtual",
                 "signature_version": "s3v4",
-                "default_acl": None,            # R2 doesn't honour S3 ACLs
-                "querystring_auth": True,        # presign every URL
+                "default_acl": None,  # R2 doesn't honour S3 ACLs
+                "querystring_auth": True,  # presign every URL
                 "querystring_expire": env.int("R2_URL_TTL_SECONDS", default=3600),
                 "file_overwrite": False,
             },

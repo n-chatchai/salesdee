@@ -17,4 +17,5 @@ urlpatterns = [
     path("members/", views.settings_members, name="settings_members"),
     path("members/<int:pk>/edit/", views.member_edit, name="member_edit"),
     path("billing/", views.settings_billing, name="settings_billing"),
+    path("billing/change/", views.plan_change, name="plan_change"),
 ]

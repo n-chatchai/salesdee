@@ -103,10 +103,15 @@ def quotation_to_invoice(request: HttpRequest, quote_pk: int) -> HttpResponse:
 @login_required
 @require_POST
 def invoice_issue_tax(request: HttpRequest, pk: int) -> HttpResponse:
+    from apps.tenants.quota import QuotaExceeded
+
     _require_write(request)
     inv = get_object_or_404(_docs(DocType.INVOICE), pk=pk)
     try:
         tax = services.issue_tax_invoice(inv, user=request.user)
+    except QuotaExceeded as e:
+        messages.error(request, str(e))
+        return redirect("billing:invoice_detail", pk=inv.pk)
     except WorkflowError as e:
         messages.error(request, str(e))
         return redirect("billing:invoice_detail", pk=inv.pk)
