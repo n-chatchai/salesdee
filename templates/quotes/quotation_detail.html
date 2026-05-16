@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ document.doc_number }} · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/quotes.css' %}">{% endblock %}
+
+{% block content %}
+
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div style="display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap;">
+    <div style="flex: 1; min-width: 280px;">
+      <div class="q-detail-num">{{ document.doc_number }}{% if document.revision %} · Rev. {{ document.revision }}{% endif %}</div>
+      <div class="q-detail-title">
+        {{ document.customer.name|default:"ลูกค้าใหม่" }}
+        {% if document.customer.company_name %}<em> · {{ document.customer.company_name }}</em>{% endif %}
+      </div>
+      <div class="q-detail-meta">
+        <span class="q-status-pill {{ document.status }}">{{ document.get_status_display }}</span>
+        <span class="dot">·</span>
+        <div class="item">ออกเมื่อ <strong>{{ document.issue_date|date:"j M y" }}</strong></div>
+        {% if document.valid_until %}<span class="dot">·</span><div class="item">ยืนราคาถึง <strong>{{ document.valid_until|date:"j M y" }}</strong></div>{% endif %}
+        {% if document.sent_at %}<span class="dot">·</span><div class="item">ส่งเมื่อ <strong>{{ document.sent_at|date:"j M y H:i" }}</strong></div>{% endif %}
+        {% if document.view_count %}<span class="dot">·</span><div class="item">ลูกค้าเปิด <strong>{{ document.view_count }}</strong> ครั้ง</div>{% endif %}
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+      {% if editable %}
+        <a href="{% url 'quotes:quotation_edit' document.pk %}" class="btn">
+          <svg class="ico ico-sm"><use href="#i-edit"/></svg> แก้ไข
+        </a>
+      {% endif %}
+      <a href="{% url 'quotes:quotation_pdf' document.pk %}" class="btn">
+        <svg class="ico ico-sm"><use href="#i-download"/></svg> PDF
+      </a>
+      {% if document.status == 'draft' or document.status == 'ready' %}
+        <a href="{% url 'quotes:quotation_send' document.pk %}" class="btn accent">
+          <svg class="ico ico-sm"><use href="#i-send"/></svg> ส่ง
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="q-form-grid">
+
+  <div class="q-form-main">
+    {% include "quotes/_quote_lines.html" %}
+
+    {% if document.notes or document.payment_terms or document.warranty or document.lead_time %}
+      <div class="q-form-section">
+        <h3>เงื่อนไข</h3>
+        <div class="q-form-stack">
+          {% if document.payment_terms %}<div><div class="muted" style="font-size:10px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.1em;">การชำระเงิน</div>{{ document.payment_terms|linebreaks }}</div>{% endif %}
+          {% if document.lead_time %}<div><div class="muted" style="font-size:10px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.1em;">กำหนดส่งมอบ</div>{{ document.lead_time }}</div>{% endif %}
+          {% if document.warranty %}<div><div class="muted" style="font-size:10px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.1em;">รับประกัน</div>{{ document.warranty }}</div>{% endif %}
+          {% if document.notes %}<div><div class="muted" style="font-size:10px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.1em;">หมายเหตุ</div>{{ document.notes|linebreaks }}</div>{% endif %}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <aside class="q-form-side">
+    <div class="q-form-section">
+      <h3>ลูกค้า</h3>
+      <div style="font-size: 14px; font-weight: 600;">{{ document.customer.name|default:"—" }}</div>
+      {% if document.customer.company_name %}<div class="muted">{{ document.customer.company_name }}</div>{% endif %}
+      {% if document.contact %}<div style="margin-top: 8px; font-size: 12px;">ผู้ติดต่อ: {{ document.contact.name }}</div>{% endif %}
+    </div>
+
+    {% if document.salesperson %}
+      <div class="q-form-section">
+        <h3>เซลส์</h3>
+        <div>{{ document.salesperson.get_full_name|default:document.salesperson.email }}</div>
+      </div>
+    {% endif %}
+
+    {% if revisions %}
+      <div class="q-form-section">
+        <h3>ประวัติแก้ไข ({{ revisions|length }})</h3>
+        <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 8px;">
+          {% for rev in revisions|slice:":5" %}
+            <li style="font-size: 12px;">
+              <a href="{% url 'quotes:quotation_revision_detail' document.pk rev.revision %}" style="color: var(--accent);">Rev. {{ rev.revision }}</a>
+              <span class="muted"> · {{ rev.created_at|date:"j M y" }}</span>
+              {% if rev.changed_by %}<div class="muted">โดย {{ rev.changed_by.get_full_name|default:rev.changed_by.email }}</div>{% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+        {% if revisions|length > 5 %}<a href="{% url 'quotes:quotation_revisions' document.pk %}" class="btn ghost sm">ดูทั้งหมด</a>{% endif %}
+      </div>
+    {% endif %}
+  </aside>
+
+</div>
+{% endblock %}

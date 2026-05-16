@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{% if document %}แก้ใบเสนอ {{ document.doc_number }}{% else %}สร้างใบเสนอ{% endif %} · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/quotes.css' %}">{% endblock %}
+
+{% block content %}
+
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-num">{{ document.doc_number|default:"ใบเสนอใหม่" }}</div>
+  <div class="q-detail-title">
+    {% if document %}
+      {% if document.revision %}แก้ไข <em>Rev. {{ document.revision }}</em>{% else %}แก้ใบเสนอ{% endif %}
+    {% else %}
+      สร้าง<em>ใบเสนอราคา</em>
+    {% endif %}
+  </div>
+  {% if document %}
+    <div class="q-detail-meta">
+      <span class="q-status-pill {{ document.status }}">{{ document.get_status_display }}</span>
+      <span class="dot">·</span>
+      <div class="item">ออกเมื่อ <strong>{{ document.issue_date|date:"j M y" }}</strong></div>
+      {% if document.valid_until %}<span class="dot">·</span><div class="item">ยืนราคาถึง <strong>{{ document.valid_until|date:"j M y" }}</strong></div>{% endif %}
+    </div>
+  {% endif %}
+</div>
+
+<form method="post" class="q-form-grid">
+  {% csrf_token %}
+
+  <div class="q-form-main">
+    {% if form.non_field_errors %}<div class="auth-alert">{{ form.non_field_errors|join:" · " }}</div>{% endif %}
+
+    <div class="q-form-section">
+      <h3>ลูกค้า + รายละเอียด</h3>
+      <div class="q-form-stack">
+        <div>
+          <label>ลูกค้า</label>
+          {{ form.customer }}
+          {% if form.customer.errors %}<div class="auth-err">{{ form.customer.errors|join:" · " }}</div>{% endif %}
+        </div>
+        <div class="q-form-row-2">
+          <div>
+            <label>ผู้ติดต่อ</label>
+            {{ form.contact }}
+          </div>
+          <div>
+            <label>เซลส์</label>
+            {{ form.salesperson }}
+          </div>
+        </div>
+        <div>
+          <label>อ้างอิง / ชื่อโปรเจกต์</label>
+          {{ form.reference }}
+        </div>
+      </div>
+    </div>
+
+    {% if document %}
+      <div id="lines-pane">
+        {% include "quotes/_quote_lines.html" %}
+      </div>
+    {% else %}
+      <div class="q-form-section">
+        <h3>รายการสินค้า</h3>
+        <div class="muted" style="text-align: center; padding: 20px;">บันทึกใบเสนอก่อน จึงจะเพิ่มรายการสินค้าได้</div>
+      </div>
+    {% endif %}
+
+    <div class="q-form-section">
+      <h3>เงื่อนไข</h3>
+      <div class="q-form-stack">
+        <div>
+          <label>เงื่อนไขการชำระเงิน</label>
+          {{ form.payment_terms }}
+        </div>
+        <div class="q-form-row-2">
+          <div><label>กำหนดส่งมอบ</label>{{ form.lead_time }}</div>
+          <div><label>การรับประกัน</label>{{ form.warranty }}</div>
+        </div>
+        <div>
+          <label>หมายเหตุ</label>
+          {{ form.notes }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <aside class="q-form-side">
+    <div class="q-form-section">
+      <h3>วันที่</h3>
+      <div class="q-form-stack">
+        <div><label>วันที่ออก</label>{{ form.issue_date }}</div>
+        <div><label>ยืนราคาถึง</label>{{ form.valid_until }}</div>
+      </div>
+    </div>
+
+    <div class="q-form-section">
+      <h3>ราคา</h3>
+      <div class="q-form-stack">
+        <div><label>โหมดราคา</label>{{ form.price_mode }}</div>
+        <div class="q-form-row-2">
+          <div><label>ส่วนลดท้าย</label>{{ form.end_discount_kind }}</div>
+          <div><label>มูลค่า</label>{{ form.end_discount_value }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="q-form-section">
+      <h3>ธนาคาร</h3>
+      {{ form.bank_account }}
+    </div>
+
+    <div style="display: flex; gap: 8px; flex-direction: column;">
+      <button type="submit" class="btn accent">
+        <svg class="ico ico-sm"><use href="#i-check"/></svg> บันทึก
+      </button>
+      {% if document %}
+        <a href="{% url 'quotes:quotation_detail' document.pk %}" class="btn">ยกเลิก</a>
+      {% else %}
+        <a href="{% url 'quotes:quotations' %}" class="btn">ยกเลิก</a>
+      {% endif %}
+    </div>
+  </aside>
+
+</form>
+
+{% endblock %}

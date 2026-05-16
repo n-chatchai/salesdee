@@ -1,0 +1,72 @@
+{# Partial · htmx-swappable lines pane (rendered by quotation_lines_partial / add_line / delete_line / line_edit). #}
+{% load static %}
+<div class="q-lines" id="lines-pane">
+  <div class="q-lines-head">
+    <div class="title">รายการสินค้า · <span class="muted">{{ document.lines.count }} รายการ</span></div>
+    {% if editable %}
+      <form method="post"
+            action="{% url 'quotes:quotation_add_line' document.pk %}"
+            hx-post="{% url 'quotes:quotation_add_line' document.pk %}"
+            hx-target="#lines-pane"
+            hx-swap="outerHTML"
+            hx-encoding="multipart/form-data"
+            enctype="multipart/form-data"
+            style="display: flex; gap: 6px; align-items: center;">
+        {% csrf_token %}
+        {{ line_form.description }}
+        {{ line_form.quantity }}
+        {{ line_form.unit_price }}
+        <button type="submit" class="btn sm accent">
+          <svg class="ico ico-sm"><use href="#i-plus"/></svg> เพิ่ม
+        </button>
+      </form>
+    {% endif %}
+  </div>
+
+  {% if document.lines.all %}
+    <table class="q-lines-table">
+      <thead>
+        <tr>
+          <th>รายการ</th>
+          <th class="r">จำนวน</th>
+          <th class="r">ราคา/หน่วย</th>
+          <th class="r">รวม</th>
+          {% if editable %}<th></th>{% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for line in document.lines.all %}
+          <tr>
+            <td>
+              <strong>{{ line.description|default:line.product.name|default:"-" }}</strong>
+              {% if line.group_label %}<div class="muted" style="font-size: 11px;">{{ line.group_label }}</div>{% endif %}
+            </td>
+            <td class="r">{{ line.quantity|floatformat:"-2" }} {{ line.unit }}</td>
+            <td class="r">{{ line.unit_price|floatformat:0 }}</td>
+            <td class="r"><strong>{{ line.amount|floatformat:0 }}</strong></td>
+            {% if editable %}
+              <td class="r">
+                <button class="btn sm ghost"
+                        hx-post="{% url 'quotes:quotation_delete_line' document.pk line.pk %}"
+                        hx-target="#lines-pane"
+                        hx-swap="outerHTML"
+                        hx-confirm="ลบรายการนี้?">
+                  <svg class="ico ico-sm"><use href="#i-trash"/></svg>
+                </button>
+              </td>
+            {% endif %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="q-lines-foot">
+      <div class="row"><div class="lbl">รวมก่อนภาษี</div><div class="val">{{ totals.subtotal|floatformat:2 }}</div></div>
+      {% if totals.end_discount_amount %}<div class="row"><div class="lbl">ส่วนลดท้ายบิล</div><div class="val">-{{ totals.end_discount_amount|floatformat:2 }}</div></div>{% endif %}
+      {% if totals.vat_amount %}<div class="row"><div class="lbl">VAT 7%</div><div class="val">{{ totals.vat_amount|floatformat:2 }}</div></div>{% endif %}
+      <div class="row total"><div class="lbl">รวมทั้งสิ้น</div><div class="val">฿{{ totals.grand_total|floatformat:2 }}</div></div>
+    </div>
+  {% else %}
+    <div class="q-lines-empty">ยังไม่มีรายการ — เพิ่มสินค้าได้จากปุ่มด้านบน</div>
+  {% endif %}
+</div>

@@ -1,0 +1,186 @@
+/* Quotes · list + form + detail (frames e.1, e.2, e.3, e.4, e.3-sent).
+   Reuses .h-row pattern from home.css for list. Form/detail use shared .card / .btn / .field. */
+
+/* ─── List page chrome ─── */
+.q-list-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 24px 28px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--paper);
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.q-list-head .title-group { display: flex; align-items: baseline; gap: 12px; }
+.q-list-head .title {
+  font-size: 24px; font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.q-list-head .count-pill {
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+}
+.q-list-head .actions { display: flex; gap: 8px; align-items: center; }
+
+.q-rows { background: var(--paper); }
+
+/* ─── Detail header ─── */
+.q-detail-head {
+  background: var(--paper);
+  border-bottom: 1px solid var(--border);
+  padding: 22px 28px;
+}
+.q-detail-num {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: 0.02em;
+  margin-bottom: 6px;
+}
+.q-detail-title {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.q-detail-title em {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  color: var(--accent);
+}
+.q-detail-meta {
+  display: flex; gap: 14px; flex-wrap: wrap;
+  font-size: 13px; color: var(--ink-2);
+  margin-top: 10px;
+}
+.q-detail-meta .item { display: inline-flex; gap: 6px; align-items: center; }
+.q-detail-meta strong { color: var(--ink); font-weight: 600; }
+.q-detail-meta .dot { color: var(--mid-2); }
+
+.q-status-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 11px; font-weight: 600;
+  padding: 3px 10px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.q-status-pill.draft    { background: var(--paper-3); color: var(--ink-2); }
+.q-status-pill.pending  { background: var(--warn-soft); color: var(--warn); }
+.q-status-pill.ready    { background: var(--accent-soft); color: var(--accent-deep); }
+.q-status-pill.sent     { background: var(--accent-soft); color: var(--accent-deep); }
+.q-status-pill.accepted { background: var(--good-soft); color: var(--good); }
+.q-status-pill.cancelled { background: var(--danger-soft); color: var(--danger); }
+
+/* ─── Form layout ─── */
+.q-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 24px;
+  align-items: start;
+}
+.q-form-main { display: flex; flex-direction: column; gap: 20px; }
+.q-form-side { display: flex; flex-direction: column; gap: 16px; }
+.q-form-section {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  padding: 20px;
+}
+.q-form-section h3 {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mid);
+  font-weight: 500;
+  margin-bottom: 14px;
+}
+.q-form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.q-form-stack { display: flex; flex-direction: column; gap: 14px; }
+
+.q-form-section input[type="text"],
+.q-form-section input[type="date"],
+.q-form-section input[type="number"],
+.q-form-section select,
+.q-form-section textarea {
+  width: 100%;
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 14px;
+  background: var(--paper-2);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: 0;
+}
+.q-form-section input:focus,
+.q-form-section select:focus,
+.q-form-section textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.q-form-section label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mid);
+  margin-bottom: 4px;
+}
+
+/* ─── Lines table ─── */
+.q-lines {
+  background: var(--paper);
+  border: 1px solid var(--border);
+}
+.q-lines-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.q-lines-head .title { font-weight: 600; font-size: 15px; }
+.q-lines-table { width: 100%; border-collapse: collapse; }
+.q-lines-table th, .q-lines-table td {
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border-2);
+}
+.q-lines-table th {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mid);
+  font-weight: 500;
+  background: var(--paper-2);
+}
+.q-lines-table td.r,
+.q-lines-table th.r { text-align: right; font-family: var(--font-mono); }
+.q-lines-empty {
+  padding: 28px;
+  text-align: center;
+  color: var(--mid);
+  font-size: 13px;
+}
+.q-lines-foot {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 14px 18px;
+  border-top: 1px solid var(--border);
+  background: var(--paper-2);
+  align-items: flex-end;
+  font-size: 13px;
+}
+.q-lines-foot .row { display: flex; gap: 24px; align-items: baseline; }
+.q-lines-foot .row .lbl { color: var(--mid); font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+.q-lines-foot .row .val { font-family: var(--font-mono); color: var(--ink); }
+.q-lines-foot .row.total .val {
+  font-size: 18px; font-weight: 600; color: var(--accent);
+}
