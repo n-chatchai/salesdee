@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}ตั้งค่า · salesdee.{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/quotes.css' %}">
+<link rel="stylesheet" href="{% static 'css/settings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-title">ตั้งค่า <em>workspace</em></div>
+  <div class="q-detail-meta">
+    <div class="item">{{ tenant.name }} <span class="muted">({{ tenant.slug }}.salesdee.app)</span></div>
+  </div>
+</div>
+
+<div class="s-layout">
+  {% include "tenants/_s_tabs.html" with active_tab="hub" %}
+
+  <div>
+    {% if onboarding.remaining %}
+      <div class="auth-alert" style="background: var(--warn-soft); color: var(--warn); border-left-color: var(--warn);">
+        เหลือตั้งค่าอีก {{ onboarding.remaining }} ขั้น — <a href="{% url 'workspace:onboarding' %}" class="auth-link">ตั้งค่าต่อ →</a>
+      </div>
+    {% endif %}
+
+    <div class="s-section">
+      <h3>ข้อมูล workspace</h3>
+      <div class="s-row">
+        <div class="label"><div class="t">บริษัท</div><div class="d">{{ company.name_th|default:"ยังไม่ตั้ง" }}</div></div>
+        <a href="{% url 'workspace:settings_company' %}" class="btn ghost sm">แก้ไข</a>
+      </div>
+      <div class="s-row">
+        <div class="label"><div class="t">LINE Official Account</div><div class="d">{% if line.channel_id %}เชื่อมแล้ว{% else %}ยังไม่เชื่อม{% endif %}</div></div>
+        <a href="{% url 'workspace:settings_line' %}" class="btn ghost sm">{% if line.channel_id %}แก้{% else %}เชื่อม{% endif %}</a>
+      </div>
+      <div class="s-row">
+        <div class="label"><div class="t">ทีมงาน</div><div class="d">{{ member_count }} คน · pipeline {{ stage_count }} ขั้น</div></div>
+        <a href="{% url 'workspace:settings_members' %}" class="btn ghost sm">จัดการ</a>
+      </div>
+      <div class="s-row">
+        <div class="label"><div class="t">แพ็กเกจ</div><div class="d">{{ tenant.get_plan_display|default:tenant.plan }}</div></div>
+        <a href="{% url 'workspace:settings_billing' %}" class="btn ghost sm">เปลี่ยน</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

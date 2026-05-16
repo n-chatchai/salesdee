@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}ตั้งค่า · Pipeline · salesdee.{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/quotes.css' %}">
+<link rel="stylesheet" href="{% static 'css/catalog.css' %}">
+<link rel="stylesheet" href="{% static 'css/settings.css' %}">
+{% endblock %}
+
+{% block extra_body %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const list = document.getElementById('stage-list');
+  if (!list) return;
+  Sortable.create(list, {
+    handle: '.grip',
+    onEnd: () => {
+      const order = Array.from(list.querySelectorAll('[data-id]')).map(el => el.dataset.id);
+      const csrf = document.querySelector('meta[name="csrf-token"]').content;
+      const fd = new FormData();
+      order.forEach(id => fd.append('order[]', id));
+      fetch('{% url "workspace:pipeline_reorder" %}', { method: 'POST', headers: { 'X-CSRFToken': csrf }, body: fd });
+    },
+  });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-title">ตั้งค่า · <em>Pipeline</em></div>
+</div>
+
+<div class="s-layout">
+  {% include "tenants/_s_tabs.html" with active_tab="pipeline" %}
+
+  <div>
+    <div class="s-section">
+      <h3>ขั้น pipeline · {{ stages|length }} ขั้น</h3>
+      <div id="stage-list">
+        {% for s in stages %}
+          <div class="cat-tree-item" data-id="{{ s.pk }}">
+            <svg class="grip" style="width:14px; height:14px;"><use href="#i-grip"/></svg>
+            <span class="name">{{ s.name }}</span>
+            <span class="ct">{{ s.get_kind_display }} · ความน่าจะ {{ s.default_probability }}%</span>
+            <form method="post" action="{% url 'workspace:pipeline_stage_edit' s.pk %}" style="display:inline;">
+              {% csrf_token %}
+              {# inline-edit deferred; for now just a link approach #}
+            </form>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <form method="post" class="s-section">
+      {% csrf_token %}
+      <input type="hidden" name="_action" value="add">
+      <h3>เพิ่มขั้นใหม่</h3>
+      <div class="s-section-body">
+        <div class="q-form-row-2">
+          {% for f in add_form %}
+            <div><label>{{ f.label }}</label>{{ f }}</div>
+          {% endfor %}
+        </div>
+      </div>
+      <div style="padding: 0 18px 18px;">
+        <button type="submit" class="btn accent">
+          <svg class="ico ico-sm"><use href="#i-plus"/></svg> เพิ่มขั้น
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

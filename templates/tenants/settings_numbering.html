@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}ตั้งค่า · เลขเอกสาร · salesdee.{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/quotes.css' %}">
+<link rel="stylesheet" href="{% static 'css/settings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-title">ตั้งค่า · <em>เลขที่เอกสาร</em></div>
+</div>
+
+<div class="s-layout">
+  {% include "tenants/_s_tabs.html" with active_tab="numbering" %}
+
+  <div>
+    <div class="s-section">
+      <h3>ลำดับเลขที่ต่อชนิดเอกสาร · ต่อปี (พ.ศ.)</h3>
+      <table class="q-lines-table">
+        <thead><tr><th>ชนิด</th><th>ปี</th><th class="r">เลขล่าสุด</th><th></th></tr></thead>
+        <tbody>
+          {% for s in sequences %}
+            <tr>
+              <td>{{ s.get_doc_type_display|default:s.doc_type }}</td>
+              <td>{{ s.year }}</td>
+              <td class="r">{{ s.last_number }}</td>
+              <td class="r">
+                <form method="post" style="display:inline;">
+                  {% csrf_token %}
+                  <input type="hidden" name="pk" value="{{ s.pk }}">
+                  <input type="hidden" name="doc_type" value="{{ s.doc_type }}">
+                  <input type="hidden" name="year" value="{{ s.year }}">
+                  <input type="number" name="last_number" value="{{ s.last_number }}" style="width: 90px; padding: 4px 8px;">
+                  <button type="submit" class="btn sm ghost">บันทึก</button>
+                </form>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4" class="muted" style="text-align: center; padding: 20px;">ยังไม่มีลำดับเลข — ระบบจะสร้างให้อัตโนมัติเมื่อออกใบแรก</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <form method="post" class="s-section">
+      {% csrf_token %}
+      <h3>เพิ่มลำดับใหม่</h3>
+      <div class="s-section-body">
+        <div class="q-form-row-2">
+          {% for f in add_form %}<div><label>{{ f.label }}</label>{{ f }}</div>{% endfor %}
+        </div>
+      </div>
+      <div style="padding: 0 18px 18px;">
+        <button type="submit" class="btn accent">เพิ่ม</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

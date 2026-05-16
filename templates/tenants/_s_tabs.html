@@ -1,0 +1,33 @@
+{# Left-rail tab navigation for settings · used by every settings sub-page #}
+<nav class="s-tabs">
+  <a href="{% url 'workspace:settings_hub' %}" class="s-tab {% if active_tab == 'hub' %}active{% endif %}">
+    <svg class="ic"><use href="#i-home"/></svg> ภาพรวม
+  </a>
+  <a href="{% url 'workspace:settings_company' %}" class="s-tab {% if active_tab == 'company' %}active{% endif %}">
+    <svg class="ic"><use href="#i-building"/></svg> บริษัท
+  </a>
+  <a href="{% url 'workspace:settings_line' %}" class="s-tab {% if active_tab == 'line' %}active{% endif %}">
+    <svg class="ic"><use href="#i-line-app"/></svg> LINE OA
+  </a>
+  <a href="{% url 'workspace:settings_pipeline' %}" class="s-tab {% if active_tab == 'pipeline' %}active{% endif %}">
+    <svg class="ic"><use href="#i-target"/></svg> Pipeline
+  </a>
+  <a href="{% url 'workspace:settings_numbering' %}" class="s-tab {% if active_tab == 'numbering' %}active{% endif %}">
+    <svg class="ic"><use href="#i-receipt"/></svg> เลขเอกสาร
+  </a>
+  <a href="{% url 'workspace:settings_members' %}" class="s-tab {% if active_tab == 'members' %}active{% endif %}">
+    <svg class="ic"><use href="#i-users"/></svg> ทีมงาน
+  </a>
+  <a href="{% url 'workspace:settings_billing' %}" class="s-tab {% if active_tab == 'billing' %}active{% endif %}">
+    <svg class="ic"><use href="#i-card"/></svg> แพ็กเกจ
+  </a>
+  <a href="{% url 'workspace:modules_status' %}" class="s-tab {% if active_tab == 'modules' %}active{% endif %}">
+    <svg class="ic"><use href="#i-puzzle"/></svg> โมดูล
+  </a>
+  <a href="{% url 'workspace:system_status' %}" class="s-tab {% if active_tab == 'system' %}active{% endif %}">
+    <svg class="ic"><use href="#i-shield"/></svg> สถานะระบบ
+  </a>
+  <a href="{% url 'accounts:two_factor_settings' %}" class="s-tab {% if active_tab == '2fa' %}active{% endif %}">
+    <svg class="ic"><use href="#i-lock"/></svg> ความปลอดภัย
+  </a>
+</nav>

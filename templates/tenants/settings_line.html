@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}ตั้งค่า · LINE OA · salesdee.{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/quotes.css' %}">
+<link rel="stylesheet" href="{% static 'css/settings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-title">ตั้งค่า · <em>LINE Official Account</em></div>
+</div>
+
+<div class="s-layout">
+  {% include "tenants/_s_tabs.html" with active_tab="line" %}
+
+  <div>
+    <div class="s-section">
+      <h3>Webhook URL</h3>
+      <div class="s-section-body">
+        <div class="muted" style="font-size: 12px; margin-bottom: 6px;">วาง URL นี้ใน LINE Developers Console → Messaging API → Webhook URL</div>
+        <code style="display: block; padding: 10px 12px; background: var(--paper-3); border: 1px solid var(--border); font-family: var(--font-mono); font-size: 12px; word-break: break-all;">{{ webhook_url }}</code>
+      </div>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="s-section">
+        <h3>เชื่อม LINE Channel</h3>
+        <div class="s-section-body">
+          {% if form.non_field_errors %}<div class="auth-alert">{{ form.non_field_errors|join:" · " }}</div>{% endif %}
+          <div class="q-form-stack">
+            {% for f in form %}
+              <div>
+                <label>{{ f.label }}</label>
+                {{ f }}
+                {% if f.help_text %}<div class="muted" style="font-size: 11px;">{{ f.help_text }}</div>{% endif %}
+                {% if f.errors %}<div class="auth-err">{{ f.errors|join:" · " }}</div>{% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      <button type="submit" class="btn accent">
+        <svg class="ico ico-sm"><use href="#i-check"/></svg> บันทึก
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

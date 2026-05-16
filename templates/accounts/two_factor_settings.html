@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}ความปลอดภัย · salesdee.{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/quotes.css' %}">
+<link rel="stylesheet" href="{% static 'css/settings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-title">ความปลอดภัย · <em>2FA</em></div>
+</div>
+
+<div class="s-layout">
+  {% include "tenants/_s_tabs.html" with active_tab="2fa" %}
+
+  <div>
+    <div class="s-section">
+      <h3>Two-Factor Authentication</h3>
+      <div class="s-section-body">
+        {% if device.confirmed %}
+          <p>เปิดใช้งานอยู่ <span class="chip good">เปิด</span></p>
+          <p class="muted" style="font-size: 12px; margin-top: 6px;">เปิดใช้งานเมื่อ {{ device.confirmed_at|date:"j M y H:i" }}</p>
+          <form method="post" action="{% url 'accounts:two_factor_disable' %}" style="margin-top: 16px;">
+            {% csrf_token %}
+            <div class="q-form-stack" style="max-width: 320px;">
+              <div>
+                <label>รหัสผ่านปัจจุบัน</label>
+                <input type="password" name="password" required>
+              </div>
+              <button type="submit" class="btn" style="background: var(--danger); color: var(--paper); border-color: var(--danger);">
+                ปิดใช้งาน 2FA
+              </button>
+            </div>
+          </form>
+        {% else %}
+          <p>ยังไม่ได้เปิดใช้งาน</p>
+          <a href="{% url 'accounts:two_factor_enable' %}" class="btn accent" style="margin-top: 12px;">
+            <svg class="ico ico-sm"><use href="#i-shield"/></svg> เปิดใช้งาน 2FA
+          </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="s-section">
+      <h3>รหัสผ่าน</h3>
+      <div class="s-section-body">
+        <a href="{% url 'accounts:password_change' %}" class="btn">เปลี่ยนรหัสผ่าน</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

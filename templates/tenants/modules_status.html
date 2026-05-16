@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}โมดูล · salesdee.{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/quotes.css' %}">
+<link rel="stylesheet" href="{% static 'css/settings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-title">โมดูล <em>({{ counts.on }}/{{ counts.total }} เปิดใช้)</em></div>
+</div>
+
+<div class="s-layout">
+  {% include "tenants/_s_tabs.html" with active_tab="modules" %}
+
+  <div>
+    {% for label, mods in sections %}
+      <div class="s-section">
+        <h3>{{ label }}</h3>
+        {% for m in mods %}
+          <div class="s-row">
+            <div class="label">
+              <div class="t">{{ m.label }}</div>
+              {% if m.desc %}<div class="d">{{ m.desc }}</div>{% endif %}
+            </div>
+            {% if m.enabled %}<span class="chip good">เปิด</span>{% else %}<span class="chip">ปิด</span>{% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

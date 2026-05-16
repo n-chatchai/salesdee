@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}เปิด 2FA · salesdee.{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/quotes.css' %}">
+<link rel="stylesheet" href="{% static 'css/settings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-title">เปิดใช้งาน <em>2FA</em></div>
+</div>
+
+<div class="s-layout">
+  {% include "tenants/_s_tabs.html" with active_tab="2fa" %}
+
+  <div>
+    <div class="s-section">
+      <h3>ขั้นที่ 1 · เพิ่มลงในแอป Authenticator</h3>
+      <div class="s-section-body">
+        <p class="muted">สแกน QR หรือพิมพ์ secret ใน Google Authenticator / Authy / 1Password</p>
+        <div style="margin: 16px 0; padding: 16px; background: var(--paper-2); border: 1px solid var(--border);">
+          <div class="muted" style="font-size: 11px; margin-bottom: 6px;">URI</div>
+          <code style="font-family: var(--font-mono); font-size: 12px; word-break: break-all;">{{ otpauth_uri }}</code>
+        </div>
+      </div>
+    </div>
+
+    <form method="post" class="s-section">
+      {% csrf_token %}
+      <h3>ขั้นที่ 2 · ยืนยันรหัส 6 หลัก</h3>
+      <div class="s-section-body">
+        {% if error %}<div class="auth-alert">{{ error }}</div>{% endif %}
+        <div style="max-width: 240px;">
+          <label>รหัสจากแอป</label>
+          <input type="text" name="code" inputmode="numeric" maxlength="6" required autofocus
+                 style="font-family: var(--font-mono); font-size: 18px; letter-spacing: 0.2em; text-align: center;">
+        </div>
+      </div>
+      <div style="padding: 0 18px 18px;">
+        <button type="submit" class="btn accent">ยืนยันและเปิด</button>
+        <a href="{% url 'accounts:two_factor_settings' %}" class="btn">ยกเลิก</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

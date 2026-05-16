@@ -1,0 +1,27 @@
+{% extends "auth_base.html" %}
+{% block title %}ยืนยัน 2FA · salesdee.{% endblock %}
+
+{% block content %}
+<div class="auth-stage">
+  <div class="auth-card">
+    <div class="auth-title">ยืนยัน <em>2FA</em></div>
+    <div class="auth-sub">ใส่รหัส 6 หลักจากแอป Authenticator ของคุณ</div>
+
+    {% if error %}<div class="auth-alert">{{ error }}</div>{% endif %}
+
+    <form method="post" class="auth-form">
+      {% csrf_token %}
+      <div class="auth-field">
+        <div class="label"><span>รหัส 6 หลัก</span></div>
+        <div class="auth-input-wrap">
+          <input class="auth-input" type="text" name="code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" autofocus required>
+        </div>
+      </div>
+      <button type="submit" class="auth-btn">
+        ยืนยัน
+        <svg class="ico ico-sm" style="color: var(--paper);"><use href="#i-check"/></svg>
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}ตั้งค่า · แพ็กเกจ · salesdee.{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/quotes.css' %}">
+<link rel="stylesheet" href="{% static 'css/settings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-title">ตั้งค่า · <em>แพ็กเกจ</em></div>
+  <div class="q-detail-meta">
+    <div class="item">ปัจจุบัน <strong>{{ current_plan.name }}</strong></div>
+  </div>
+</div>
+
+<div class="s-layout">
+  {% include "tenants/_s_tabs.html" with active_tab="billing" %}
+
+  <div>
+    <div class="s-section">
+      <h3>แพ็กเกจที่เลือกได้</h3>
+      <div class="plan-grid">
+        {% for t in tiers %}
+          <div class="plan-card {% if t.key == tenant.plan %}current{% endif %}">
+            <div class="name">{{ t.name }}{% if t.tag %} <em>{{ t.tag }}</em>{% endif %}</div>
+            <div class="price">฿{{ t.price_thb|floatformat:0 }}/{{ t.cycle_label|default:"เดือน" }}</div>
+            {% if t.features %}
+              <ul class="feats">
+                {% for f in t.features|slice:":6" %}<li>{{ f }}</li>{% endfor %}
+              </ul>
+            {% endif %}
+            {% if can_admin and t.key != tenant.plan %}
+              <form method="post" action="{% url 'workspace:plan_change' %}">
+                {% csrf_token %}
+                <input type="hidden" name="plan" value="{{ t.key }}">
+                <button type="submit" class="btn accent" style="width: 100%;">เลือก</button>
+              </form>
+            {% elif t.key == tenant.plan %}
+              <div style="text-align: center; padding: 8px; color: var(--accent); font-weight: 600;">ใช้งานอยู่</div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    {% if usage %}
+      <div class="s-section">
+        <h3>การใช้งาน (เทียบกับ cap ของแพ็กเกจ)</h3>
+        <table class="q-lines-table">
+          <thead><tr><th>หมวด</th><th class="r">ใช้</th><th class="r">Cap</th></tr></thead>
+          <tbody>
+            {% for u in usage %}
+              <tr>
+                <td>{{ u.label|default:u.key }}</td>
+                <td class="r">{{ u.used }}</td>
+                <td class="r">{% if u.cap == -1 %}∞{% else %}{{ u.cap }}{% endif %}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

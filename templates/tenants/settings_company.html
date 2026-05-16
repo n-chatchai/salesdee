@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}ตั้งค่า · บริษัท · salesdee.{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/quotes.css' %}">
+<link rel="stylesheet" href="{% static 'css/settings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-title">ตั้งค่า · <em>บริษัท</em></div>
+</div>
+
+<div class="s-layout">
+  {% include "tenants/_s_tabs.html" with active_tab="company" %}
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="s-section">
+      <h3>ข้อมูลบริษัท</h3>
+      <div class="s-section-body">
+        <div class="q-form-stack">
+          {% for f in form %}
+            <div>
+              <label>{{ f.label }}</label>
+              {{ f }}
+              {% if f.errors %}<div class="auth-err">{{ f.errors|join:" · " }}</div>{% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <button type="submit" class="btn accent">
+      <svg class="ico ico-sm"><use href="#i-check"/></svg> บันทึก
+    </button>
+  </form>
+</div>
+{% endblock %}

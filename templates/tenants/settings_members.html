@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}ตั้งค่า · ทีมงาน · salesdee.{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/quotes.css' %}">
+<link rel="stylesheet" href="{% static 'css/settings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-title">ตั้งค่า · <em>ทีมงาน</em></div>
+</div>
+
+<div class="s-layout">
+  {% include "tenants/_s_tabs.html" with active_tab="members" %}
+
+  <div>
+    <div class="s-section">
+      <h3>สมาชิก · {{ memberships|length }} คน</h3>
+      <table class="q-lines-table">
+        <thead><tr><th>อีเมล</th><th>ชื่อ</th><th>บทบาท</th><th>เห็นทั้งหมด</th><th>สถานะ</th><th></th></tr></thead>
+        <tbody>
+          {% for m in memberships %}
+            <tr>
+              <td>{{ m.user.email }}</td>
+              <td>{{ m.user.get_full_name|default:"—" }}</td>
+              <td>{{ m.get_role_display|default:m.role }}</td>
+              <td>{% if m.can_see_all_records %}✓{% else %}—{% endif %}</td>
+              <td>{% if m.is_active %}<span class="chip good">เปิด</span>{% else %}<span class="chip">ปิด</span>{% endif %}</td>
+              <td class="r">
+                {% if can_admin and m.user_id != request.user.pk %}
+                  <a href="#" class="btn sm ghost" onclick="alert('แก้สมาชิกผ่าน admin ไปก่อน'); return false;">แก้</a>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if can_admin %}
+      <form method="post" class="s-section">
+        {% csrf_token %}
+        <h3>เชิญสมาชิกใหม่</h3>
+        <div class="s-section-body">
+          {% if form.non_field_errors %}<div class="auth-alert">{{ form.non_field_errors|join:" · " }}</div>{% endif %}
+          <div class="q-form-stack">
+            {% for f in form %}
+              <div>
+                <label>{{ f.label }}</label>
+                {{ f }}
+                {% if f.errors %}<div class="auth-err">{{ f.errors|join:" · " }}</div>{% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+        <div style="padding: 0 18px 18px;">
+          <button type="submit" class="btn accent">
+            <svg class="ico ico-sm"><use href="#i-send"/></svg> ส่งคำเชิญ
+          </button>
+        </div>
+      </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}สถานะระบบ · salesdee.{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/quotes.css' %}">
+<link rel="stylesheet" href="{% static 'css/settings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-title">สถานะ<em>ระบบ</em></div>
+  <div class="q-detail-meta">
+    <div class="item">{{ tenant.name }}</div>
+    <span class="dot">·</span>
+    <div class="item">app v.<strong>{{ app_version }}</strong></div>
+  </div>
+</div>
+
+<div class="s-layout">
+  {% include "tenants/_s_tabs.html" with active_tab="system" %}
+
+  <div>
+    <div class="s-section">
+      <h3>สุขภาพระบบ</h3>
+      <table class="q-lines-table">
+        <thead><tr><th>หัวข้อ</th><th>สถานะ</th><th>หมายเหตุ</th></tr></thead>
+        <tbody>
+          {% for c in checks %}
+            <tr>
+              <td>{{ c.name }}</td>
+              <td>
+                {% if c.warn %}<span class="chip warn">เตือน</span>
+                {% elif c.ok %}<span class="chip good">ok</span>
+                {% else %}<span class="chip danger">ไม่พร้อม</span>{% endif %}
+              </td>
+              <td class="muted">{{ c.note }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
