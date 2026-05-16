@@ -139,7 +139,8 @@ def signup(request: HttpRequest) -> HttpResponse:
                 )
                 profile = tenant.company_profile
                 profile.name_th = data["workspace_name"]
-                profile.save(update_fields=["name_th"])
+                profile.phone = data.get("phone") or ""
+                profile.save(update_fields=["name_th", "phone"])
                 user = get_user_model().objects.create_user(
                     email=data["email"], password=data["password"], full_name=data["full_name"]
                 )

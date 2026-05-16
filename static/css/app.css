@@ -1,0 +1,295 @@
+/* salesdee. shared app shell + components.
+   Per CLAUDE.md: design/brand-guide.html wins; deck = layout; brand-guide = tokens, .ic, .wm, logo.
+   Screen-specific styles live in per-screen files (dashboard.css, kanban.css, …) loaded via {% block extra_css %}. */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ─── Paper grain overlay (canonical · per design/backoffice.html body::before) ─── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.42 0 0 0 0 0.38 0 0 0 0 0.30 0 0 0 0.025 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  z-index: 9999;
+  opacity: .8;
+}
+
+/* ─── Wordmark · sales<em>dee</em>. ─── */
+.wm {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  text-transform: lowercase;
+  line-height: 1;
+  display: inline-block;
+}
+.wm .sales { color: var(--ink); }
+.wm .dee   { color: var(--accent); }
+.wm .dot {
+  display: inline-block;
+  width: 0.13em; height: 0.13em;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-left: 0.04em;
+  vertical-align: 0.05em;
+}
+.wm.reverse .sales { color: var(--paper); }
+.wm.mono .sales,
+.wm.mono .dee     { color: var(--ink); }
+.wm.mono .dot     { background: var(--ink); }
+
+/* Wordmark sizes */
+.wm-12 { font-size: 12px; }
+.wm-14 { font-size: 14px; }
+.wm-18 { font-size: 18px; }
+.wm-22 { font-size: 22px; }
+.wm-28 { font-size: 28px; }
+.wm-36 { font-size: 36px; }
+.wm-48 { font-size: 48px; }
+.wm-64 { font-size: 64px; }
+.wm-96 { font-size: 96px; }
+
+/* ─── Icon · letter-mark squircle (canonical · per design/brand-guide.html) ─── */
+.ic {
+  display: grid; place-items: center;
+  position: relative; overflow: hidden;
+  flex-shrink: 0;
+}
+.ic .d {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 0.85;
+}
+.ic .dot { position: absolute; border-radius: 50%; }
+
+/* Variants */
+.ic.primary { background: var(--ink); border-radius: var(--radius-ic); }
+.ic.primary .d   { color: var(--accent); }
+.ic.primary .dot { background: var(--accent); }
+
+.ic.accent  { background: var(--accent); border-radius: var(--radius-ic); }
+.ic.accent .d    { color: var(--paper); }
+.ic.accent .dot  { background: var(--paper); }
+
+.ic.cream   { background: var(--paper-2); border: 2px solid var(--ink); border-radius: var(--radius-ic); }
+.ic.cream .d    { color: var(--ink); }
+.ic.cream .dot  { background: var(--accent); }
+
+.ic.round { border-radius: 50%; }
+
+/* Sizes (canonical · brand-guide.html lines 406–414) */
+.ic-48 { width: 48px; height: 48px; }
+.ic-48 .d   { font-size: 32px; }
+.ic-48 .dot { width: 4px; height: 4px; bottom: 9px; right: 9px; }
+
+.ic-32 { width: 32px; height: 32px; }
+.ic-32 .d   { font-size: 22px; }
+.ic-32 .dot { display: none; }
+
+.ic-16 { width: 16px; height: 16px; }
+.ic-16 .d   { font-size: 12px; }
+.ic-16 .dot { display: none; }
+
+/* ─── Inline SVG icon utility (lucide / heroicons via <svg use href>) ─── */
+.ico {
+  width: 16px; height: 16px;
+  display: inline-block;
+  vertical-align: -3px;
+  flex-shrink: 0;
+  stroke-width: 1.5;
+}
+.ico-sm { width: 12px; height: 12px; vertical-align: -2px; }
+.ico-md { width: 18px; height: 18px; vertical-align: -4px; }
+.ico-lg { width: 22px; height: 22px; }
+.ico-xl { width: 32px; height: 32px; }
+
+/* ─── Typography helpers ─── */
+.display { font-family: var(--font-display); }
+.display em { font-style: italic; font-weight: 500; }
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mid);
+}
+
+/* ─── Shared components ─── */
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 16px;
+  font: inherit;
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: -0.005em;
+  background: var(--paper-2);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background .12s ease, border-color .12s ease;
+}
+.btn:hover { background: var(--paper-3); }
+.btn.primary {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+.btn.primary:hover { background: var(--ink-2); }
+.btn.accent {
+  background: var(--accent);
+  color: var(--paper);
+  border-color: var(--accent);
+}
+.btn.accent:hover { background: var(--accent-deep); }
+.btn.ai {
+  background: var(--ai);
+  color: var(--paper);
+  border-color: var(--ai);
+}
+.btn.ai:hover { background: var(--ai-deep); }
+.btn.ghost {
+  background: transparent;
+  border-color: transparent;
+}
+.btn.ghost:hover { background: var(--paper-3); }
+.btn.sm { padding: 5px 10px; font-size: 12px; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* Chip / pill */
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  background: var(--paper-3);
+  color: var(--ink-2);
+  border-radius: var(--radius);
+  white-space: nowrap;
+}
+.chip.accent  { background: var(--accent-soft); color: var(--accent-deep); }
+.chip.ai      { background: var(--ai-soft);     color: var(--ai-deep); }
+.chip.good    { background: var(--good-soft);   color: var(--good); }
+.chip.warn    { background: var(--warn-soft);   color: var(--warn); }
+.chip.danger  { background: var(--danger-soft); color: var(--danger); }
+
+/* Card */
+.card {
+  background: var(--paper-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.card-pad   { padding: 20px; }
+.card-pad-sm { padding: 12px; }
+
+/* KPI */
+.kpi {
+  background: var(--paper-2);
+  border: 1px solid var(--border);
+  padding: 16px 20px;
+}
+.kpi .label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mid);
+  margin-bottom: 6px;
+}
+.kpi .value {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+/* AI panel — sage tint, only for AI surfaces */
+.ai-panel {
+  background: var(--ai-soft);
+  border: 1px solid var(--ai);
+  border-left-width: 3px;
+  color: var(--ai-deep);
+  padding: 14px 16px;
+}
+.ai-panel .label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ai);
+  margin-bottom: 4px;
+}
+
+/* Table */
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.tbl th, .tbl td {
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-2);
+}
+.tbl th {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mid);
+  font-weight: 500;
+}
+.tbl tr:hover { background: var(--paper-3); }
+
+/* Form field */
+.field {
+  display: flex; flex-direction: column;
+  gap: 4px;
+}
+.field label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mid);
+}
+.field input,
+.field select,
+.field textarea {
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 14px;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--ink);
+}
+.field .help { font-size: 11px; color: var(--mid); }
+.field.err input,
+.field.err select,
+.field.err textarea { border-color: var(--danger); }
+.field .err-msg { font-size: 11px; color: var(--danger); }
+
+/* Utility */
+.muted { color: var(--mid); }
+.strong { font-weight: 600; }
+.divider { height: 1px; background: var(--border); border: 0; }

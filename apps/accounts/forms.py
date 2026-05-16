@@ -9,23 +9,11 @@ from apps.tenants.models import Tenant
 
 
 class SignupForm(forms.Form):
-    workspace_name = forms.CharField(label="ชื่อธุรกิจ / Workspace", max_length=200)
-    slug = forms.SlugField(
-        label="ชื่อพื้นที่ทำงาน (URL)",
-        max_length=63,
-        help_text="ใช้เป็นที่อยู่: <ชื่อนี้>.salesdee.app",
-    )
     full_name = forms.CharField(label="ชื่อ-นามสกุล", max_length=200)
-    email = forms.EmailField(label="อีเมล")
-    password = forms.CharField(label="รหัสผ่าน", widget=forms.PasswordInput)
-
-    def clean_slug(self):
-        slug = slugify(self.cleaned_data["slug"])
-        if not slug:
-            raise forms.ValidationError("กรุณาระบุชื่อพื้นที่ทำงานที่ถูกต้อง")
-        if Tenant.objects.filter(slug=slug).exists():
-            raise forms.ValidationError("ชื่อพื้นที่ทำงานนี้ถูกใช้แล้ว ลองชื่ออื่น")
-        return slug
+    email = forms.EmailField(label="อีเมลธุรกิจ")
+    password = forms.CharField(label="รหัสผ่าน", widget=forms.PasswordInput, min_length=8)
+    workspace_name = forms.CharField(label="ชื่อบริษัท", max_length=200)
+    phone = forms.CharField(label="เบอร์โทร", max_length=40, required=False)
 
     def clean_email(self):
         email = self.cleaned_data["email"].lower()
@@ -37,3 +25,17 @@ class SignupForm(forms.Form):
         password = self.cleaned_data["password"]
         validate_password(password)
         return password
+
+    def clean(self):
+        cleaned = super().clean()
+        workspace_name = cleaned.get("workspace_name")
+        if not workspace_name:
+            return cleaned
+        base_slug = slugify(workspace_name) or "workspace"
+        slug = base_slug
+        counter = 2
+        while Tenant.objects.filter(slug=slug).exists():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+        cleaned["slug"] = slug
+        return cleaned

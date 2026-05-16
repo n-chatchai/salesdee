@@ -1,0 +1,75 @@
+{% extends "auth_base.html" %}
+{% block title %}เข้าระบบ · salesdee.{% endblock %}
+
+{% block outside_top_right %}
+  ยังไม่มีบัญชี? <a href="{% url 'accounts:signup' %}" class="outside-top-link">สมัครใช้งาน →</a>
+{% endblock %}
+
+{% block content %}
+<div class="auth-stage">
+  <div class="auth-card">
+    <div class="auth-title">ยินดีต้อนรับกลับ</div>
+    <div class="auth-sub">เข้าระบบเพื่อจัดการลูกค้า · สร้างใบเสนอราคา · และดูดีลทั้งหมดในที่เดียว</div>
+
+    {% if form.non_field_errors %}
+      <div class="auth-alert">{{ form.non_field_errors|join:" · " }}</div>
+    {% endif %}
+
+    <form method="post" class="auth-form">
+      {% csrf_token %}
+      {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+
+      <div class="auth-field">
+        <div class="label"><span>อีเมล</span></div>
+        <div class="auth-input-wrap">
+          <svg><use href="#i-mail"/></svg>
+          <input
+            class="auth-input with-icon"
+            type="text"
+            name="{{ form.username.name }}"
+            value="{{ form.username.value|default:'' }}"
+            autocomplete="username"
+            autofocus
+            required>
+        </div>
+        {% if form.username.errors %}<div class="auth-err">{{ form.username.errors|join:" · " }}</div>{% endif %}
+      </div>
+
+      <div class="auth-field">
+        <div class="label">
+          <span>รหัสผ่าน</span>
+          <a href="{% url 'accounts:password_reset' %}" class="auth-link" style="font-size: 11px;">ลืมรหัสผ่าน?</a>
+        </div>
+        <div class="auth-input-wrap">
+          <svg><use href="#i-lock"/></svg>
+          <input
+            class="auth-input with-icon"
+            type="password"
+            name="{{ form.password.name }}"
+            autocomplete="current-password"
+            required>
+        </div>
+        {% if form.password.errors %}<div class="auth-err">{{ form.password.errors|join:" · " }}</div>{% endif %}
+      </div>
+
+      <div class="auth-row">
+        <label class="auth-check">
+          <input type="checkbox" name="remember" checked>
+          <span class="box"><svg><use href="#i-check"/></svg></span>
+          จำการเข้าระบบ
+        </label>
+        <a href="{% url 'accounts:signup' %}" class="auth-link">สมัครใช้งาน →</a>
+      </div>
+
+      <button type="submit" class="auth-btn">
+        เข้าระบบ
+        <svg class="ico ico-sm" style="color: var(--paper);"><use href="#i-trend"/></svg>
+      </button>
+    </form>
+
+    <div class="auth-foot">
+      ยังไม่มีบัญชี? <a href="{% url 'accounts:signup' %}" class="auth-link">เริ่มทดลองใช้ฟรี 14 วัน</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

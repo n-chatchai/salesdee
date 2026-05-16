@@ -1,0 +1,167 @@
+{% extends "auth_base.html" %}
+{% block title %}สมัครใช้งาน · salesdee.{% endblock %}
+
+{% block outside_top_right %}
+  มีบัญชีอยู่แล้ว? <a href="{% url 'accounts:login' %}" class="outside-top-link">เข้าระบบ →</a>
+{% endblock %}
+
+{% block content %}
+<div class="auth-stage with-side">
+
+  <div class="auth-card auth-card-wide">
+    <div class="auth-title">เริ่มต้นใช้งาน <em>salesdee.</em></div>
+    <div class="auth-sub">ทดลองฟรี 14 วัน · ไม่ต้องบัตรเครดิต · ตั้งค่าครบใน 10 นาที</div>
+
+    {% if form.non_field_errors %}
+      <div class="auth-alert">{{ form.non_field_errors|join:" · " }}</div>
+    {% endif %}
+
+    <form method="post" class="auth-form" x-data="{ pw: '', show: false }">
+      {% csrf_token %}
+
+      <div class="auth-field">
+        <div class="label"><span>ชื่อ-นามสกุล</span></div>
+        <div class="auth-input-wrap">
+          <svg><use href="#i-user"/></svg>
+          <input
+            class="auth-input with-icon"
+            type="text"
+            name="full_name"
+            value="{{ form.full_name.value|default:'' }}"
+            placeholder="คุณนริศ พัฒนกุล"
+            autocomplete="name"
+            required>
+        </div>
+        {% if form.full_name.errors %}<div class="auth-err">{{ form.full_name.errors|join:" · " }}</div>{% endif %}
+      </div>
+
+      <div class="auth-field">
+        <div class="label">
+          <span>อีเมลธุรกิจ</span>
+          <span class="auth-hint">ใช้สำหรับเข้าระบบ · ลูกค้าจะเห็นในใบเสนอ</span>
+        </div>
+        <div class="auth-input-wrap">
+          <svg><use href="#i-mail"/></svg>
+          <input
+            class="auth-input with-icon"
+            type="email"
+            name="email"
+            value="{{ form.email.value|default:'' }}"
+            autocomplete="email"
+            required>
+        </div>
+        {% if form.email.errors %}<div class="auth-err">{{ form.email.errors|join:" · " }}</div>{% endif %}
+      </div>
+
+      <div class="auth-field">
+        <div class="label">
+          <span>รหัสผ่าน</span>
+          <span class="auth-hint">อย่างน้อย 8 ตัวอักษร</span>
+        </div>
+        <div class="auth-input-wrap">
+          <svg><use href="#i-lock"/></svg>
+          <input
+            class="auth-input with-icon"
+            :type="show ? 'text' : 'password'"
+            name="password"
+            x-model="pw"
+            autocomplete="new-password"
+            minlength="8"
+            required>
+          <button type="button" class="auth-eye-btn" @click="show = !show" title="แสดง/ซ่อน">
+            <svg><use href="#i-eye"/></svg>
+          </button>
+        </div>
+        <div class="auth-pw-strength" x-show="pw.length > 0" x-cloak>
+          <div class="bar">
+            <span class="fill" :style="`width: ${Math.min(100, pw.length * 10)}%; background: ${pw.length < 8 ? 'var(--warn)' : pw.length < 12 ? 'var(--good)' : 'var(--ai)'}`"></span>
+          </div>
+          <span class="lbl" x-text="pw.length < 8 ? 'อ่อน' : pw.length < 12 ? 'กลาง' : 'แข็งแรง'"></span>
+        </div>
+        {% if form.password.errors %}<div class="auth-err">{{ form.password.errors|join:" · " }}</div>{% endif %}
+      </div>
+
+      <div class="auth-field">
+        <div class="label">
+          <span>ชื่อบริษัท</span>
+          <span class="auth-hint">เปลี่ยนได้ภายหลัง</span>
+        </div>
+        <div class="auth-input-wrap">
+          <svg><use href="#i-building"/></svg>
+          <input
+            class="auth-input with-icon"
+            type="text"
+            name="workspace_name"
+            value="{{ form.workspace_name.value|default:'' }}"
+            placeholder="บริษัท วัน.ดี.ดี. จำกัด"
+            required>
+        </div>
+        {% if form.workspace_name.errors %}<div class="auth-err">{{ form.workspace_name.errors|join:" · " }}</div>{% endif %}
+      </div>
+
+      <div class="auth-field">
+        <div class="label">
+          <span>เบอร์โทร <span class="auth-optional">(ไม่บังคับ)</span></span>
+        </div>
+        <div class="auth-input-wrap">
+          <svg><use href="#i-phone"/></svg>
+          <input
+            class="auth-input with-icon"
+            type="tel"
+            name="phone"
+            value="{{ form.phone.value|default:'' }}"
+            placeholder="02-XXX-XXXX">
+        </div>
+      </div>
+
+      <label class="auth-check-tos">
+        <input type="checkbox" name="tos" required checked>
+        <span class="box"><svg><use href="#i-check"/></svg></span>
+        <span class="t">ยอมรับ <a href="#" class="auth-link">เงื่อนไขการใช้งาน</a> และ <a href="#" class="auth-link">นโยบายความเป็นส่วนตัว</a></span>
+      </label>
+
+      <button type="submit" class="auth-btn">
+        เริ่มทดลองใช้ฟรี 14 วัน
+        <svg class="ico ico-sm" style="color: var(--paper);"><use href="#i-trend"/></svg>
+      </button>
+    </form>
+
+    <div class="auth-foot">
+      มีบัญชีอยู่แล้ว? <a href="{% url 'accounts:login' %}" class="auth-link">เข้าระบบ →</a>
+    </div>
+  </div>
+
+  <aside class="auth-side-panel">
+    <div class="auth-side-eyebrow">SME ไทย · ตั้งแต่ 2025</div>
+    <h3 class="auth-side-title">
+      <em>"ส่งใบเสนอ</em><br>
+      จากแชต LINE<br>
+      ใน 30 วินาที"
+    </h3>
+    <div class="auth-side-list">
+      <div class="auth-side-item">
+        <div class="ic-check"><svg><use href="#i-check"/></svg></div>
+        <div class="t">ผู้ช่วยร่างใบจากแชต · เซลส์แค่ตรวจ + ส่ง</div>
+      </div>
+      <div class="auth-side-item">
+        <div class="ic-check"><svg><use href="#i-check"/></svg></div>
+        <div class="t">เห็นทันทีว่าลูกค้าเปิดดูใบหรือยัง · เปิดกี่ครั้ง</div>
+      </div>
+      <div class="auth-side-item">
+        <div class="ic-check"><svg><use href="#i-check"/></svg></div>
+        <div class="t">เชื่อม LINE Official Account · ทำใน 5 นาที</div>
+      </div>
+      <div class="auth-side-item">
+        <div class="ic-check"><svg><use href="#i-check"/></svg></div>
+        <div class="t">ใบเสนอจริงคงเส้นคงวาทุกใบ · ภาษีถูกต้อง</div>
+      </div>
+    </div>
+    <div class="auth-side-quote">
+      <div class="qmark">"</div>
+      <div class="qt">ลดเวลาออกใบเสนอจาก 30 นาที เหลือ 3 นาที · แทนที่จะเขียนใบ ก็ไปคุยกับลูกค้าได้</div>
+      <div class="qm">— คุณกฤษ · Lighthouse Studio</div>
+    </div>
+  </aside>
+
+</div>
+{% endblock %}
