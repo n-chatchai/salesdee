@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}หน้าหลัก · salesdee.{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block topbar %}{# omit the default topbar — home queue uses its own list-head #}{% endblock %}
+
+{% block content %}
+<div class="h-main" style="margin: -24px;">  {# full-bleed inside .app-content #}
+
+  {# ── List pane ── #}
+  <aside class="h-list-pane">
+    <div class="h-list-head">
+      <div class="top">
+        <div class="title">หน้าหลัก</div>
+        <div class="count-pill">{{ counts.all }} รายการ</div>
+      </div>
+      <div class="sub">เรียงตาม <strong>ใหม่ล่าสุด</strong></div>
+      <div class="h-filters">
+        <a href="?filter=all"      class="h-filter {% if filter == 'all' %}active{% endif %}">ทั้งหมด <span class="ct">{{ counts.all }}</span></a>
+        <a href="?filter=new"      class="h-filter {% if filter == 'new' %}active{% endif %}">รับเรื่องใหม่ <span class="ct">{{ counts.new }}</span></a>
+        <a href="?filter=waiting"  class="h-filter {% if filter == 'waiting' %}active{% endif %}">รอตอบ <span class="ct">{{ counts.waiting }}</span></a>
+        <a href="?filter=expiring" class="h-filter {% if filter == 'expiring' %}active{% endif %}">ใกล้หมดอายุ <span class="ct">{{ counts.expiring }}</span></a>
+      </div>
+    </div>
+
+    <div class="h-rows">
+      {% for item in queue %}
+        <a href="?{% if filter %}filter={{ filter }}&{% endif %}item={{ item.key }}"
+           class="h-row {% if active.key == item.key %}active{% endif %}">
+          <div class="h-avatar">
+            {{ item.initial }}
+            <div class="ch {{ item.source }}">{{ item.source_letter }}</div>
+          </div>
+          <div class="h-row-content">
+            <div class="h-row-top">
+              <div class="h-row-name">{{ item.name }}{% if item.company %} · {{ item.company }}{% endif %}</div>
+              <div class="h-row-age {{ item.age_kind }}">{{ item.age_label }}</div>
+            </div>
+            <div class="h-row-context">{{ item.context|safe }}</div>
+            <div class="h-row-foot">
+              <span class="h-row-status {{ item.status }}">{{ item.status_label }}</span>
+              {% if item.amount %}<span class="h-row-amt">{{ item.amount }}</span>{% endif %}
+            </div>
+          </div>
+        </a>
+      {% empty %}
+        <div class="h-empty">
+          <svg class="ic"><use href="#i-inbox"/></svg>
+          <div class="t">ยังไม่มีรายการในคิว</div>
+          <div class="d">ลูกค้าทักผ่านไลน์หรือเว็บ → จะขึ้นที่นี่</div>
+        </div>
+      {% endfor %}
+    </div>
+  </aside>
+
+  {# ── Detail pane ── #}
+  <section class="h-detail-pane">
+    {% if active and active_doc %}
+      <div class="h-detail-head">
+        <div class="h-detail-crumb">
+          {% if active.status == 'new' %}<span class="pill">รับเรื่องใหม่</span>{% endif %}
+          {% if active.status == 'waiting' %}<span class="pill">รอตอบ</span>{% endif %}
+          {% if active.status == 'expiring' %}<span class="pill">ใกล้หมดอายุ</span>{% endif %}
+          {% if active_doc.doc_number %}<span class="mono">{{ active_doc.doc_number }}</span>{% endif %}
+        </div>
+        <div class="h-detail-title">{{ active.name }} <em>{% if active.company %}· {{ active.company }}{% endif %}</em></div>
+        <div class="h-detail-meta">
+          {% if active_doc.salesperson %}<div class="item">เซลส์ <strong>{{ active_doc.salesperson.get_full_name|default:active_doc.salesperson.email }}</strong></div><span class="dot">·</span>{% endif %}
+          <div class="item">ออกเมื่อ <strong>{{ active_doc.issue_date|date:"j M y" }}</strong></div>
+          {% if active_doc.valid_until %}<span class="dot">·</span><div class="item">ยืนราคาถึง <strong>{{ active_doc.valid_until|date:"j M y" }}</strong></div>{% endif %}
+          {% if active_doc.view_count %}<span class="dot">·</span><div class="item">เปิด <strong>{{ active_doc.view_count }} ครั้ง</strong></div>{% endif %}
+        </div>
+      </div>
+
+      <div class="h-detail-body">
+
+        <div class="h-cust">
+          <div class="h-cust-top">
+            <div class="h-cust-id">{{ active_doc.doc_number|default:"—" }}</div>
+            <div class="h-cust-source {{ active.source }}">
+              <span class="src-badge">{{ active.source_letter }}</span>
+              {% if active.source == 'line' %}จากไลน์{% elif active.source == 'web' %}จากเว็บ{% else %}สร้างเอง{% endif %}
+            </div>
+          </div>
+          <div class="h-cust-name">
+            <strong>{{ active.name }}</strong>
+            {% if active.company %}<span class="dot">·</span><span class="co">{{ active.company }}</span>{% endif %}
+          </div>
+        </div>
+
+        <div class="h-status-box">
+          <span class="h-status-pill {{ active.status }}">{{ active.status_label }}</span>
+          <div class="h-status-meta">
+            {% if active.amount %}มูลค่า <strong>{{ active.amount }}</strong><span class="dot">·</span>{% endif %}
+            <strong>{{ active.age_label }}</strong>
+          </div>
+        </div>
+
+        {% with lines=active_doc.lines.all %}
+          {% if lines %}
+            <div class="h-items-box">
+              <div class="h-items-head">
+                <div class="lbl">รายการ</div>
+                <div class="total">รวม <strong>{{ lines|length }}</strong> รายการ</div>
+              </div>
+              <ul class="h-items-list">
+                {% for line in lines|slice:":5" %}
+                  <li>
+                    <span class="nm">{{ line.description|default:line.product.name|default:"-" }}</span>
+                    <span class="qty">×{{ line.quantity|default:1 }}</span>
+                    <span class="pr">{{ line.unit_price|floatformat:0 }}</span>
+                  </li>
+                {% endfor %}
+              </ul>
+              {% if lines|length > 5 %}
+                <a href="{% url 'quotes:quotation_detail' active_doc.pk %}" class="btn btn-ghost" style="margin-top: 6px;">
+                  ดูทั้งหมด {{ lines|length }} รายการ →
+                </a>
+              {% endif %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <div class="h-actions">
+          <a href="{% url 'quotes:quotation_detail' active_doc.pk %}" class="btn primary">
+            <svg class="ico ico-sm"><use href="#i-eye"/></svg> เปิดใบเสนอ
+          </a>
+          {% if active_doc.is_editable %}
+            <a href="{% url 'quotes:quotation_edit' active_doc.pk %}" class="btn">
+              <svg class="ico ico-sm"><use href="#i-edit"/></svg> แก้ไข
+            </a>
+          {% else %}
+            <a href="{% url 'quotes:quotation_send' active_doc.pk %}" class="btn">
+              <svg class="ico ico-sm"><use href="#i-send"/></svg> ส่งซ้ำ
+            </a>
+          {% endif %}
+        </div>
+
+      </div>
+
+    {% else %}
+      <div class="h-empty">
+        <svg class="ic"><use href="#i-inbox"/></svg>
+        <div class="t">เลือกรายการจากด้านซ้าย</div>
+        <div class="d">หรือ <a href="{% url 'quotes:quotation_create' %}">สร้างใบเสนอใหม่</a></div>
+      </div>
+    {% endif %}
+  </section>
+
+</div>
+{% endblock %}

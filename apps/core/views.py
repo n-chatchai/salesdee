@@ -67,10 +67,11 @@ def home(request: HttpRequest) -> HttpResponse:
         return render(request, "core/landing.html")
     ctx: dict = {}
     if getattr(request, "tenant", None) is not None:
-        from apps.crm.dashboard import build_dashboard
+        from apps.core.home_queue import build_home_queue
         from apps.tenants.views import onboarding_status
 
-        ctx = build_dashboard(request)
+        ctx = build_home_queue(request, selected_key=request.GET.get("item"))
+        ctx["active_nav"] = "home"
         ob = onboarding_status(request)
         ctx["onboarding_remaining"] = ob["remaining"]
         ctx["onboarding_complete"] = ob["complete"]
