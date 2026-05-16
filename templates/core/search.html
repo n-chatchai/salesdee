@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}ค้นหา · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/quotes.css' %}">{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-title">ผลการค้นหา · <em>{{ q }}</em></div>
+  <div class="q-detail-meta"><div class="item">{{ total }} ผลลัพธ์</div></div>
+</div>
+
+<form method="get" style="max-width: 480px; margin-bottom: 16px; position: relative;">
+  <svg style="position:absolute; left:10px; top:50%; transform:translateY(-50%); width:16px; height:16px; color:var(--mid);"><use href="#i-search"/></svg>
+  <input name="q" value="{{ q }}" autofocus
+         style="width:100%; padding:8px 12px 8px 34px; background: var(--paper-2); border: 1px solid var(--border); font: inherit;">
+</form>
+
+{% for section, items in results.items %}
+  {% if items %}
+    <div class="q-form-section">
+      <h3>{{ section|capfirst }} · {{ items|length }}</h3>
+      <ul style="list-style: none; padding: 12px 18px; margin: 0;">
+        {% for it in items %}
+          <li style="padding: 6px 0; border-bottom: 1px solid var(--border-2); font-size: 13px;">
+            <a href="#" style="color: var(--ink); text-decoration: none;">{{ it }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+{% endfor %}
+
+{% if total == 0 and q %}
+  <div class="h-empty"><svg class="ic"><use href="#i-search"/></svg><div class="t">ไม่พบผลลัพธ์</div></div>
+{% endif %}
+{% endblock %}

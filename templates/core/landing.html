@@ -1,0 +1,31 @@
+{% extends "auth_base.html" %}
+{% load static %}
+{% block title %}salesdee. · Presale + CRM สำหรับ SME ไทย{% endblock %}
+
+{% block outside_top_right %}
+  <a href="{% url 'accounts:login' %}" class="outside-top-link">เข้าระบบ</a>
+  &nbsp;·&nbsp;
+  <a href="{% url 'accounts:signup' %}" class="outside-top-link">สมัครใช้งาน</a>
+{% endblock %}
+
+{% block content %}
+<div class="auth-stage" style="display: block; padding: 80px 24px;">
+  <div style="max-width: 960px; margin: 0 auto; text-align: center;">
+    <div class="mono" style="color: var(--accent); margin-bottom: 20px;">Presale + CRM · SME ไทย</div>
+    <h1 style="font-size: 56px; font-weight: 600; letter-spacing: -0.03em; color: var(--ink); line-height: 1.1;">
+      ส่ง<em style="font-family: var(--font-display); font-style: italic; color: var(--accent);">ใบเสนอราคา</em><br>
+      จากแชตไลน์<br>
+      ใน 30 วินาที
+    </h1>
+    <p style="font-size: 18px; color: var(--ink-2); margin-top: 24px; max-width: 540px; margin-left: auto; margin-right: auto;">
+      จัดการลีดจากเว็บ + ไลน์ · ออกใบเสนอราคามีมาตรฐาน · ตามดูทุกการเปิดของลูกค้า
+    </p>
+    <div style="margin-top: 36px; display: inline-flex; gap: 12px;">
+      <a href="{% url 'accounts:signup' %}" class="auth-btn" style="display: inline-flex; padding: 14px 24px;">
+        เริ่มทดลองใช้ฟรี 14 วัน
+      </a>
+      <a href="{% url 'accounts:login' %}" class="btn" style="padding: 12px 24px;">เข้าระบบ</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

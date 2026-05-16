@@ -1,0 +1,51 @@
+{% load static %}<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ใบเสนอราคา {{ document.doc_number }} · {{ tenant_name }}</title>
+  <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
+  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <link rel="stylesheet" href="{% static 'css/quotes.css' %}">
+</head>
+<body>
+{% include 'partials/_icons.svg.html' %}
+
+<div style="max-width: 800px; margin: 24px auto; padding: 24px;">
+  <div class="q-detail-head" style="margin-bottom: 24px;">
+    <div class="q-detail-num">{{ document.doc_number }}</div>
+    <div class="q-detail-title">{{ document.customer.name|default:"ลูกค้า" }} <em>· {{ tenant_name }}</em></div>
+    <div class="q-detail-meta">
+      <span class="q-status-pill {{ document.status }}">{{ document.get_status_display }}</span>
+      <span class="dot">·</span>
+      <div class="item">ออกเมื่อ <strong>{{ document.issue_date|date:"j M y" }}</strong></div>
+      {% if document.valid_until %}<span class="dot">·</span><div class="item">ยืนราคาถึง <strong>{{ document.valid_until|date:"j M y" }}</strong></div>{% endif %}
+    </div>
+  </div>
+
+  {% include "quotes/_quote_lines.html" with editable=False %}
+
+  {% if document.payment_terms %}
+    <div class="q-form-section" style="margin-top: 16px;">
+      <h3>เงื่อนไขการชำระเงิน</h3>
+      <div style="padding: 18px;">{{ document.payment_terms|linebreaks }}</div>
+    </div>
+  {% endif %}
+
+  <div style="margin-top: 24px; display: flex; gap: 8px; justify-content: center;">
+    <a href="{% url 'public_quotation_pdf' token=token %}" class="btn">
+      <svg class="ico ico-sm"><use href="#i-download"/></svg> ดาวน์โหลด PDF
+    </a>
+    {% if can_respond %}
+      <form method="post" action="{% url 'public_quotation_respond' token=token %}" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" name="response" value="accepted" class="btn accent">
+          <svg class="ico ico-sm"><use href="#i-check"/></svg> ยอมรับใบเสนอ
+        </button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+</body>
+</html>

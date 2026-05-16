@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}แจ้งเตือน · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/quotes.css' %}">{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-title">แจ้ง<em>เตือน</em></div>
+</div>
+
+<div class="q-form-section">
+  <h3>{{ items|length }} เรื่อง</h3>
+  <ul style="list-style: none; padding: 12px 18px; margin: 0;">
+    {% for n in items %}
+      <li style="padding: 10px 0; border-bottom: 1px solid var(--border-2); font-size: 13px;">
+        <a href="{{ n.url|default:'#' }}" style="color: var(--ink); text-decoration: none;">
+          <strong>{{ n.title|default:n.kind }}</strong>
+          {% if n.body %}<div class="muted">{{ n.body }}</div>{% endif %}
+          {% if n.when %}<div class="muted" style="font-size: 11px;">{{ n.when }}</div>{% endif %}
+        </a>
+      </li>
+    {% empty %}
+      <li class="muted" style="padding: 24px; text-align: center;">ยังไม่มีแจ้งเตือน</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

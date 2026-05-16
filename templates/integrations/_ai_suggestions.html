@@ -1,0 +1,15 @@
+{# Partial · AI-suggested replies for inbox, htmx-swapped #}
+{% if suggestions %}
+  <div class="ai-panel">
+    <div class="label">ข้อความที่ AI แนะนำ</div>
+    <ul style="list-style: none; padding: 0; margin: 8px 0 0; display: flex; flex-direction: column; gap: 6px;">
+      {% for s in suggestions %}
+        <li style="padding: 8px 10px; background: var(--paper-2); border: 1px solid var(--border);">{{ s }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% elif error %}
+  <div class="auth-alert">{{ error }}</div>
+{% else %}
+  <p class="muted">ไม่มีข้อเสนอแนะ</p>
+{% endif %}

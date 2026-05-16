@@ -1,0 +1,52 @@
+{% load static %}<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ product.name }} · {{ tenant.name }}</title>
+  <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
+  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <link rel="stylesheet" href="{% static 'css/quotes.css' %}">
+</head>
+<body>
+{% include 'partials/_icons.svg.html' %}
+
+<div style="max-width: 960px; margin: 0 auto; padding: 24px;">
+  <header style="padding: 16px 0; margin-bottom: 24px; border-bottom: 1px solid var(--border);">
+    <a href="{% url 'public_home' tenant_slug=tenant.slug %}" style="font-family: var(--font-sans); font-weight: 700; font-size: 22px; color: var(--ink); text-decoration: none; text-transform: lowercase;">
+      {{ tenant.name }}<span style="color: var(--accent);">.</span>
+    </a>
+  </header>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start;">
+    <div>
+      {% with first=product.images.first %}
+        {% if first %}
+          <img src="{{ first.image.url }}" alt="" style="width: 100%; border: 1px solid var(--border);">
+        {% else %}
+          <div style="aspect-ratio: 4/3; background: var(--paper-3); display: grid; place-items: center; color: var(--mid-2);">
+            <svg style="width: 48px; height: 48px;"><use href="#i-image"/></svg>
+          </div>
+        {% endif %}
+      {% endwith %}
+    </div>
+
+    <div>
+      {% if product.category %}<div class="mono" style="color: var(--accent); margin-bottom: 8px;">{{ product.category.name }}</div>{% endif %}
+      <h1 style="font-size: 28px; font-weight: 600; letter-spacing: -0.02em;">{{ product.name }}</h1>
+      {% if product.name_en %}<div class="muted">{{ product.name_en }}</div>{% endif %}
+
+      <div style="font-family: var(--font-mono); font-size: 24px; font-weight: 600; color: var(--accent); margin: 16px 0;">
+        ฿{{ product.default_price|floatformat:0 }}{% if product.unit %} /{{ product.unit }}{% endif %}
+      </div>
+
+      {% if product.description %}<p style="color: var(--ink-2); line-height: 1.6;">{{ product.description|linebreaks }}</p>{% endif %}
+
+      <a href="#" class="btn accent" style="padding: 12px 20px; margin-top: 16px;">
+        <svg class="ico ico-sm"><use href="#i-plus"/></svg> เพิ่มในใบเสนอ
+      </a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

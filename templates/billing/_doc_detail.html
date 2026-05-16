@@ -1,0 +1,17 @@
+{# Shared billing document detail · used by invoice/tax/receipt/CN/DN. Caller provides `actions` block. #}
+{% load static %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-num">{{ document.doc_number }}{% if document.revision %} · Rev. {{ document.revision }}{% endif %}</div>
+  <div class="q-detail-title">{{ title }} · <em>{{ document.customer.name|default:"—" }}</em></div>
+  <div class="q-detail-meta">
+    <span class="q-status-pill {{ document.status }}">{{ document.get_status_display }}</span>
+    <span class="dot">·</span>
+    <div class="item">ออกเมื่อ <strong>{{ document.issue_date|date:"j M y" }}</strong></div>
+    {% if document.due_date %}<span class="dot">·</span><div class="item">กำหนดชำระ <strong>{{ document.due_date|date:"j M y" }}</strong></div>{% endif %}
+    {% if outstanding %}<span class="dot">·</span><div class="item" style="color: var(--warn); font-weight: 600;">ค้างชำระ ฿{{ outstanding|floatformat:0 }}</div>{% endif %}
+  </div>
+</div>
+
+{% block billing_actions %}{% endblock %}
+
+{% include "quotes/_quote_lines.html" %}

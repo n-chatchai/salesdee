@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ document.doc_number }} Rev. {{ rev.revision }} · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/quotes.css' %}">{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-num">{{ document.doc_number }} · Rev. {{ rev.revision }}</div>
+  <div class="q-detail-title">สแนปช็อต <em>เวอร์ชัน {{ rev.revision }}</em></div>
+  <div class="q-detail-meta">
+    <div class="item">{{ rev.created_at|date:"j M y H:i" }}</div>
+    {% if rev.changed_by %}<span class="dot">·</span><div class="item">โดย {{ rev.changed_by.get_full_name|default:rev.changed_by.email }}</div>{% endif %}
+  </div>
+</div>
+
+<div class="q-form-section">
+  <h3>เนื้อหา ณ เวอร์ชันนั้น</h3>
+  <pre style="padding: 18px; font-family: var(--font-mono); font-size: 11px; white-space: pre-wrap; overflow-x: auto; background: var(--paper-2);">{{ snap|pprint }}</pre>
+</div>
+
+<a href="{% url 'quotes:quotation_revisions' document.pk %}" class="btn" style="margin-top: 16px;">← ประวัติทั้งหมด</a>
+{% endblock %}

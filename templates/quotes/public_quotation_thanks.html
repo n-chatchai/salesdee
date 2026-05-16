@@ -1,0 +1,13 @@
+{% load static %}<!DOCTYPE html>
+<html lang="th"><head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ขอบคุณ · salesdee.</title>
+  <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
+  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head><body>
+<div style="max-width: 480px; margin: 80px auto; padding: 40px; text-align: center;">
+  <div style="font-family: var(--font-display); font-style: italic; font-size: 32px; color: var(--accent); margin-bottom: 12px;">ขอบคุณ</div>
+  <p style="font-size: 16px; color: var(--ink-2);">รับคำตอบของคุณสำหรับใบเสนอ <strong>{{ document.doc_number }}</strong> แล้ว · ทีมงานจะติดต่อกลับ</p>
+</div>
+</body></html>

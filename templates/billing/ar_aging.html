@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}AR Aging · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/quotes.css' %}">{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-title">AR Aging · <em>ลูกหนี้</em></div>
+  <div class="q-detail-meta">
+    <div class="item">ทั้งหมด <strong>฿{{ data.total|floatformat:0 }}</strong></div>
+  </div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 16px;">
+  <div class="kpi"><div class="label">ปัจจุบัน</div><div class="value">฿{{ data.bucket_current|floatformat:0 }}</div></div>
+  <div class="kpi"><div class="label">1-30 วัน</div><div class="value">฿{{ data.bucket_1_30|floatformat:0 }}</div></div>
+  <div class="kpi"><div class="label">31-60 วัน</div><div class="value">฿{{ data.bucket_31_60|floatformat:0 }}</div></div>
+  <div class="kpi"><div class="label">61-90 วัน</div><div class="value">฿{{ data.bucket_61_90|floatformat:0 }}</div></div>
+  <div class="kpi"><div class="label">90+ วัน</div><div class="value" style="color: var(--danger);">฿{{ data.bucket_90_plus|floatformat:0 }}</div></div>
+</div>
+
+<div class="q-form-section">
+  <h3>ลูกหนี้รายคน</h3>
+  <table class="q-lines-table">
+    <thead><tr><th>ลูกค้า</th><th class="r">ปัจจุบัน</th><th class="r">1-30</th><th class="r">31-60</th><th class="r">61-90</th><th class="r">90+</th><th class="r">รวม</th></tr></thead>
+    <tbody>
+      {% for r in data.rows %}
+        <tr>
+          <td><a href="{% url 'billing:customer_statement' r.customer.pk %}" style="color: var(--accent);">{{ r.customer.name }}</a></td>
+          <td class="r">{{ r.current|floatformat:0 }}</td>
+          <td class="r">{{ r.b1_30|floatformat:0 }}</td>
+          <td class="r">{{ r.b31_60|floatformat:0 }}</td>
+          <td class="r">{{ r.b61_90|floatformat:0 }}</td>
+          <td class="r">{{ r.b90_plus|floatformat:0 }}</td>
+          <td class="r"><strong>฿{{ r.total|floatformat:0 }}</strong></td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="7" class="muted" style="text-align: center; padding: 20px;">ไม่มีลูกหนี้ค้างชำระ</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,9 @@
+{# Partial · AI-generated customer summary, htmx-swapped #}
+{% if summary %}
+  <div class="ai-panel">
+    <div class="label">สรุปลูกค้าโดย AI</div>
+    <div style="white-space: pre-wrap;">{{ summary }}</div>
+  </div>
+{% elif error %}
+  <div class="auth-alert">{{ error }}</div>
+{% endif %}

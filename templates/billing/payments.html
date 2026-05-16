@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}การชำระเงิน · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/quotes.css' %}">{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-title">การ<em>ชำระเงิน</em></div>
+</div>
+
+<div class="q-form-section">
+  <table class="q-lines-table">
+    <thead><tr><th>วันที่</th><th>ใบแจ้งหนี้</th><th>ลูกค้า</th><th>ช่องทาง</th><th class="r">จำนวน</th></tr></thead>
+    <tbody>
+      {% for p in rows %}
+        <tr>
+          <td>{{ p.paid_at|date:"j M y" }}</td>
+          <td><a href="{% url 'billing:invoice_detail' p.invoice.pk %}" style="color: var(--accent); font-family: var(--font-mono);">{{ p.invoice.doc_number }}</a></td>
+          <td>{{ p.invoice.customer.name|default:"—" }}</td>
+          <td>{{ p.get_method_display|default:p.method }}</td>
+          <td class="r">฿{{ p.amount|floatformat:0 }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5" class="muted" style="text-align: center; padding: 20px;">ยังไม่มีรายการชำระ</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

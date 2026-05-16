@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}LINE Inbox · salesdee.{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+<link rel="stylesheet" href="{% static 'css/quotes.css' %}">
+{% endblock %}
+
+{% block content %}
+<div style="margin: -24px;">
+  <div class="q-list-head">
+    <div class="title-group">
+      <div class="title">LINE Inbox</div>
+      <div class="count-pill">{{ conversations|length }} แชต</div>
+    </div>
+  </div>
+
+  <div class="h-main" style="height: calc(100vh - 56px - 80px);">
+    <aside class="h-list-pane">
+      <div class="h-rows">
+        {% for c in conversations %}
+          <a href="?conv={{ c.pk }}" class="h-row {% if active_conv and active_conv.pk == c.pk %}active{% endif %}">
+            <div class="h-avatar">{{ c.display_name|default:"?"|slice:":1"|upper }}<div class="ch line">L</div></div>
+            <div class="h-row-content">
+              <div class="h-row-top">
+                <div class="h-row-name">{{ c.display_name|default:c.external_id }}</div>
+                <div class="h-row-age">{{ c.last_message_at|date:"j M H:i" }}</div>
+              </div>
+              <div class="h-row-context">{{ c.last_message_preview|default:""|truncatechars:60 }}</div>
+            </div>
+          </a>
+        {% empty %}
+          <div class="h-empty"><svg class="ic"><use href="#i-line-app"/></svg><div class="t">ยังไม่มีแชต</div></div>
+        {% endfor %}
+      </div>
+    </aside>
+    <section class="h-detail-pane">
+      {% if active_conv %}
+        {% include "integrations/_conversation.html" %}
+      {% else %}
+        <div class="h-empty"><svg class="ic"><use href="#i-message"/></svg><div class="t">เลือกแชตจากด้านซ้าย</div></div>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}

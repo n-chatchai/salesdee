@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}รายงาน · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/quotes.css' %}">{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-title"><em>รายงาน</em></div>
+  <div class="q-detail-meta">
+    <form method="get" style="display: inline-flex; gap: 8px; align-items: center;">
+      <label class="muted">ช่วงเวลา</label>
+      <select name="period" onchange="this.form.submit()">
+        <option value="7" {% if period == '7' %}selected{% endif %}>7 วันล่าสุด</option>
+        <option value="30" {% if period == '30' %}selected{% endif %}>30 วันล่าสุด</option>
+        <option value="90" {% if period == '90' %}selected{% endif %}>90 วันล่าสุด</option>
+      </select>
+    </form>
+  </div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px;">
+  <div class="kpi"><div class="label">ใบเสนอใหม่</div><div class="value">{{ new_quotes|default:0 }}</div></div>
+  <div class="kpi"><div class="label">ใบส่งให้ลูกค้า</div><div class="value">{{ sent_quotes|default:0 }}</div></div>
+  <div class="kpi"><div class="label">ใบที่ปิดได้</div><div class="value">{{ won_quotes|default:0 }}</div></div>
+  <div class="kpi"><div class="label">ยอดขาย</div><div class="value">฿{{ won_value|default:0|floatformat:0 }}</div></div>
+</div>
+
+{% if by_salesperson %}
+  <div class="q-form-section">
+    <h3>ผลงานต่อเซลส์</h3>
+    <table class="q-lines-table">
+      <thead><tr><th>เซลส์</th><th class="r">ใบเสนอ</th><th class="r">ปิดได้</th><th class="r">ยอด</th></tr></thead>
+      <tbody>
+        {% for r in by_salesperson %}
+          <tr>
+            <td>{{ r.name }}</td>
+            <td class="r">{{ r.quotes }}</td>
+            <td class="r">{{ r.won }}</td>
+            <td class="r">฿{{ r.value|floatformat:0 }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}
+{% endblock %}

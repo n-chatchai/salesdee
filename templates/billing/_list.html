@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ title }} · salesdee.{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+<link rel="stylesheet" href="{% static 'css/quotes.css' %}">
+{% endblock %}
+
+{% block content %}
+<div style="margin: -24px;">
+  <div class="q-list-head">
+    <div class="title-group">
+      <div class="title">{{ title }}</div>
+      <div class="count-pill">{{ rows|length }} รายการ</div>
+    </div>
+  </div>
+
+  <div class="q-rows">
+    {% for row in rows %}
+      {% if show_outstanding %}
+        {% with doc=row.0 totals=row.1 outstanding=row.2 %}
+          <a href="{% url detail_url doc.pk %}" class="h-row">
+            <div class="h-avatar">{{ doc.customer.name|default:"—"|slice:":1"|upper }}</div>
+            <div class="h-row-content">
+              <div class="h-row-top">
+                <div class="h-row-name">{{ doc.customer.name|default:"—" }}{% if doc.customer.company_name %} · {{ doc.customer.company_name }}{% endif %}</div>
+                <div class="h-row-age">{{ doc.issue_date|date:"j M y" }}</div>
+              </div>
+              <div class="h-row-context"><em>{{ doc.doc_number }}</em></div>
+              <div class="h-row-foot">
+                <span class="q-status-pill {{ doc.status }}">{{ doc.get_status_display }}</span>
+                <span class="h-row-amt">฿{{ totals.grand_total|floatformat:0 }}</span>
+                {% if outstanding %}<span class="chip warn">ค้าง ฿{{ outstanding|floatformat:0 }}</span>{% endif %}
+              </div>
+            </div>
+          </a>
+        {% endwith %}
+      {% else %}
+        {% with doc=row.0 totals=row.1 %}
+          <a href="{% url detail_url doc.pk %}" class="h-row">
+            <div class="h-avatar">{{ doc.customer.name|default:"—"|slice:":1"|upper }}</div>
+            <div class="h-row-content">
+              <div class="h-row-top">
+                <div class="h-row-name">{{ doc.customer.name|default:"—" }}{% if doc.customer.company_name %} · {{ doc.customer.company_name }}{% endif %}</div>
+                <div class="h-row-age">{{ doc.issue_date|date:"j M y" }}</div>
+              </div>
+              <div class="h-row-context"><em>{{ doc.doc_number }}</em></div>
+              <div class="h-row-foot">
+                <span class="q-status-pill {{ doc.status }}">{{ doc.get_status_display }}</span>
+                <span class="h-row-amt">฿{{ totals.grand_total|floatformat:0 }}</span>
+              </div>
+            </div>
+          </a>
+        {% endwith %}
+      {% endif %}
+    {% empty %}
+      <div class="h-empty"><svg class="ic"><use href="#i-receipt"/></svg><div class="t">ยังไม่มี{{ title }}</div></div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}ประวัติแก้ไข {{ document.doc_number }} · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/quotes.css' %}">{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-num">{{ document.doc_number }}</div>
+  <div class="q-detail-title">ประวัติ<em>แก้ไข</em></div>
+</div>
+
+<div class="q-form-section">
+  <table class="q-lines-table">
+    <thead><tr><th>Rev.</th><th>ผู้แก้</th><th>เมื่อ</th><th>หมายเหตุ</th></tr></thead>
+    <tbody>
+      {% for rev in revisions %}
+        <tr>
+          <td><a href="{% url 'quotes:quotation_revision_detail' document.pk rev.revision %}" style="color: var(--accent); font-family: var(--font-mono);">Rev. {{ rev.revision }}</a></td>
+          <td>{{ rev.changed_by.get_full_name|default:rev.changed_by.email|default:"—" }}</td>
+          <td>{{ rev.created_at|date:"j M y H:i" }}</td>
+          <td class="muted">{{ rev.note|default:"" }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4" class="muted" style="text-align: center; padding: 20px;">ยังไม่มีการแก้ไข</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<a href="{% url 'quotes:quotation_detail' document.pk %}" class="btn" style="margin-top: 16px;">← กลับ</a>
+{% endblock %}

@@ -1,0 +1,16 @@
+{# Partial · AI catalog-match results, htmx-swapped #}
+{% if matches %}
+  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;">
+    {% for m in matches %}
+      <a href="{% url 'public_product' tenant_slug=tenant.slug pk=m.product.pk %}" style="text-decoration: none; color: inherit; background: var(--paper-2); border: 1px solid var(--border); padding: 12px;">
+        <div style="font-weight: 600; font-size: 14px;">{{ m.product.name }}</div>
+        {% if m.score %}<div class="muted" style="font-size: 11px; font-family: var(--font-mono);">score {{ m.score|floatformat:2 }}</div>{% endif %}
+        {% if m.product.default_price %}<div style="color: var(--accent); font-family: var(--font-mono); margin-top: 4px;">฿{{ m.product.default_price|floatformat:0 }}</div>{% endif %}
+      </a>
+    {% endfor %}
+  </div>
+{% elif error %}
+  <div class="auth-alert">{{ error }}</div>
+{% else %}
+  <p class="muted">ไม่พบสินค้าที่ตรงกับคำค้น</p>
+{% endif %}

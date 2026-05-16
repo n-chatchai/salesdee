@@ -1,0 +1,16 @@
+{# Partial · single conversation thread, htmx-swapped #}
+<div style="display: flex; flex-direction: column; height: 100%; padding: 16px 24px;">
+  <div style="font-weight: 600; font-size: 16px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
+    {{ active_conv.display_name|default:active_conv.external_id }}
+  </div>
+  <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+    {% for m in messages %}
+      <div style="max-width: 70%; padding: 8px 12px; background: {% if m.direction == 'out' %}var(--accent-soft); align-self: flex-end;{% else %}var(--paper-2); align-self: flex-start;{% endif %} font-size: 13px;">
+        {{ m.body|linebreaks }}
+        <div class="muted" style="font-size: 10px; margin-top: 4px; font-family: var(--font-mono);">{{ m.created_at|date:"j M H:i" }}</div>
+      </div>
+    {% empty %}
+      <div class="muted" style="text-align: center; padding: 20px;">ยังไม่มีข้อความ</div>
+    {% endfor %}
+  </div>
+</div>

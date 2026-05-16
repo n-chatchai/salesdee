@@ -1,0 +1,46 @@
+{% load static %}<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>สินค้า · {{ tenant.name }}</title>
+  <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
+  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <link rel="stylesheet" href="{% static 'css/catalog.css' %}">
+</head>
+<body>
+{% include 'partials/_icons.svg.html' %}
+
+<div style="max-width: 1100px; margin: 0 auto; padding: 24px;">
+  <header style="display: flex; align-items: center; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid var(--border); margin-bottom: 24px;">
+    <a href="{% url 'public_home' tenant_slug=tenant.slug %}" style="font-family: var(--font-sans); font-weight: 700; font-size: 22px; color: var(--ink); text-decoration: none; text-transform: lowercase;">
+      {{ tenant.name }}<span style="color: var(--accent);">.</span>
+    </a>
+    <form method="get" style="position: relative;">
+      <svg style="position:absolute; left:10px; top:50%; transform:translateY(-50%); width:16px; height:16px; color:var(--mid);"><use href="#i-search"/></svg>
+      <input name="q" value="{{ q|default:'' }}" placeholder="ค้นหา"
+             style="padding: 8px 12px 8px 34px; background: var(--paper-2); border: 1px solid var(--border); font: inherit;">
+    </form>
+  </header>
+
+  <h1 style="font-size: 28px; font-weight: 600; margin-bottom: 16px;">สินค้าทั้งหมด</h1>
+
+  <div class="pl-grid">
+    {% for p in products %}
+      <a href="{% url 'public_product' tenant_slug=tenant.slug pk=p.pk %}" class="pl-card">
+        <div class="thumb">
+          {% with first=p.images.first %}{% if first %}<img src="{{ first.image.url }}" alt="">{% else %}<svg><use href="#i-image"/></svg>{% endif %}{% endwith %}
+        </div>
+        <div class="body">
+          <div class="name">{{ p.name }}</div>
+          <div class="meta">{{ p.category.name|default:"—" }}</div>
+          <div class="price">฿{{ p.default_price|floatformat:0 }}</div>
+        </div>
+      </a>
+    {% empty %}
+      <p class="muted">ยังไม่มีสินค้า</p>
+    {% endfor %}
+  </div>
+</div>
+</body>
+</html>

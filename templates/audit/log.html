@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Audit log · salesdee.{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/quotes.css' %}">
+<link rel="stylesheet" href="{% static 'css/settings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-title">Audit <em>log</em></div>
+</div>
+
+<div class="s-layout">
+  {% include "tenants/_s_tabs.html" with active_tab="audit" %}
+
+  <div>
+    <div class="q-form-section">
+      <table class="q-lines-table">
+        <thead><tr><th>เมื่อ</th><th>ผู้ใช้</th><th>การกระทำ</th><th>วัตถุ</th></tr></thead>
+        <tbody>
+          {% for e in events %}
+            <tr>
+              <td style="font-family: var(--font-mono); font-size: 11px;">{{ e.created_at|date:"j M y H:i:s" }}</td>
+              <td>{{ e.user.email|default:"system" }}</td>
+              <td><strong>{{ e.action }}</strong></td>
+              <td class="muted">{{ e.object_repr|default:"—" }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4" class="muted" style="text-align: center; padding: 20px;">ยังไม่มี event</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

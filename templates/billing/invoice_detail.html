@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ document.doc_number }} · ใบแจ้งหนี้ · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/quotes.css' %}">{% endblock %}
+
+{% block content %}
+{% include "billing/_doc_detail.html" %}
+
+<div style="display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap;">
+  {% if can_write and document.status != 'cancelled' %}
+    {% if not tax_invoice %}
+      <form method="post" action="{% url 'billing:invoice_issue_tax' document.pk %}" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn accent">
+          <svg class="ico ico-sm"><use href="#i-stamp"/></svg> ออกใบกำกับภาษี
+        </button>
+      </form>
+    {% else %}
+      <a href="{% url 'billing:tax_invoice_detail' tax_invoice.pk %}" class="btn">
+        <svg class="ico ico-sm"><use href="#i-stamp"/></svg> ดูใบกำกับภาษี {{ tax_invoice.doc_number }}
+      </a>
+    {% endif %}
+    {% if outstanding %}
+      <a href="{% url 'billing:payment_create' document.pk %}" class="btn accent">
+        <svg class="ico ico-sm"><use href="#i-bank"/></svg> บันทึกชำระ
+      </a>
+    {% endif %}
+    <form method="post" action="{% url 'billing:invoice_cancel' document.pk %}" style="display: inline;" onsubmit="return confirm('ยืนยันยกเลิกใบแจ้งหนี้?');">
+      {% csrf_token %}
+      <button type="submit" class="btn ghost" style="color: var(--danger);">ยกเลิก</button>
+    </form>
+  {% endif %}
+  <a href="{% url 'billing:invoices' %}" class="btn ghost">← รายการ</a>
+</div>
+{% endblock %}

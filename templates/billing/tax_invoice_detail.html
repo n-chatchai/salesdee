@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ document.doc_number }} · ใบกำกับภาษี · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/quotes.css' %}">{% endblock %}
+
+{% block content %}
+{% include "billing/_doc_detail.html" %}
+
+<div style="display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap;">
+  {% if can_write and document.status != 'cancelled' %}
+    {% if not receipt %}
+      <form method="post" action="{% url 'billing:tax_invoice_issue_receipt' document.pk %}" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn accent"><svg class="ico ico-sm"><use href="#i-receipt"/></svg> ออกใบเสร็จ</button>
+      </form>
+    {% else %}
+      <a href="{% url 'billing:receipt_detail' receipt.pk %}" class="btn"><svg class="ico ico-sm"><use href="#i-receipt"/></svg> ใบเสร็จ {{ receipt.doc_number }}</a>
+    {% endif %}
+    <a href="{% url 'billing:credit_note_create' document.pk %}" class="btn ghost">ใบลดหนี้</a>
+    <a href="{% url 'billing:debit_note_create' document.pk %}" class="btn ghost">ใบเพิ่มหนี้</a>
+  {% endif %}
+  <a href="{% url 'billing:tax_invoices' %}" class="btn ghost">← รายการ</a>
+</div>
+{% endblock %}

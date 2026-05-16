@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Statement · {{ customer.name }} · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/quotes.css' %}">{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-num">STATEMENT</div>
+  <div class="q-detail-title">{{ customer.name }} <em>· ยอดคงค้าง</em></div>
+  <div class="q-detail-meta">
+    <div class="item">ยอดรวม <strong>฿{{ data.total|floatformat:0 }}</strong></div>
+    <span class="dot">·</span>
+    <div class="item">ค้างชำระ <strong style="color: var(--warn);">฿{{ data.outstanding|floatformat:0 }}</strong></div>
+  </div>
+</div>
+
+<div class="q-form-section">
+  <h3>รายการใบแจ้งหนี้ที่ยังไม่ปิด</h3>
+  <table class="q-lines-table">
+    <thead><tr><th>เลขที่</th><th>ออกเมื่อ</th><th>ครบกำหนด</th><th class="r">มูลค่า</th><th class="r">ค้างชำระ</th></tr></thead>
+    <tbody>
+      {% for row in data.rows %}
+        <tr>
+          <td><a href="{% url 'billing:invoice_detail' row.invoice.pk %}" style="color: var(--accent); font-family: var(--font-mono);">{{ row.invoice.doc_number }}</a></td>
+          <td>{{ row.invoice.issue_date|date:"j M y" }}</td>
+          <td>{{ row.invoice.due_date|date:"j M y"|default:"—" }}</td>
+          <td class="r">฿{{ row.total|floatformat:0 }}</td>
+          <td class="r">฿{{ row.outstanding|floatformat:0 }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5" class="muted" style="text-align: center; padding: 20px;">ไม่มียอดค้าง</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

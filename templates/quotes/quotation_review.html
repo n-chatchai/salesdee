@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}ตรวจร่าง {{ document.doc_number }} · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/quotes.css' %}">{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-num">{{ document.doc_number }} · ตรวจร่าง</div>
+  <div class="q-detail-title">ตรวจ <em>ใบเสนอราคา</em> ก่อนส่ง</div>
+</div>
+
+<div class="ai-panel" style="margin-bottom: 16px;">
+  <div class="label">ผู้ช่วยร่างให้แล้ว</div>
+  ตรวจสอบรายการและตัวเลขด้านล่าง · กด "ส่ง" เพื่อส่งผ่านไลน์/อีเมล · กด "แก้ไข" เพื่อปรับ
+</div>
+
+{% include "quotes/_quote_lines.html" %}
+
+<div style="display: flex; gap: 8px; margin-top: 16px;">
+  <a href="{% url 'quotes:quotation_edit' document.pk %}" class="btn">
+    <svg class="ico ico-sm"><use href="#i-edit"/></svg> แก้ไข
+  </a>
+  <form method="post" action="{% url 'quotes:quotation_review_send_line' document.pk %}" style="display: inline;">
+    {% csrf_token %}
+    <button type="submit" class="btn accent">
+      <svg class="ico ico-sm"><use href="#i-send"/></svg> ส่งผ่านไลน์
+    </button>
+  </form>
+</div>
+{% endblock %}

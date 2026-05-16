@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}สร้างใบเพิ่มหนี้ · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/quotes.css' %}">{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-title">สร้าง<em>ใบเพิ่มหนี้</em> · อ้างอิง {{ tax_invoice.doc_number }}</div>
+</div>
+
+<form method="post" style="max-width: 720px;">
+  {% csrf_token %}
+  <div class="q-form-section">
+    <h3>สาเหตุการเพิ่มหนี้</h3>
+    <div class="q-form-stack">
+      <div>
+        <label>เหตุผล</label>
+        <textarea name="reason" rows="3" required></textarea>
+      </div>
+      <div>
+        <label>มูลค่าที่เพิ่ม</label>
+        <input type="number" step="0.01" name="amount" required>
+      </div>
+    </div>
+  </div>
+  <div style="display: flex; gap: 8px; margin-top: 16px;">
+    <button type="submit" class="btn accent">ออกใบเพิ่มหนี้</button>
+    <a href="{% url 'billing:tax_invoice_detail' tax_invoice.pk %}" class="btn">ยกเลิก</a>
+  </div>
+</form>
+{% endblock %}

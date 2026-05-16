@@ -1,0 +1,15 @@
+{# Partial · LINE thread list, htmx-refreshed #}
+{% for c in conversations %}
+  <a href="?conv={{ c.pk }}" class="h-row {% if active_conv and active_conv.pk == c.pk %}active{% endif %}">
+    <div class="h-avatar">{{ c.display_name|default:"?"|slice:":1"|upper }}<div class="ch line">L</div></div>
+    <div class="h-row-content">
+      <div class="h-row-top">
+        <div class="h-row-name">{{ c.display_name|default:c.external_id }}</div>
+        <div class="h-row-age">{{ c.last_message_at|date:"j M H:i" }}</div>
+      </div>
+      <div class="h-row-context">{{ c.last_message_preview|default:""|truncatechars:60 }}</div>
+    </div>
+  </a>
+{% empty %}
+  <div class="h-empty"><svg class="ic"><use href="#i-line-app"/></svg><div class="t">ยังไม่มีแชต</div></div>
+{% endfor %}

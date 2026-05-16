@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}การชำระ #{{ payment.pk }} · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/quotes.css' %}">{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-num">PAY · #{{ payment.pk }}</div>
+  <div class="q-detail-title">การ<em>ชำระเงิน</em></div>
+  <div class="q-detail-meta">
+    <div class="item">ใบแจ้งหนี้ <strong>{{ payment.invoice.doc_number }}</strong></div>
+    <span class="dot">·</span>
+    <div class="item">เมื่อ <strong>{{ payment.paid_at|date:"j M y" }}</strong></div>
+    <span class="dot">·</span>
+    <div class="item">฿<strong>{{ payment.amount|floatformat:2 }}</strong></div>
+  </div>
+</div>
+
+<div class="q-form-section">
+  <h3>รายละเอียด</h3>
+  <table class="q-lines-table">
+    <tr><th>ลูกค้า</th><td>{{ payment.invoice.customer.name|default:"—" }}</td></tr>
+    <tr><th>ช่องทาง</th><td>{{ payment.get_method_display|default:payment.method }}</td></tr>
+    {% if payment.reference %}<tr><th>อ้างอิง</th><td>{{ payment.reference }}</td></tr>{% endif %}
+    {% if payment.note %}<tr><th>หมายเหตุ</th><td>{{ payment.note }}</td></tr>{% endif %}
+  </table>
+</div>
+
+<a href="{% url 'billing:invoice_detail' payment.invoice.pk %}" class="btn" style="margin-top: 16px;">← กลับใบแจ้งหนี้</a>
+{% endblock %}
