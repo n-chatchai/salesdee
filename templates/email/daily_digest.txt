@@ -1,7 +1,0 @@
-salesdee · {{ tenant.name }}
-สรุปงานวันนี้ — {{ count }} รายการที่ต้องดูแล
-{% for item in items %}
-- {{ item.text }}{% if item.url %} ({{ item.url }}){% endif %}{% endfor %}
-
-—
-คุณได้รับอีเมลนี้เพราะคุณเป็นสมาชิกของ workspace "{{ tenant.name }}" ใน salesdee

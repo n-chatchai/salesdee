@@ -56,7 +56,7 @@ def push_quotation_flex(
     company_name: str = "",
 ) -> None:
     """Push a LINE Flex 'bubble' summarising a quotation, with buttons to open the web view / PDF.
-    Layout follows specs/salesdee-pdf-and-line.html. Raises ``LineNotConfigured`` or SDK errors."""
+    Raises ``LineNotConfigured`` or SDK errors."""
     integration = _active_integration()
     if integration is None:
         raise LineNotConfigured("ยังไม่ได้ตั้งค่าการเชื่อม LINE OA สำหรับ workspace นี้")
