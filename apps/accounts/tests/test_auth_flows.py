@@ -18,15 +18,15 @@ def test_signup_creates_tenant_and_logs_in(client) -> None:
     resp = client.post(
         reverse("accounts:signup"),
         {
-            "workspace_name": "ร้านโต๊ะดี",
-            "slug": "rantodee",
+            "workspace_name": "Rantodee Shop",
             "full_name": "เจ้าของ ร้าน",
             "email": "owner@rantodee.test",
             "password": "sup3r-secret-pw-99",
         },
     )
     assert resp.status_code == 302
-    tenant = Tenant.objects.get(slug="rantodee")
+    tenant = Tenant.objects.get(name="Rantodee Shop")
+    assert tenant.slug == "rantodee-shop"  # auto-derived from workspace_name
     assert CompanyProfile.objects.filter(tenant=tenant).exists()
     user = get_user_model().objects.get(email="owner@rantodee.test")
     m = Membership.objects.get(user=user, tenant=tenant)
@@ -37,19 +37,23 @@ def test_signup_creates_tenant_and_logs_in(client) -> None:
     assert client.get("/").status_code in (200, 302)
 
 
-def test_signup_rejects_duplicate_slug(client, tenant) -> None:
+def test_signup_auto_dedupes_slug(client, tenant) -> None:
+    """Slug is auto-derived from workspace_name; duplicates get a -N suffix instead of erroring."""
+    from apps.tenants.models import Tenant
+
     resp = client.post(
         reverse("accounts:signup"),
         {
-            "workspace_name": "อีกร้าน",
-            "slug": tenant.slug,
+            "workspace_name": tenant.name,  # would collide on slug
             "full_name": "x y",
             "email": "x@y.test",
             "password": "sup3r-secret-pw-99",
         },
     )
-    assert resp.status_code == 200
-    assert b"\xe0" in resp.content  # form re-rendered with an error (Thai bytes present)
+    assert resp.status_code == 302
+    new_tenants = Tenant.objects.filter(name=tenant.name).exclude(pk=tenant.pk)
+    assert new_tenants.count() == 1
+    assert new_tenants.first().slug != tenant.slug  # got -2 suffix
 
 
 def test_password_reset_sends_email(client, user) -> None:

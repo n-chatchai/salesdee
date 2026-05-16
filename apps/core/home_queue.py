@@ -7,9 +7,9 @@ renders as an `.h-row`."""
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import date, timedelta
-from typing import Iterable
 
 from django.http import HttpRequest
 from django.urls import reverse
@@ -18,19 +18,19 @@ from django.utils import timezone
 
 @dataclass
 class QueueItem:
-    key: str                 # unique selector for this row (e.g. "q:42")
-    name: str                # customer / lead display name
-    company: str             # company name (or blank)
-    context: str             # short context line (project, reference, last message)
-    age_label: str           # "3 ชม", "2 วัน", "เหลือ 5 วัน"
-    age_kind: str            # "", "stale", "critical"
-    source: str              # "line" | "web" | "email" | "manual"
-    source_letter: str       # avatar source badge text (L / W / E / M)
-    status: str              # "new" | "waiting" | "expiring"
-    status_label: str        # display label (รับเรื่องใหม่ / รอตอบ / ใกล้หมดอายุ)
-    amount: str              # "฿185K" or ""
-    url: str                 # link to underlying object detail page
-    initial: str             # avatar single-char letter
+    key: str  # unique selector for this row (e.g. "q:42")
+    name: str  # customer / lead display name
+    company: str  # company name (or blank)
+    context: str  # short context line (project, reference, last message)
+    age_label: str  # "3 ชม", "2 วัน", "เหลือ 5 วัน"
+    age_kind: str  # "", "stale", "critical"
+    source: str  # "line" | "web" | "email" | "manual"
+    source_letter: str  # avatar source badge text (L / W / E / M)
+    status: str  # "new" | "waiting" | "expiring"
+    status_label: str  # display label (รับเรื่องใหม่ / รอตอบ / ใกล้หมดอายุ)
+    amount: str  # "฿185K" or ""
+    url: str  # link to underlying object detail page
+    initial: str  # avatar single-char letter
 
 
 def _age(then) -> tuple[str, str]:

@@ -518,8 +518,9 @@ def onboarding(request: HttpRequest) -> HttpResponse:
                 logo = form.cleaned_data.get("logo")
                 if logo:
                     profile = _company(request, create=True)
-                    profile.logo = logo
-                    profile.save(update_fields=["logo"])
+                    if profile is not None:
+                        profile.logo = logo
+                        profile.save(update_fields=["logo"])
                 messages.success(request, "ตั้งค่า workspace เรียบร้อย — เริ่มใช้งานได้เลย")
                 return redirect("core:home")
         else:
