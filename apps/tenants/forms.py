@@ -44,6 +44,38 @@ class CompanyProfileForm(forms.ModelForm):
             self.fields[name].required = False
 
 
+class OnboardingDomainForm(forms.Form):
+    """Step 2 of onboarding: pick a subdomain (Tenant.slug) + upload a logo."""
+
+    slug = forms.SlugField(
+        label="Subdomain",
+        max_length=63,
+        help_text="ที่อยู่ที่ลูกค้าใช้: <slug>.salesdee.app",
+    )
+    logo = forms.ImageField(label="โลโก้", required=False)
+
+    def __init__(self, *args, tenant=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.tenant = tenant
+        if tenant is not None and not self.is_bound:
+            self.fields["slug"].initial = tenant.slug
+
+    def clean_slug(self):
+        from django.utils.text import slugify
+
+        from apps.tenants.models import Tenant
+
+        slug = slugify(self.cleaned_data["slug"])
+        if not slug:
+            raise forms.ValidationError("กรุณาระบุ subdomain ที่ถูกต้อง")
+        qs = Tenant.objects.filter(slug=slug)
+        if self.tenant is not None:
+            qs = qs.exclude(pk=self.tenant.pk)
+        if qs.exists():
+            raise forms.ValidationError("subdomain นี้ถูกใช้แล้ว ลองชื่ออื่น")
+        return slug
+
+
 class LineIntegrationForm(forms.ModelForm):
     class Meta:
         model = LineIntegration

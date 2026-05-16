@@ -1,0 +1,234 @@
+{% extends "auth_base.html" %}
+{% load static %}
+{% block title %}ตั้งค่าครั้งแรก · salesdee.{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/onboarding.css' %}">
+{% endblock %}
+
+{% block outside_top_right %}
+<a href="{% url 'core:home' %}" class="outside-top-link skip">ข้ามและสำรวจเอง</a>
+{% endblock %}
+
+{% block content %}
+
+<div class="onb-progress">
+  <div class="onb-steps">
+    <div class="onb-step-bar {% if step == 1 %}active{% else %}done{% endif %}"></div>
+    <div class="onb-step-bar {% if step == 2 %}active{% endif %}"></div>
+  </div>
+  <div class="onb-step-label">
+    <div class="onb-step-current"><strong>0{{ step }}</strong> ·
+      {% if step == 1 %}ข้อมูลบริษัท{% else %}โดเมน + แบรนด์{% endif %}
+    </div>
+    <div class="onb-step-total">
+      ขั้นที่ {{ step }} / 2{% if step == 2 %} · ขั้นสุดท้าย{% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="onb-body">
+
+  {% if form.non_field_errors %}
+    <div class="auth-alert">{{ form.non_field_errors|join:" · " }}</div>
+  {% endif %}
+
+  {% if step == 1 %}
+    {# ─── c.1 · ข้อมูลบริษัท ─── #}
+    <div class="onb-eyebrow">ขั้นที่หนึ่ง · ตั้งค่าครั้งแรก</div>
+    <h2 class="onb-h">
+      ใส่ข้อมูลบริษัท<br>
+      <em>จะใช้บนใบเสนอราคาทุกใบ</em>
+    </h2>
+    <p class="onb-desc">
+      ข้อมูลพื้นฐานที่จะปรากฏหัวใบเสนอราคา · ลูกค้าจะเห็นบน PDF / Email / LINE Flex · เปลี่ยนภายหลังได้ตลอดที่ <strong>ตั้งค่า → ทั่วไป</strong>
+    </p>
+
+    <form method="post" enctype="multipart/form-data" class="onb-fields">
+      {% csrf_token %}
+
+      <div class="auth-field">
+        <div class="label" style="display: flex; justify-content: space-between;">
+          <span>ชื่อบริษัท <span class="onb-required">*</span></span>
+          <span class="onb-helper">จะใช้บนใบเสนอ</span>
+        </div>
+        <div class="auth-input-wrap">
+          <input class="auth-input" type="text" name="name_th" value="{{ form.name_th.value|default:'' }}" required>
+        </div>
+        {% if form.name_th.errors %}<div class="auth-err">{{ form.name_th.errors|join:" · " }}</div>{% endif %}
+      </div>
+
+      <div class="onb-row-2">
+        <div class="auth-field">
+          <div class="label" style="display: flex; justify-content: space-between;">
+            <span>ชื่อย่อ / แบรนด์</span>
+            <span class="onb-helper">ไม่บังคับ</span>
+          </div>
+          <div class="auth-input-wrap">
+            <input class="auth-input" type="text" name="name_en" value="{{ form.name_en.value|default:'' }}" placeholder="default = ชื่อบริษัท">
+          </div>
+        </div>
+
+        <div class="auth-field">
+          <div class="label" style="display: flex; justify-content: space-between;">
+            <span>เลขผู้เสียภาษี <span class="onb-required">*</span></span>
+            <span class="onb-helper">13 หลัก</span>
+          </div>
+          <div class="auth-input-wrap">
+            <input class="auth-input" type="text" name="tax_id" value="{{ form.tax_id.value|default:'' }}" maxlength="13" inputmode="numeric">
+          </div>
+          {% if form.tax_id.errors %}<div class="auth-err">{{ form.tax_id.errors|join:" · " }}</div>{% endif %}
+        </div>
+      </div>
+
+      <div class="auth-field">
+        <div class="label">ที่อยู่บริษัท <span class="onb-required">*</span></div>
+        <div class="auth-input-wrap">
+          <textarea class="auth-input" name="address" style="min-height: 70px; resize: vertical; padding-top: 10px;">{{ form.address.value|default:'' }}</textarea>
+        </div>
+      </div>
+
+      <div class="onb-row-2">
+        <div class="auth-field">
+          <div class="label">โทรศัพท์ <span class="onb-required">*</span></div>
+          <div class="auth-input-wrap">
+            <input class="auth-input" type="tel" name="phone" value="{{ form.phone.value|default:'' }}">
+          </div>
+        </div>
+        <div class="auth-field">
+          <div class="label">Email บริษัท <span class="onb-required">*</span></div>
+          <div class="auth-input-wrap">
+            <input class="auth-input" type="email" name="email" value="{{ form.email.value|default:'' }}">
+          </div>
+        </div>
+      </div>
+
+      <div class="onb-tip">
+        <div class="ic">d</div>
+        <div class="text">
+          <strong>เคล็ดลับ:</strong> "ชื่อย่อ" จะใช้เป็นชื่อในแอป · บน sidebar · บน greeting message ของ LINE Official Account · ใช้สั้น ๆ ได้เลย เช่น "วัน.ดี.ดี." แทน "บริษัท วัน.ดี.ดี.บิสซิเนส จำกัด"
+        </div>
+      </div>
+
+      <div class="onb-actions">
+        <a href="{% url 'core:home' %}" class="btn">ย้อนกลับ</a>
+        <button type="submit" name="_skip" value="1" class="btn btn-ghost" formnovalidate>ข้ามขั้นนี้</button>
+        <button type="submit" class="btn btn-accent" style="margin-left: auto;">
+          ต่อไป · โดเมนและแบรนด์
+          <svg class="ico ico-sm" style="margin-left: 4px;"><use href="#i-chevron"/></svg>
+        </button>
+      </div>
+    </form>
+
+  {% else %}
+    {# ─── c.2 · โดเมน + แบรนด์ ─── #}
+    <div class="onb-eyebrow">ขั้นที่สอง · ตั้งค่าครั้งแรก</div>
+    <h2 class="onb-h">
+      หน้าเว็บลูกค้า<br>
+      <em>เลือก subdomain + ธีม</em>
+    </h2>
+    <p class="onb-desc">
+      ลูกค้าทักหาคุณผ่าน <strong>subdomain</strong> ที่จะตั้งให้ได้เอง · เลือก theme ที่ใช้บนเว็บ tenant และใบเสนอราคา · ใช้ <strong>custom domain</strong> เองภายหลังได้ตลอด
+    </p>
+
+    <form method="post" enctype="multipart/form-data" x-data="{ theme: 'craft', slug: '{{ form.slug.value|default:tenant.slug }}' }">
+      {% csrf_token %}
+
+      <div class="auth-field">
+        <div class="label" style="display: flex; justify-content: space-between;">
+          <span>Subdomain <span class="onb-required">*</span></span>
+          <span class="onb-helper">ที่ลูกค้าใช้เข้าเว็บ</span>
+        </div>
+        <div class="onbb-subdomain">
+          <input type="text" name="slug" x-model="slug" required>
+          <div class="suffix">.salesdee.app</div>
+        </div>
+        <div class="onbb-avail" x-show="slug">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          <span x-text="slug + '.salesdee.app · ใช้ได้'"></span>
+        </div>
+        {% if form.slug.errors %}<div class="auth-err">{{ form.slug.errors|join:" · " }}</div>{% endif %}
+      </div>
+
+      <div class="onb-note">
+        มีโดเมนตัวเองอยู่แล้ว? · ตั้ง <strong>custom domain</strong> ภายหลังที่ <strong>ตั้งค่า → โดเมน</strong> (เช่น quote.wundee.co.th)
+      </div>
+
+      <div class="auth-field" style="margin-top: 24px;">
+        <div class="label" style="display: flex; justify-content: space-between;">
+          <span>Logo <span class="muted">(ไม่บังคับ)</span></span>
+          <span class="onb-helper">SVG / PNG · ขนาด 200×200 ขึ้นไป</span>
+        </div>
+        <label class="onbb-logo-drop">
+          <div class="preview">
+            {% if company.logo %}<img src="{{ company.logo.url }}" alt="logo">{% else %}{{ company.name_en|default:tenant.name|slice:":1" }}{% endif %}
+          </div>
+          <div class="text">
+            <strong>เลือกไฟล์ logo</strong> หรือลากมาวาง<br>
+            <span class="muted">เปลี่ยนภายหลังได้ที่ ตั้งค่า → ทั่วไป</span>
+          </div>
+          <input type="file" name="logo" accept="image/*">
+        </label>
+      </div>
+
+      <div class="auth-field" style="margin-top: 28px;">
+        <div class="label" style="display: flex; justify-content: space-between;">
+          <span>ธีม <span class="onb-required">*</span></span>
+          <span class="onb-helper">เปลี่ยนภายหลังได้ตลอด</span>
+        </div>
+        <div class="onbb-themes">
+          <div class="onbb-theme t-craft" :class="theme === 'craft' && 'selected'" @click="theme='craft'">
+            <div class="swatch">
+              <div class="mini-text">Wundee</div>
+              <div class="mini-btn">ขอใบเสนอ</div>
+              <div class="ink"></div>
+            </div>
+            <div class="name">Craft <span class="vibe">warm · classic</span></div>
+          </div>
+          <div class="onbb-theme t-atelier" :class="theme === 'atelier' && 'selected'" @click="theme='atelier'">
+            <div class="swatch">
+              <div class="mini-text">Wundee</div>
+              <div class="mini-btn">ขอใบเสนอ</div>
+              <div class="ink"></div>
+            </div>
+            <div class="name">Atelier <span class="vibe">refined</span></div>
+          </div>
+          <div class="onbb-theme t-bauhaus" :class="theme === 'bauhaus' && 'selected'" @click="theme='bauhaus'">
+            <div class="swatch">
+              <div class="mini-text">WUNDEE</div>
+              <div class="mini-btn">ขอใบเสนอ</div>
+              <div class="ink"></div>
+            </div>
+            <div class="name">Bauhaus <span class="vibe">bold</span></div>
+          </div>
+          <div class="onbb-theme t-velvet" :class="theme === 'velvet' && 'selected'" @click="theme='velvet'">
+            <div class="swatch">
+              <div class="mini-text">Wundee</div>
+              <div class="mini-btn">ขอใบเสนอ</div>
+              <div class="ink"></div>
+            </div>
+            <div class="name">Velvet <span class="vibe">luxe</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="onb-tip">
+        <div class="ic">d</div>
+        <div class="text">
+          <strong>หมายเหตุ:</strong> ธีม Craft เหมาะกับเฟอร์นิเจอร์งานไม้ classic · Atelier สำหรับ premium · Bauhaus modern minimal · Velvet luxury dark mode · เปลี่ยนภายหลังได้ที่ <strong>ตั้งค่า → ธีม</strong>
+        </div>
+      </div>
+
+      <div class="onb-actions">
+        <a href="?step=1" class="btn">ย้อนกลับ</a>
+        <button type="submit" name="_finish" value="1" class="btn btn-ghost" formnovalidate>ข้ามขั้นนี้</button>
+        <button type="submit" class="btn btn-accent" style="margin-left: auto;">
+          <svg class="ico ico-sm" style="margin-right: 4px;"><use href="#i-check"/></svg>
+          เสร็จ · เข้าใช้งาน
+        </button>
+      </div>
+    </form>
+  {% endif %}
+
+</div>
+{% endblock %}

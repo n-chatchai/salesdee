@@ -23,6 +23,7 @@ from .forms import (
     LineIntegrationForm,
     MemberInviteForm,
     MemberRoleForm,
+    OnboardingDomainForm,
     PipelineStageForm,
 )
 from .models import BillingCycle, CompanyProfile
@@ -52,30 +53,15 @@ def _company(request: HttpRequest, *, create: bool = False) -> CompanyProfile | 
 
 
 def onboarding_status(request: HttpRequest) -> dict:
-    """Derive setup-wizard progress from existing data — no model. Returns step flags + remaining."""
+    """Derive setup-wizard progress (2 steps per design c.1+c.2). Post-onboarding nudges
+    (add products / invite team / connect LINE) live in catalog + settings pages."""
     tenant = getattr(request, "tenant", None)
     if tenant is None:
         return {"steps": [], "done": True, "remaining": 0, "complete": True}
-    from apps.catalog.models import Product
-
     cp = CompanyProfile.objects.filter(tenant=tenant).first()
-    line = LineIntegration.objects.filter(tenant=tenant).first()
     steps = [
-        {"n": 1, "key": "company", "label": "ข้อมูลบริษัท", "done": bool(cp and cp.name_th)},
-        {"n": 2, "key": "brand", "label": "โลโก้และแบรนด์", "done": bool(cp and cp.logo)},
-        {"n": 3, "key": "product", "label": "สินค้าชิ้นแรก", "done": Product.objects.exists()},
-        {
-            "n": 4,
-            "key": "team",
-            "label": "ทีมงานและสิทธิ์",
-            "done": Membership.objects.filter(tenant=tenant, is_active=True).count() > 1,
-        },
-        {
-            "n": 5,
-            "key": "line",
-            "label": "เชื่อม LINE OA",
-            "done": bool(line and (line.channel_id or line.channel_access_token)),
-        },
+        {"n": 1, "key": "company", "label": "ข้อมูลบริษัท", "done": bool(cp and cp.tax_id)},
+        {"n": 2, "key": "brand", "label": "โดเมน + แบรนด์", "done": bool(cp and cp.logo)},
     ]
     remaining = sum(1 for s in steps if not s["done"])
     return {"steps": steps, "remaining": remaining, "complete": remaining == 0}
@@ -495,19 +481,19 @@ def plan_change(request: HttpRequest) -> HttpResponse:
 
 @login_required
 def onboarding(request: HttpRequest) -> HttpResponse:
-    from apps.catalog.forms import ProductForm
+    """First-run setup · 2 steps per design/backoffice.html c.1+c.2.
 
+    Step 1 ข้อมูลบริษัท · Step 2 subdomain + logo (+ theme picker UI, deco for now).
+    Other setup (products / invite / LINE) lives in catalog + settings, reached after onboarding."""
     tenant = _tenant(request)
     status = onboarding_status(request)
     try:
         step = int(request.GET.get("step", "1"))
     except ValueError:
         step = 1
-    step = max(1, min(5, step))
-    can_admin = _can_admin(request)
+    step = max(1, min(2, step))
 
     form: object | None = None
-    template_step = f"tenants/onboarding/step{step}.html"
 
     if step == 1:
         instance = _company(request, create=True)
@@ -518,78 +504,27 @@ def onboarding(request: HttpRequest) -> HttpResponse:
                 return redirect(reverse("workspace:onboarding") + "?step=2")
         else:
             form = CompanyProfileForm(instance=instance)
-    elif step == 2:
-        instance = _company(request, create=True)
-        if request.method == "POST":
-            form = CompanyProfileForm(request.POST, request.FILES, instance=instance)
-            if isinstance(form, CompanyProfileForm) and form.is_valid():
-                form.save()
-                return redirect(reverse("workspace:onboarding") + "?step=3")
-        else:
-            form = CompanyProfileForm(instance=instance)
-    elif step == 3:
-        if request.method == "POST":
-            form = ProductForm(request.POST, request.FILES)
-            if isinstance(form, ProductForm) and form.is_valid():
-                form.save()
-                return redirect(reverse("workspace:onboarding") + "?step=4")
-        else:
-            form = ProductForm()
-    elif step == 4:
-        if request.method == "POST":
-            if request.POST.get("_skip"):
-                return redirect(reverse("workspace:onboarding") + "?step=5")
-            form = MemberInviteForm(request.POST)
-            if isinstance(form, MemberInviteForm) and form.is_valid() and can_admin:
-                email = form.cleaned_data["email"].lower().strip()
-                user, created = User.objects.get_or_create(
-                    email=email, defaults={"full_name": form.cleaned_data.get("full_name", "")}
-                )
-                if created:
-                    user.set_unusable_password()
-                    user.save(update_fields=["password"])
-                Membership.objects.get_or_create(
-                    user=user,
-                    tenant=tenant,
-                    defaults={
-                        "role": form.cleaned_data["role"],
-                        "can_see_all_records": form.cleaned_data["can_see_all_records"],
-                    },
-                )
-                send_mail(
-                    "เชิญเข้าใช้งาน salesdee",
-                    f"คุณได้รับเชิญเข้าร่วม {tenant.name}",
-                    None,
-                    [email],
-                    fail_silently=True,
-                )
-                return redirect(reverse("workspace:onboarding") + "?step=4")
-        else:
-            form = MemberInviteForm()
-    elif step == 5:
-        line_instance = LineIntegration.objects.filter(tenant=tenant).first()
+    else:  # step == 2
         if request.method == "POST":
             if request.POST.get("_finish"):
                 messages.success(request, "ตั้งค่า workspace เรียบร้อย — เริ่มใช้งานได้เลย")
                 return redirect("core:home")
-            form = LineIntegrationForm(request.POST, instance=line_instance)
-            if isinstance(form, LineIntegrationForm) and form.is_valid():
-                obj = form.save(commit=False)
-                obj.tenant = tenant
-                obj.save()
+            form = OnboardingDomainForm(request.POST, request.FILES, tenant=tenant)
+            if isinstance(form, OnboardingDomainForm) and form.is_valid():
+                new_slug = form.cleaned_data["slug"]
+                if new_slug != tenant.slug:
+                    tenant.slug = new_slug
+                    tenant.save(update_fields=["slug"])
+                logo = form.cleaned_data.get("logo")
+                if logo:
+                    profile = _company(request, create=True)
+                    profile.logo = logo
+                    profile.save(update_fields=["logo"])
                 messages.success(request, "ตั้งค่า workspace เรียบร้อย — เริ่มใช้งานได้เลย")
                 return redirect("core:home")
         else:
-            form = LineIntegrationForm(instance=line_instance)
+            form = OnboardingDomainForm(tenant=tenant)
 
-    members = (
-        list(Membership.objects.filter(tenant=tenant).select_related("user")) if step == 4 else []
-    )
-    webhook_url = (
-        request.build_absolute_uri(reverse("integrations:line_webhook", args=[tenant.slug]))
-        if step == 5
-        else ""
-    )
     return render(
         request,
         "tenants/onboarding.html",
@@ -597,10 +532,7 @@ def onboarding(request: HttpRequest) -> HttpResponse:
             "step": step,
             "status": status,
             "form": form,
-            "step_template": template_step,
             "tenant": tenant,
-            "can_admin": can_admin,
-            "members": members,
-            "webhook_url": webhook_url,
+            "company": _company(request),
         },
     )
