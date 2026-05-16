@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ deal.name }} · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/quotes.css' %}">{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-num">DEAL · {{ deal.pk }}</div>
+  <div class="q-detail-title">{{ deal.name }}</div>
+  <div class="q-detail-meta">
+    <div class="item">ลูกค้า <strong>{{ deal.customer.name|default:"—" }}</strong></div>
+    <span class="dot">·</span>
+    <div class="item">ขั้น <strong>{{ deal.stage.name|default:"—" }}</strong></div>
+    {% if deal.amount %}<span class="dot">·</span><div class="item">มูลค่า <strong>฿{{ deal.amount|floatformat:0 }}</strong></div>{% endif %}
+  </div>
+</div>
+
+{% if next_step %}
+  <div class="ai-panel" style="margin-bottom: 16px;">
+    <div class="label">แนะนำต่อไป</div>
+    {{ next_step }}
+  </div>
+{% endif %}
+
+<div class="q-form-grid">
+  <div class="q-form-main">
+    <div class="q-form-section">
+      <h3>กิจกรรม</h3>
+      <div id="activity-list">{% include "crm/_activity_list.html" %}</div>
+      <form hx-post="{% url 'crm:deal_log_activity' deal.pk %}" hx-target="#activity-list" hx-swap="innerHTML" method="post" style="padding: 12px 18px; border-top: 1px solid var(--border);">
+        {% csrf_token %}
+        <div class="q-form-stack">
+          {% for f in activity_form %}<div><label>{{ f.label }}</label>{{ f }}</div>{% endfor %}
+        </div>
+        <button type="submit" class="btn accent sm" style="margin-top: 8px;">บันทึก</button>
+      </form>
+    </div>
+
+    <div class="q-form-section">
+      <h3>งาน</h3>
+      <div id="task-list">{% include "crm/_task_list.html" %}</div>
+      <form hx-post="{% url 'crm:deal_add_task' deal.pk %}" hx-target="#task-list" hx-swap="innerHTML" method="post" style="padding: 12px 18px; border-top: 1px solid var(--border);">
+        {% csrf_token %}
+        <div class="q-form-stack">
+          {% for f in task_form %}<div><label>{{ f.label }}</label>{{ f }}</div>{% endfor %}
+        </div>
+        <button type="submit" class="btn accent sm" style="margin-top: 8px;">เพิ่มงาน</button>
+      </form>
+    </div>
+  </div>
+
+  <aside class="q-form-side">
+    <div class="q-form-section">
+      <h3>ดีล</h3>
+      <a href="{% url 'crm:deal_edit' deal.pk %}" class="btn"><svg class="ico ico-sm"><use href="#i-edit"/></svg> แก้ไข</a>
+      <a href="{% url 'quotes:quotation_from_deal' deal.pk %}" class="btn accent" style="margin-top: 8px;">
+        <svg class="ico ico-sm"><use href="#i-file-text"/></svg> สร้างใบเสนอจากดีล
+      </a>
+    </div>
+  </aside>
+</div>
+{% endblock %}

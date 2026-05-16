@@ -29,6 +29,15 @@ def is_platform_disabled(code: str) -> bool:
     return code in getattr(settings, "PLATFORM_DISABLED_MODULES", [])
 
 
+def crm_legacy_enabled() -> bool:
+    """Old CRM screens (kanban / leads list / lead-detail / deal-detail / tasks-page /
+    AI reply / AI quote-from-lead) are NOT in design/backoffice.html. They're feature-
+    flagged off by default — Deal/Lead models still work for the home queue, customer 360,
+    and quote-from-deal flow, but the dedicated pages 404. Re-enable per env by removing
+    'crm_legacy' from PLATFORM_DISABLED_MODULES."""
+    return not is_platform_disabled("crm_legacy")
+
+
 def _from_plan(tenant, code: str) -> bool:
     f = plan_registry.get(tenant.plan).features
     if code == "billing":

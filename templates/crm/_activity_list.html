@@ -1,0 +1,12 @@
+{# Partial · activity timeline rows, htmx-swapped #}
+<ul style="list-style: none; padding: 12px 18px; margin: 0;">
+  {% for a in activities %}
+    <li style="padding: 8px 0; border-bottom: 1px solid var(--border-2); font-size: 13px;">
+      <strong>{{ a.get_kind_display|default:a.kind }}</strong>
+      {% if a.note %}— {{ a.note }}{% endif %}
+      <div class="muted" style="font-size: 11px;">{{ a.created_by.get_full_name|default:a.created_by.email|default:"ระบบ" }} · {{ a.occurred_at|date:"j M H:i" }}</div>
+    </li>
+  {% empty %}
+    <li class="muted" style="padding: 12px; font-size: 13px;">ยังไม่มีกิจกรรม</li>
+  {% endfor %}
+</ul>

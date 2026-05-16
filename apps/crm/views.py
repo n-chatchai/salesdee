@@ -1,17 +1,19 @@
 from __future__ import annotations
 
+import functools
 from datetime import date, timedelta
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count
-from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest
+from django.http import Http404, HttpRequest, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from apps.core.permissions import can_view_reports, own_q
+from apps.tenants.features import crm_legacy_enabled
 
 from .forms import ActivityForm, CustomerForm, DealForm, LeadForm, LeadIntakeForm, TaskForm
 from .models import (
@@ -29,8 +31,22 @@ from .reports import build_reports
 from .services import convert_lead, move_deal_to_stage
 
 
+def require_crm_legacy(view):
+    """Gate for screens not in design/backoffice.html (kanban / leads / tasks / deal-detail
+    / AI reply). Off by default — flip via PLATFORM_DISABLED_MODULES env."""
+
+    @functools.wraps(view)
+    def wrapped(*args, **kwargs):
+        if not crm_legacy_enabled():
+            raise Http404("ฟีเจอร์นี้ถูกปิดในเวอร์ชันปัจจุบัน")
+        return view(*args, **kwargs)
+
+    return wrapped
+
+
 # --- Pipeline -----------------------------------------------------------------
 @login_required
+@require_crm_legacy
 def pipeline(request: HttpRequest) -> HttpResponse:
     """Kanban board: a column per pipeline stage, cards = open deals in that stage."""
     mine = own_q(request, "owner")
@@ -54,6 +70,7 @@ def pipeline(request: HttpRequest) -> HttpResponse:
 
 @login_required
 @require_POST
+@require_crm_legacy
 def move_deal(request: HttpRequest) -> HttpResponse:
     """htmx/SortableJS endpoint: move a deal to another stage (within the current tenant)."""
     deal_id = request.POST.get("deal_id")
@@ -68,6 +85,7 @@ def move_deal(request: HttpRequest) -> HttpResponse:
 
 # --- Deals --------------------------------------------------------------------
 @login_required
+@require_crm_legacy
 def deal_detail(request: HttpRequest, pk: int) -> HttpResponse:
     deal = get_object_or_404(
         Deal.objects.filter(own_q(request, "owner")).select_related(
@@ -123,11 +141,13 @@ def _deal_next_step(deal: Deal) -> str | None:
 
 
 @login_required
+@require_crm_legacy
 def deal_create(request: HttpRequest) -> HttpResponse:
     return _deal_form(request, instance=None)
 
 
 @login_required
+@require_crm_legacy
 def deal_edit(request: HttpRequest, pk: int) -> HttpResponse:
     return _deal_form(
         request, instance=get_object_or_404(Deal.objects.filter(own_q(request, "owner")), pk=pk)
@@ -150,6 +170,7 @@ def _deal_form(request: HttpRequest, *, instance: Deal | None) -> HttpResponse:
 
 @login_required
 @require_POST
+@require_crm_legacy
 def deal_log_activity(request: HttpRequest, pk: int) -> HttpResponse:
     deal = get_object_or_404(
         Deal.objects.filter(own_q(request, "owner")).select_related("customer"), pk=pk
@@ -167,6 +188,7 @@ def deal_log_activity(request: HttpRequest, pk: int) -> HttpResponse:
 
 @login_required
 @require_POST
+@require_crm_legacy
 def deal_add_task(request: HttpRequest, pk: int) -> HttpResponse:
     deal = get_object_or_404(
         Deal.objects.filter(own_q(request, "owner")).select_related("customer"), pk=pk
@@ -250,6 +272,7 @@ def _customer_form(request: HttpRequest, *, instance: Customer | None) -> HttpRe
 
 # --- Tasks ("my work") --------------------------------------------------------
 @login_required
+@require_crm_legacy
 def task_list(request: HttpRequest) -> HttpResponse:
     now = timezone.now()
     tasks = (
@@ -262,6 +285,7 @@ def task_list(request: HttpRequest) -> HttpResponse:
 
 @login_required
 @require_POST
+@require_crm_legacy
 def task_done(request: HttpRequest, pk: int) -> HttpResponse:
     task = get_object_or_404(Task.objects.select_related("deal", "customer"), pk=pk)
     task.status = TaskStatus.DONE
@@ -272,6 +296,7 @@ def task_done(request: HttpRequest, pk: int) -> HttpResponse:
 
 # --- Leads --------------------------------------------------------------------
 @login_required
+@require_crm_legacy
 def lead_list(request: HttpRequest) -> HttpResponse:
     leads = (
         Lead.objects.filter(own_q(request, "assigned_to"))
@@ -283,6 +308,7 @@ def lead_list(request: HttpRequest) -> HttpResponse:
 
 
 @login_required
+@require_crm_legacy
 def lead_detail(request: HttpRequest, pk: int) -> HttpResponse:
     from apps.integrations.ai import ai_is_configured
 
@@ -306,11 +332,13 @@ def lead_detail(request: HttpRequest, pk: int) -> HttpResponse:
 
 
 @login_required
+@require_crm_legacy
 def lead_create(request: HttpRequest) -> HttpResponse:
     return _lead_form(request, instance=None)
 
 
 @login_required
+@require_crm_legacy
 def lead_edit(request: HttpRequest, pk: int) -> HttpResponse:
     return _lead_form(
         request,
@@ -331,6 +359,7 @@ def _lead_form(request: HttpRequest, *, instance: Lead | None) -> HttpResponse:
 
 @login_required
 @require_POST
+@require_crm_legacy
 def lead_convert(request: HttpRequest, pk: int) -> HttpResponse:
     lead = get_object_or_404(
         Lead.objects.filter(own_q(request, "assigned_to")).select_related("deal"), pk=pk
@@ -354,6 +383,7 @@ def _company_name(request: HttpRequest) -> str:
 
 @login_required
 @require_POST
+@require_crm_legacy
 def lead_suggest_reply(request: HttpRequest, pk: int) -> HttpResponse:
     """htmx: Claude drafts the next reply to the customer based on this lead's conversation."""
     from apps.integrations.ai import AINotConfigured, draft_reply_from_text
@@ -388,6 +418,7 @@ def lead_suggest_reply(request: HttpRequest, pk: int) -> HttpResponse:
 
 @login_required
 @require_POST
+@require_crm_legacy
 def lead_send_line_reply(request: HttpRequest, pk: int) -> HttpResponse:
     """Send a (possibly AI-drafted, possibly edited) reply to the lead's LINE user."""
     from apps.integrations.line import LineNotConfigured, push_text

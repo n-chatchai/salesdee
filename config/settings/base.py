@@ -181,7 +181,10 @@ PLATFORM_HOSTS = env.list(
 # bug — pause issuance across the platform until fix ships"). Empty = no kill switches.
 # Module codes match apps/tenants/modules.py (billing, e_tax, white_label, custom_domain, api,
 # priority_support, sla).
-PLATFORM_DISABLED_MODULES = env.list("PLATFORM_DISABLED_MODULES", default=[])
+# `crm_legacy` is disabled by default — the new design (design/backoffice.html) does NOT
+# include kanban / leads / tasks / deal-detail / AI-reply screens. Code remains for the
+# Deal model + customer-detail integration; override per env to re-enable the pages.
+PLATFORM_DISABLED_MODULES = env.list("PLATFORM_DISABLED_MODULES", default=["crm_legacy"])
 
 # --- Static / media -----------------------------------------------------------
 STATIC_URL = "static/"

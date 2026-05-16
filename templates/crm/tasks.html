@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}งานของฉัน · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/quotes.css' %}">{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-title">งาน<em>ของฉัน</em></div>
+  <div class="q-detail-meta"><div class="item">{{ tasks|length }} งานเปิดอยู่</div></div>
+</div>
+
+<div class="q-form-section">
+  <h3>งานทั้งหมด</h3>
+  <ul style="list-style: none; padding: 12px 18px; margin: 0;">
+    {% for t in tasks %}
+      {% include "crm/_task_row.html" %}
+    {% empty %}
+      <li class="muted" style="padding: 12px;">ไม่มีงานค้าง</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

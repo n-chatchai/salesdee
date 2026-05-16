@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{% if lead %}แก้ Lead{% else %}เพิ่ม Lead{% endif %} · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/quotes.css' %}">{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-title">{% if lead %}แก้ Lead <em>{{ lead.name }}</em>{% else %}เพิ่ม <em>Lead</em>{% endif %}</div>
+</div>
+
+<form method="post" style="max-width: 720px;">
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="auth-alert">{{ form.non_field_errors|join:" · " }}</div>{% endif %}
+  <div class="q-form-section">
+    <h3>ข้อมูล Lead</h3>
+    <div class="q-form-stack">
+      {% for f in form %}
+        <div>
+          <label>{{ f.label }}</label>
+          {{ f }}
+          {% if f.errors %}<div class="auth-err">{{ f.errors|join:" · " }}</div>{% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  <div style="display: flex; gap: 8px; margin-top: 16px;">
+    <button type="submit" class="btn accent">บันทึก</button>
+    {% if lead %}<a href="{% url 'crm:lead_detail' lead.pk %}" class="btn">ยกเลิก</a>{% else %}<a href="{% url 'crm:leads' %}" class="btn">ยกเลิก</a>{% endif %}
+  </div>
+</form>
+{% endblock %}

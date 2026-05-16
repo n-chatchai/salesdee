@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Pipeline · salesdee.{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/quotes.css' %}">
+<link rel="stylesheet" href="{% static 'css/kanban.css' %}">
+{% endblock %}
+
+{% block extra_body %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const csrf = document.querySelector('meta[name="csrf-token"]').content;
+  document.querySelectorAll('.kb-col-body').forEach(col => {
+    Sortable.create(col, {
+      group: 'deals',
+      ghostClass: 'sortable-ghost',
+      onAdd: evt => {
+        const fd = new FormData();
+        fd.append('deal_id', evt.item.dataset.id);
+        fd.append('stage_id', evt.to.dataset.stage);
+        fetch('{% url "crm:move_deal" %}', { method: 'POST', headers: { 'X-CSRFToken': csrf }, body: fd });
+      },
+    });
+  });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div style="margin: -24px;">
+  <div class="q-list-head">
+    <div class="title-group">
+      <div class="title">Pipeline</div>
+      {% if unassigned_count %}<div class="count-pill">{{ unassigned_count }} ยังไม่จัดขั้น</div>{% endif %}
+    </div>
+    <div class="actions">
+      <a href="{% url 'crm:deal_create' %}" class="btn accent">
+        <svg class="ico ico-sm"><use href="#i-plus"/></svg> ดีลใหม่
+      </a>
+    </div>
+  </div>
+
+  <div class="kb-board">
+    {% for stage, deals in columns %}
+      <div class="kb-col">
+        <div class="kb-col-head">
+          <div class="name">{{ stage.name }}</div>
+          <div class="ct">{{ deals|length }}</div>
+        </div>
+        <div class="kb-col-body" data-stage="{{ stage.pk }}">
+          {% for d in deals %}
+            <a href="{% url 'crm:deal_detail' d.pk %}" class="kb-card" data-id="{{ d.pk }}">
+              <div class="name">{{ d.name }}</div>
+              <div class="meta">{{ d.customer.name|default:"—" }}</div>
+              {% if d.amount %}<div class="amt">฿{{ d.amount|floatformat:0 }}</div>{% endif %}
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+    {% empty %}
+      <div class="h-empty" style="padding: 60px;">
+        <svg class="ic"><use href="#i-target"/></svg>
+        <div class="t">ยังไม่ได้ตั้ง Pipeline</div>
+        <div class="d"><a href="{% url 'workspace:settings_pipeline' %}">ไปตั้งค่า →</a></div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

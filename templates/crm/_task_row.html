@@ -1,0 +1,18 @@
+{# Partial · single task row, htmx-swappable when marking done #}
+<li style="padding: 8px 0; border-bottom: 1px solid var(--border-2); font-size: 13px; display: flex; gap: 10px; align-items: flex-start;" id="task-{{ task.pk|default:t.pk }}">
+  <form method="post" action="{% url 'crm:task_done' task.pk|default:t.pk %}" hx-post="{% url 'crm:task_done' task.pk|default:t.pk %}" hx-target="closest li" hx-swap="outerHTML">
+    {% csrf_token %}
+    <button type="submit" class="btn sm ghost" title="ทำเสร็จ">
+      <svg class="ico ico-sm"><use href="#i-check"/></svg>
+    </button>
+  </form>
+  <div style="flex: 1;">
+    {% with tt=task|default:t %}
+      <strong>{{ tt.title }}</strong>
+      <div class="muted" style="font-size: 11px;">
+        {% if tt.assignee %}{{ tt.assignee.get_full_name|default:tt.assignee.email }} · {% endif %}
+        {% if tt.due_at %}กำหนด {{ tt.due_at|date:"j M H:i" }}{% endif %}
+      </div>
+    {% endwith %}
+  </div>
+</li>

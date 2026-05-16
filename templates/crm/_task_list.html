@@ -1,0 +1,8 @@
+{# Partial · open tasks list, htmx-swapped #}
+<ul style="list-style: none; padding: 12px 18px; margin: 0;">
+  {% for t in tasks %}
+    {% include "crm/_task_row.html" %}
+  {% empty %}
+    <li class="muted" style="padding: 12px; font-size: 13px;">ยังไม่มีงาน</li>
+  {% endfor %}
+</ul>

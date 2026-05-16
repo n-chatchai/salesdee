@@ -98,6 +98,19 @@ def get_modules(request: HttpRequest) -> list[ModuleStatus]:
             note_th=f"ผู้ใช้ {user_cap}",
         ),
         ModuleStatus(
+            code="crm_legacy",
+            label_th="CRM เก่า · kanban / leads / tasks / deal-detail / AI reply",
+            category="config",
+            enabled=not is_platform_disabled("crm_legacy"),
+            platform_disabled=is_platform_disabled("crm_legacy"),
+            note_th=(
+                "ปิดอยู่ — ไม่อยู่ใน design ใหม่ (เก็บโค้ดไว้เผื่อเปิดกลับ)"
+                if is_platform_disabled("crm_legacy")
+                else "เปิดอยู่ (PLATFORM_DISABLED_MODULES ไม่มี 'crm_legacy')"
+            ),
+            fix_th="ลบ 'crm_legacy' ออกจาก PLATFORM_DISABLED_MODULES ใน .env เพื่อเปิดกลับ",
+        ),
+        ModuleStatus(
             code="catalog",
             label_th="แคตตาล็อกสินค้า",
             category="core",

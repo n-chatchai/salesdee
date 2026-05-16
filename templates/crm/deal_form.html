@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{% if deal %}แก้ดีล{% else %}ดีลใหม่{% endif %} · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/quotes.css' %}">{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-title">{% if deal %}แก้ <em>{{ deal.name }}</em>{% else %}ดีล<em>ใหม่</em>{% endif %}</div>
+</div>
+
+<form method="post" style="max-width: 720px;">
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="auth-alert">{{ form.non_field_errors|join:" · " }}</div>{% endif %}
+  <div class="q-form-section">
+    <h3>ข้อมูลดีล</h3>
+    <div class="q-form-stack">
+      {% for f in form %}
+        <div>
+          <label>{{ f.label }}</label>
+          {{ f }}
+          {% if f.errors %}<div class="auth-err">{{ f.errors|join:" · " }}</div>{% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  <div style="display: flex; gap: 8px; margin-top: 16px;">
+    <button type="submit" class="btn accent">บันทึก</button>
+    {% if deal %}<a href="{% url 'crm:deal_detail' deal.pk %}" class="btn">ยกเลิก</a>{% else %}<a href="{% url 'crm:pipeline' %}" class="btn">ยกเลิก</a>{% endif %}
+  </div>
+</form>
+{% endblock %}

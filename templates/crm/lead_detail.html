@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ lead.name }} · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/quotes.css' %}">{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-num">LEAD · #{{ lead.pk }}</div>
+  <div class="q-detail-title">{{ lead.name }}{% if lead.company_name %} <em>· {{ lead.company_name }}</em>{% endif %}</div>
+  <div class="q-detail-meta">
+    {% if lead.phone %}<div class="item"><svg class="ico ico-sm"><use href="#i-phone"/></svg> {{ lead.phone }}</div>{% endif %}
+    {% if lead.email %}<span class="dot">·</span><div class="item"><svg class="ico ico-sm"><use href="#i-mail"/></svg> {{ lead.email }}</div>{% endif %}
+  </div>
+</div>
+
+<div style="display: flex; gap: 8px; margin-bottom: 16px;">
+  <a href="{% url 'crm:lead_edit' lead.pk %}" class="btn"><svg class="ico ico-sm"><use href="#i-edit"/></svg> แก้</a>
+  <a href="{% url 'crm:lead_convert' lead.pk %}" class="btn accent"><svg class="ico ico-sm"><use href="#i-check"/></svg> แปลงเป็นดีล</a>
+  {% if ai_enabled %}
+    <button class="btn ai"
+            hx-post="{% url 'crm:lead_ai_reply' lead.pk %}"
+            hx-target="#ai-reply"
+            hx-swap="innerHTML">
+      <svg class="ico ico-sm"><use href="#i-spark"/></svg> ร่างตอบกลับ
+    </button>
+  {% endif %}
+  {% if lead.email %}
+    <button class="btn"
+            hx-post="{% url 'crm:lead_ai_quote' lead.pk %}"
+            hx-target="#ai-quote"
+            hx-swap="innerHTML">
+      <svg class="ico ico-sm"><use href="#i-file-text"/></svg> ร่างใบเสนอ
+    </button>
+  {% endif %}
+</div>
+
+<div id="ai-reply"></div>
+<div id="ai-quote"></div>
+
+{% if lead.message %}
+  <div class="q-form-section">
+    <h3>ข้อความเริ่มต้น</h3>
+    <div style="padding: 18px;">{{ lead.message|linebreaks }}</div>
+  </div>
+{% endif %}
+
+<div class="q-form-section">
+  <h3>กิจกรรม</h3>
+  <ul style="list-style: none; padding: 12px 18px; margin: 0;">
+    {% for a in activities %}
+      <li style="padding: 8px 0; border-bottom: 1px solid var(--border-2); font-size: 13px;">
+        <strong>{{ a.get_kind_display|default:a.kind }}</strong>
+        {% if a.note %}— {{ a.note }}{% endif %}
+        {% if a.body %}<div class="muted" style="margin-top: 4px;">{{ a.body|truncatechars:200 }}</div>{% endif %}
+        <div class="muted" style="font-size: 11px;">{{ a.created_by.get_full_name|default:a.created_by.email|default:"ระบบ" }} · {{ a.occurred_at|date:"j M H:i" }}</div>
+      </li>
+    {% empty %}
+      <li class="muted" style="padding: 12px;">ยังไม่มีกิจกรรม</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

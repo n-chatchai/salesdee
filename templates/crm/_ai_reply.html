@@ -1,0 +1,9 @@
+{# Partial · AI-drafted reply panel, htmx-swapped into #ai-reply #}
+<div class="ai-panel" style="margin-bottom: 16px;">
+  <div class="label">ร่างคำตอบจาก AI</div>
+  {% if error %}
+    <div style="color: var(--danger);">{{ error }}</div>
+  {% else %}
+    <div style="white-space: pre-wrap;">{{ reply|default:"" }}</div>
+  {% endif %}
+</div>
