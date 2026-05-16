@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}หมวดสินค้า · salesdee.{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/quotes.css' %}">
+<link rel="stylesheet" href="{% static 'css/catalog.css' %}">
+{% endblock %}
+
+{% block extra_body %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const list = document.getElementById('cat-tree');
+  if (!list) return;
+  Sortable.create(list, {
+    handle: '.grip',
+    ghostClass: 'sortable-ghost',
+    onEnd: () => {
+      const order = Array.from(list.querySelectorAll('.cat-tree-item')).map(el => el.dataset.id);
+      const csrf = document.querySelector('meta[name="csrf-token"]').content;
+      fetch('{% url "catalog:category_reorder" %}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
+        body: JSON.stringify({ order }),
+      });
+    },
+  });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div style="margin: -24px;">
+  <div class="q-list-head">
+    <div class="title-group">
+      <div class="title">หมวดสินค้า</div>
+      <div class="count-pill">{{ categories|length }} หมวด</div>
+    </div>
+    <div class="actions">
+      <a href="{% url 'catalog:products' %}" class="btn ghost">← สินค้า</a>
+      <a href="{% url 'catalog:category_create' %}" class="btn accent">
+        <svg class="ico ico-sm"><use href="#i-plus"/></svg> เพิ่มหมวด
+      </a>
+    </div>
+  </div>
+
+  <div class="cat-tree" id="cat-tree">
+    {% for c in categories %}
+      <div class="cat-tree-item {% if c.parent %}child{% endif %}" data-id="{{ c.pk }}">
+        <svg class="grip" style="width:14px; height:14px;"><use href="#i-grip"/></svg>
+        <span class="name">{{ c.name }}</span>
+        <span class="ct">{{ c.products.count }} สินค้า</span>
+        <span class="actions">
+          <a href="{% url 'catalog:category_edit' c.pk %}" class="btn sm ghost"><svg class="ico ico-sm"><use href="#i-edit"/></svg></a>
+        </span>
+      </div>
+    {% empty %}
+      <div class="h-empty">
+        <svg class="ic"><use href="#i-tag"/></svg>
+        <div class="t">ยังไม่มีหมวด</div>
+        <div class="d"><a href="{% url 'catalog:category_create' %}">เพิ่มหมวดแรก →</a></div>
+      </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}สินค้า · salesdee.{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/quotes.css' %}">
+<link rel="stylesheet" href="{% static 'css/catalog.css' %}">
+{% endblock %}
+
+{% block content %}
+<div style="margin: -24px;">
+  <div class="q-list-head">
+    <div class="title-group">
+      <div class="title">สินค้า</div>
+      <div class="count-pill">{{ products|length }} รายการ</div>
+    </div>
+    <form method="get" style="flex: 1; max-width: 320px; position: relative;">
+      <svg style="position:absolute; left:10px; top:50%; transform:translateY(-50%); width:16px; height:16px; color:var(--mid);"><use href="#i-search"/></svg>
+      <input name="q" value="{{ q|default:'' }}" placeholder="ค้นหา ชื่อ / รหัส"
+             style="width:100%; padding:8px 12px 8px 34px; background: var(--paper-2); border: 1px solid var(--border); font: inherit;">
+    </form>
+    <div class="actions">
+      <a href="{% url 'catalog:categories' %}" class="btn ghost">
+        <svg class="ico ico-sm"><use href="#i-tag"/></svg> หมวด
+      </a>
+      <a href="{% url 'catalog:product_create' %}" class="btn accent">
+        <svg class="ico ico-sm"><use href="#i-plus"/></svg> เพิ่มสินค้า
+      </a>
+    </div>
+  </div>
+
+  <div class="pl-grid">
+    {% for p in products %}
+      <a href="{% url 'catalog:product_edit' p.pk %}" class="pl-card">
+        <div class="thumb">
+          {% with first=p.images.first %}
+            {% if first %}<img src="{{ first.image.url }}" alt="{{ p.name }}">
+            {% else %}<svg><use href="#i-image"/></svg>{% endif %}
+          {% endwith %}
+        </div>
+        <div class="body">
+          <div class="code">{{ p.code|default:"" }}</div>
+          <div class="name">{{ p.name }}</div>
+          <div class="meta">{{ p.category.name|default:"—" }}{% if p.unit %} · /{{ p.unit }}{% endif %}</div>
+          <div class="price">฿{{ p.default_price|floatformat:0 }}</div>
+        </div>
+      </a>
+    {% empty %}
+      <div class="h-empty" style="grid-column: 1/-1;">
+        <svg class="ic"><use href="#i-package"/></svg>
+        <div class="t">ยังไม่มีสินค้าในคลัง</div>
+        <div class="d"><a href="{% url 'catalog:product_create' %}">เพิ่มสินค้าตัวแรก →</a></div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

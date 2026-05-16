@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}ลูกค้า · salesdee.{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+<link rel="stylesheet" href="{% static 'css/quotes.css' %}">
+<link rel="stylesheet" href="{% static 'css/customer.css' %}">
+{% endblock %}
+
+{% block content %}
+<div style="margin: -24px;">
+
+  <div class="q-list-head">
+    <div class="title-group">
+      <div class="title">ลูกค้า</div>
+      <div class="count-pill">{{ customers|length }} ราย</div>
+    </div>
+    <div class="actions">
+      <a href="{% url 'crm:customer_create' %}" class="btn accent">
+        <svg class="ico ico-sm"><use href="#i-plus"/></svg> เพิ่มลูกค้า
+      </a>
+    </div>
+  </div>
+
+  <form method="get" class="c-search">
+    <div class="c-search-input-wrap">
+      <svg><use href="#i-search"/></svg>
+      <input name="q" class="c-search-input" value="{{ request.GET.q|default:'' }}"
+             placeholder="ค้นหาด้วยชื่อ · บริษัท · เลขผู้เสียภาษี (เช่น 'ออฟฟิศใหญ่กรุงเทพ')">
+    </div>
+    <span class="c-search-hint">ค้นด้วยภาษาธรรมชาติ</span>
+  </form>
+
+  <div class="q-rows">
+    {% for c in customers %}
+      <a href="{% url 'crm:customer_detail' c.pk %}" class="h-row" style="grid-template-columns: 36px 1fr;">
+        <div class="h-avatar">{{ c.name|slice:":1"|upper }}</div>
+        <div class="h-row-content">
+          <div class="h-row-top">
+            <div class="h-row-name">
+              {{ c.name }}{% if c.company_name %} · <span class="muted">{{ c.company_name }}</span>{% endif %}
+            </div>
+            <div class="h-row-age">{{ c.deal_count }} ดีล</div>
+          </div>
+          <div class="h-row-context">
+            {% if c.phone %}{{ c.phone }} · {% endif %}
+            {% if c.email %}{{ c.email }}{% endif %}
+            {% if c.tax_id %} · TAX {{ c.tax_id }}{% endif %}
+          </div>
+        </div>
+      </a>
+    {% empty %}
+      <div class="h-empty">
+        <svg class="ic"><use href="#i-users"/></svg>
+        <div class="t">ยังไม่มีลูกค้าในระบบ</div>
+        <div class="d"><a href="{% url 'crm:customer_create' %}">เพิ่มลูกค้าคนแรก →</a></div>
+      </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

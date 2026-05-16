@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{% if product %}แก้ {{ product.name }}{% else %}เพิ่มสินค้า{% endif %} · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/quotes.css' %}">{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-title">
+    {% if product %}แก้ <em>{{ product.name }}</em>{% else %}เพิ่ม<em>สินค้า</em>{% endif %}
+  </div>
+  {% if product %}<div class="q-detail-meta"><span class="muted">รหัส</span> <strong>{{ product.code|default:"—" }}</strong></div>{% endif %}
+</div>
+
+<form method="post" enctype="multipart/form-data" class="q-form-grid">
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="auth-alert">{{ form.non_field_errors|join:" · " }}</div>{% endif %}
+
+  <div class="q-form-main">
+    <div class="q-form-section">
+      <h3>ทั่วไป</h3>
+      <div class="q-form-stack">
+        <div class="q-form-row-2">
+          <div><label>รหัส</label>{{ form.code }}</div>
+          <div><label>หมวด</label>{{ form.category }}</div>
+        </div>
+        <div><label>ชื่อสินค้า</label>{{ form.name }}{% if form.name.errors %}<div class="auth-err">{{ form.name.errors|join:" · " }}</div>{% endif %}</div>
+        <div><label>ชื่ออังกฤษ</label>{{ form.name_en }}</div>
+        <div><label>คำอธิบาย</label>{{ form.description }}</div>
+        <div class="q-form-row-2">
+          <div><label>หน่วย</label>{{ form.unit }}</div>
+          <div><label>ภาษี</label>{{ form.tax_type }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="q-form-section">
+      <h3>ขนาด · วัสดุ · มาตรฐาน</h3>
+      <div class="q-form-stack">
+        <div class="q-form-row-2">
+          <div><label>กว้าง (มม.)</label>{{ form.width_mm }}</div>
+          <div><label>ลึก (มม.)</label>{{ form.depth_mm }}</div>
+        </div>
+        <div class="q-form-row-2">
+          <div><label>สูง (มม.)</label>{{ form.height_mm }}</div>
+          <div><label>สี</label>{{ form.color_code }}</div>
+        </div>
+        <div class="q-form-row-2">
+          <div><label>วัสดุ</label>{{ form.material }}</div>
+          <div><label>ผิวสำเร็จ</label>{{ form.finish }}</div>
+        </div>
+        <div class="q-form-row-2">
+          <div><label>แบรนด์ hardware</label>{{ form.hardware_brand }}</div>
+          <div><label>มาตรฐาน</label>{{ form.standard }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <aside class="q-form-side">
+    <div class="q-form-section">
+      <h3>ราคา</h3>
+      <div class="q-form-stack">
+        <div><label>ราคาขายตั้ง</label>{{ form.default_price }}</div>
+        <div><label>ต้นทุน</label>{{ form.cost }}</div>
+      </div>
+    </div>
+    <div class="q-form-section">
+      <h3>ตั้งค่า</h3>
+      <div class="q-form-stack">
+        <label style="display: flex; align-items: center; gap: 8px;">{{ form.is_active }} ใช้งาน</label>
+        <label style="display: flex; align-items: center; gap: 8px;">{{ form.is_bundle }} เป็น bundle</label>
+        <div><label>แท็ก</label>{{ form.tags }}</div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 8px; flex-direction: column;">
+      <button type="submit" class="btn accent">
+        <svg class="ico ico-sm"><use href="#i-check"/></svg> บันทึก
+      </button>
+      <a href="{% url 'catalog:products' %}" class="btn">ยกเลิก</a>
+    </div>
+  </aside>
+</form>
+{% endblock %}

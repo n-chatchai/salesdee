@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{% if category %}แก้ {{ category.name }}{% else %}เพิ่มหมวด{% endif %} · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/quotes.css' %}">{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-title">
+    {% if delete %}ยืนยันลบหมวด <em>{{ category.name }}</em>
+    {% elif category %}แก้หมวด <em>{{ category.name }}</em>
+    {% else %}เพิ่ม<em>หมวดสินค้า</em>{% endif %}
+  </div>
+</div>
+
+<form method="post" style="max-width: 480px;">
+  {% csrf_token %}
+  {% if delete %}
+    <div class="auth-alert">ลบหมวดนี้? · สินค้าในหมวดจะถูกเลื่อนไปอยู่นอกหมวด</div>
+    <div style="display: flex; gap: 8px;">
+      <button type="submit" name="_confirm" value="1" class="btn" style="background: var(--danger); color: var(--paper); border-color: var(--danger);">
+        ลบหมวด
+      </button>
+      <a href="{% url 'catalog:categories' %}" class="btn">ยกเลิก</a>
+    </div>
+  {% else %}
+    {% if form.non_field_errors %}<div class="auth-alert">{{ form.non_field_errors|join:" · " }}</div>{% endif %}
+    <div class="q-form-section">
+      <h3>หมวด</h3>
+      <div class="q-form-stack">
+        {% for f in form %}
+          <div>
+            <label>{{ f.label }}</label>
+            {{ f }}
+            {% if f.errors %}<div class="auth-err">{{ f.errors|join:" · " }}</div>{% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div style="display: flex; gap: 8px; margin-top: 16px;">
+      <button type="submit" class="btn accent">บันทึก</button>
+      {% if category %}
+        <a href="{% url 'catalog:category_delete' category.pk %}" class="btn ghost" style="color: var(--danger);">ลบ</a>
+      {% endif %}
+      <a href="{% url 'catalog:categories' %}" class="btn">ยกเลิก</a>
+    </div>
+  {% endif %}
+</form>
+{% endblock %}

@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ customer.name }} · salesdee.{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/quotes.css' %}">
+<link rel="stylesheet" href="{% static 'css/customer.css' %}">
+{% endblock %}
+
+{% block content %}
+<div style="margin: -24px;">
+
+  <div class="c-360-head">
+    <div class="c-360-avatar">{{ customer.name|slice:":1"|upper }}</div>
+    <div class="c-360-title">
+      <div class="c-360-name">
+        {{ customer.name }}
+        {% if customer.company_name %}<em>· {{ customer.company_name }}</em>{% endif %}
+      </div>
+      <div class="c-360-meta">
+        {% if customer.tax_id %}<span>TAX <strong>{{ customer.tax_id }}</strong></span><span class="dot">·</span>{% endif %}
+        {% if customer.phone %}<span><svg class="ico ico-sm"><use href="#i-phone"/></svg> {{ customer.phone }}</span><span class="dot">·</span>{% endif %}
+        {% if customer.email %}<span><svg class="ico ico-sm"><use href="#i-mail"/></svg> {{ customer.email }}</span>{% endif %}
+      </div>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <a href="{% url 'crm:customer_edit' customer.pk %}" class="btn">
+        <svg class="ico ico-sm"><use href="#i-edit"/></svg> แก้ไข
+      </a>
+      <a href="{% url 'crm:customers' %}" class="btn ghost">← กลับ</a>
+    </div>
+  </div>
+
+  <div class="c-360-kpis">
+    <div class="c-360-kpi">
+      <div class="lbl">ดีลทั้งหมด</div>
+      <div class="val">{{ deals|length }}</div>
+    </div>
+    <div class="c-360-kpi">
+      <div class="lbl">ใบเสนอ</div>
+      <div class="val">{{ quotations|length }}</div>
+    </div>
+    <div class="c-360-kpi">
+      <div class="lbl">แชต</div>
+      <div class="val">{{ conversations|length }}</div>
+    </div>
+    <div class="c-360-kpi">
+      <div class="lbl">งานค้าง</div>
+      <div class="val">{{ tasks|length }}</div>
+    </div>
+  </div>
+
+  <div class="c-360-body">
+
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+
+      <div class="c-360-section">
+        <h3>ใบเสนอราคา <span class="ct">{{ quotations|length }}</span></h3>
+        {% if quotations %}
+          <table class="q-lines-table">
+            <thead><tr><th>เลขที่</th><th>ออกเมื่อ</th><th>สถานะ</th><th class="r">มูลค่า</th></tr></thead>
+            <tbody>
+              {% for doc in quotations|slice:":10" %}
+                <tr>
+                  <td><a href="{% url 'quotes:quotation_detail' doc.pk %}" style="color: var(--accent); font-family: var(--font-mono);">{{ doc.doc_number|default:"—" }}</a></td>
+                  <td>{{ doc.issue_date|date:"j M y" }}</td>
+                  <td><span class="q-status-pill {{ doc.status }}">{{ doc.get_status_display }}</span></td>
+                  <td class="r">{{ doc.reference|default:"—" }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <div class="q-lines-empty">ยังไม่มีใบเสนอกับลูกค้ารายนี้</div>
+        {% endif %}
+      </div>
+
+      <div class="c-360-section">
+        <h3>ดีล <span class="ct">{{ deals|length }}</span></h3>
+        {% if deals %}
+          <ul style="list-style: none; padding: 12px 18px; margin: 0;">
+            {% for d in deals|slice:":10" %}
+              <li style="padding: 8px 0; border-bottom: 1px solid var(--border-2); display: flex; gap: 10px;">
+                <a href="{% url 'crm:deal_detail' d.pk %}" style="flex: 1; color: var(--ink); text-decoration: none;">
+                  <strong>{{ d.name }}</strong>
+                  <div class="muted" style="font-size: 11px;">{{ d.stage.name }} · {{ d.created_at|date:"j M y" }}</div>
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="q-lines-empty">ยังไม่มีดีล</div>
+        {% endif %}
+      </div>
+
+      <div class="c-360-section">
+        <h3>ไทม์ไลน์ <span class="ct">{{ activities|length }} กิจกรรม</span></h3>
+        {% if activities %}
+          <ul class="c-timeline">
+            {% for a in activities|slice:":15" %}
+              <li>
+                <div class="t">
+                  <strong>{{ a.get_kind_display|default:a.kind }}</strong>
+                  {% if a.note %}— {{ a.note|truncatechars:120 }}{% endif %}
+                  <div class="muted" style="font-size: 11px;">{{ a.created_by.get_full_name|default:a.created_by.email|default:"ระบบ" }}{% if a.deal %} · {{ a.deal.name }}{% endif %}</div>
+                </div>
+                <div class="when">{{ a.occurred_at|date:"j M H:i" }}</div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="q-lines-empty">ยังไม่มีกิจกรรม</div>
+        {% endif %}
+      </div>
+
+    </div>
+
+    <aside style="display: flex; flex-direction: column; gap: 16px;">
+
+      {% if contacts %}
+        <div class="c-360-section">
+          <h3>ผู้ติดต่อ <span class="ct">{{ contacts|length }}</span></h3>
+          <ul style="list-style: none; padding: 12px 18px; margin: 0;">
+            {% for ct in contacts %}
+              <li style="padding: 6px 0; border-bottom: 1px solid var(--border-2); font-size: 13px;">
+                <strong>{{ ct.name }}</strong>
+                {% if ct.position %}<div class="muted" style="font-size: 11px;">{{ ct.position }}</div>{% endif %}
+                {% if ct.phone %}<div class="muted" style="font-size: 11px;">{{ ct.phone }}</div>{% endif %}
+                {% if ct.email %}<div class="muted" style="font-size: 11px;">{{ ct.email }}</div>{% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+
+      {% if tasks %}
+        <div class="c-360-section">
+          <h3>งานค้าง <span class="ct">{{ tasks|length }}</span></h3>
+          <ul style="list-style: none; padding: 12px 18px; margin: 0;">
+            {% for t in tasks|slice:":10" %}
+              <li style="padding: 6px 0; border-bottom: 1px solid var(--border-2); font-size: 13px;">
+                <strong>{{ t.title }}</strong>
+                <div class="muted" style="font-size: 11px;">{% if t.assignee %}{{ t.assignee.get_full_name|default:t.assignee.email }} · {% endif %}{% if t.due_at %}กำหนด {{ t.due_at|date:"j M" }}{% endif %}</div>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+
+    </aside>
+
+  </div>
+
+</div>
+{% endblock %}

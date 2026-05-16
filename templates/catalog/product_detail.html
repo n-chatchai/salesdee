@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ product.name }} · salesdee.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/quotes.css' %}">{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-num">{{ product.code|default:"" }}</div>
+  <div class="q-detail-title">{{ product.name }}{% if product.name_en %} <em>· {{ product.name_en }}</em>{% endif %}</div>
+  <div class="q-detail-meta">
+    {% if product.category %}<div class="item">หมวด <strong>{{ product.category.name }}</strong></div><span class="dot">·</span>{% endif %}
+    <div class="item">ราคา <strong>฿{{ product.default_price|floatformat:0 }}{% if product.unit %} /{{ product.unit }}{% endif %}</strong></div>
+  </div>
+</div>
+
+<div style="display: flex; gap: 8px; margin-bottom: 16px;">
+  <a href="{% url 'catalog:product_edit' product.pk %}" class="btn accent"><svg class="ico ico-sm"><use href="#i-edit"/></svg> แก้ไข</a>
+  <a href="{% url 'catalog:products' %}" class="btn">← กลับ</a>
+</div>
+
+<div class="q-form-grid">
+  <div class="q-form-main">
+    {% if product.description %}
+      <div class="q-form-section">
+        <h3>คำอธิบาย</h3>
+        <div>{{ product.description|linebreaks }}</div>
+      </div>
+    {% endif %}
+    <div class="q-form-section">
+      <h3>สเปค</h3>
+      <table class="q-lines-table">
+        <tbody>
+          {% if product.width_mm %}<tr><th>กว้าง × ลึก × สูง</th><td>{{ product.width_mm }} × {{ product.depth_mm }} × {{ product.height_mm }} มม.</td></tr>{% endif %}
+          {% if product.material %}<tr><th>วัสดุ</th><td>{{ product.material }}</td></tr>{% endif %}
+          {% if product.finish %}<tr><th>ผิวสำเร็จ</th><td>{{ product.finish }}</td></tr>{% endif %}
+          {% if product.color_code %}<tr><th>สี</th><td>{{ product.color_code }}</td></tr>{% endif %}
+          {% if product.hardware_brand %}<tr><th>Hardware</th><td>{{ product.hardware_brand }}</td></tr>{% endif %}
+          {% if product.standard %}<tr><th>มาตรฐาน</th><td>{{ product.standard }}</td></tr>{% endif %}
+          {% if product.tags %}<tr><th>แท็ก</th><td>{{ product.tags }}</td></tr>{% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <aside class="q-form-side">
+    <div class="q-form-section">
+      <h3>รูป</h3>
+      {% for img in product.images.all %}
+        <img src="{{ img.image.url }}" alt="" style="width:100%; border:1px solid var(--border); margin-bottom:8px;">
+      {% empty %}
+        <div class="muted">ยังไม่มีรูป</div>
+      {% endfor %}
+    </div>
+  </aside>
+</div>
+{% endblock %}
