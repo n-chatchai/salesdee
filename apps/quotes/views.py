@@ -56,14 +56,36 @@ def _visible_quotes(request: HttpRequest):
 
 @login_required
 def quotation_list(request: HttpRequest) -> HttpResponse:
-    docs = (
+    from apps.quotes.models import DocSource, DocStatus
+
+    qs = (
         _visible_quotes(request)
         .select_related("customer", "salesperson")
         .prefetch_related("lines")
         .order_by("-created_at")
     )
-    rows = [(d, compute_document_totals(d)) for d in docs]
-    return render(request, "quotes/quotations.html", {"rows": rows})
+    # Filter chips: all / requests (from web) / drafts / sent / accepted
+    f = (request.GET.get("f") or "").strip()
+    if f == "requests":
+        qs = qs.filter(status=DocStatus.REQUEST)
+    elif f == "from_web":
+        qs = qs.filter(source=DocSource.WEBSITE)
+    elif f == "from_line":
+        qs = qs.filter(source=DocSource.LINE)
+    elif f == "drafts":
+        qs = qs.filter(status__in=[DocStatus.DRAFT, DocStatus.PENDING_APPROVAL, DocStatus.READY])
+    elif f == "sent":
+        qs = qs.filter(status=DocStatus.SENT)
+    elif f == "accepted":
+        qs = qs.filter(status=DocStatus.ACCEPTED)
+    rows = [(d, compute_document_totals(d)) for d in qs]
+    counts = {
+        "all": _visible_quotes(request).count(),
+        "requests": _visible_quotes(request).filter(status=DocStatus.REQUEST).count(),
+        "from_web": _visible_quotes(request).filter(source=DocSource.WEBSITE).count(),
+        "from_line": _visible_quotes(request).filter(source=DocSource.LINE).count(),
+    }
+    return render(request, "quotes/quotations.html", {"rows": rows, "filter": f, "counts": counts})
 
 
 @login_required

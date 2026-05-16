@@ -21,6 +21,16 @@
     </div>
   </div>
 
+  <div class="h-filters" style="padding: 12px 24px; background: var(--paper);">
+    <a href="?" class="h-filter {% if not filter %}active{% endif %}">ทั้งหมด <span class="ct">{{ counts.all }}</span></a>
+    <a href="?f=requests" class="h-filter {% if filter == 'requests' %}active{% endif %}">คำขอจากเว็บ <span class="ct">{{ counts.requests }}</span></a>
+    <a href="?f=from_web" class="h-filter {% if filter == 'from_web' %}active{% endif %}">จากเว็บ <span class="ct">{{ counts.from_web }}</span></a>
+    <a href="?f=from_line" class="h-filter {% if filter == 'from_line' %}active{% endif %}">จากไลน์ <span class="ct">{{ counts.from_line }}</span></a>
+    <a href="?f=drafts" class="h-filter {% if filter == 'drafts' %}active{% endif %}">ร่าง</a>
+    <a href="?f=sent" class="h-filter {% if filter == 'sent' %}active{% endif %}">ส่งแล้ว</a>
+    <a href="?f=accepted" class="h-filter {% if filter == 'accepted' %}active{% endif %}">ตอบรับ</a>
+  </div>
+
   <div class="q-rows">
     {% for doc, totals in rows %}
       <a href="{% url 'quotes:quotation_detail' doc.pk %}" class="h-row" style="grid-template-columns: 36px 1fr;">
