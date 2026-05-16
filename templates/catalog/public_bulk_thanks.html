@@ -1,0 +1,10 @@
+{% extends "catalog/_ts_base.html" %}
+{% block title %}รับคำขอแล้ว · {{ tenant.name }}{% endblock %}
+{% block content %}
+<div class="ts-thanks">
+  <div class="check">✓</div>
+  <h1>รับคำขอ Bulk แล้ว</h1>
+  <p>ทีมจัด proposal ตาม SLA ของร้าน</p>
+  <a href="{% url 'public_home' tenant_slug=tenant.slug %}" class="auth-link">← กลับหน้าหลัก</a>
+</div>
+{% endblock %}

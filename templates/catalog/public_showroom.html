@@ -1,0 +1,15 @@
+{% extends "catalog/_ts_base.html" %}
+{% block title %}นัด showroom · {{ tenant.name }}{% endblock %}
+{% block content %}
+<section class="lh-section" style="max-width:640px">
+  <h1 class="lh-h2">นัด<em>showroom</em></h1>
+  <form method="post" class="ts-req-form" style="margin-top:24px">
+    {% csrf_token %}
+    <div class="ts-req-field"><label>ชื่อ *</label><input name="name" required></div>
+    <div class="ts-req-field"><label>โทร *</label><input name="phone" type="tel" required></div>
+    <div class="ts-req-field"><label>วันที่ต้องการมา</label><input name="visit_date" placeholder="เช่น จันทร์ 20 พ.ค. 10:00"></div>
+    <div class="ts-req-field"><label>หมายเหตุ</label><textarea name="notes" rows="3"></textarea></div>
+    <button type="submit" class="ts-req-submit">ส่งคำขอนัด →</button>
+  </form>
+</section>
+{% endblock %}

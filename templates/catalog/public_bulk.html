@@ -1,0 +1,17 @@
+{% extends "catalog/_ts_base.html" %}
+{% block title %}Bulk request · {{ tenant.name }}{% endblock %}
+{% block content %}
+<section class="lh-section" style="max-width:640px">
+  <h1 class="lh-h2">Bulk · <em>floorplan</em></h1>
+  <p class="muted">ส่งรายละเอียด · ทีมจัด proposal ภายใน {% if company %}{{ company.bulk_proposal_hours|default:48 }}{% else %}48{% endif %} ชม.</p>
+  <form method="post" class="ts-req-form" style="margin-top:24px">
+    {% csrf_token %}
+    <div class="ts-req-field"><label>ชื่อ *</label><input name="name" required></div>
+    <div class="ts-req-field"><label>โทร *</label><input name="phone" type="tel" required></div>
+    <div class="ts-req-field"><label>งบประมาณ</label><input name="budget" placeholder="เช่น 300,000–500,000"></div>
+    <div class="ts-req-field"><label>จำนวนที่นั่ง/คน</label><input name="people"></div>
+    <div class="ts-req-field"><label>รายละเอียด / ลิงก์ floorplan</label><textarea name="notes" rows="4"></textarea></div>
+    <button type="submit" class="ts-req-submit">ส่งคำขอ →</button>
+  </form>
+</section>
+{% endblock %}

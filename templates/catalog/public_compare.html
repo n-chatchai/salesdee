@@ -1,0 +1,21 @@
+{% extends "catalog/_ts_base.html" %}
+{% load public_tags %}
+{% block title %}เทียบสเปค · {{ tenant.name }}{% endblock %}
+{% block content %}
+<section class="lh-section">
+  <h1 class="lh-h2">เทียบ<em>สเปค</em></h1>
+  {% if products %}
+  <div style="overflow-x:auto;margin-top:24px">
+    <table class="pd-spec-table" style="width:100%">
+      <tr><th></th>{% for p in products %}<th>{{ p.name }}</th>{% endfor %}</tr>
+      {% for row in rows %}
+      <tr><th>{{ row.label }}</th>{% for v in row.values %}<td>{{ v }}</td>{% endfor %}</tr>
+      {% endfor %}
+    </table>
+  </div>
+  {% else %}
+  <p class="muted" style="margin-top:24px">เลือกสินค้าจากแคตตาล็อก · กดช่องเปรียบเทียบบนการ์ด (สูงสุด 4 รุ่น)</p>
+  <a href="{% url 'public_catalog' tenant_slug=tenant.slug %}" class="lh-btn-primary" style="display:inline-block;margin-top:16px">ดูสินค้า</a>
+  {% endif %}
+</section>
+{% endblock %}

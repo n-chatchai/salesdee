@@ -114,6 +114,23 @@ class CompanyProfile(BaseModel):
     website = models.URLField("เว็บไซต์", blank=True)
     line_id = models.CharField("LINE", max_length=100, blank=True)
     logo = models.ImageField("โลโก้", upload_to="company_logos/", blank=True, null=True)
+    # Public tenant-site (design/tenant-site.html · facts + showroom + bulk SLA)
+    public_sku_count = models.PositiveIntegerField("จำนวน SKU (เว็บ)", null=True, blank=True)
+    public_response_sla_hours = models.PositiveSmallIntegerField(
+        "SLA ตอบกลับ (ชม.)", default=24, blank=True, null=True
+    )
+    public_free_install_min_thb = models.PositiveIntegerField(
+        "ติดตั้งฟรีขั้นต่ำ (บาท)", null=True, blank=True
+    )
+    public_certifications = models.CharField("มาตรฐาน/ใบรับรอง (แสดง)", max_length=255, blank=True)
+    showroom_address = models.TextField("ที่อยู่ showroom", blank=True)
+    showroom_hours = models.CharField("เวลาเปิด showroom", max_length=255, blank=True)
+    showroom_sqm = models.CharField("พื้นที่ showroom", max_length=120, blank=True)
+    showroom_parking = models.CharField("ที่จอดรถ showroom", max_length=120, blank=True)
+    bulk_proposal_hours = models.PositiveSmallIntegerField(
+        "SLA bulk proposal (ชม.)", default=48, blank=True, null=True
+    )
+    showroom_maps_url = models.URLField("Google Maps", blank=True)
 
     class Meta:
         verbose_name = "ข้อมูลบริษัท"
@@ -215,7 +232,8 @@ class QuoteTemplate(BaseModel):
     delivery_days = models.PositiveIntegerField("กำหนดส่งของ (วัน)", default=45)
     validity_days = models.PositiveIntegerField("ยืนราคา (วัน)", default=90)
     payment_terms = models.TextField(
-        "เงื่อนไขการชำระเงิน", blank=True,
+        "เงื่อนไขการชำระเงิน",
+        blank=True,
         default="โอนเข้าบัญชีธนาคารหลัก · ส่งสลิปยืนยันการโอน",
     )
     deposit_text = models.CharField(

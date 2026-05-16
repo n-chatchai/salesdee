@@ -132,16 +132,31 @@ _PRICE_BANDS = {
 }
 
 
+def _public_base_products():
+    return (
+        Product.objects.filter(is_active=True)
+        .select_related("category")
+        .prefetch_related("images", "variants")
+    )
+
+
 def public_catalog(request: HttpRequest, tenant_slug: str) -> HttpResponse:
-    """Browse the tenant's published catalog with keyword + category + price-band filters.
-    Filter UI is htmx-friendly (just query params today; the page rerenders cheaply)."""
+    """Browse catalog · deck frame b (facets, lead-time, sort)."""
     tenant = _public_tenant(tenant_slug)
     selected_cat = request.GET.get("cat", "").strip() or request.GET.get("category", "").strip()
     q = (request.GET.get("q") or "").strip()[:120]
     band = (request.GET.get("price") or "").strip()
+    fast_only = request.GET.get("fast") == "1"
+    sort = (request.GET.get("sort") or "default").strip()
     with tenant_context(tenant):
+        from apps.catalog.public_site import (
+            enrich_categories,
+            facet_lead_time_counts,
+            facet_price_counts,
+        )
         from apps.tenants.models import CompanyProfile
 
+        company = CompanyProfile.objects.filter(tenant=tenant).first()
         categories = list(
             ProductCategory.objects.annotate(
                 n=Count("products", filter=Q(products__is_active=True))
@@ -149,68 +164,103 @@ def public_catalog(request: HttpRequest, tenant_slug: str) -> HttpResponse:
             .filter(n__gt=0)
             .order_by("order", "name")
         )
-        products = (
-            Product.objects.filter(is_active=True)
-            .select_related("category")
-            .order_by("category__order", "name")
-        )
+        cat_rows = enrich_categories(categories)
+        base_qs = _public_base_products()
+        facet_base = base_qs
+        active_category = None
         if selected_cat.isdigit():
-            products = products.filter(category_id=int(selected_cat))
+            active_category = ProductCategory.objects.filter(pk=int(selected_cat)).first()
+            base_qs = base_qs.filter(category_id=int(selected_cat))
+            facet_base = facet_base.filter(category_id=int(selected_cat))
         if q:
-            products = products.filter(Q(name__icontains=q) | Q(code__icontains=q))
+            base_qs = base_qs.filter(Q(name__icontains=q) | Q(code__icontains=q))
         if band in _PRICE_BANDS:
             lo, hi = _PRICE_BANDS[band]
             if lo is not None:
-                products = products.filter(default_price__gte=lo)
+                base_qs = base_qs.filter(default_price__gte=lo)
             if hi is not None:
-                products = products.filter(default_price__lte=hi)
+                base_qs = base_qs.filter(default_price__lte=hi)
+        if fast_only:
+            base_qs = base_qs.filter(lead_time_days__lte=7)
+        if sort == "price_asc":
+            base_qs = base_qs.order_by("default_price", "name")
+        elif sort == "price_desc":
+            base_qs = base_qs.order_by("-default_price", "name")
+        elif sort == "fast":
+            base_qs = base_qs.order_by("lead_time_days", "name")
+        else:
+            base_qs = base_qs.order_by("category__order", "name")
+        products = list(base_qs)
+        fast_count = facet_base.filter(lead_time_days__lte=7).count()
         return render(
             request,
             "catalog/public_catalog.html",
             {
                 "tenant": tenant,
-                "company": CompanyProfile.objects.filter(tenant=tenant).first(),
+                "company": company,
                 "categories": categories,
-                "products": list(products),
+                "cat_rows": cat_rows,
+                "nav_q": q,
+                "products": products,
                 "selected_cat": selected_cat,
+                "active_category": active_category,
                 "q": q,
                 "price_band": band,
+                "fast_only": fast_only,
+                "fast_count": fast_count,
+                "sort": sort,
+                "facet_prices": facet_price_counts(facet_base),
+                "facet_lead": facet_lead_time_counts(facet_base),
+                "total_in_cat": facet_base.count(),
             },
         )
 
 
 def public_home(request: HttpRequest, tenant_slug: str | None = None, tenant=None) -> HttpResponse:
-    """Per-tenant public landing page (deck "หน้าหลักสาธารณะ"): hero, browse-by-category,
-    featured products, an AI-match teaser, how-it-works, contact footer."""
+    """Per-tenant landing · deck frame a."""
     if tenant is None:
         tenant = _public_tenant(tenant_slug or "")
     with tenant_context(tenant):
+        from django.urls import reverse
+
+        from apps.catalog.default_content import hero_slides_for_home
+        from apps.catalog.models import PortfolioCase
+        from apps.catalog.public_site import enrich_categories, facts_for_company
         from apps.integrations.ai import ai_is_configured
         from apps.tenants.models import CompanyProfile, HeroBanner
 
         company = CompanyProfile.objects.filter(tenant=tenant).first()
-        banners = list(HeroBanner.objects.filter(is_active=True).order_by("order")[:3])
+        banners = list(HeroBanner.objects.filter(is_active=True).order_by("order")[:4])
+        hero_slides = hero_slides_for_home(banners, tenant, reverse)
         categories = list(
             ProductCategory.objects.annotate(
                 n=Count("products", filter=Q(products__is_active=True))
             )
             .filter(n__gt=0)
-            .order_by("order", "name")[:8]
+            .order_by("order", "name")[:10]
         )
-        featured = list(
-            Product.objects.filter(is_active=True)
-            .select_related("category")
-            .order_by("-created_at")[:8]
-        )
+        cat_rows = enrich_categories(categories)
+        product_count = Product.objects.filter(is_active=True).count()
+        fast_qs = _public_base_products().filter(lead_time_days__lte=7)
+        fast_count = fast_qs.count()
+        fast_products = list(fast_qs.order_by("lead_time_days", "name")[:8])
+        if not fast_products:
+            fast_products = list(_public_base_products().order_by("-created_at")[:8])
+        cases = list(PortfolioCase.objects.filter(is_active=True).order_by("order")[:4])
         return render(
             request,
             "catalog/public_home.html",
             {
                 "tenant": tenant,
                 "company": company,
-                "categories": categories,
-                "featured": featured,
-                "banners": banners,
+                "cat_rows": cat_rows,
+                "hero_slides": hero_slides,
+                "fast_products": fast_products,
+                "fast_count": fast_count,
+                "category_count": len(categories),
+                "product_count": product_count,
+                "facts": facts_for_company(company, product_count=product_count),
+                "cases": cases,
                 "ai_enabled": ai_is_configured(),
             },
         )
@@ -219,6 +269,12 @@ def public_home(request: HttpRequest, tenant_slug: str | None = None, tenant=Non
 def public_product(request: HttpRequest, tenant_slug: str, pk: int) -> HttpResponse:
     tenant = _public_tenant(tenant_slug)
     with tenant_context(tenant):
+        from apps.catalog.models import PortfolioCase
+        from apps.catalog.public_site import (
+            format_price_range,
+            lead_time_label,
+            product_price_range,
+        )
         from apps.tenants.models import CompanyProfile
 
         product = get_object_or_404(
@@ -228,14 +284,17 @@ def public_product(request: HttpRequest, tenant_slug: str, pk: int) -> HttpRespo
             pk=pk,
             is_active=True,
         )
+        lo, hi = product_price_range(product)
+        lead_text, lead_cls = lead_time_label(product.lead_time_days)
         related = []
         if product.category_id:
             related = list(
-                Product.objects.filter(is_active=True, category_id=product.category_id)
+                _public_base_products()
+                .filter(category_id=product.category_id)
                 .exclude(pk=product.pk)
-                .select_related("category")
                 .order_by("-created_at")[:4]
             )
+        cases = list(PortfolioCase.objects.filter(is_active=True).order_by("order")[:3])
         return render(
             request,
             "catalog/public_product.html",
@@ -243,8 +302,125 @@ def public_product(request: HttpRequest, tenant_slug: str, pk: int) -> HttpRespo
                 "tenant": tenant,
                 "company": CompanyProfile.objects.filter(tenant=tenant).first(),
                 "product": product,
+                "price_range_text": format_price_range(lo, hi),
+                "lead_text": lead_text,
+                "lead_cls": lead_cls,
                 "related_products": related,
+                "cases": cases,
             },
+        )
+
+
+def public_compare(request: HttpRequest, tenant_slug: str) -> HttpResponse:
+    tenant = _public_tenant(tenant_slug)
+    raw = (request.GET.get("ids") or "").strip()
+    ids = [int(x) for x in raw.split(",") if x.isdigit()][:4]
+    with tenant_context(tenant):
+        from apps.catalog.public_site import (
+            format_price_range,
+            lead_time_label,
+            product_price_range,
+        )
+        from apps.tenants.models import CompanyProfile
+
+        products = list(_public_base_products().filter(pk__in=ids))
+        rows = []
+        for label, fn in (
+            ("ราคา", lambda p: format_price_range(*product_price_range(p))),
+            ("ลีดไทม์", lambda p: lead_time_label(p.lead_time_days)[0]),
+            ("วัสดุ", lambda p: p.material or "—"),
+            ("ขนาด", lambda p: p.dimensions or "—"),
+        ):
+            rows.append({"label": label, "values": [fn(p) for p in products]})
+        return render(
+            request,
+            "catalog/public_compare.html",
+            {
+                "tenant": tenant,
+                "company": CompanyProfile.objects.filter(tenant=tenant).first(),
+                "products": products,
+                "rows": rows,
+            },
+        )
+
+
+def public_showroom(request: HttpRequest, tenant_slug: str) -> HttpResponse:
+    tenant = _public_tenant(tenant_slug)
+    with tenant_context(tenant):
+        from apps.tenants.models import CompanyProfile
+
+        company = CompanyProfile.objects.filter(tenant=tenant).first()
+        if request.method == "POST":
+            from apps.crm.models import Activity, Customer
+
+            name = (request.POST.get("name") or "").strip()[:200]
+            phone = (request.POST.get("phone") or "").strip()[:40]
+            when = (request.POST.get("visit_date") or "").strip()[:100]
+            notes = (request.POST.get("notes") or "").strip()[:2000]
+            if name and phone:
+                customer = Customer.objects.create(name=name)
+                from apps.crm.models import ActivityKind
+
+                Activity.objects.create(
+                    customer=customer,
+                    kind=ActivityKind.MEETING,
+                    body="นัด showroom (เว็บ)\n"
+                    + "\n".join(filter(None, [f"เวลา: {when}" if when else "", notes])),
+                )
+                return render(
+                    request,
+                    "catalog/public_showroom_thanks.html",
+                    {"tenant": tenant, "company": company},
+                )
+        return render(
+            request,
+            "catalog/public_showroom.html",
+            {"tenant": tenant, "company": company},
+        )
+
+
+def public_bulk_request(request: HttpRequest, tenant_slug: str) -> HttpResponse:
+    tenant = _public_tenant(tenant_slug)
+    with tenant_context(tenant):
+        from apps.tenants.models import CompanyProfile
+
+        company = CompanyProfile.objects.filter(tenant=tenant).first()
+        if request.method == "POST":
+            from apps.crm.models import Activity, Customer
+
+            name = (request.POST.get("name") or "").strip()[:200]
+            phone = (request.POST.get("phone") or "").strip()[:40]
+            budget = (request.POST.get("budget") or "").strip()[:100]
+            people = (request.POST.get("people") or "").strip()[:50]
+            notes = (request.POST.get("notes") or "").strip()[:2000]
+            if name and phone:
+                customer = Customer.objects.create(name=name)
+                from apps.crm.models import ActivityKind
+
+                Activity.objects.create(
+                    customer=customer,
+                    kind=ActivityKind.NOTE,
+                    body="Bulk request (เว็บ)\n"
+                    + "\n".join(
+                        filter(
+                            None,
+                            [
+                                f"งบ: {budget}" if budget else "",
+                                f"จำนวนคน: {people}" if people else "",
+                                notes,
+                            ],
+                        )
+                    ),
+                )
+                return render(
+                    request,
+                    "catalog/public_bulk_thanks.html",
+                    {"tenant": tenant, "company": company},
+                )
+        return render(
+            request,
+            "catalog/public_bulk.html",
+            {"tenant": tenant, "company": company},
         )
 
 
@@ -305,7 +481,9 @@ def public_quote_request(request: HttpRequest, tenant_slug: str) -> HttpResponse
             # Tiny rate-limit · 5 submits per hour per IP. Caches keyed by IP only — fine for MVP.
             from django.core.cache import cache
 
-            ip = request.META.get("HTTP_X_FORWARDED_FOR", "").split(",")[0].strip() or request.META.get("REMOTE_ADDR", "?")
+            ip = request.META.get("HTTP_X_FORWARDED_FOR", "").split(",")[
+                0
+            ].strip() or request.META.get("REMOTE_ADDR", "?")
             cache_key = f"qr-submit:{tenant.slug}:{ip}"
             hits = cache.get(cache_key, 0)
             if hits >= 5:
@@ -372,7 +550,12 @@ def public_quote_request(request: HttpRequest, tenant_slug: str) -> HttpResponse
                 return render(
                     request,
                     "catalog/quote_request_thanks.html",
-                    {"tenant": tenant, "company": company, "ref": doc.doc_number or f"REQ-{doc.pk}", "doc": doc},
+                    {
+                        "tenant": tenant,
+                        "company": company,
+                        "ref": doc.doc_number or f"REQ-{doc.pk}",
+                        "doc": doc,
+                    },
                 )
         else:
             form = QuoteRequestForm()

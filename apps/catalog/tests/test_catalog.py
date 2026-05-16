@@ -161,7 +161,9 @@ def test_root_on_tenant_host_shows_public_home(client, tenant) -> None:
     body = resp.content.decode()
     assert "โซฟารับแขก 3 ที่นั่ง" in body
     assert tenant.name in body
-    assert "ดูสินค้าทั้งหมด" in body
+    assert "lh-nav" in body
+    assert "ดูสินค้าทั้งหมด" in body or "ดูสินค้า" in body
+    assert "lh-banners" in body
 
 
 def test_root_on_platform_host_renders_landing(client) -> None:

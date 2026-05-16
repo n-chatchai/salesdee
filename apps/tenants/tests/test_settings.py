@@ -125,7 +125,9 @@ def test_public_home_renders_for_anon(client, tenant) -> None:
     # the per-tenant homepage is served at the tenant root host
     resp = client.get("/", HTTP_HOST=f"{tenant.slug}.localhost")
     assert resp.status_code == 200
-    assert "ดูสินค้าทั้งหมด" in resp.content.decode()
+    body = resp.content.decode()
+    assert "lh-page" in body
+    assert "lh-nav" in body
 
 
 def test_billing_page_shows_all_public_tiers(client, owner) -> None:

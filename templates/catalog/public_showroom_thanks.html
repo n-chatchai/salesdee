@@ -1,0 +1,10 @@
+{% extends "catalog/_ts_base.html" %}
+{% block title %}รับนัดแล้ว · {{ tenant.name }}{% endblock %}
+{% block content %}
+<div class="ts-thanks">
+  <div class="check">✓</div>
+  <h1>รับคำขอนัดแล้ว</h1>
+  <p>ทีมจะโทรยืนยันภายใน 4 ชม.ทำการ</p>
+  <a href="{% url 'public_home' tenant_slug=tenant.slug %}" class="auth-link">← กลับหน้าหลัก</a>
+</div>
+{% endblock %}

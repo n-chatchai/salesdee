@@ -64,7 +64,7 @@ def home(request: HttpRequest) -> HttpResponse:
             from apps.catalog.views import public_home
 
             return public_home(request, tenant=tenant)
-        return render(request, "core/landing.html")
+        return render(request, "web/landing.html")
     ctx: dict = {}
     if getattr(request, "tenant", None) is not None:
         from apps.core.home_queue import build_home_queue

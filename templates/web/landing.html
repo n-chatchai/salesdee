@@ -1,0 +1,509 @@
+{% extends "web_base.html" %}
+{% load static %}
+
+{% block content %}
+<!-- Icon definitions (used inline) -->
+<svg class="ico-set" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <symbol id="i-message" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+    </symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>
+    </symbol>
+    <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <line x1="9" y1="13" x2="15" y2="13"/>
+      <line x1="9" y1="17" x2="15" y2="17"/>
+    </symbol>
+    <symbol id="i-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="22" y1="2" x2="11" y2="13"/>
+      <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+    </symbol>
+    <symbol id="i-inbox" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
+      <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
+    </symbol>
+    <symbol id="i-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <circle cx="12" cy="12" r="6"/>
+      <circle cx="12" cy="12" r="2"/>
+    </symbol>
+    <symbol id="i-package" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/>
+      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+      <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+      <line x1="12" y1="22.08" x2="12" y2="12"/>
+    </symbol>
+    <symbol id="i-trend" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+      <polyline points="17 6 23 6 23 12"/>
+    </symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    </symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="5" y1="12" x2="19" y2="12"/>
+      <polyline points="12 5 19 12 12 19"/>
+    </symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="2" y1="12" x2="22" y2="12"/>
+      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- ═══════════════════════════════════════════════
+     NAVIGATION
+     ═══════════════════════════════════════════════ -->
+<nav class="top">
+  <div class="nav-inner">
+    <a href="#" class="nav-brand">
+      <div class="ic" style="width: 32px; height: 32px;">
+        <span class="d" style="font-size: 22px;">d</span>
+        <span class="dot" style="width: 3px; height: 3px; bottom: 5px; right: 5px;"></span>
+      </div>
+      <span class="wm"><span class="sales">sales</span><span class="dee">dee</span><span class="dot"></span><span class="tld"></span></span>
+    </a>
+
+    <div class="nav-links">
+      <a href="#how">วิธีทำงาน</a>
+      <a href="#features">ฟีเจอร์</a>
+      <a href="#pricing">ราคา</a>
+      <a href="#faq">คำถาม</a>
+    </div>
+
+    <div class="nav-cta">
+      <a href="{% url 'accounts:login' %}" class="btn btn-sm btn-paper">เข้าระบบ</a>
+      <a href="{% url 'accounts:signup' %}" class="btn btn-sm btn-primary">ใช้ฟรี</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════
+     HERO
+     ═══════════════════════════════════════════════ -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+
+      <div class="hero-text">
+        <h1 class="display hero-headline">
+          ออก<em>ใบเสนอราคา</em><br>
+          ที่<em>ง่าย</em><br>
+          และ<em>ถูกต้อง</em>
+        </h1>
+        <p class="lead ตัวหลัก-sub">
+          ลูกค้าจะเข้ามาทาง<em>ไหน</em> — เว็บ หรือไลน์ · ทีมเซลส์ออกใบเสนอราคาที่ <em>สวย</em> และ <em>แม่นยำ</em> · ระบบช่วยให้แคตตาล็อกถูกต้อง · ราคาไม่พลาด · ขั้นตอนน้อยที่สุด
+        </p>
+        <div class="hero-ctas">
+          <a href="{% url 'accounts:signup' %}" class="btn btn-primary btn-lg">
+            ใช้ฟรีตลอด
+            <svg width="18" height="18"><use href="#i-arrow"/></svg>
+          </a>
+        </div>
+        <div class="hero-microcopy">
+          <span><span class="check">✓</span> ไม่ต้องบัตรเครดิต</span>
+          <span><span class="check">✓</span> ตั้งค่า 10 นาที</span>
+          <span><span class="check">✓</span> ใช้กับ ไลน์ โอเอ ที่มีอยู่</span>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+
+        <div class="app-mock">
+          <div class="app-mock-bar">
+            <div class="dot-row">
+              <span class="red"></span>
+              <span class="yellow"></span>
+              <span class="green"></span>
+            </div>
+            <span class="url">wandeedee.salesdee.com/inbox</span>
+          </div>
+          <div class="app-mock-body">
+            <div class="mock-chat">
+              <div class="chat-incoming">
+                <div class="avatar"></div>
+                <div class="bubble">
+                  ขอใบเสนอราคาราคาโต๊ะ 12 ตัว + เก้าอี้ เออร์โกโนมิก 14 ตัว สำหรับออฟฟิศชั้น 7 ครับ
+                </div>
+              </div>
+
+              <div class="ai-card">
+                <div class="ai-card-head">
+                  <div class="ic-ai">D</div>
+                  <div class="label">ผู้ช่วยเสนอรายการที่ตรง</div>
+                </div>
+                <div class="text">เจอ 3 รายการตรงกับข้อความ · ยืนยันก่อนสร้างใบเสนอราคา</div>
+                <div class="ai-matched">
+                  <div class="ai-matched-item">
+                    <div class="img" style="background: linear-gradient(135deg, #8B7355, #4A3C2C);"></div>
+                    <div class="info">
+                      <div class="name">โต๊ะ วอลนัทพรีเมียม 180</div>
+                      <div class="price">฿ 85,000 × 12</div>
+                    </div>
+                    <span class="conf">98%</span>
+                  </div>
+                  <div class="ai-matched-item">
+                    <div class="img" style="background: linear-gradient(135deg, #2D3748, #1A202C);"></div>
+                    <div class="info">
+                      <div class="name">เก้าอี้ เออร์โกโนมิก Skyline</div>
+                      <div class="price">฿ 12,800 × 14</div>
+                    </div>
+                    <span class="conf">95%</span>
+                  </div>
+                  <div class="ai-matched-item">
+                    <div class="img" style="background: linear-gradient(135deg, #C0B097, #8A7A65);"></div>
+                    <div class="info">
+                      <div class="name">แผ่นกั้น acoustic 120 cm</div>
+                      <div class="price">฿ 4,800 × 6</div>
+                    </div>
+                    <span class="conf">82%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mock-cta-row">
+                <button class="mock-cta primary">สร้างใบเสนอราคา →</button>
+                <button class="mock-cta ghost">ปรับรายการ</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════
+     SOCIAL PROOF
+     ═══════════════════════════════════════════════ -->
+<section class="social-proof">
+  <div class="container">
+
+    <div class="stats-row">
+      <div class="stat-item">
+        <div class="stat-num"><span style="font-family: 'Fraunces', serif; font-style: italic;">เร็ว</span>ขึ้น</div>
+        <div class="stat-label">แคตตาล็อก + อัตโนมัติ + เอไอ<br><small style="color: var(--mid);">ไม่ต้องพิมพ์ใหม่ทุกใบ</small></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num"><span style="font-family: 'Fraunces', serif; font-style: italic;">แม่น</span>ขึ้น</div>
+        <div class="stat-label">ระบบคำนวณภาษี · ส่วนลด · เงื่อนไข<br><small style="color: var(--mid);">ไม่พลาด · ไม่ลืม</small></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num"><span style="font-family: 'Fraunces', serif; font-style: italic;">ครบ</span>วงจร</div>
+        <div class="stat-label">ตั้งแต่ลูกค้าทักจนปิดดีล<br><small style="color: var(--mid);">ในระบบเดียว</small></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<style>
+  .workflow {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr 1fr;
+    gap: 16px;
+    max-width: 1080px;
+    margin: 0 auto;
+  }
+  @media (max-width: 1024px) {
+    .workflow { grid-template-columns: 1fr; gap: 12px; }
+  }
+  .wf-step {
+    background: var(--paper-2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 20px 24px;
+    position: relative;
+    transition: transform 0.2s;
+  }
+  .wf-step.featured {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    border-width: 2px;
+  }
+  .wf-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--mid);
+    letter-spacing: 0.15em;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .wf-step.featured .wf-num { color: var(--accent-deep); }
+  .wf-ic {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: var(--paper);
+    border: 1px solid var(--border);
+    display: grid;
+    place-items: center;
+    color: var(--ink);
+    margin-bottom: 14px;
+  }
+  .wf-ic.accent {
+    background: var(--accent);
+    color: var(--paper);
+    border-color: var(--accent);
+  }
+  .wf-step h3 {
+    font-family: 'IBM Plex Sans Thai';
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.25;
+    margin-bottom: 10px;
+    letter-spacing: -0.015em;
+  }
+  .wf-step h3 em {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    color: var(--accent);
+  }
+  .wf-step p {
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.6;
+    margin-bottom: 14px;
+  }
+  .wf-detail {
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .ch-pill {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    padding: 3px 9px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-2);
+    letter-spacing: 0.02em;
+  }
+  .wf-step.featured .ch-pill { background: var(--paper); }
+  .wf-bullets { flex-direction: column; gap: 6px; }
+  .wf-bullet {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--ink-2);
+    line-height: 1.5;
+    align-items: start;
+    padding: 2px 0;
+  }
+  .b-ic {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    text-align: center;
+    line-height: 1.4;
+  }
+  .b-ic.ai { color: var(--ai, #7B8F6B); }
+  .wf-bullet strong { color: var(--ink); font-weight: 600; }
+</style>
+
+<style>
+  .path-step {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 10px;
+    padding: 8px 0;
+    align-items: start;
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.5;
+  }
+  .ps-num {
+    width: 22px; height: 22px;
+    background: var(--accent-soft);
+    color: var(--accent-deep);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 1px;
+  }
+  .ps-txt {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--ink-2);
+  }
+  @media (max-width: 768px) {
+    .paths-wrap { grid-template-columns: 1fr !important; gap: 32px !important; }
+  }
+</style>
+
+<!-- ═══════════════════════════════════════════════
+     FEATURES
+     ═══════════════════════════════════════════════ -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow mid">ทุกอย่างในที่เดียว</div>
+      <h2 class="h1">เครื่องมือที่ทำให้<br>ใบเสนอราคา<em>ง่ายและถูกต้อง</em></h2>
+    </div>
+
+    <div class="features-grid">
+
+      <div class="feature-card">
+        <div class="icon-box">
+          <svg viewBox="0 0 24 24"><use href="#i-inbox"/></svg>
+        </div>
+        <h3>หน้า<em>รวม</em>ใบเสนอราคา</h3>
+        <p>ทุกแชตจากไลน์ ของทุกลูกค้ารวมในจอเดียว · มอบหมายให้เซลส์แต่ละคน · ดูประวัติย้อนหลังได้</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="icon-box">
+          <svg viewBox="0 0 24 24"><use href="#i-globe"/></svg>
+        </div>
+        <h3>เว็บของคุณ<em>รับคำขอ</em>เอง</h3>
+        <p>ลูกค้าเข้าเว็บขอใบเสนอราคาเอง · เลือกธีมได้ · โดเมนของคุณเอง </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="icon-box">
+          <svg viewBox="0 0 24 24"><use href="#i-file"/></svg>
+        </div>
+        <h3>ส่งใบเสนอราคา <em>3 ช่องทาง</em></h3>
+        <p>อีเมล · ไลน์ · เอสเอ็มเอส · เลือกได้ทุกครั้งที่ส่ง · ติดตามสถานะแต่ละ ช่องทาง</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+<!-- ═══════════════════════════════════════════════
+     PRICING
+     ═══════════════════════════════════════════════ -->
+<section class="pricing" id="pricing">
+  <div class="container">
+    <div class="section-head">
+      <h2 class="h1">เริ่ม<em>ฟรี</em><br>เติบโตเมื่อพร้อม</h2>
+      <p class="lead">ใช้ฟรีตลอด · ไม่ต้องบัตรเครดิต · upgrade เมื่อพร้อม</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     FAQ
+     ═══════════════════════════════════════════════ -->
+<section class="faq" id="faq">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow mid">คำถามที่ถามบ่อย</div>
+      <h2 class="h1">มีคำถาม?<br>มี<em>คำตอบ</em>ที่นี่</h2>
+    </div>
+
+    <div class="faq-list">
+      <details class="faq-item" open>
+        <summary class="faq-q">ใช้กับ ไลน์ ออฟฟิเชียล ที่มีอยู่ได้ไหม?</summary>
+        <p class="faq-a">ได้ครับ ไม่ต้องสร้างใหม่ · เชื่อมต่อ ไลน์ โอเอ ที่ใช้อยู่กับ salesdee. ผ่าน Channel Access Token ใช้เวลาไม่นาน · ทุกข้อความเก่าจะถูก import เข้าระบบให้ดูประวัติย้อนหลังได้</p>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">ข้อมูลปลอดภัยไหม · มี privacy ตามกฎหมายไทยหรือเปล่า?</summary>
+        <p class="faq-a">ปลอดภัยและเป็นไปตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล (PDPA) ของไทย · ข้อมูลถูกเก็บใน data center ที่มาตรฐาน ISO 27001 · เข้ารหัสทั้ง in-transit และ at-rest · ลูกค้าสามารถขอลบข้อมูลได้เมื่อต้องการ · เรามี Data Processing Agreement สำหรับลูกค้า บิสซิเนส แพ็ค</p>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">ขั้นตอนการตั้งค่าครั้งแรกใช้เวลานานไหม?</summary>
+        <p class="faq-a">ปกติประมาณ 10-15 นาที · 5 ขั้นง่าย ๆ: ข้อมูลบริษัท → โลโก้ → เพิ่มสินค้าแรก (import จาก PDF ได้) → เชิญทีม → เชื่อมต่อ  · ผู้ช่วยจะนำทางทุกขั้น · ถ้าติดขัด นัด การตั้งค่าเริ่มต้น 1-on-1 กับทีมเราฟรีได้ (paid แพ็ค)</p>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">เหมาะกับธุรกิจประเภทไหน?</summary>
+        <p class="faq-a">ตอนนี้ focus ที่ <strong>เฟอร์นิเจอร์สำนักงาน · อุปกรณ์ออฟฟิศ · เครื่องใช้ในบ้าน</strong> เพราะ เทมเพลต + แคตตาล็อก structure ออกแบบมาให้เหมาะ · แต่ใช้กับธุรกิจอื่นที่ขายผ่านไลน์ และต้องส่งใบเสนอราคาราคาได้ทุกประเภท · ถ้าไม่แน่ใจ ลองคุยกับเราก่อน</p>
+      </details>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     FINAL CTA
+     ═══════════════════════════════════════════════ -->
+<section class="final-cta" id="signup">
+  <div class="container">
+    <div class="eyebrow">เริ่มต้นวันนี้</div>
+    <h2 class="display">พร้อมออก<em>ใบเสนอราคา</em><br>ที่<em>ง่ายและถูกต้อง</em><br>ทุกครั้งแล้ว?</h2>
+    <p class="lead">ใช้ฟรีตลอด · ไม่ต้องบัตรเครดิต · ตั้งค่าครบใน 10 นาที</p>
+    <div class="final-cta-ctas">
+      <a href="{% url 'accounts:signup' %}" class="btn btn-primary btn-lg">
+        เริ่มใช้ฟรี
+        <svg width="18" height="18"><use href="#i-arrow"/></svg>
+      </a>
+    </div>
+    <div style="margin-top: 32px; font-size: 13px; color: rgba(246,241,231,0.5);">
+      <span><svg width="14" height="14" style="vertical-align: -2px; margin-right: 6px;"><use href="#i-shield"/></svg></span>
+      ข้อมูลปลอดภัยตาม PDPA ไทย · ยกเลิกได้ทุกเมื่อ
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     FOOTER
+     ═══════════════════════════════════════════════ -->
+<footer class="site">
+  <div class="container">
+
+    <div class="footer-grid">
+
+      <div class="footer-brand">
+        <span class="wm"><span class="sales">sales</span><span class="dee">dee</span><span class="dot"></span><span class="tld">com</span></span>
+        <p class="tagline">ออกใบเสนอราคาราคาง่ายและถูกต้อง · ทุก ช่องทาง</p>
+      </div>
+
+      <div class="footer-col">
+        <h4>สินค้า</h4>
+        <ul>
+          <li><a href="#features">ฟีเจอร์</a></li>
+          <li><a href="#how">วิธีทำงาน</a></li>
+          <li><a href="#pricing">ราคา</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>บริษัท</h4>
+        <ul>
+          <li><a href="#">เกี่ยวกับเรา</a></li>
+          <li><a href="#contact">ติดต่อ</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>ช่วยเหลือ</h4>
+        <ul>
+          <li><a href="#">ศูนย์ช่วยเหลือ</a></li>
+          <li><a href="#">ติดต่อ support</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="footer-bottom">
+      <div>© 2569 salesdee.com</div>
+      <div class="footer-legal">
+        <a href="#">ข้อกำหนดการใช้บริการ</a>
+        <a href="#">นโยบายความเป็นส่วนตัว</a>
+      </div>
+    </div>
+
+  </div>
+</footer>
+{% endblock %}

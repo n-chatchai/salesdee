@@ -1,0 +1,39 @@
+<footer class="lh-footer">
+  <div class="lh-foot-cols">
+    <div class="lh-foot-col">
+      <div class="lh-foot-h">ติดต่อ</div>
+      {% if company %}
+        {% if company.phone %}<div class="lh-foot-line"><strong>โทร</strong> {{ company.phone }}</div>{% endif %}
+        {% if company.line_id %}<div class="lh-foot-line"><strong>LINE</strong> {{ company.line_id }}</div>{% endif %}
+        {% if company.email %}<div class="lh-foot-line"><strong>Email</strong> {{ company.email }}</div>{% endif %}
+        {% if company.address %}<div class="lh-foot-line"><strong>ที่อยู่</strong> {{ company.address }}</div>{% endif %}
+      {% endif %}
+    </div>
+    <div class="lh-foot-col">
+      <div class="lh-foot-h">สินค้า</div>
+      {% for row in cat_rows %}
+        <a class="lh-foot-link" href="{% url 'public_catalog' tenant_slug=tenant.slug %}?cat={{ row.category.pk }}">{{ row.category.name }}</a>
+      {% empty %}
+        <a class="lh-foot-link" href="{% url 'public_catalog' tenant_slug=tenant.slug %}">ดูทั้งหมด</a>
+      {% endfor %}
+    </div>
+    <div class="lh-foot-col">
+      <div class="lh-foot-h">บริการ</div>
+      <a class="lh-foot-link" href="{% url 'public_quote_request' tenant_slug=tenant.slug %}">ขอใบเสนอราคา</a>
+      <a class="lh-foot-link" href="{% url 'public_showroom' tenant_slug=tenant.slug %}">นัด showroom</a>
+      <a class="lh-foot-link" href="{% url 'public_bulk' tenant_slug=tenant.slug %}">Bulk · floorplan request</a>
+    </div>
+    <div class="lh-foot-col">
+      <div class="lh-foot-h">บริษัท</div>
+      <a class="lh-foot-link" href="{% url 'public_home' tenant_slug=tenant.slug %}">หน้าหลัก</a>
+      <a class="lh-foot-link" href="{% url 'public_catalog' tenant_slug=tenant.slug %}">แคตตาล็อก</a>
+    </div>
+  </div>
+  <div class="lh-foot-bottom">
+    <div class="lh-foot-brand">
+      {% if company %}{{ company.name_th }}{% else %}{{ tenant.name }}{% endif %}
+      {% if company.tax_id %} · TAX ID {{ company.tax_id }}{% endif %}
+    </div>
+    <div class="lh-foot-powered">Powered by salesdee.com</div>
+  </div>
+</footer>

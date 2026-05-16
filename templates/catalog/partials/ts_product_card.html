@@ -1,0 +1,35 @@
+{% load public_tags %}
+<div class="pub-product">
+  <div class="lh-card-stock-tag {{ product|lead_time_class }}">{{ product|lead_time_text }}</div>
+  <button type="button" class="lh-compare-check"
+          :class="$store.compare.has({{ product.pk }}) ? 'on' : ''"
+          @click.stop="$store.compare.toggle({{ product.pk }})">
+    <span x-show="$store.compare.has({{ product.pk }})">✓</span>
+  </button>
+  <a href="{% url 'public_product' tenant_slug=tenant.slug pk=product.pk %}" class="pub-product-img">
+    {% with first=product.images.first %}
+      {% if first %}<img src="{{ first.image.url }}" alt="{{ product.name }}">{% else %}
+        <svg class="ico" style="width:48px;height:48px;color:var(--mid-2)"><use href="#i-image"/></svg>
+      {% endif %}
+    {% endwith %}
+  </a>
+  <div class="pub-product-body">
+    {% if product.code %}<div class="pub-product-sku">{{ product.code }}</div>{% endif %}
+    <a href="{% url 'public_product' tenant_slug=tenant.slug pk=product.pk %}" class="pub-product-name">{{ product.name }}</a>
+    {% if product.material %}
+      <div class="pub-product-spec">
+        <div class="pub-product-spec-row"><span class="k">spec</span><span class="v">{{ product.material }}</span></div>
+      </div>
+    {% endif %}
+    <div class="pub-product-foot">
+      <div class="pub-product-price">
+        <span class="from">ช่วงราคา</span>
+        {% ts_price_range product %}
+      </div>
+      <button type="button" class="pub-product-quote"
+              @click.stop="$store.cart.add({ id: {{ product.pk }}, name: '{{ product.name|escapejs }}', price: {{ product.default_price|default:0 }}, image: '{% with first=product.images.first %}{% if first %}{{ first.image.url }}{% endif %}{% endwith %}', qty: 1 })">
+        + ใส่
+      </button>
+    </div>
+  </div>
+</div>

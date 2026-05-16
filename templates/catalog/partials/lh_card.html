@@ -1,0 +1,22 @@
+{% load public_tags %}
+<div class="lh-card">
+  <a href="{% url 'public_product' tenant_slug=tenant.slug pk=product.pk %}" class="lh-card-img" style="background: {{ product|ts_card_gradient }};">
+    {% with first=product.images.first %}
+      {% if first %}<img src="{{ first.image.url }}" alt="" style="width:100%;height:100%;object-fit:cover">{% endif %}
+    {% endwith %}
+  </a>
+  <div class="lh-card-stock {{ product|lead_time_class }}">{{ product|lead_time_text }}</div>
+  <div class="lh-card-body">
+    {% if product.code %}<div class="lh-card-sku">{{ product.code }}</div>{% endif %}
+    <a href="{% url 'public_product' tenant_slug=tenant.slug pk=product.pk %}" class="lh-card-name">{{ product.name }}</a>
+    {% if product.material or product.finish %}<div class="lh-card-config">{{ product.finish|default:product.material }}</div>{% endif %}
+    <div class="lh-card-foot">
+      <div class="lh-card-price">{% ts_price_range product %}</div>
+      <button type="button" class="lh-card-add" title="ใส่ในใบขอ"
+        data-product-id="{{ product.pk }}"
+        data-product-name="{{ product.name }}"
+        data-product-price="{{ product.default_price|default:0 }}"
+        {% with first=product.images.first %}{% if first %}data-product-image="{{ first.image.url }}"{% endif %}{% endwith %}>+ ใส่ในใบขอ</button>
+    </div>
+  </div>
+</div>

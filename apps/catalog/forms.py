@@ -18,10 +18,14 @@ class QuoteRequestForm(forms.Form):
     phone = forms.CharField(label="เบอร์โทร", max_length=40)
     contact = forms.CharField(label="LINE ID หรืออีเมล", max_length=200)
     company_name = forms.CharField(label="บริษัท", max_length=255, required=False)
-    address = forms.CharField(label="ที่อยู่ส่งของ", required=False, widget=forms.Textarea(attrs={"rows": 2}))
+    address = forms.CharField(
+        label="ที่อยู่ส่งของ", required=False, widget=forms.Textarea(attrs={"rows": 2})
+    )
     install_date = forms.CharField(label="กำหนดติดตั้ง", max_length=100, required=False)
     service = forms.CharField(label="บริการ", max_length=100, required=False)
-    notes = forms.CharField(label="หมายเหตุ", required=False, widget=forms.Textarea(attrs={"rows": 3}))
+    notes = forms.CharField(
+        label="หมายเหตุ", required=False, widget=forms.Textarea(attrs={"rows": 3})
+    )
     tos = forms.BooleanField(label="ยอมรับเงื่อนไข", required=True)
     cart = forms.CharField(widget=forms.HiddenInput, required=False)
 
@@ -90,6 +94,7 @@ class ProductForm(forms.ModelForm):
             "standard",
             "is_bundle",
             "is_active",
+            "lead_time_days",
             "tags",
         ]
         widgets = {"description": forms.Textarea(attrs={"rows": 3})}

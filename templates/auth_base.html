@@ -5,12 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}salesdee.{% endblock %}</title>
 
-  <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
-  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
-  <link rel="stylesheet" href="{% static 'css/app.css' %}">
-  <link rel="stylesheet" href="{% static 'css/auth.css' %}">
-  {% block extra_css %}{% endblock %}
-
+  <link rel="stylesheet" href="{% static 'css/backoffice.css' %}">
+  
   <script src="https://unpkg.com/htmx.org@2.0.2" defer></script>
   <script src="https://unpkg.com/alpinejs@3.x.x" defer></script>
 </head>
@@ -20,8 +16,8 @@
 <div class="outside-page">
   <div class="outside-top">
     <a href="/" class="outside-top-brand" style="text-decoration: none;">
-      <div class="ic ic-32 primary"><span class="d">d</span><span class="dot"></span></div>
-      <div class="wordmark">sales<em>dee</em><span class="dot"></span></div>
+      <div class="ic ic-48 primary"><span class="d">d</span><span class="dot"></span></div>
+      <div class="wordmark">sales<em>dee</em><span class="dot"></span><span class="tld">com</span></div>
     </a>
     <div class="outside-top-right">
       {% block outside_top_right %}{% endblock %}

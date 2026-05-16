@@ -55,6 +55,12 @@ class Product(TenantScopedModel):
     standard = models.CharField("มาตรฐาน", max_length=100, blank=True, help_text="เช่น มอก. ...")
     is_bundle = models.BooleanField("เป็นชุด (มีรายการย่อย)", default=False)
     is_active = models.BooleanField("เปิดขาย", default=True)
+    lead_time_days = models.PositiveSmallIntegerField(
+        "ลีดไทม์ (วัน)",
+        null=True,
+        blank=True,
+        help_text="ใช้แสดง chip บนเว็บสาธารณะ · ไม่ใช่สต๊อกจริง",
+    )
     tags = models.CharField("แท็ก", max_length=255, blank=True, help_text="คั่นด้วยจุลภาค")
 
     class Meta:
@@ -142,3 +148,29 @@ class BundleItem(TenantScopedModel):
 
     def __str__(self) -> str:
         return f"{self.component} × {self.quantity}"
+
+
+class PortfolioCase(TenantScopedModel):
+    """ผลงานติดตั้ง · แสดงบนหน้า landing สาธารณะ (deck frame a)."""
+
+    client_name = models.CharField("ลูกค้า", max_length=200)
+    year_display = models.CharField("ปี (แสดง)", max_length=20, blank=True, help_text="เช่น 2568")
+    scope = models.CharField("ขอบเขตงาน", max_length=500, blank=True)
+    spec_summary = models.CharField("สเปคสรุป", max_length=500, blank=True)
+    project_value_display = models.CharField(
+        "มูลค่า (แสดง)", max_length=80, blank=True, help_text="เช่น ~฿342,000"
+    )
+    install_days_display = models.CharField("ส่ง+ติดตั้ง", max_length=80, blank=True)
+    photo_count = models.PositiveSmallIntegerField("จำนวนรูป", default=0)
+    image_primary = models.ImageField("รูปหลัก", upload_to="portfolio/", blank=True, null=True)
+    image_secondary = models.ImageField("รูปรอง", upload_to="portfolio/", blank=True, null=True)
+    order = models.PositiveIntegerField("ลำดับ", default=0)
+    is_active = models.BooleanField("เปิดแสดง", default=True)
+
+    class Meta:
+        ordering = ("order", "-created_at")
+        verbose_name = "ผลงาน"
+        verbose_name_plural = "ผลงาน"
+
+    def __str__(self) -> str:
+        return self.client_name

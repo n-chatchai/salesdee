@@ -6,12 +6,8 @@
   <meta name="csrf-token" content="{{ csrf_token }}">
   <title>{% block title %}salesdee.{% endblock %}</title>
 
-  <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
-  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
-  <link rel="stylesheet" href="{% static 'css/app.css' %}">
-  <link rel="stylesheet" href="{% static 'css/shell.css' %}">
-  {% block extra_css %}{% endblock %}
-
+  <link rel="stylesheet" href="{% static 'css/backoffice.css' %}">
+  
   <script src="https://unpkg.com/htmx.org@2.0.2" defer></script>
   <script src="https://unpkg.com/alpinejs@3.x.x" defer></script>
   {% block extra_head %}{% endblock %}
@@ -25,8 +21,8 @@
 
   <aside class="app-sidebar" :class="sb && 'open'">
     <div class="sb-brand">
-      <div class="ic ic-32 cream"><span class="d">s</span><span class="dot"></span></div>
-      <div class="name">sales<em>dee</em><span class="dot"></span></div>
+      <div class="ic ic-48 cream"><span class="d">d</span><span class="dot"></span></div>
+      <div class="name">sales<em>dee</em><span class="brand-dot"></span></div>
     </div>
 
     {# หน้าหลัก #}

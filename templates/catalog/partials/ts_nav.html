@@ -1,0 +1,25 @@
+{% load static public_tags %}
+<nav class="lh-nav">
+  <a href="{% url 'public_home' tenant_slug=tenant.slug %}" class="lh-brand">
+    <span class="lh-brand-mark">{{ tenant.name|ts_initials }}</span>
+    <span class="lh-brand-name">{{ tenant.name|brand_emphasis }}</span>
+  </a>
+  <form class="lh-search" method="get" action="{% url 'public_search' tenant_slug=tenant.slug %}">
+    <svg class="ico ico-sm"><use href="#i-search"/></svg>
+    <input type="search" name="q" value="{{ nav_q|default:'' }}" placeholder="ค้นหา · รหัส · ชื่อสินค้า · spec" autocomplete="off">
+    <kbd>⌘K</kbd>
+  </form>
+  <div class="lh-nav-actions">
+    {% if company and company.line_id %}
+      <a class="lh-nav-link" href="https://line.me/R/ti/p/{{ company.line_id }}" target="_blank" rel="noopener">
+        <svg class="ico ico-sm" style="color:#06C755"><use href="#i-line-app"/></svg>
+        LINE
+      </a>
+    {% endif %}
+    <button type="button" class="lh-nav-link" @click="$store.cart.open = true">
+      <svg class="ico ico-sm"><use href="#i-package"/></svg>
+      ตะกร้า <span class="lh-cart-badge" x-show="$store.cart.count() > 0" x-text="$store.cart.count()"></span>
+    </button>
+    <a class="lh-nav-cta" href="{% url 'public_quote_request' tenant_slug=tenant.slug %}">ขอใบเสนอ →</a>
+  </div>
+</nav>

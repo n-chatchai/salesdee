@@ -1,76 +1,123 @@
 {% extends "catalog/_ts_base.html" %}
-{% load static %}
+{% load public_tags %}
 {% block title %}{{ product.name }} · {{ tenant.name }}{% endblock %}
-
 {% block content %}
-<div class="ts-product" x-data="{ qty: 1, added: false }">
-  <div class="gallery">
-    {% with first=product.images.first %}
-      {% if first %}
-        <img src="{{ first.image.url }}" alt="">
-      {% else %}
-        <div style="aspect-ratio: 4/3; background: var(--paper-3); display: grid; place-items: center; color: var(--mid-2);">
-          <svg style="width: 48px; height: 48px;"><use href="#i-image"/></svg>
-        </div>
-      {% endif %}
-    {% endwith %}
-    {% if product.images.all|length > 1 %}
-      <div style="display: flex; gap: 8px; margin-top: 8px; overflow-x: auto;">
-        {% for img in product.images.all %}
-          <img src="{{ img.image.url }}" alt="" style="width: 80px; height: 80px; object-fit: cover; border: 1px solid var(--border);">
+<div class="pd-container">
+  <div class="pd-breadcrumb">
+    <a class="pd-bc-link" href="{% url 'public_home' tenant_slug=tenant.slug %}">หน้าหลัก</a>
+    <span class="pd-bc-sep">/</span>
+    {% if product.category %}
+    <a class="pd-bc-link" href="{% url 'public_catalog' tenant_slug=tenant.slug %}?cat={{ product.category.pk }}">{{ product.category.name }}</a>
+    <span class="pd-bc-sep">/</span>
+    {% endif %}
+    <span class="pd-bc-current">{{ product.name }}</span>
+  </div>
+  <div class="pd-main">
+    <div class="pd-gallery" x-data="{ active: 0 }">
+      {% with images=product.images.all %}
+      <div class="pd-photo-main">
+        {% with first=images.0 %}
+        {% if first %}<img src="{{ first.image.url }}" alt="" style="width:100%;height:100%;object-fit:cover">{% endif %}
+        {% endwith %}
+      </div>
+      {% if images|length > 1 %}
+      <div class="pd-thumbs">
+        {% for img in images %}
+        <button type="button" class="pd-thumb{% if forloop.first %} on{% endif %}" @click="active={{ forloop.counter0 }}">
+          <img src="{{ img.image.url }}" alt="" style="width:100%;height:100%;object-fit:cover">
+        </button>
         {% endfor %}
       </div>
-    {% endif %}
-  </div>
-
-  <div class="info">
-    {% if product.category %}<div class="eyebrow">{{ product.category.name }}</div>{% endif %}
-    <h1>{{ product.name }}{% if product.name_en %} <em>· {{ product.name_en }}</em>{% endif %}</h1>
-    <div class="price-big">฿{{ product.default_price|floatformat:0 }}{% if product.unit %} <span class="muted" style="font-size: 14px;">/{{ product.unit }}</span>{% endif %}</div>
-
-    {% if product.description %}<p style="color: var(--ink-2); line-height: 1.6;">{{ product.description|linebreaks }}</p>{% endif %}
-
-    <div class="ts-qty">
-      <button @click="qty = Math.max(1, qty - 1)">−</button>
-      <input type="number" min="1" x-model.number="qty">
-      <button @click="qty += 1">+</button>
+      {% endif %}
+      {% endwith %}
     </div>
-
-    <button class="ts-cta" style="margin-top: 0;"
-            @click="$store.cart.add({ id: {{ product.pk }}, name: '{{ product.name|escapejs }}', price: {{ product.default_price|default:0 }}, image: '{% with first=product.images.first %}{% if first %}{{ first.image.url }}{% endif %}{% endwith %}', qty }); added = true; setTimeout(() => added = false, 1800);">
-      <svg class="ico ico-sm" style="color: var(--paper);"><use href="#i-plus"/></svg>
-      <span x-show="!added">เพิ่มในใบเสนอ</span>
-      <span x-show="added" x-cloak>เพิ่มแล้ว ✓</span>
-    </button>
-
-    {% if product.width_mm or product.material %}
-      <dl class="ts-spec">
-        {% if product.width_mm %}<dt>ขนาด (กว้าง × ลึก × สูง)</dt><dd>{{ product.width_mm }} × {{ product.depth_mm }} × {{ product.height_mm }} มม.</dd>{% endif %}
-        {% if product.material %}<dt>วัสดุ</dt><dd>{{ product.material }}</dd>{% endif %}
-        {% if product.finish %}<dt>ผิวสำเร็จ</dt><dd>{{ product.finish }}</dd>{% endif %}
-        {% if product.color_code %}<dt>สี</dt><dd>{{ product.color_code }}</dd>{% endif %}
-        {% if product.standard %}<dt>มาตรฐาน</dt><dd>{{ product.standard }}</dd>{% endif %}
-      </dl>
-    {% endif %}
+    <div class="pd-info">
+      <div class="pd-name">{{ product.name }}</div>
+      {% if product.description %}<div class="pd-tagline">{{ product.description|truncatewords:24 }}</div>{% endif %}
+      <div class="pd-sku-line">
+        {% if product.code %}<span class="pd-sku">SKU · <strong>{{ product.code }}</strong></span>{% endif %}
+        <a class="pd-compare-link" href="{% url 'public_compare' tenant_slug=tenant.slug %}?ids={{ product.pk }}">เปรียบเทียบ →</a>
+      </div>
+      <div class="pd-price-line">
+        <span class="pd-from">ช่วงราคา</span>
+        <span class="pd-price-range">{{ price_range_text }}</span>
+      </div>
+      <div class="pd-quick-spec">
+        <div class="pd-quick-spec-h">Quick spec</div>
+        <div class="pd-quick-spec-grid">
+          {% if product.dimensions %}<div class="pd-qspec-row"><span class="k">ขนาด</span><span class="v">{{ product.dimensions }}</span></div>{% endif %}
+          {% if product.material %}<div class="pd-qspec-row"><span class="k">วัสดุ</span><span class="v">{{ product.material }}</span></div>{% endif %}
+          {% if product.finish %}<div class="pd-qspec-row"><span class="k">ผิว</span><span class="v">{{ product.finish }}</span></div>{% endif %}
+          {% if product.standard %}<div class="pd-qspec-row"><span class="k">มาตรฐาน</span><span class="v">{{ product.standard }}</span></div>{% endif %}
+        </div>
+      </div>
+      {% if product.variants.all %}
+      <div class="pd-attrs">
+        <div class="pd-attr-group">
+          <div class="pd-attr-lbl">รุ่นย่อย</div>
+          <div class="pd-attr-values">
+            {% for v in product.variants.all %}
+            {% if v.is_active %}
+            <button type="button" class="pd-opt{% if forloop.first %} on{% endif %}">{{ v.name }} · ฿{{ v.price|floatformat:0 }}</button>
+            {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      <div class="pd-stock {{ lead_cls }}">
+        <span class="pd-stock-lbl">{{ lead_text }} · ลีดไทม์ผู้ผลิต</span>
+      </div>
+      {% if cases %}
+      <div class="pd-installed-at">
+        <span class="lbl">ติดตั้งแล้วที่</span>
+        <span class="val">{% for c in cases %}<strong>{{ c.client_name }}</strong>{% if not forloop.last %} · {% endif %}{% endfor %}</span>
+      </div>
+      {% endif %}
+      <div class="pd-ctas">
+        <button type="button" class="pd-cta-primary"
+                @click="$store.cart.add({ id: {{ product.pk }}, name: '{{ product.name|escapejs }}', price: {{ product.default_price|default:0 }}, image: '{% with first=product.images.first %}{% if first %}{{ first.image.url }}{% endif %}{% endwith %}', qty: 1 })">
+          + ใส่ในใบขอราคา
+        </button>
+      </div>
+      <div class="pd-extra-ctas">
+        <a class="pd-extra-cta" href="{% url 'public_showroom' tenant_slug=tenant.slug %}">ไปดูที่ showroom</a>
+        <a class="pd-extra-cta" href="{% url 'public_compare' tenant_slug=tenant.slug %}?ids={{ product.pk }}">เทียบสเปค</a>
+      </div>
+    </div>
   </div>
-</div>
-
-{% if related_products %}
-<section class="ts-section">
-  <h2>สินค้า<em>ใกล้เคียง</em></h2>
-  <div class="ts-grid">
-    {% for p in related_products %}
-      <a href="{% url 'public_product' tenant_slug=tenant.slug pk=p.pk %}" class="ts-card">
-        <div class="thumb">
-          {% with first=p.images.first %}{% if first %}<img src="{{ first.image.url }}" alt="">{% else %}<svg style="width:32px;height:32px;"><use href="#i-image"/></svg>{% endif %}{% endwith %}
-        </div>
-        <div class="body">
-          <div class="name">{{ p.name }}</div>
-          <div class="price">฿{{ p.default_price|floatformat:0 }}</div>
-        </div>
+  <div class="pd-tabs" x-data="{ tab: 'spec' }">
+    <div class="pd-tab-headers">
+      <button type="button" class="pd-tab-h" :class="tab==='spec' && 'on'" @click="tab='spec'">สเปคเต็ม</button>
+      <button type="button" class="pd-tab-h" :class="tab==='desc' && 'on'" @click="tab='desc'">รายละเอียด</button>
+    </div>
+    <div class="pd-tab-content">
+      <div class="pd-tab-pane" x-show="tab==='spec'">
+        <table class="pd-spec-table">
+          {% if product.dimensions %}<tr><th>ขนาด</th><td>{{ product.dimensions }}</td></tr>{% endif %}
+          {% if product.material %}<tr><th>วัสดุ</th><td>{{ product.material }}</td></tr>{% endif %}
+          {% if product.finish %}<tr><th>ผิวสำเร็จ</th><td>{{ product.finish }}</td></tr>{% endif %}
+          {% if product.standard %}<tr><th>มาตรฐาน</th><td>{{ product.standard }}</td></tr>{% endif %}
+        </table>
+      </div>
+      <div class="pd-tab-pane" x-show="tab==='desc'" x-cloak>
+        {{ product.description|linebreaks }}
+      </div>
+    </div>
+  </div>
+  {% if related_products %}
+  <div class="pd-related">
+    <h3 class="pd-related-h">สินค้าใกล้เคียง</h3>
+    <div class="pd-related-grid">
+      {% for p in related_products %}
+      <a class="pd-related-card" href="{% url 'public_product' tenant_slug=tenant.slug pk=p.pk %}">
+        <div class="pd-related-img">{% with first=p.images.first %}{% if first %}<img src="{{ first.image.url }}" alt="">{% endif %}{% endwith %}</div>
+        <div class="pd-related-name">{{ p.name }}</div>
+        <div class="pd-related-price">{% ts_price_range p %}</div>
       </a>
-    {% endfor %}
+      {% endfor %}
+    </div>
   </div>
-</section>
-{% endif %}
+  {% endif %}
+</div>
 {% endblock %}

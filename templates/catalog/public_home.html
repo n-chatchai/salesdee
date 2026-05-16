@@ -1,60 +1,208 @@
 {% extends "catalog/_ts_base.html" %}
-{% load static %}
+{% load public_tags %}
 {% block title %}{{ tenant.name }} · เฟอร์นิเจอร์คุณภาพ{% endblock %}
-
 {% block content %}
-{% if banners %}
-  {% with b=banners.0 %}
-    <section class="ts-hero-banner">
-      <img src="{{ b.image.url }}" alt="{{ b.headline }}">
-      {% if b.headline or b.cta_label %}
-        <div style="position: absolute; inset: 0; background: linear-gradient(transparent 50%, rgba(27,42,58,.55)); display: flex; flex-direction: column; justify-content: flex-end; padding: 32px;">
-          {% if b.headline %}<div style="font-family: var(--font-display); font-style: italic; font-size: 36px; color: var(--paper); max-width: 600px;">{{ b.headline }}</div>{% endif %}
-          {% if b.subline %}<div style="color: var(--paper); opacity: .9; margin-top: 8px; max-width: 600px;">{{ b.subline }}</div>{% endif %}
-          {% if b.cta_label %}<a href="{{ b.cta_url|default:'#' }}" class="ts-cta" style="margin-top: 16px; align-self: flex-start;">{{ b.cta_label }} →</a>{% endif %}
+
+<section class="lh-banners" x-data="{ slide: 0, total: {{ hero_slides|length }} }" x-init="if (total > 1) setInterval(() => { slide = (slide + 1) % total }, 6000)">
+  <div class="lh-banner-track">
+    {% for slide in hero_slides %}
+    {% if slide.kind == 'db' %}
+    {% with b=slide.banner %}
+    <article class="lh-banner{% if forloop.first %} on{% endif %}" :class="{ 'on': slide === {{ forloop.counter0 }} }" style="background: linear-gradient(135deg, #2A1F0F 0%, #4A3C2C 60%, #8B7355 100%);">
+      <div class="lh-banner-art">
+        {% if b.image %}<img src="{{ b.image.url }}" alt="" style="width:100%;height:100%;object-fit:cover;opacity:.25">{% endif %}
+      </div>
+      <div class="lh-banner-body">
+        {% if b.headline %}<div class="lh-banner-tag">{{ b.headline|truncatewords:8 }}</div>{% endif %}
+        <h2 class="lh-banner-h">{{ b.headline|default:tenant.name }}</h2>
+        {% if b.subline %}<p class="lh-banner-sub">{{ b.subline }}</p>{% endif %}
+        <div class="lh-banner-ctas">
+          {% if b.cta_url and b.cta_label %}
+          <a href="{{ b.cta_url }}" class="lh-banner-btn primary">{{ b.cta_label }}</a>
+          {% else %}
+          <a href="{% url 'public_catalog' tenant_slug=tenant.slug %}" class="lh-banner-btn primary">ดูสินค้า →</a>
+          {% endif %}
+          {% if company and company.line_id %}
+          <a href="https://line.me/R/ti/p/{{ company.line_id }}" class="lh-banner-btn ghost" target="_blank" rel="noopener">ทักไลน์</a>
+          {% endif %}
         </div>
-      {% endif %}
-    </section>
-  {% endwith %}
-{% endif %}
-
-<section class="ts-hero">
-  <div class="eyebrow">{% if categories %}{% for c in categories|slice:":3" %}{{ c.name }}{% if not forloop.last %} · {% endif %}{% endfor %}{% else %}เฟอร์นิเจอร์{% endif %}</div>
-  <h1>{{ tenant.name }}<br><em>ขอใบเสนอราคาออนไลน์</em></h1>
-  <p>เลือกสินค้าจากแคตตาล็อก · ส่งคำขอใบเสนอราคา · ทีมขายตอบกลับใน 1 วันทำการ</p>
-  <a href="{% url 'public_catalog' tenant_slug=tenant.slug %}" class="ts-cta">
-    ดูสินค้าทั้งหมด <svg class="ico ico-sm" style="color: var(--paper);"><use href="#i-chevron"/></svg>
-  </a>
-</section>
-
-{% if categories %}
-<section class="ts-section">
-  <h2>หมวด<em>สินค้า</em></h2>
-  <div class="ts-cat-pills">
-    {% for c in categories %}
-      <a href="{% url 'public_catalog' tenant_slug=tenant.slug %}?cat={{ c.pk }}" class="ts-cat-pill">{{ c.name }} <span class="muted">({{ c.n }})</span></a>
+      </div>
+    </article>
+    {% endwith %}
+    {% else %}
+    <article class="lh-banner{% if forloop.first %} on{% endif %}" :class="{ 'on': slide === {{ forloop.counter0 }} }" style="background: {{ slide.gradient }};">
+      <div class="lh-banner-art">{% include 'catalog/partials/lh_banner_art.html' with idx=forloop.counter0 %}</div>
+      <div class="lh-banner-body">
+        <div class="lh-banner-tag">{{ slide.tag }}</div>
+        <h2 class="lh-banner-h">{{ slide.headline_html|safe }}</h2>
+        <p class="lh-banner-sub">{{ slide.subline }}</p>
+        <div class="lh-banner-ctas">
+          {% if slide.cta_primary_url %}
+          <a href="{{ slide.cta_primary_url }}" class="lh-banner-btn primary">{{ slide.cta_primary_label }}</a>
+          {% endif %}
+          {% if slide.cta_ghost_line and company and company.line_id %}
+          <a href="https://line.me/R/ti/p/{{ company.line_id }}" class="lh-banner-btn ghost" target="_blank" rel="noopener">{{ slide.cta_ghost_label }}</a>
+          {% endif %}
+        </div>
+      </div>
+    </article>
+    {% endif %}
     {% endfor %}
   </div>
+  <div class="lh-banner-nav">
+    <div class="lh-banner-dots">
+      {% for slide in hero_slides %}
+      <button type="button" class="lh-banner-dot{% if forloop.first %} on{% endif %}" :class="{ 'on': slide === {{ forloop.counter0 }} }" @click="slide = {{ forloop.counter0 }}" aria-label="slide {{ forloop.counter }}"></button>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% if facts %}
+<section class="lh-facts">
+  {% for f in facts %}
+  <div class="lh-fact">
+    <div class="lh-fact-num">{{ f.num }}</div>
+    <div class="lh-fact-lbl">{{ f.lbl }}</div>
+  </div>
+  {% endfor %}
 </section>
 {% endif %}
 
-{% if featured %}
-<section class="ts-section">
-  <h2>สินค้า<em>แนะนำ</em></h2>
-  <div class="ts-grid">
-    {% for p in featured %}
-      <a href="{% url 'public_product' tenant_slug=tenant.slug pk=p.pk %}" class="ts-card">
-        <div class="thumb">
-          {% with first=p.images.first %}{% if first %}<img src="{{ first.image.url }}" alt="">{% else %}<svg style="width:32px;height:32px;"><use href="#i-image"/></svg>{% endif %}{% endwith %}
+{% if cat_rows %}
+<section class="lh-section lh-cats-section lh-section-dark" id="categories">
+  <div class="lh-sec-head">
+    <h2 class="lh-h2 lh-h2-light">หมวดสินค้า</h2>
+    <div class="lh-sec-meta lh-sec-meta-light">{{ category_count }} หมวด · {{ product_count }}+ รุ่น · เลื่อนซ้าย-ขวา</div>
+  </div>
+  <div class="lh-cats-scroll-wrap">
+    <button type="button" class="lh-cats-arrow prev" aria-label="เลื่อนซ้าย" onclick="tsScrollCats(this,-1)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div class="lh-cats" id="lh-cats">
+      {% for row in cat_rows %}
+      <a href="{% url 'public_catalog' tenant_slug=tenant.slug %}?cat={{ row.category.pk }}" class="lh-cat">
+        <div class="lh-cat-icon"><svg class="ico"><use href="#i-grid"/></svg></div>
+        <div class="lh-cat-name">{{ row.category.name }}</div>
+        <div class="lh-cat-stats">
+          <span><strong>{{ row.stats.n }}</strong> รุ่น</span>
+          {% if row.fast_label %}<span class="in">{{ row.fast_label }}</span>{% endif %}
         </div>
-        <div class="body">
-          <div class="name">{{ p.name }}</div>
-          <div class="meta">{{ p.category.name|default:"" }}</div>
-          <div class="price">฿{{ p.default_price|floatformat:0 }}{% if p.unit %} <span class="muted">/{{ p.unit }}</span>{% endif %}</div>
-        </div>
+        {% if row.price_range %}<div class="lh-cat-range">{{ row.price_range }}</div>{% endif %}
       </a>
+      {% endfor %}
+    </div>
+    <button type="button" class="lh-cats-arrow next" aria-label="เลื่อนขวา" onclick="tsScrollCats(this,1)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </div>
+  <div class="lh-cats-scrollbar" aria-hidden="true">
+    <div class="lh-cats-scrollbar-track">
+      <div class="lh-cats-scrollbar-thumb" id="lh-cats-thumb"></div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if fast_products %}
+<section class="lh-section">
+  <div class="lh-sec-head">
+    <h2 class="lh-h2">สินค้าที่ส่งเร็ว · ลีดไทม์ ≤ 7 วัน</h2>
+    <div class="lh-sec-meta">กรุงเทพ-ปริมณฑล ติดตั้งฟรี ≥ ฿50K · ต่างจังหวัด คิดตามจริง</div>
+  </div>
+  <div class="lh-filter-bar">
+    <a href="{% url 'public_catalog' tenant_slug=tenant.slug %}?fast=1" class="lh-chip on">ทั้งหมด · {{ fast_count }}</a>
+    {% for row in cat_rows|slice:":7" %}
+    <a href="{% url 'public_catalog' tenant_slug=tenant.slug %}?cat={{ row.category.pk }}&fast=1" class="lh-chip">{{ row.category.name }} · {{ row.stats.fast }}</a>
+    {% endfor %}
+  </div>
+  <div class="lh-products">
+    {% for p in fast_products %}{% include 'catalog/partials/lh_card.html' with product=p %}{% endfor %}
+  </div>
+  <a href="{% url 'public_catalog' tenant_slug=tenant.slug %}?fast=1" class="lh-see-all">ดูสินค้าทั้งหมด · {{ product_count }}+ รุ่น →</a>
+</section>
+{% endif %}
+
+{% if cases %}
+<section class="lh-section lh-section-alt" id="cases">
+  <div class="lh-sec-head">
+    <h2 class="lh-h2">ผลงานล่าสุด · ตัวเลขจริง</h2>
+    <div class="lh-sec-meta">{% if company and company.line_id %}ขอ portfolio เพิ่ม → <a href="https://line.me/R/ti/p/{{ company.line_id }}">ทักไลน์</a>{% endif %}</div>
+  </div>
+  <div class="lh-cases">
+    {% for c in cases %}
+    <article class="lh-case">
+      <div class="lh-case-imgs">
+        <div class="lh-case-img">{% if c.image_primary %}<img src="{{ c.image_primary.url }}" alt="" style="width:100%;height:100%;object-fit:cover">{% else %}<div style="width:100%;height:100%;background:linear-gradient(135deg,#8B7355,#4A3C2C)"></div>{% endif %}</div>
+        <div class="lh-case-img">{% if c.image_secondary %}<img src="{{ c.image_secondary.url }}" alt="" style="width:100%;height:100%;object-fit:cover">{% else %}<div style="width:100%;height:100%;background:linear-gradient(135deg,#6B5340,#2A1C0C)"></div>{% endif %}</div>
+      </div>
+      <div class="lh-case-body">
+        <div class="lh-case-meta">
+          <span class="lh-case-client">{{ c.client_name }}</span>
+          {% if c.year_display %}<span class="lh-case-year">ปี {{ c.year_display }}</span>{% endif %}
+        </div>
+        {% if c.scope %}<div class="lh-case-scope">{{ c.scope }}</div>{% endif %}
+        <div class="lh-case-spec">
+          {% if c.spec_summary %}<div class="lh-spec-row"><span class="k">Spec</span><span class="v">{{ c.spec_summary }}</span></div>{% endif %}
+          {% if c.project_value_display %}<div class="lh-spec-row"><span class="k">มูลค่าโครงการ</span><span class="v">{{ c.project_value_display }}</span></div>{% endif %}
+          {% if c.install_days_display %}<div class="lh-spec-row"><span class="k">ส่ง + ติดตั้ง</span><span class="v">{{ c.install_days_display }}</span></div>{% endif %}
+        </div>
+      </div>
+    </article>
     {% endfor %}
   </div>
 </section>
 {% endif %}
+
+<section class="lh-section">
+  <div class="lh-bottom-grid">
+    <div class="lh-showroom">
+      <div class="lh-sec-tag">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;color:var(--accent);"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Showroom
+      </div>
+      <h3 class="lh-block-h">มาดูของจริง</h3>
+      <div class="lh-show-info">
+        {% if company %}
+        {% if company.showroom_address or company.address %}
+        <div class="lh-show-row"><span class="lh-show-lbl">ที่อยู่</span><span class="lh-show-val">{{ company.showroom_address|default:company.address }}</span></div>
+        {% endif %}
+        {% if company.showroom_hours %}<div class="lh-show-row"><span class="lh-show-lbl">เวลา</span><span class="lh-show-val">{{ company.showroom_hours }}</span></div>{% endif %}
+        {% if company.phone %}<div class="lh-show-row"><span class="lh-show-lbl">โทร</span><span class="lh-show-val">{{ company.phone }}</span></div>{% endif %}
+        {% if company.showroom_sqm %}<div class="lh-show-row"><span class="lh-show-lbl">พื้นที่</span><span class="lh-show-val">{{ company.showroom_sqm }}</span></div>{% endif %}
+        {% if company.showroom_parking %}<div class="lh-show-row"><span class="lh-show-lbl">ที่จอด</span><span class="lh-show-val">{{ company.showroom_parking }}</span></div>{% endif %}
+        {% endif %}
+      </div>
+      <div class="lh-show-ctas">
+        <a href="{% url 'public_showroom' tenant_slug=tenant.slug %}" class="lh-btn-primary">นัดเวลามาดู · จองที่นี่</a>
+        {% if company and company.showroom_maps_url %}<a href="{{ company.showroom_maps_url }}" class="lh-btn-ghost" target="_blank" rel="noopener">เปิด Google Maps →</a>{% endif %}
+      </div>
+    </div>
+    <div class="lh-bulk">
+      <div class="lh-sec-tag">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;color:var(--accent);"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Bulk request
+      </div>
+      <h3 class="lh-block-h">เปิดออฟฟิศใหม่? · เซ็ตทั้งห้องในใบเสนอเดียว</h3>
+      <p class="lh-bulk-desc">ส่งแผนผังห้อง + จำนวนคน + งบ · ทีมเซลส์จัด proposal เต็ม · spec + photo + ราคา · ส่งกลับใน <strong>{% if company %}{{ company.bulk_proposal_hours|default:48 }}{% else %}48{% endif %} ชม.</strong></p>
+      <ul class="lh-bulk-list">
+        <li>✓ ออกแบบ layout ตามขนาดห้อง</li>
+        <li>✓ จับคู่ของ + ราคารวมจบ</li>
+        <li>✓ ติดตั้ง + ส่งของในนัดเดียว</li>
+        <li>✓ มี option หลายระดับงบ</li>
+      </ul>
+      <div class="lh-bulk-upload">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:24px;height:24px;color:var(--accent);"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        <div class="lh-bulk-up-text">
+          <strong>ลาก floorplan หรือ click เพื่ออัปโหลด</strong>
+          <span>PDF · PNG · JPG · DWG · max 20MB</span>
+        </div>
+      </div>
+      <div class="lh-bulk-ctas">
+        <a href="{% url 'public_bulk' tenant_slug=tenant.slug %}" class="lh-btn-primary">ส่งคำขอ · ขอ proposal</a>
+        {% if company and company.line_id %}<a href="https://line.me/R/ti/p/{{ company.line_id }}" class="lh-btn-ghost" target="_blank" rel="noopener">หรือทักไลน์เลย →</a>{% endif %}
+      </div>
+    </div>
+  </div>
+</section>
 {% endblock %}

@@ -38,6 +38,9 @@ urlpatterns = [
         name="public_quote_request",
     ),
     path("c/<slug:tenant_slug>/search/", catalog_views.public_search, name="public_search"),
+    path("c/<slug:tenant_slug>/compare/", catalog_views.public_compare, name="public_compare"),
+    path("c/<slug:tenant_slug>/showroom/", catalog_views.public_showroom, name="public_showroom"),
+    path("c/<slug:tenant_slug>/bulk/", catalog_views.public_bulk_request, name="public_bulk"),
     path("", include("apps.core.urls")),
 ]
 
