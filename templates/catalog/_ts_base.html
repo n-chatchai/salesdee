@@ -1,0 +1,107 @@
+{# Shared per-tenant public-site shell · nav + Alpine cart store + drawer.
+   Each public page extends this. Cart persists in localStorage scoped to tenant.slug. #}
+{% load static %}<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>{% block title %}{{ tenant.name }}{% endblock %}</title>
+
+  <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
+  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <link rel="stylesheet" href="{% static 'css/tenant-site.css' %}">
+  {% block extra_css %}{% endblock %}
+
+  <script>
+  document.addEventListener('alpine:init', () => {
+    const key = 'salesdee-cart:{{ tenant.slug }}';
+    const load = () => { try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch { return []; } };
+    Alpine.store('cart', {
+      items: load(),
+      open: false,
+      add(p) {
+        const exist = this.items.find(i => i.id === p.id);
+        if (exist) exist.qty += p.qty || 1;
+        else this.items.push({ id: p.id, name: p.name, price: p.price, image: p.image || '', qty: p.qty || 1 });
+        this._save();
+      },
+      remove(id) { this.items = this.items.filter(i => i.id !== id); this._save(); },
+      inc(id) { const i = this.items.find(x => x.id === id); if (i) { i.qty += 1; this._save(); } },
+      dec(id) { const i = this.items.find(x => x.id === id); if (i) { i.qty = Math.max(1, i.qty - 1); this._save(); } },
+      total() { return this.items.reduce((s, i) => s + i.price * i.qty, 0); },
+      count() { return this.items.reduce((s, i) => s + i.qty, 0); },
+      clear() { this.items = []; this._save(); },
+      _save() { localStorage.setItem(key, JSON.stringify(this.items)); },
+    });
+  });
+  </script>
+  <script src="https://unpkg.com/alpinejs@3.x.x" defer></script>
+</head>
+<body class="ts-page">
+{% include 'partials/_icons.svg.html' %}
+
+<nav class="ts-nav">
+  <a href="{% url 'public_home' tenant_slug=tenant.slug %}" class="ts-brand">
+    {{ tenant.name }}<span class="dot"></span>
+  </a>
+  <div class="ts-nav-links">
+    <a href="{% url 'public_catalog' tenant_slug=tenant.slug %}">สินค้า</a>
+    {% if company.line_id %}<a href="https://line.me/R/ti/p/{{ company.line_id }}" target="_blank">ไลน์</a>{% endif %}
+    <button class="ts-cart-btn" @click="$store.cart.open = true" x-data>
+      <svg width="14" height="14"><use href="#i-package"/></svg>
+      <span>ตะกร้า</span>
+      <span class="badge" x-text="$store.cart.count()" x-show="$store.cart.count() > 0"></span>
+    </button>
+  </div>
+</nav>
+
+{% block content %}{% endblock %}
+
+{# ─── Cart drawer (frame d) ─── #}
+<template x-teleport="body">
+  <div x-data @keydown.escape.window="$store.cart.open = false">
+    <div class="ts-drawer-bg" x-show="$store.cart.open" @click="$store.cart.open = false" x-cloak></div>
+    <aside class="ts-drawer" x-show="$store.cart.open" x-transition.opacity x-cloak>
+      <div class="ts-drawer-head">
+        <div class="t">ตะกร้า · <span x-text="$store.cart.count()"></span> รายการ</div>
+        <button @click="$store.cart.open = false">×</button>
+      </div>
+      <div class="ts-drawer-body">
+        <template x-for="item in $store.cart.items" :key="item.id">
+          <div class="ts-cart-item">
+            <div class="thumb"><template x-if="item.image"><img :src="item.image" alt=""></template></div>
+            <div class="info">
+              <div class="name" x-text="item.name"></div>
+              <div class="price" x-text="'฿' + Math.round(item.price * item.qty).toLocaleString()"></div>
+              <div class="controls">
+                <button @click="$store.cart.dec(item.id)">−</button>
+                <span class="qty" x-text="item.qty"></span>
+                <button @click="$store.cart.inc(item.id)">+</button>
+                <button class="remove" @click="$store.cart.remove(item.id)" title="ลบ">×</button>
+              </div>
+            </div>
+          </div>
+        </template>
+        <div x-show="$store.cart.items.length === 0" class="muted" style="text-align: center; padding: 32px 16px;">
+          ยังไม่มีสินค้าในตะกร้า
+        </div>
+      </div>
+      <div class="ts-drawer-foot" x-show="$store.cart.items.length > 0">
+        <div class="total">
+          <span>รวมประมาณ</span>
+          <span class="v" x-text="'฿' + Math.round($store.cart.total()).toLocaleString()"></span>
+        </div>
+        <div class="actions">
+          <button @click="$store.cart.clear()">ล้างตะกร้า</button>
+          <a class="primary" href="{% url 'public_quote_request' tenant_slug=tenant.slug %}">ขอใบเสนอราคา →</a>
+        </div>
+      </div>
+    </aside>
+  </div>
+</template>
+
+{% block extra_body %}{% endblock %}
+</body>
+</html>

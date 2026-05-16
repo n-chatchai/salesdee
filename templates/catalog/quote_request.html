@@ -1,0 +1,108 @@
+{% extends "catalog/_ts_base.html" %}
+{% load static %}
+{% block title %}ขอใบเสนอราคา · {{ tenant.name }}{% endblock %}
+
+{% block content %}
+<form method="post" class="ts-req" x-data
+      @submit="document.getElementById('cart-input').value = JSON.stringify($store.cart.items.map(i => ({ id: i.id, qty: i.qty })))">
+  {% csrf_token %}
+  <input type="hidden" name="cart" id="cart-input" value="">
+
+  <div class="ts-req-form">
+    <div class="ts-req-head">
+      <h1>ขอ<em>ใบเสนอราคา</em></h1>
+      <p>กรอกข้อมูล · ทีมขายจะส่งใบเสนอราคา (PDF) ภายใน 24 ชม. · หรือ <a href="https://line.me/R/ti/p/{{ company.line_id|default:'' }}" target="_blank">ทักไลน์ตรงเลย</a> (เร็วกว่า)</p>
+    </div>
+
+    {% if throttled %}
+      <div class="auth-alert">ส่งบ่อยเกินไป · ลองอีกครั้งใน 1 ชม. หรือทักไลน์</div>
+    {% endif %}
+    {% if form.non_field_errors %}<div class="auth-alert">{{ form.non_field_errors|join:" · " }}</div>{% endif %}
+
+    <div class="ts-req-row">
+      <div class="ts-req-field">
+        <label>ชื่อ-นามสกุล *</label>
+        <input name="name" value="{{ form.name.value|default:'' }}" required>
+        {% if form.name.errors %}<div class="auth-err">{{ form.name.errors|join:" · " }}</div>{% endif %}
+      </div>
+      <div class="ts-req-field">
+        <label>เบอร์โทร *</label>
+        <input type="tel" name="phone" value="{{ form.phone.value|default:'' }}" required>
+        {% if form.phone.errors %}<div class="auth-err">{{ form.phone.errors|join:" · " }}</div>{% endif %}
+      </div>
+    </div>
+
+    <div class="ts-req-row">
+      <div class="ts-req-field">
+        <label>LINE ID หรืออีเมล *</label>
+        <input name="contact" value="{{ form.contact.value|default:'' }}" required placeholder="@worapol หรือ name@example.com">
+      </div>
+      <div class="ts-req-field">
+        <label>บริษัท (ถ้ามี)</label>
+        <input name="company_name" value="{{ form.company_name.value|default:'' }}">
+      </div>
+    </div>
+
+    <div class="ts-req-row">
+      <div class="ts-req-field full">
+        <label>ที่อยู่ส่งของ (ถ้ามี)</label>
+        <textarea name="address" rows="2">{{ form.address.value|default:'' }}</textarea>
+      </div>
+    </div>
+
+    <div class="ts-req-row">
+      <div class="ts-req-field">
+        <label>กำหนดติดตั้ง</label>
+        <select name="install_date">
+          <option value="">— เลือก —</option>
+          <option {% if form.install_date.value == "ภายใน 1 เดือน" %}selected{% endif %}>ภายใน 1 เดือน</option>
+          <option {% if form.install_date.value == "เร็วที่สุด (1-2 สัปดาห์)" %}selected{% endif %}>เร็วที่สุด (1-2 สัปดาห์)</option>
+          <option {% if form.install_date.value == "ภายใน 3 เดือน" %}selected{% endif %}>ภายใน 3 เดือน</option>
+          <option {% if form.install_date.value == "ยังไม่กำหนด" %}selected{% endif %}>ยังไม่กำหนด</option>
+        </select>
+      </div>
+      <div class="ts-req-field">
+        <label>บริการ</label>
+        <select name="service">
+          <option value="">— เลือก —</option>
+          <option {% if form.service.value == "ส่ง + ติดตั้ง" %}selected{% endif %}>ส่ง + ติดตั้ง</option>
+          <option {% if form.service.value == "ส่งอย่างเดียว" %}selected{% endif %}>ส่งอย่างเดียว</option>
+          <option {% if form.service.value == "มารับเอง" %}selected{% endif %}>มารับเอง · ที่ showroom</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="ts-req-row">
+      <div class="ts-req-field full">
+        <label>เพิ่มเติม (งบ · ความต้องการพิเศษ)</label>
+        <textarea name="notes" rows="3">{{ form.notes.value|default:'' }}</textarea>
+      </div>
+    </div>
+
+    <label class="ts-req-tos">
+      <input type="checkbox" name="tos" checked required>
+      <span>ยอมรับ <a href="#">เงื่อนไขการใช้งาน</a> · ส่งข้อมูลให้ทีม {{ tenant.name }} · เราจะไม่ส่งให้บุคคลที่สาม</span>
+    </label>
+    {% if form.tos.errors %}<div class="auth-err">{{ form.tos.errors|join:" · " }}</div>{% endif %}
+
+    <button type="submit" class="ts-req-submit">ส่งคำขอใบเสนอราคา →</button>
+  </div>
+
+  <aside class="ts-req-summary" x-data>
+    <h3>รายการในคำขอ · <span x-text="$store.cart.count()"></span> ตัว</h3>
+    <template x-for="item in $store.cart.items" :key="item.id">
+      <div class="ts-req-sum-item">
+        <span class="qty" x-text="'×' + item.qty"></span>
+        <span class="name" x-text="item.name" style="flex: 1; font-size: 13px;"></span>
+      </div>
+    </template>
+    <div x-show="$store.cart.items.length === 0" class="muted" style="padding: 20px; text-align: center; font-size: 13px;">
+      ตะกร้ายังว่าง · <a href="{% url 'public_catalog' tenant_slug=tenant.slug %}" class="auth-link">ดูสินค้า</a>
+    </div>
+    <div style="display: flex; justify-content: space-between; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 14px; font-weight: 600;" x-show="$store.cart.items.length > 0">
+      <span>ประมาณ</span>
+      <span class="muted" style="font-family: var(--font-mono);" x-text="'฿' + Math.round($store.cart.total()).toLocaleString()"></span>
+    </div>
+  </aside>
+</form>
+{% endblock %}

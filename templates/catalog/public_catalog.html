@@ -1,46 +1,41 @@
-{% load static %}<!DOCTYPE html>
-<html lang="th">
-<head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>สินค้า · {{ tenant.name }}</title>
-  <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
-  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
-  <link rel="stylesheet" href="{% static 'css/app.css' %}">
-  <link rel="stylesheet" href="{% static 'css/catalog.css' %}">
-</head>
-<body>
-{% include 'partials/_icons.svg.html' %}
+{% extends "catalog/_ts_base.html" %}
+{% load static %}
+{% block title %}สินค้า · {{ tenant.name }}{% endblock %}
 
-<div style="max-width: 1100px; margin: 0 auto; padding: 24px;">
-  <header style="display: flex; align-items: center; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid var(--border); margin-bottom: 24px;">
-    <a href="{% url 'public_home' tenant_slug=tenant.slug %}" style="font-family: var(--font-sans); font-weight: 700; font-size: 22px; color: var(--ink); text-decoration: none; text-transform: lowercase;">
-      {{ tenant.name }}<span style="color: var(--accent);">.</span>
-    </a>
-    <form method="get" style="position: relative;">
-      <svg style="position:absolute; left:10px; top:50%; transform:translateY(-50%); width:16px; height:16px; color:var(--mid);"><use href="#i-search"/></svg>
-      <input name="q" value="{{ q|default:'' }}" placeholder="ค้นหา"
-             style="padding: 8px 12px 8px 34px; background: var(--paper-2); border: 1px solid var(--border); font: inherit;">
-    </form>
-  </header>
+{% block content %}
+<section class="ts-section">
+  <h2>สินค้า<em>ทั้งหมด</em></h2>
 
-  <h1 style="font-size: 28px; font-weight: 600; margin-bottom: 16px;">สินค้าทั้งหมด</h1>
+  <form method="get" style="display: flex; gap: 10px; margin-bottom: 16px;">
+    <div style="flex: 1; max-width: 360px; position: relative;">
+      <svg style="position:absolute; left:12px; top:50%; transform:translateY(-50%); width:16px; height:16px; color:var(--mid);"><use href="#i-search"/></svg>
+      <input name="q" value="{{ q|default:'' }}" placeholder="ค้นหาสินค้า"
+             style="width:100%; padding:10px 12px 10px 36px; background: var(--paper-2); border: 1px solid var(--border); font: inherit;">
+    </div>
+  </form>
 
-  <div class="pl-grid">
+  <div class="ts-cat-pills">
+    <a href="?" class="ts-cat-pill {% if not selected_cat %}active{% endif %}">ทั้งหมด</a>
+    {% for c in categories %}
+      <a href="?cat={{ c.pk }}" class="ts-cat-pill {% if selected_cat == c.pk|stringformat:'s' %}active{% endif %}">{{ c.name }} <span class="muted">({{ c.n }})</span></a>
+    {% endfor %}
+  </div>
+
+  <div class="ts-grid">
     {% for p in products %}
-      <a href="{% url 'public_product' tenant_slug=tenant.slug pk=p.pk %}" class="pl-card">
+      <a href="{% url 'public_product' tenant_slug=tenant.slug pk=p.pk %}" class="ts-card">
         <div class="thumb">
-          {% with first=p.images.first %}{% if first %}<img src="{{ first.image.url }}" alt="">{% else %}<svg><use href="#i-image"/></svg>{% endif %}{% endwith %}
+          {% with first=p.images.first %}{% if first %}<img src="{{ first.image.url }}" alt="">{% else %}<svg style="width:32px;height:32px;"><use href="#i-image"/></svg>{% endif %}{% endwith %}
         </div>
         <div class="body">
           <div class="name">{{ p.name }}</div>
-          <div class="meta">{{ p.category.name|default:"—" }}</div>
-          <div class="price">฿{{ p.default_price|floatformat:0 }}</div>
+          <div class="meta">{{ p.category.name|default:"" }}</div>
+          <div class="price">฿{{ p.default_price|floatformat:0 }}{% if p.unit %} <span class="muted">/{{ p.unit }}</span>{% endif %}</div>
         </div>
       </a>
     {% empty %}
-      <p class="muted">ยังไม่มีสินค้า</p>
+      <p class="muted" style="grid-column: 1/-1; text-align: center; padding: 40px;">ไม่พบสินค้าตามที่ค้น</p>
     {% endfor %}
   </div>
-</div>
-</body>
-</html>
+</section>
+{% endblock %}

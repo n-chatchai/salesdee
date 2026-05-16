@@ -1,0 +1,45 @@
+{% extends "catalog/_ts_base.html" %}
+{% load static %}
+{% block title %}ส่งคำขอแล้ว · {{ tenant.name }}{% endblock %}
+
+{% block content %}
+<div class="ts-thanks" x-data x-init="$store.cart.clear()">
+  <div class="check"><svg style="width: 32px; height: 32px;"><use href="#i-check"/></svg></div>
+  <h1>ส่งคำขอเรียบร้อย <em>·</em></h1>
+  <p>ทีมขายของ <strong>{{ tenant.name }}</strong> ได้รับคำขอแล้ว · จะติดต่อกลับใน 24 ชั่วโมงทำการ</p>
+
+  <div class="ref-box">
+    เลขที่คำขอ · {{ ref }}
+  </div>
+
+  <div class="timeline">
+    <div class="timeline-step done">
+      <div class="ic">✓</div>
+      <div><strong>รับคำขอแล้ว</strong><div class="muted" style="font-size: 12px;">{{ doc.created_at|date:"j M y H:i" }}</div></div>
+    </div>
+    <div class="timeline-step">
+      <div class="ic">2</div>
+      <div><strong>ทีมขายตรวจ + จัดใบเสนอ</strong><div class="muted" style="font-size: 12px;">ภายใน 24 ชม.</div></div>
+    </div>
+    <div class="timeline-step">
+      <div class="ic">3</div>
+      <div><strong>ส่งใบเสนอราคา (PDF) ทางอีเมล / ไลน์</strong></div>
+    </div>
+    <div class="timeline-step">
+      <div class="ic">4</div>
+      <div><strong>ยืนยันออเดอร์ + จัดส่ง</strong></div>
+    </div>
+  </div>
+
+  {% if company.line_id %}
+    <a href="https://line.me/R/ti/p/{{ company.line_id }}" target="_blank" class="ts-cta" style="margin-top: 24px;">
+      <svg class="ico ico-sm" style="color: var(--paper);"><use href="#i-line-app"/></svg>
+      ทักไลน์ตรงเพื่อคุยเร็วกว่า
+    </a>
+  {% endif %}
+
+  <div style="margin-top: 16px;">
+    <a href="{% url 'public_home' tenant_slug=tenant.slug %}" class="auth-link">← กลับหน้าหลัก</a>
+  </div>
+</div>
+{% endblock %}

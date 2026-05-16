@@ -1,56 +1,45 @@
-{% load static %}<!DOCTYPE html>
-<html lang="th">
-<head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ tenant.name }}</title>
-  <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
-  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
-  <link rel="stylesheet" href="{% static 'css/app.css' %}">
-</head>
-<body>
-{% include 'partials/_icons.svg.html' %}
+{% extends "catalog/_ts_base.html" %}
+{% load static %}
+{% block title %}{{ tenant.name }} · เฟอร์นิเจอร์คุณภาพ{% endblock %}
 
-<div style="max-width: 1100px; margin: 0 auto; padding: 24px;">
-  <header style="display: flex; align-items: center; justify-content: space-between; padding: 16px 0;">
-    <div style="font-family: var(--font-sans); font-weight: 700; font-size: 22px; letter-spacing: -0.03em; color: var(--ink); text-transform: lowercase;">
-      {{ tenant.name }}<span style="color: var(--accent);">.</span>
-    </div>
-    <nav style="display: flex; gap: 18px; font-size: 13px;">
-      <a href="{% url 'public_catalog' tenant_slug=tenant.slug %}" style="color: var(--ink-2); text-decoration: none;">สินค้า</a>
-      <a href="#contact" style="color: var(--ink-2); text-decoration: none;">ติดต่อ</a>
-    </nav>
-  </header>
+{% block content %}
+<section class="ts-hero">
+  <div class="eyebrow">{% if categories %}{% for c in categories|slice:":3" %}{{ c.name }}{% if not forloop.last %} · {% endif %}{% endfor %}{% else %}เฟอร์นิเจอร์{% endif %}</div>
+  <h1>{{ tenant.name }}<br><em>ขอใบเสนอราคาออนไลน์</em></h1>
+  <p>เลือกสินค้าจากแคตตาล็อก · ส่งคำขอใบเสนอราคา · ทีมขายตอบกลับใน 1 วันทำการ</p>
+  <a href="{% url 'public_catalog' tenant_slug=tenant.slug %}" class="ts-cta">
+    ดูสินค้าทั้งหมด <svg class="ico ico-sm" style="color: var(--paper);"><use href="#i-chevron"/></svg>
+  </a>
+</section>
 
-  <section style="padding: 64px 0;">
-    <div class="mono" style="color: var(--accent); margin-bottom: 12px;">เฟอร์นิเจอร์คุณภาพ</div>
-    <h1 style="font-size: 48px; font-weight: 600; letter-spacing: -0.02em; color: var(--ink); line-height: 1.15;">
-      {{ tenant.name }}<br>
-      <em style="font-family: var(--font-display); font-style: italic; color: var(--accent);">ขอใบเสนอราคาออนไลน์</em>
-    </h1>
-    <p style="font-size: 16px; color: var(--ink-2); margin-top: 20px; max-width: 540px;">
-      เลือกสินค้า · ส่งคำขอใบเสนอราคา · ทีมขายตอบกลับใน 1 วันทำการ
-    </p>
-    <a href="{% url 'public_catalog' tenant_slug=tenant.slug %}" class="btn accent" style="margin-top: 24px; padding: 14px 24px;">
-      ดูสินค้าทั้งหมด →
-    </a>
-  </section>
+{% if categories %}
+<section class="ts-section">
+  <h2>หมวด<em>สินค้า</em></h2>
+  <div class="ts-cat-pills">
+    {% for c in categories %}
+      <a href="{% url 'public_catalog' tenant_slug=tenant.slug %}?cat={{ c.pk }}" class="ts-cat-pill">{{ c.name }} <span class="muted">({{ c.n }})</span></a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
 
-  {% if products %}
-    <section style="padding: 32px 0;">
-      <h2 style="font-size: 24px; font-weight: 600; margin-bottom: 16px;">สินค้าแนะนำ</h2>
-      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px;">
-        {% for p in products|slice:":8" %}
-          <a href="{% url 'public_product' tenant_slug=tenant.slug pk=p.pk %}" style="background: var(--paper-2); border: 1px solid var(--border); text-decoration: none; color: inherit; padding: 12px;">
-            <div style="aspect-ratio: 4/3; background: var(--paper-3); margin-bottom: 8px;">
-              {% with first=p.images.first %}{% if first %}<img src="{{ first.image.url }}" alt="" style="width:100%; height:100%; object-fit: cover;">{% endif %}{% endwith %}
-            </div>
-            <div style="font-weight: 600;">{{ p.name }}</div>
-            <div style="font-family: var(--font-mono); color: var(--accent); margin-top: 4px;">฿{{ p.default_price|floatformat:0 }}</div>
-          </a>
-        {% endfor %}
-      </div>
-    </section>
-  {% endif %}
-</div>
-</body>
-</html>
+{% if featured %}
+<section class="ts-section">
+  <h2>สินค้า<em>แนะนำ</em></h2>
+  <div class="ts-grid">
+    {% for p in featured %}
+      <a href="{% url 'public_product' tenant_slug=tenant.slug pk=p.pk %}" class="ts-card">
+        <div class="thumb">
+          {% with first=p.images.first %}{% if first %}<img src="{{ first.image.url }}" alt="">{% else %}<svg style="width:32px;height:32px;"><use href="#i-image"/></svg>{% endif %}{% endwith %}
+        </div>
+        <div class="body">
+          <div class="name">{{ p.name }}</div>
+          <div class="meta">{{ p.category.name|default:"" }}</div>
+          <div class="price">฿{{ p.default_price|floatformat:0 }}{% if p.unit %} <span class="muted">/{{ p.unit }}</span>{% endif %}</div>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}

@@ -32,6 +32,11 @@ urlpatterns = [
         name="public_catalog_match",
     ),
     path("c/<slug:tenant_slug>/p/<int:pk>/", catalog_views.public_product, name="public_product"),
+    path(
+        "c/<slug:tenant_slug>/request/",
+        catalog_views.public_quote_request,
+        name="public_quote_request",
+    ),
     path("", include("apps.core.urls")),
 ]
 

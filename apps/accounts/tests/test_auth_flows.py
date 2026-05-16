@@ -53,7 +53,9 @@ def test_signup_auto_dedupes_slug(client, tenant) -> None:
     assert resp.status_code == 302
     new_tenants = Tenant.objects.filter(name=tenant.name).exclude(pk=tenant.pk)
     assert new_tenants.count() == 1
-    assert new_tenants.first().slug != tenant.slug  # got -2 suffix
+    new_tenant = new_tenants.first()
+    assert new_tenant is not None
+    assert new_tenant.slug != tenant.slug  # got -2 suffix
 
 
 def test_password_reset_sends_email(client, user) -> None:

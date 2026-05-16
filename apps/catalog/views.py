@@ -246,6 +246,102 @@ def public_product(request: HttpRequest, tenant_slug: str, pk: int) -> HttpRespo
         )
 
 
+def public_quote_request(request: HttpRequest, tenant_slug: str) -> HttpResponse:
+    """Public Path A endpoint · GET shows the form, POST creates a quote request.
+    No login required. Rate-limited per-IP via the cache backend (5/hr soft cap)."""
+    tenant = _public_tenant(tenant_slug)
+    with tenant_context(tenant):
+        from apps.crm.models import Contact, Customer
+        from apps.quotes.models import DocSource, DocStatus, DocType, SalesDocLine, SalesDocument
+        from apps.tenants.models import CompanyProfile
+
+        from .forms import QuoteRequestForm
+
+        company = CompanyProfile.objects.filter(tenant=tenant).first()
+
+        if request.method == "POST":
+            # Tiny rate-limit · 5 submits per hour per IP. Caches keyed by IP only — fine for MVP.
+            from django.core.cache import cache
+
+            ip = request.META.get("HTTP_X_FORWARDED_FOR", "").split(",")[0].strip() or request.META.get("REMOTE_ADDR", "?")
+            cache_key = f"qr-submit:{tenant.slug}:{ip}"
+            hits = cache.get(cache_key, 0)
+            if hits >= 5:
+                form = QuoteRequestForm(request.POST)
+                return render(
+                    request,
+                    "catalog/quote_request.html",
+                    {"tenant": tenant, "company": company, "form": form, "throttled": True},
+                )
+            cache.set(cache_key, hits + 1, timeout=3600)
+
+            form = QuoteRequestForm(request.POST)
+            if form.is_valid():
+                d = form.cleaned_data
+                customer = Customer.objects.create(
+                    name=d["company_name"] or d["name"],
+                    shipping_address=d.get("address") or "",
+                )
+                Contact.objects.create(
+                    customer=customer,
+                    name=d["name"],
+                    phone=d["phone"],
+                    email=d["contact"] if "@" in d["contact"] else "",
+                    line_id=d["contact"] if "@" not in d["contact"] else "",
+                    is_primary=True,
+                )
+                from datetime import date as _date
+
+                doc = SalesDocument.objects.create(
+                    doc_type=DocType.QUOTATION,
+                    status=DocStatus.REQUEST,
+                    source=DocSource.WEBSITE,
+                    customer=customer,
+                    issue_date=_date.today(),
+                    reference=(d.get("install_date") or "")[:200],
+                    notes="\n".join(
+                        filter(
+                            None,
+                            [
+                                f"บริการ: {d['service']}" if d.get("service") else "",
+                                f"ติดตั้ง: {d['install_date']}" if d.get("install_date") else "",
+                                d.get("notes") or "",
+                            ],
+                        )
+                    ),
+                )
+                # Translate cart entries → lines (best-effort: skip products that don't exist).
+                cart = d.get("cart") or []
+                positions = 0
+                for item in cart:
+                    p = Product.objects.filter(pk=item["id"], is_active=True).first()
+                    if not p:
+                        continue
+                    positions += 1
+                    SalesDocLine.objects.create(
+                        document=doc,
+                        position=positions,
+                        product=p,
+                        description=p.name,
+                        quantity=item["qty"],
+                        unit=p.unit or "",
+                        unit_price=p.default_price or 0,
+                    )
+                return render(
+                    request,
+                    "catalog/quote_request_thanks.html",
+                    {"tenant": tenant, "company": company, "ref": doc.doc_number or f"REQ-{doc.pk}", "doc": doc},
+                )
+        else:
+            form = QuoteRequestForm()
+
+        return render(
+            request,
+            "catalog/quote_request.html",
+            {"tenant": tenant, "company": company, "form": form},
+        )
+
+
 @require_POST
 def public_catalog_match(request: HttpRequest, tenant_slug: str) -> HttpResponse:
     """Public, login-free: visitor types what they want; if AI is configured we ask Claude to

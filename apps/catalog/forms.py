@@ -1,10 +1,49 @@
 from __future__ import annotations
 
+import json
+
 from django import forms
 
 from apps.core.forms import set_queryset
 
 from .models import Product, ProductCategory
+
+
+class QuoteRequestForm(forms.Form):
+    """Public, anonymous Path A quote-request form (tenant-site frame e).
+    Validates contact info + cart payload; the view then creates a SalesDocument
+    with source=WEBSITE, status=REQUEST."""
+
+    name = forms.CharField(label="ชื่อ-นามสกุล", max_length=200)
+    phone = forms.CharField(label="เบอร์โทร", max_length=40)
+    contact = forms.CharField(label="LINE ID หรืออีเมล", max_length=200)
+    company_name = forms.CharField(label="บริษัท", max_length=255, required=False)
+    address = forms.CharField(label="ที่อยู่ส่งของ", required=False, widget=forms.Textarea(attrs={"rows": 2}))
+    install_date = forms.CharField(label="กำหนดติดตั้ง", max_length=100, required=False)
+    service = forms.CharField(label="บริการ", max_length=100, required=False)
+    notes = forms.CharField(label="หมายเหตุ", required=False, widget=forms.Textarea(attrs={"rows": 3}))
+    tos = forms.BooleanField(label="ยอมรับเงื่อนไข", required=True)
+    cart = forms.CharField(widget=forms.HiddenInput, required=False)
+
+    def clean_cart(self):
+        raw = (self.cleaned_data.get("cart") or "").strip()
+        if not raw:
+            return []
+        try:
+            items = json.loads(raw)
+        except json.JSONDecodeError as exc:
+            raise forms.ValidationError("ข้อมูลตะกร้าผิดพลาด") from exc
+        if not isinstance(items, list):
+            raise forms.ValidationError("ข้อมูลตะกร้าผิดพลาด")
+        cleaned = []
+        for it in items[:50]:
+            try:
+                pid = int(it.get("id"))
+                qty = max(1, int(it.get("qty", 1)))
+            except (TypeError, ValueError):
+                continue
+            cleaned.append({"id": pid, "qty": qty})
+        return cleaned
 
 
 class ProductCategoryForm(forms.ModelForm):

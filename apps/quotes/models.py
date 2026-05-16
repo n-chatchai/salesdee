@@ -35,6 +35,7 @@ LOCKED_DOC_TYPES = frozenset(
 
 
 class DocStatus(models.TextChoices):
+    REQUEST = "request", "คำขอจากลูกค้า"  # pre-quote: arrived via Path A web form
     DRAFT = "draft", "ร่าง"
     PENDING_APPROVAL = "pending", "รออนุมัติ"
     READY = "ready", "พร้อมส่ง"
@@ -43,6 +44,15 @@ class DocStatus(models.TextChoices):
     REJECTED = "rejected", "ลูกค้าปฏิเสธ"
     EXPIRED = "expired", "หมดอายุ"
     CANCELLED = "cancelled", "ยกเลิก"
+
+
+class DocSource(models.TextChoices):
+    """Where this document originated · drives the queue source-badge + filter."""
+
+    MANUAL = "manual", "สร้างเอง"
+    LINE = "line", "ไลน์"
+    WEBSITE = "website", "เว็บไซต์"
+    EMAIL = "email", "อีเมล"
 
 
 class PriceMode(models.TextChoices):
@@ -160,6 +170,12 @@ class SalesDocument(TenantScopedModel):
         "tenants.BankAccount", on_delete=models.SET_NULL, related_name="+", null=True, blank=True
     )
     sent_at = models.DateTimeField("ส่งให้ลูกค้าเมื่อ", null=True, blank=True)
+    # Where this doc originated (drives queue source-badge + Quote Requests filter). For LINE-
+    # sourced docs `source_conversation` still points to the thread; `source` is the high-level
+    # bucket. New rows default to MANUAL; web/intake/LINE flows set this explicitly.
+    source = models.CharField(
+        "ที่มา", max_length=10, choices=DocSource.choices, default=DocSource.MANUAL, db_index=True
+    )
     # If the quotation was drafted from a LINE conversation (Quote-from-Chat), the source thread —
     # so sending it can post the Flex summary back into that chat and the deal shows the open count.
     source_conversation = models.ForeignKey(

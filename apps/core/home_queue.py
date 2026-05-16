@@ -111,7 +111,13 @@ def build_home_queue(request: HttpRequest, *, selected_key: str | None = None) -
 
     qs = (
         SalesDocument.objects.filter(
-            status__in=[DocStatus.DRAFT, DocStatus.SENT, "pending", "ready"]
+            status__in=[
+                DocStatus.REQUEST,
+                DocStatus.DRAFT,
+                DocStatus.SENT,
+                DocStatus.PENDING_APPROVAL,
+                DocStatus.READY,
+            ]
         )
         .exclude(doc_type__in=["invoice", "tax_invoice", "receipt", "credit_note", "debit_note"])
         .select_related("customer")
@@ -132,7 +138,7 @@ def build_home_queue(request: HttpRequest, *, selected_key: str | None = None) -
             status = "new"
             status_label = "รับเรื่องใหม่"
 
-        source = getattr(doc, "source", "") or ("line" if doc.source_conversation_id else "manual")
+        source = doc.source or ("line" if doc.source_conversation_id else "manual")
         customer = doc.customer
         cust_name = customer.name if customer else "ลูกค้าใหม่"
         company = getattr(customer, "company_name", "") if customer else ""

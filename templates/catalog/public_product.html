@@ -1,52 +1,76 @@
-{% load static %}<!DOCTYPE html>
-<html lang="th">
-<head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ product.name }} · {{ tenant.name }}</title>
-  <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
-  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
-  <link rel="stylesheet" href="{% static 'css/app.css' %}">
-  <link rel="stylesheet" href="{% static 'css/quotes.css' %}">
-</head>
-<body>
-{% include 'partials/_icons.svg.html' %}
+{% extends "catalog/_ts_base.html" %}
+{% load static %}
+{% block title %}{{ product.name }} · {{ tenant.name }}{% endblock %}
 
-<div style="max-width: 960px; margin: 0 auto; padding: 24px;">
-  <header style="padding: 16px 0; margin-bottom: 24px; border-bottom: 1px solid var(--border);">
-    <a href="{% url 'public_home' tenant_slug=tenant.slug %}" style="font-family: var(--font-sans); font-weight: 700; font-size: 22px; color: var(--ink); text-decoration: none; text-transform: lowercase;">
-      {{ tenant.name }}<span style="color: var(--accent);">.</span>
-    </a>
-  </header>
-
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start;">
-    <div>
-      {% with first=product.images.first %}
-        {% if first %}
-          <img src="{{ first.image.url }}" alt="" style="width: 100%; border: 1px solid var(--border);">
-        {% else %}
-          <div style="aspect-ratio: 4/3; background: var(--paper-3); display: grid; place-items: center; color: var(--mid-2);">
-            <svg style="width: 48px; height: 48px;"><use href="#i-image"/></svg>
-          </div>
-        {% endif %}
-      {% endwith %}
-    </div>
-
-    <div>
-      {% if product.category %}<div class="mono" style="color: var(--accent); margin-bottom: 8px;">{{ product.category.name }}</div>{% endif %}
-      <h1 style="font-size: 28px; font-weight: 600; letter-spacing: -0.02em;">{{ product.name }}</h1>
-      {% if product.name_en %}<div class="muted">{{ product.name_en }}</div>{% endif %}
-
-      <div style="font-family: var(--font-mono); font-size: 24px; font-weight: 600; color: var(--accent); margin: 16px 0;">
-        ฿{{ product.default_price|floatformat:0 }}{% if product.unit %} /{{ product.unit }}{% endif %}
+{% block content %}
+<div class="ts-product" x-data="{ qty: 1, added: false }">
+  <div class="gallery">
+    {% with first=product.images.first %}
+      {% if first %}
+        <img src="{{ first.image.url }}" alt="">
+      {% else %}
+        <div style="aspect-ratio: 4/3; background: var(--paper-3); display: grid; place-items: center; color: var(--mid-2);">
+          <svg style="width: 48px; height: 48px;"><use href="#i-image"/></svg>
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% if product.images.all|length > 1 %}
+      <div style="display: flex; gap: 8px; margin-top: 8px; overflow-x: auto;">
+        {% for img in product.images.all %}
+          <img src="{{ img.image.url }}" alt="" style="width: 80px; height: 80px; object-fit: cover; border: 1px solid var(--border);">
+        {% endfor %}
       </div>
+    {% endif %}
+  </div>
 
-      {% if product.description %}<p style="color: var(--ink-2); line-height: 1.6;">{{ product.description|linebreaks }}</p>{% endif %}
+  <div class="info">
+    {% if product.category %}<div class="eyebrow">{{ product.category.name }}</div>{% endif %}
+    <h1>{{ product.name }}{% if product.name_en %} <em>· {{ product.name_en }}</em>{% endif %}</h1>
+    <div class="price-big">฿{{ product.default_price|floatformat:0 }}{% if product.unit %} <span class="muted" style="font-size: 14px;">/{{ product.unit }}</span>{% endif %}</div>
 
-      <a href="#" class="btn accent" style="padding: 12px 20px; margin-top: 16px;">
-        <svg class="ico ico-sm"><use href="#i-plus"/></svg> เพิ่มในใบเสนอ
-      </a>
+    {% if product.description %}<p style="color: var(--ink-2); line-height: 1.6;">{{ product.description|linebreaks }}</p>{% endif %}
+
+    <div class="ts-qty">
+      <button @click="qty = Math.max(1, qty - 1)">−</button>
+      <input type="number" min="1" x-model.number="qty">
+      <button @click="qty += 1">+</button>
     </div>
+
+    <button class="ts-cta" style="margin-top: 0;"
+            @click="$store.cart.add({ id: {{ product.pk }}, name: '{{ product.name|escapejs }}', price: {{ product.default_price|default:0 }}, image: '{% with first=product.images.first %}{% if first %}{{ first.image.url }}{% endif %}{% endwith %}', qty }); added = true; setTimeout(() => added = false, 1800);">
+      <svg class="ico ico-sm" style="color: var(--paper);"><use href="#i-plus"/></svg>
+      <span x-show="!added">เพิ่มในใบเสนอ</span>
+      <span x-show="added" x-cloak>เพิ่มแล้ว ✓</span>
+    </button>
+
+    {% if product.width_mm or product.material %}
+      <dl class="ts-spec">
+        {% if product.width_mm %}<dt>ขนาด (กว้าง × ลึก × สูง)</dt><dd>{{ product.width_mm }} × {{ product.depth_mm }} × {{ product.height_mm }} มม.</dd>{% endif %}
+        {% if product.material %}<dt>วัสดุ</dt><dd>{{ product.material }}</dd>{% endif %}
+        {% if product.finish %}<dt>ผิวสำเร็จ</dt><dd>{{ product.finish }}</dd>{% endif %}
+        {% if product.color_code %}<dt>สี</dt><dd>{{ product.color_code }}</dd>{% endif %}
+        {% if product.standard %}<dt>มาตรฐาน</dt><dd>{{ product.standard }}</dd>{% endif %}
+      </dl>
+    {% endif %}
   </div>
 </div>
-</body>
-</html>
+
+{% if related_products %}
+<section class="ts-section">
+  <h2>สินค้า<em>ใกล้เคียง</em></h2>
+  <div class="ts-grid">
+    {% for p in related_products %}
+      <a href="{% url 'public_product' tenant_slug=tenant.slug pk=p.pk %}" class="ts-card">
+        <div class="thumb">
+          {% with first=p.images.first %}{% if first %}<img src="{{ first.image.url }}" alt="">{% else %}<svg style="width:32px;height:32px;"><use href="#i-image"/></svg>{% endif %}{% endwith %}
+        </div>
+        <div class="body">
+          <div class="name">{{ p.name }}</div>
+          <div class="price">฿{{ p.default_price|floatformat:0 }}</div>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}

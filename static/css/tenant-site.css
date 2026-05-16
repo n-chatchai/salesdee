@@ -1,0 +1,555 @@
+/* Tenant-site (public buyer surface · frames a-h, l from design/tenant-site.html).
+   Builds on app.css tokens. Cart = Alpine `$store.cart` w/ localStorage persistence.
+   Brand-guide canonical · radius 0 · Fraunces italic for em · persimmon accent. */
+
+.ts-page {
+  background: var(--paper);
+  min-height: 100vh;
+}
+
+.ts-nav {
+  background: var(--paper);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 24px;
+  display: flex; align-items: center; gap: 24px;
+  position: sticky; top: 0; z-index: 50;
+}
+.ts-brand {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  text-decoration: none;
+  text-transform: lowercase;
+}
+.ts-brand em {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  color: var(--accent);
+}
+.ts-brand .dot {
+  display: inline-block;
+  width: 5px; height: 5px;
+  background: var(--accent);
+  border-radius: 50%;
+  margin: 0 2px 2px;
+}
+.ts-nav-links {
+  display: flex; gap: 18px;
+  font-size: 14px;
+  margin-left: auto;
+}
+.ts-nav-links a {
+  color: var(--ink-2);
+  text-decoration: none;
+}
+.ts-nav-links a:hover { color: var(--accent); }
+.ts-cart-btn {
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  padding: 8px 14px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+  position: relative;
+}
+.ts-cart-btn .badge {
+  background: var(--accent);
+  color: var(--paper);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 6px;
+  min-width: 20px;
+  text-align: center;
+}
+
+/* Hero · landing */
+.ts-hero {
+  padding: 80px 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.ts-hero .eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+.ts-hero h1 {
+  font-size: 56px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  line-height: 1.1;
+}
+.ts-hero h1 em {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  color: var(--accent);
+}
+.ts-hero p {
+  font-size: 18px;
+  color: var(--ink-2);
+  margin-top: 24px;
+  max-width: 540px;
+  line-height: 1.5;
+}
+.ts-cta {
+  background: var(--accent);
+  color: var(--paper);
+  border: none;
+  padding: 14px 24px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-top: 32px;
+  text-decoration: none;
+}
+.ts-cta:hover { background: var(--accent-deep); }
+
+/* Hero banner (Hero CMS · per i.1) */
+.ts-hero-banner {
+  width: 100%;
+  aspect-ratio: 21 / 9;
+  background: var(--paper-3);
+  display: grid; place-items: center;
+  overflow: hidden;
+  position: relative;
+}
+.ts-hero-banner img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Section heading */
+.ts-section {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+.ts-section h2 {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 24px;
+}
+.ts-section h2 em {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+/* Category browse (frame b) */
+.ts-cat-pills {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+.ts-cat-pill {
+  padding: 8px 16px;
+  background: var(--paper-2);
+  border: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--ink-2);
+  text-decoration: none;
+}
+.ts-cat-pill:hover { background: var(--paper-3); }
+.ts-cat-pill.active {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+  font-weight: 500;
+}
+
+/* Product grid (shared) */
+.ts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+}
+.ts-card {
+  background: var(--paper-2);
+  border: 1px solid var(--border);
+  text-decoration: none;
+  color: inherit;
+  display: flex; flex-direction: column;
+  transition: border-color .12s;
+}
+.ts-card:hover { border-color: var(--accent); }
+.ts-card .thumb {
+  aspect-ratio: 4 / 3;
+  background: var(--paper-3);
+  display: grid; place-items: center;
+  color: var(--mid-2);
+  overflow: hidden;
+}
+.ts-card .thumb img { width: 100%; height: 100%; object-fit: cover; }
+.ts-card .body { padding: 14px 16px; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.ts-card .name { font-weight: 600; font-size: 15px; color: var(--ink); }
+.ts-card .meta { font-size: 12px; color: var(--mid); }
+.ts-card .price {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-top: auto;
+}
+
+/* Product detail (frame c) */
+.ts-product {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+.ts-product .gallery img {
+  width: 100%;
+  border: 1px solid var(--border);
+}
+.ts-product .info .eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.ts-product .info h1 {
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+.ts-product .info h1 em {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+}
+.ts-product .price-big {
+  font-family: var(--font-mono);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--accent);
+  margin: 16px 0;
+}
+.ts-spec {
+  margin-top: 24px;
+  border-top: 1px solid var(--border);
+}
+.ts-spec dt {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mid);
+  margin-top: 12px;
+}
+.ts-spec dd { font-size: 14px; color: var(--ink-2); }
+
+.ts-qty {
+  display: flex; align-items: stretch;
+  border: 1px solid var(--border);
+  background: var(--paper-2);
+  width: fit-content;
+  margin: 16px 0;
+}
+.ts-qty button {
+  background: transparent; border: none;
+  width: 36px; height: 36px;
+  font: inherit; font-size: 18px;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+.ts-qty button:hover { background: var(--paper-3); }
+.ts-qty input {
+  width: 60px;
+  background: transparent;
+  border: none;
+  text-align: center;
+  font: inherit;
+  font-family: var(--font-mono);
+}
+
+/* Cart drawer (frame d) */
+.ts-drawer-bg {
+  position: fixed; inset: 0;
+  background: rgba(27, 42, 58, .5);
+  z-index: 100;
+}
+.ts-drawer {
+  position: fixed; right: 0; top: 0; bottom: 0;
+  width: 100%; max-width: 440px;
+  background: var(--paper-2);
+  border-left: 1px solid var(--border);
+  z-index: 101;
+  display: flex; flex-direction: column;
+}
+.ts-drawer-head {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.ts-drawer-head .t { font-size: 18px; font-weight: 600; }
+.ts-drawer-head button {
+  background: transparent; border: none; cursor: pointer;
+  color: var(--mid); font-size: 24px; line-height: 1;
+}
+.ts-drawer-body {
+  flex: 1; overflow-y: auto;
+  padding: 14px 20px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.ts-cart-item {
+  display: flex; gap: 12px;
+  padding: 12px;
+  background: var(--paper);
+  border: 1px solid var(--border-2);
+}
+.ts-cart-item .thumb {
+  width: 64px; height: 64px;
+  background: var(--paper-3);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.ts-cart-item .thumb img { width: 100%; height: 100%; object-fit: cover; }
+.ts-cart-item .info { flex: 1; min-width: 0; }
+.ts-cart-item .name { font-size: 13px; font-weight: 600; }
+.ts-cart-item .price {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+}
+.ts-cart-item .controls {
+  display: flex; align-items: center; gap: 6px;
+  margin-top: 4px;
+}
+.ts-cart-item .controls button {
+  background: var(--paper-2); border: 1px solid var(--border);
+  width: 24px; height: 24px;
+  cursor: pointer; font: inherit;
+}
+.ts-cart-item .controls .qty {
+  min-width: 24px; text-align: center;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+.ts-cart-item .remove {
+  margin-left: auto;
+  background: transparent; border: none; cursor: pointer;
+  color: var(--mid); font-size: 16px;
+}
+
+.ts-drawer-foot {
+  padding: 18px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--paper);
+}
+.ts-drawer-foot .total {
+  display: flex; justify-content: space-between;
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+.ts-drawer-foot .total .v {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--accent);
+}
+.ts-drawer-foot .actions { display: flex; gap: 8px; }
+.ts-drawer-foot .actions a, .ts-drawer-foot .actions button {
+  flex: 1;
+  padding: 12px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  border: 1px solid var(--border);
+  background: var(--paper);
+  color: var(--ink);
+}
+.ts-drawer-foot .actions .primary {
+  background: var(--accent);
+  color: var(--paper);
+  border-color: var(--accent);
+}
+
+/* Request form (frame e) */
+.ts-req {
+  max-width: 1100px;
+  margin: 32px auto;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 32px;
+  align-items: start;
+}
+.ts-req-form {
+  background: var(--paper-2);
+  border: 1px solid var(--border);
+  padding: 28px;
+}
+.ts-req-head h1 {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.ts-req-head h1 em {
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--accent);
+}
+.ts-req-head p {
+  font-size: 13px;
+  color: var(--mid);
+  margin-top: 6px;
+  margin-bottom: 24px;
+}
+.ts-req-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+  margin-bottom: 14px;
+}
+.ts-req-field { display: flex; flex-direction: column; gap: 4px; }
+.ts-req-field.full { grid-column: 1 / -1; }
+.ts-req-field label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mid);
+}
+.ts-req-field input,
+.ts-req-field select,
+.ts-req-field textarea {
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 14px;
+  background: var(--paper);
+  border: 1px solid var(--border);
+  color: var(--ink);
+}
+.ts-req-field input:focus,
+.ts-req-field select:focus,
+.ts-req-field textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.ts-req-tos {
+  display: flex; gap: 8px;
+  margin: 16px 0;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.ts-req-submit {
+  background: var(--accent);
+  color: var(--paper);
+  border: none;
+  width: 100%;
+  padding: 14px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.ts-req-submit:hover { background: var(--accent-deep); }
+
+.ts-req-summary {
+  background: var(--paper-2);
+  border: 1px solid var(--border);
+  padding: 20px;
+  position: sticky;
+  top: 80px;
+}
+.ts-req-summary h3 {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mid);
+  margin-bottom: 14px;
+}
+.ts-req-sum-item {
+  display: flex; gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-2);
+  font-size: 13px;
+}
+.ts-req-sum-item .qty {
+  font-family: var(--font-mono);
+  color: var(--mid);
+  min-width: 36px;
+}
+
+/* Post-submit (frame f) */
+.ts-thanks {
+  max-width: 640px;
+  margin: 80px auto;
+  padding: 0 24px;
+  text-align: center;
+}
+.ts-thanks .check {
+  width: 64px; height: 64px;
+  background: var(--good);
+  color: var(--paper);
+  border-radius: 50%;
+  display: grid; place-items: center;
+  margin: 0 auto 24px;
+}
+.ts-thanks h1 {
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.ts-thanks h1 em {
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--accent);
+}
+.ts-thanks p { color: var(--ink-2); margin-top: 12px; line-height: 1.6; }
+.ts-thanks .ref-box {
+  margin: 24px 0;
+  padding: 16px;
+  background: var(--paper-2);
+  border: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 600;
+}
+.ts-thanks .timeline {
+  text-align: left;
+  margin-top: 32px;
+  padding: 20px;
+  background: var(--paper-2);
+  border: 1px solid var(--border);
+}
+.ts-thanks .timeline-step {
+  display: flex; gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-2);
+  font-size: 14px;
+}
+.ts-thanks .timeline-step:last-child { border-bottom: none; }
+.ts-thanks .timeline-step .ic {
+  width: 24px; height: 24px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  display: grid; place-items: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+}
+.ts-thanks .timeline-step.done .ic { background: var(--good); color: var(--paper); }
