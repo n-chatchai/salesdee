@@ -19,4 +19,9 @@ urlpatterns = [
     path("members/<int:pk>/edit/", views.member_edit, name="member_edit"),
     path("billing/", views.settings_billing, name="settings_billing"),
     path("billing/change/", views.plan_change, name="plan_change"),
+    path("quote-template/", views.settings_quote_template, name="settings_quote_template"),
+    path("hero/", views.settings_hero, name="settings_hero"),
+    path("hero/new/", views.hero_banner_create, name="hero_banner_create"),
+    path("hero/<int:pk>/delete/", views.hero_banner_delete, name="hero_banner_delete"),
+    path("hero/reorder/", views.hero_banner_reorder, name="hero_banner_reorder"),
 ]

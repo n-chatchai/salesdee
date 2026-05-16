@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Hero banners · salesdee.{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/quotes.css' %}">
+<link rel="stylesheet" href="{% static 'css/catalog.css' %}">
+<link rel="stylesheet" href="{% static 'css/settings.css' %}">
+{% endblock %}
+
+{% block extra_body %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const list = document.getElementById('hero-list');
+  if (!list) return;
+  Sortable.create(list, {
+    handle: '.grip',
+    onEnd: () => {
+      const order = Array.from(list.querySelectorAll('[data-id]')).map(el => el.dataset.id);
+      const csrf = document.querySelector('meta[name="csrf-token"]').content;
+      const fd = new FormData();
+      order.forEach(id => fd.append('order[]', id));
+      fetch('{% url "workspace:hero_banner_reorder" %}', { method: 'POST', headers: { 'X-CSRFToken': csrf }, body: fd });
+    },
+  });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-title">หน้าเว็บไซต์ · <em>Hero banners</em></div>
+  <div class="q-detail-meta"><div class="item">แสดงบนหน้าหลักของเว็บ tenant · ลากเรียงลำดับได้</div></div>
+</div>
+
+<div class="s-layout">
+  {% include "tenants/_s_tabs.html" with active_tab="hero" %}
+
+  <div>
+    <div class="s-section">
+      <h3>Banner ทั้งหมด · {{ banners|length }}</h3>
+      <div id="hero-list" style="padding: 12px;">
+        {% for b in banners %}
+          <div class="cat-tree-item" data-id="{{ b.pk }}" style="align-items: stretch; padding: 12px; gap: 14px;">
+            <svg class="grip" style="width:14px; height:14px; margin-top:8px;"><use href="#i-grip"/></svg>
+            <img src="{{ b.image.url }}" alt="" style="width: 120px; height: 60px; object-fit: cover; border: 1px solid var(--border);">
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-weight: 600;">{{ b.headline|default:"(ไม่มีหัวข้อ)" }}</div>
+              {% if b.subline %}<div class="muted" style="font-size: 12px;">{{ b.subline }}</div>{% endif %}
+              {% if b.cta_label %}<div class="muted" style="font-size: 11px; margin-top: 4px;">CTA: {{ b.cta_label }} → {{ b.cta_url|default:"—" }}</div>{% endif %}
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              {% if b.is_active %}<span class="chip good">เปิด</span>{% else %}<span class="chip">ปิด</span>{% endif %}
+              <form method="post" action="{% url 'workspace:hero_banner_delete' b.pk %}" onsubmit="return confirm('ลบ banner นี้?');">
+                {% csrf_token %}
+                <button type="submit" class="btn sm ghost" style="color: var(--danger);">
+                  <svg class="ico ico-sm"><use href="#i-trash"/></svg>
+                </button>
+              </form>
+            </div>
+          </div>
+        {% empty %}
+          <div class="muted" style="padding: 24px; text-align: center;">ยังไม่มี banner · เพิ่ม banner แรกด้านล่าง</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <form method="post" action="{% url 'workspace:hero_banner_create' %}" enctype="multipart/form-data" class="s-section">
+      {% csrf_token %}
+      <h3>เพิ่ม banner ใหม่</h3>
+      <div class="s-section-body">
+        <div class="q-form-stack">
+          <div><label>ภาพ * (อัตราส่วน 21:9 แนะนำ)</label>{{ form.image }}</div>
+          <div><label>หัวข้อ</label>{{ form.headline }}</div>
+          <div><label>รายละเอียด</label>{{ form.subline }}</div>
+          <div class="q-form-row-2">
+            <div><label>ข้อความปุ่ม</label>{{ form.cta_label }}</div>
+            <div><label>ปุ่มลิงก์ไปที่</label>{{ form.cta_url }}</div>
+          </div>
+          <label style="display: flex; align-items: center; gap: 8px;">{{ form.is_active }} เปิดใช้งาน</label>
+        </div>
+      </div>
+      <div style="padding: 0 18px 18px;">
+        <button type="submit" class="btn accent">
+          <svg class="ico ico-sm"><use href="#i-plus"/></svg> เพิ่ม banner
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

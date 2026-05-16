@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}ตั้งค่า · ใบเสนอราคา · salesdee.{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/quotes.css' %}">
+<link rel="stylesheet" href="{% static 'css/settings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-title">ตั้งค่า · <em>ใบเสนอราคา</em></div>
+  <div class="q-detail-meta"><div class="item">เทมเพลตและค่าเริ่มต้นที่ขึ้นทุกใบ</div></div>
+</div>
+
+<div class="s-layout">
+  {% include "tenants/_s_tabs.html" with active_tab="quote_template" %}
+
+  <form method="post">
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="auth-alert">{{ form.non_field_errors|join:" · " }}</div>{% endif %}
+
+    <div class="s-section">
+      <h3>หัวเอกสาร</h3>
+      <div class="s-section-body">
+        <div class="q-form-stack">
+          <div><label>ข้อความหัวเอกสาร</label>{{ form.title_text }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="s-section">
+      <h3>วันที่และเงื่อนไข</h3>
+      <div class="s-section-body">
+        <div class="q-form-row-2">
+          <div><label>กำหนดส่งของ (วัน)</label>{{ form.delivery_days }}</div>
+          <div><label>ยืนราคา (วัน)</label>{{ form.validity_days }}</div>
+        </div>
+        <div style="margin-top: 14px;">
+          <label>เงื่อนไขการชำระเงิน</label>
+          {{ form.payment_terms }}
+        </div>
+        <div class="q-form-row-2" style="margin-top: 14px;">
+          <div><label>ชำระล่วงหน้า (deposit)</label>{{ form.deposit_text }}</div>
+          <div><label>ชำระหลังส่งมอบ</label>{{ form.after_delivery_text }}</div>
+        </div>
+        <div style="margin-top: 14px;">
+          <label>การรับประกัน</label>{{ form.warranty_text }}
+        </div>
+      </div>
+    </div>
+
+    <div class="s-section">
+      <h3>ลายเซ็น</h3>
+      <div class="s-section-body">
+        <div class="q-form-row-2">
+          <div><label>ชื่อผู้ลงนาม</label>{{ form.signer_name }}</div>
+          <div><label>เบอร์ผู้ลงนาม</label>{{ form.signer_phone }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="s-section">
+      <h3>ภาษีและเลย์เอาต์</h3>
+      <div class="s-row"><div class="label"><div class="t">VAT 7%</div><div class="d">เปิดให้ใช้บนใบเสนอ</div></div>{{ form.vat_enabled }}</div>
+      <div class="s-row"><div class="label"><div class="t">WHT 3% (หัก ณ ที่จ่าย)</div><div class="d">แสดงเป็นข้อมูลให้ลูกค้า B2B</div></div>{{ form.wht_enabled }}</div>
+      <div class="s-row"><div class="label"><div class="t">หน้ารูปสินค้า (page 2)</div></div>{{ form.page2_layout }}</div>
+    </div>
+
+    <div style="display: flex; gap: 8px;">
+      <button type="submit" class="btn accent">
+        <svg class="ico ico-sm"><use href="#i-check"/></svg> บันทึก
+      </button>
+      <a href="{% url 'workspace:settings_hub' %}" class="btn">ยกเลิก</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

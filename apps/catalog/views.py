@@ -186,9 +186,10 @@ def public_home(request: HttpRequest, tenant_slug: str | None = None, tenant=Non
         tenant = _public_tenant(tenant_slug or "")
     with tenant_context(tenant):
         from apps.integrations.ai import ai_is_configured
-        from apps.tenants.models import CompanyProfile
+        from apps.tenants.models import CompanyProfile, HeroBanner
 
         company = CompanyProfile.objects.filter(tenant=tenant).first()
+        banners = list(HeroBanner.objects.filter(is_active=True).order_by("order")[:3])
         categories = list(
             ProductCategory.objects.annotate(
                 n=Count("products", filter=Q(products__is_active=True))
@@ -209,6 +210,7 @@ def public_home(request: HttpRequest, tenant_slug: str | None = None, tenant=Non
                 "company": company,
                 "categories": categories,
                 "featured": featured,
+                "banners": banners,
                 "ai_enabled": ai_is_configured(),
             },
         )

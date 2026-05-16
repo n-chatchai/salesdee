@@ -3,6 +3,21 @@
 {% block title %}{{ tenant.name }} · เฟอร์นิเจอร์คุณภาพ{% endblock %}
 
 {% block content %}
+{% if banners %}
+  {% with b=banners.0 %}
+    <section class="ts-hero-banner">
+      <img src="{{ b.image.url }}" alt="{{ b.headline }}">
+      {% if b.headline or b.cta_label %}
+        <div style="position: absolute; inset: 0; background: linear-gradient(transparent 50%, rgba(27,42,58,.55)); display: flex; flex-direction: column; justify-content: flex-end; padding: 32px;">
+          {% if b.headline %}<div style="font-family: var(--font-display); font-style: italic; font-size: 36px; color: var(--paper); max-width: 600px;">{{ b.headline }}</div>{% endif %}
+          {% if b.subline %}<div style="color: var(--paper); opacity: .9; margin-top: 8px; max-width: 600px;">{{ b.subline }}</div>{% endif %}
+          {% if b.cta_label %}<a href="{{ b.cta_url|default:'#' }}" class="ts-cta" style="margin-top: 16px; align-self: flex-start;">{{ b.cta_label }} →</a>{% endif %}
+        </div>
+      {% endif %}
+    </section>
+  {% endwith %}
+{% endif %}
+
 <section class="ts-hero">
   <div class="eyebrow">{% if categories %}{% for c in categories|slice:":3" %}{{ c.name }}{% if not forloop.last %} · {% endif %}{% endfor %}{% else %}เฟอร์นิเจอร์{% endif %}</div>
   <h1>{{ tenant.name }}<br><em>ขอใบเสนอราคาออนไลน์</em></h1>

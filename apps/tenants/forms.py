@@ -7,7 +7,7 @@ from apps.crm.models import PipelineStage
 from apps.integrations.models import LineIntegration
 from apps.quotes.models import DocumentNumberSequence
 
-from .models import CompanyProfile
+from .models import CompanyProfile, HeroBanner, QuoteTemplate
 
 
 class CompanyProfileForm(forms.ModelForm):
@@ -126,3 +126,29 @@ class MemberRoleForm(forms.ModelForm):
     class Meta:
         model = Membership
         fields = ["role", "can_see_all_records", "is_active"]
+
+
+class QuoteTemplateForm(forms.ModelForm):
+    class Meta:
+        model = QuoteTemplate
+        fields = [
+            "title_text",
+            "delivery_days",
+            "validity_days",
+            "payment_terms",
+            "deposit_text",
+            "after_delivery_text",
+            "warranty_text",
+            "signer_name",
+            "signer_phone",
+            "vat_enabled",
+            "wht_enabled",
+            "page2_layout",
+        ]
+        widgets = {"payment_terms": forms.Textarea(attrs={"rows": 2})}
+
+
+class HeroBannerForm(forms.ModelForm):
+    class Meta:
+        model = HeroBanner
+        fields = ["headline", "subline", "image", "cta_label", "cta_url", "is_active"]

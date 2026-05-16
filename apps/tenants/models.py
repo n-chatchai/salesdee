@@ -193,6 +193,74 @@ class Usage(TenantScopedModel):
         return f"{self.tenant_id}/{self.period}/{self.kind}={self.count}"
 
 
+class QuoteTemplate(BaseModel):
+    """Per-tenant default values for every quotation · drives header text, terms, layout.
+    Settings page (h.2) lets the owner edit once · every new quote inherits these. Sales
+    can override per-document. OneToOne · auto-created on first access."""
+
+    tenant = models.OneToOneField(Tenant, on_delete=models.CASCADE, related_name="quote_template")
+    title_text = models.CharField(
+        "ข้อความหัวเอกสาร", max_length=200, default="ใบเสนอราคา / QUOTATION"
+    )
+    delivery_days = models.PositiveIntegerField("กำหนดส่งของ (วัน)", default=45)
+    validity_days = models.PositiveIntegerField("ยืนราคา (วัน)", default=90)
+    payment_terms = models.TextField(
+        "เงื่อนไขการชำระเงิน", blank=True,
+        default="โอนเข้าบัญชีธนาคารหลัก · ส่งสลิปยืนยันการโอน",
+    )
+    deposit_text = models.CharField(
+        "ชำระล่วงหน้า (deposit)", max_length=200, default="30% ก่อนเริ่มงาน", blank=True
+    )
+    after_delivery_text = models.CharField(
+        "ชำระหลังส่งมอบ", max_length=200, default="70% เมื่อรับมอบงาน", blank=True
+    )
+    warranty_text = models.CharField(
+        "การรับประกัน", max_length=200, default="1 ปี จากการใช้งานปกติ", blank=True
+    )
+    signer_name = models.CharField("ชื่อผู้ลงนาม", max_length=200, blank=True)
+    signer_phone = models.CharField("เบอร์ผู้ลงนาม", max_length=40, blank=True)
+    vat_enabled = models.BooleanField("เปิด VAT 7%", default=True)
+    wht_enabled = models.BooleanField("เปิด WHT 3% (หัก ณ ที่จ่าย)", default=False)
+    PAGE2_LAYOUTS = (
+        ("none", "ไม่มีหน้ารูป"),
+        ("one", "1 รายการ/หน้า · รูปใหญ่"),
+        ("two", "2 รายการ/หน้า"),
+        ("grid4", "Grid 4 รายการ/หน้า"),
+    )
+    page2_layout = models.CharField(
+        "หน้ารูปสินค้า · เลย์เอาต์", max_length=10, choices=PAGE2_LAYOUTS, default="one"
+    )
+
+    class Meta:
+        verbose_name = "เทมเพลตใบเสนอราคา"
+        verbose_name_plural = "เทมเพลตใบเสนอราคา"
+
+    def __str__(self) -> str:
+        return f"QuoteTemplate · {self.tenant.slug}"
+
+
+class HeroBanner(TenantScopedModel):
+    """Hero banner shown on the tenant's public landing page (frame a · i.1 CMS).
+    Tenant CMS adds / reorders / toggles banners. Public site renders first `is_active=True`
+    by `order`. Image is required; headline + cta optional."""
+
+    headline = models.CharField("หัวข้อ", max_length=200, blank=True)
+    subline = models.CharField("รายละเอียด", max_length=300, blank=True)
+    image = models.ImageField("ภาพ", upload_to="hero_banners/")
+    cta_label = models.CharField("ข้อความปุ่ม", max_length=80, blank=True)
+    cta_url = models.URLField("ปุ่มลิงก์ไปที่", blank=True)
+    order = models.PositiveIntegerField("ลำดับ", default=0, db_index=True)
+    is_active = models.BooleanField("เปิดใช้", default=True)
+
+    class Meta:
+        verbose_name = "Hero banner"
+        verbose_name_plural = "Hero banners"
+        ordering = ("order", "-created_at")
+
+    def __str__(self) -> str:
+        return self.headline or f"banner #{self.pk}"
+
+
 class BankAccount(TenantScopedModel):
     """A bank account of the tenant, shown in payment terms on documents (REQUIREMENTS.md §4.1)."""
 

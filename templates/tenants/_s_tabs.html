@@ -6,6 +6,12 @@
   <a href="{% url 'workspace:settings_company' %}" class="s-tab {% if active_tab == 'company' %}active{% endif %}">
     <svg class="ic"><use href="#i-building"/></svg> บริษัท
   </a>
+  <a href="{% url 'workspace:settings_quote_template' %}" class="s-tab {% if active_tab == 'quote_template' %}active{% endif %}">
+    <svg class="ic"><use href="#i-file-text"/></svg> ใบเสนอราคา
+  </a>
+  <a href="{% url 'workspace:settings_hero' %}" class="s-tab {% if active_tab == 'hero' %}active{% endif %}">
+    <svg class="ic"><use href="#i-image"/></svg> Hero banners
+  </a>
   <a href="{% url 'workspace:settings_line' %}" class="s-tab {% if active_tab == 'line' %}active{% endif %}">
     <svg class="ic"><use href="#i-line-app"/></svg> LINE OA
   </a>

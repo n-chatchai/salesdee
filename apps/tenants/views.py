@@ -20,13 +20,15 @@ from . import plans as plan_registry
 from .forms import (
     CompanyProfileForm,
     DocumentNumberSequenceForm,
+    HeroBannerForm,
     LineIntegrationForm,
     MemberInviteForm,
     MemberRoleForm,
     OnboardingDomainForm,
     PipelineStageForm,
+    QuoteTemplateForm,
 )
-from .models import BillingCycle, CompanyProfile
+from .models import BillingCycle, CompanyProfile, HeroBanner, QuoteTemplate
 
 User = get_user_model()
 
@@ -537,3 +539,84 @@ def onboarding(request: HttpRequest) -> HttpResponse:
             "company": _company(request),
         },
     )
+
+
+# --------------------------------------------------------------------------- quote template (h.2)
+
+
+@login_required
+def settings_quote_template(request):
+    """h.2 · per-tenant defaults for every quotation (header text, terms, signature, layout)."""
+    if not _can_admin(request):
+        return HttpResponseForbidden("ต้องเป็นเจ้าของหรือผู้จัดการ")
+    tenant = _tenant(request)
+    instance, _ = QuoteTemplate.objects.get_or_create(tenant=tenant)
+    if request.method == "POST":
+        form = QuoteTemplateForm(request.POST, instance=instance)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "บันทึกเทมเพลตใบเสนอราคาแล้ว")
+            return redirect("workspace:settings_quote_template")
+    else:
+        form = QuoteTemplateForm(instance=instance)
+    return render(
+        request,
+        "tenants/settings_quote_template.html",
+        {"form": form, "template": instance, "company": _company(request), "tenant": tenant},
+    )
+
+
+# --------------------------------------------------------------------------- hero banners (i.1)
+
+
+@login_required
+def settings_hero(request):
+    """i.1 · Hero banners CMS for the public tenant landing page."""
+    if not _can_admin(request):
+        return HttpResponseForbidden("ต้องเป็นเจ้าของหรือผู้จัดการ")
+    banners = list(HeroBanner.objects.order_by("order", "-created_at"))
+    form = HeroBannerForm()
+    return render(
+        request,
+        "tenants/settings_hero.html",
+        {"banners": banners, "form": form, "tenant": _tenant(request)},
+    )
+
+
+@login_required
+@require_POST
+def hero_banner_create(request):
+    if not _can_admin(request):
+        return HttpResponseForbidden()
+    form = HeroBannerForm(request.POST, request.FILES)
+    if form.is_valid():
+        b = form.save(commit=False)
+        last = HeroBanner.objects.order_by("-order").values_list("order", flat=True).first() or 0
+        b.order = last + 1
+        b.save()
+        messages.success(request, "เพิ่ม banner แล้ว")
+    else:
+        messages.error(request, "ใส่ภาพและข้อความให้ครบ")
+    return redirect("workspace:settings_hero")
+
+
+@login_required
+@require_POST
+def hero_banner_delete(request, pk):
+    if not _can_admin(request):
+        return HttpResponseForbidden()
+    HeroBanner.objects.filter(pk=pk).delete()
+    messages.success(request, "ลบ banner แล้ว")
+    return redirect("workspace:settings_hero")
+
+
+@login_required
+@require_POST
+def hero_banner_reorder(request):
+    if not _can_admin(request):
+        return HttpResponseForbidden()
+    ids = request.POST.getlist("order[]") or request.POST.getlist("order")
+    for idx, bid in enumerate(ids):
+        HeroBanner.objects.filter(pk=bid).update(order=idx)
+    return JsonResponse({"ok": True})
+
