@@ -2,6 +2,43 @@
    Builds on app.css tokens. Cart = Alpine `$store.cart` w/ localStorage persistence.
    Brand-guide canonical · radius 0 · Fraunces italic for em · persimmon accent. */
 
+/* ─── Theme presets (frame c.2 picker · Tenant.theme) ───
+   Applied as a class on <body> · overrides accent + paper-related tokens. */
+.theme-craft   { /* default · matches brand-guide */ }
+.theme-atelier {
+  --paper: #F2EAD7;
+  --paper-2: #F7F1E1;
+  --paper-3: #E5DAC0;
+  --ink: #2A2317;
+  --accent: #B8965A;
+  --accent-deep: #8A6F3F;
+  --accent-soft: #ECDFC4;
+}
+.theme-bauhaus {
+  --paper: #FAFAF8;
+  --paper-2: #FFFFFF;
+  --paper-3: #F0F0EE;
+  --ink: #1A1A1A;
+  --accent: #E63946;
+  --accent-deep: #B7232E;
+  --accent-soft: #FBD9DC;
+  --font-display: 'Inter', sans-serif;
+}
+.theme-velvet {
+  --paper: #0F1715;
+  --paper-2: #1A2421;
+  --paper-3: #2A3431;
+  --ink: #F4E8CF;
+  --ink-2: #D0C5B0;
+  --mid: #8A8175;
+  --mid-2: #5F5A52;
+  --border: #2F3935;
+  --border-2: #243029;
+  --accent: #C9A961;
+  --accent-deep: #A88841;
+  --accent-soft: #2F2A1F;
+}
+
 .ts-page {
   background: var(--paper);
   min-height: 100vh;

@@ -39,7 +39,7 @@
   </script>
   <script src="https://unpkg.com/alpinejs@3.x.x" defer></script>
 </head>
-<body class="ts-page">
+<body class="ts-page theme-{{ tenant.theme|default:'craft' }}">
 {% include 'partials/_icons.svg.html' %}
 
 <nav class="ts-nav">

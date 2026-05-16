@@ -19,9 +19,11 @@
 <body>
 {% include 'partials/_icons.svg.html' %}
 
-<div class="app">
+<div class="app" x-data="{ sb: false }">
 
-  <aside class="app-sidebar">
+  <div class="app-sidebar-scrim" :class="sb && 'open'" @click="sb = false"></div>
+
+  <aside class="app-sidebar" :class="sb && 'open'">
     <div class="sb-brand">
       <div class="ic ic-32 cream"><span class="d">s</span><span class="dot"></span></div>
       <div class="name">sales<em>dee</em><span class="dot"></span></div>
@@ -90,6 +92,9 @@
   <main class="app-main">
     {% block topbar %}
     <div class="app-topbar">
+      <button class="mobile-burger" @click="sb = true" title="เมนู">
+        <svg width="20" height="20"><use href="#i-menu"/></svg>
+      </button>
       <div class="search-wrap">
         <svg><use href="#i-search"/></svg>
         <input class="search" type="search" placeholder="ค้นหาลูกค้า · ใบเสนอ · สินค้า…" />

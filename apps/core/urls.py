@@ -10,4 +10,5 @@ urlpatterns = [
     path("_caddy/ask", views.caddy_ask, name="caddy_ask"),
     path("search/", views.search, name="search"),
     path("notifications/", views.notifications, name="notifications"),
+    path("_dev/states/", views.state_reference, name="state_reference"),
 ]

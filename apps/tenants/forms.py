@@ -45,20 +45,28 @@ class CompanyProfileForm(forms.ModelForm):
 
 
 class OnboardingDomainForm(forms.Form):
-    """Step 2 of onboarding: pick a subdomain (Tenant.slug) + upload a logo."""
+    """Step 2 of onboarding: pick a subdomain (Tenant.slug) + upload a logo + choose theme."""
 
+    THEMES = (
+        ("craft", "Craft · warm classic"),
+        ("atelier", "Atelier · refined"),
+        ("bauhaus", "Bauhaus · bold modern"),
+        ("velvet", "Velvet · luxe dark"),
+    )
     slug = forms.SlugField(
         label="Subdomain",
         max_length=63,
         help_text="ที่อยู่ที่ลูกค้าใช้: <slug>.salesdee.app",
     )
     logo = forms.ImageField(label="โลโก้", required=False)
+    theme = forms.ChoiceField(label="ธีม", choices=THEMES, required=False, initial="craft")
 
     def __init__(self, *args, tenant=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.tenant = tenant
         if tenant is not None and not self.is_bound:
             self.fields["slug"].initial = tenant.slug
+            self.fields["theme"].initial = tenant.theme or "craft"
 
     def clean_slug(self):
         from django.utils.text import slugify

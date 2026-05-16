@@ -38,6 +38,16 @@ class Tenant(BaseModel):
     subscription_started_at = models.DateField("วันเริ่มแพ็กเกจ", null=True, blank=True)
     current_period_ends_at = models.DateField("รอบปัจจุบันสิ้นสุด", null=True, blank=True)
 
+    THEMES = (
+        ("craft", "Craft · warm classic"),
+        ("atelier", "Atelier · refined"),
+        ("bauhaus", "Bauhaus · bold modern"),
+        ("velvet", "Velvet · luxe dark"),
+    )
+    theme = models.CharField(
+        "ธีมเว็บ tenant", max_length=20, choices=THEMES, default="craft", db_index=True
+    )
+
     class Meta:
         verbose_name = "Workspace"
         verbose_name_plural = "Workspaces"

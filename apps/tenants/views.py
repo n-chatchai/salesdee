@@ -514,9 +514,16 @@ def onboarding(request: HttpRequest) -> HttpResponse:
             form = OnboardingDomainForm(request.POST, request.FILES, tenant=tenant)
             if isinstance(form, OnboardingDomainForm) and form.is_valid():
                 new_slug = form.cleaned_data["slug"]
+                new_theme = form.cleaned_data.get("theme") or tenant.theme or "craft"
+                changed: list[str] = []
                 if new_slug != tenant.slug:
                     tenant.slug = new_slug
-                    tenant.save(update_fields=["slug"])
+                    changed.append("slug")
+                if new_theme != tenant.theme:
+                    tenant.theme = new_theme
+                    changed.append("theme")
+                if changed:
+                    tenant.save(update_fields=changed)
                 logo = form.cleaned_data.get("logo")
                 if logo:
                     profile = _company(request, create=True)

@@ -133,3 +133,10 @@ def notifications(request: HttpRequest) -> HttpResponse:
 
     items = build_notifications(request)
     return render(request, "core/notifications.html", {"items": items})
+
+
+@login_required
+def state_reference(request: HttpRequest) -> HttpResponse:
+    """Frame l · design reference of empty / error / loading states. Dev-only."""
+    return render(request, "core/state_reference.html", {})
+

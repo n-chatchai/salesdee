@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}สถานะระบบ · design ref · salesdee.{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/quotes.css' %}">
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+<style>
+.st-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+}
+.st-card {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  min-height: 360px;
+  display: flex; flex-direction: column;
+}
+.st-card-label {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-2);
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mid);
+}
+.st-card-body {
+  flex: 1;
+  padding: 24px 20px;
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  text-align: center;
+}
+.st-illust {
+  width: 64px; height: 64px;
+  display: grid; place-items: center;
+  margin-bottom: 14px;
+  background: var(--paper-3);
+  border-radius: 50%;
+  color: var(--mid);
+}
+.st-illust svg { width: 28px; height: 28px; }
+.st-illust.danger { background: var(--danger-soft); color: var(--danger); }
+.st-illust.warn   { background: var(--warn-soft); color: var(--warn); }
+.st-illust.accent { background: var(--accent-soft); color: var(--accent); }
+.st-h {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.st-h em {
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--accent);
+}
+.st-desc {
+  font-size: 13px;
+  color: var(--ink-2);
+  line-height: 1.55;
+  max-width: 280px;
+  margin: 8px 0 14px;
+}
+.st-actions { display: flex; gap: 8px; justify-content: center; }
+.st-help, .st-code {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--mid);
+  margin-top: 10px;
+}
+.st-skel-row {
+  display: flex; gap: 12px; align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-2);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="q-detail-head" style="margin: -24px -24px 24px;">
+  <div class="q-detail-title">สถานะระบบ · <em>design reference</em></div>
+  <div class="q-detail-meta"><div class="item">empty · error · loading · ใช้ยึดเสมอเวลาทำหน้าใหม่</div></div>
+</div>
+
+<div class="st-grid">
+
+  <div class="st-card">
+    <div class="st-card-label"><span>ว่างเปล่า · ครั้งแรก</span><span style="color: var(--good);">empty</span></div>
+    <div class="st-card-body">
+      <div class="st-illust"><svg><use href="#i-search"/></svg></div>
+      <div class="st-h">ยังไม่มี<em>ดีลในระบบ</em></div>
+      <div class="st-desc">สร้างดีลแรกเพื่อจัดการขั้นตอนการขาย · หรือให้ผู้ช่วยอัจฉริยะช่วย</div>
+      <div class="st-actions">
+        <button class="btn sm"><svg class="ico ico-sm"><use href="#i-spark"/></svg> ขอผู้ช่วยช่วย</button>
+        <button class="btn sm accent"><svg class="ico ico-sm"><use href="#i-plus"/></svg> สร้างดีลแรก</button>
+      </div>
+      <div class="st-help">ลองข้อมูลตัวอย่างเพื่อดูว่าระบบทำงานยังไง</div>
+    </div>
+  </div>
+
+  <div class="st-card">
+    <div class="st-card-label"><span>404 · ไม่พบหน้า</span><span style="color: var(--danger);">error</span></div>
+    <div class="st-card-body">
+      <div class="st-illust danger"><svg><use href="#i-info"/></svg></div>
+      <div class="st-h">ไม่พบ<em>หน้าที่หา</em></div>
+      <div class="st-desc">หน้านี้อาจถูกย้าย ลบ หรือลิงก์ไม่ถูกต้อง · ลองค้นหาใหม่</div>
+      <div class="st-actions">
+        <button class="btn sm"><svg class="ico ico-sm"><use href="#i-arrow-left"/></svg> ย้อนกลับ</button>
+        <button class="btn sm accent"><svg class="ico ico-sm"><use href="#i-home"/></svg> ไปหน้าหลัก</button>
+      </div>
+      <div class="st-code">404 · /quotes/q-2026-9999</div>
+    </div>
+  </div>
+
+  <div class="st-card">
+    <div class="st-card-label"><span>กำลังโหลด · skeleton</span><span style="color: var(--mid);">loading</span></div>
+    <div class="st-card-body" style="padding: 0; justify-content: stretch; align-items: stretch;">
+      <div style="width: 100%; display: flex; flex-direction: column;">
+        <div style="padding: 12px 16px; border-bottom: 1px solid var(--border-2); display: flex; justify-content: space-between; align-items: center;">
+          <span class="skel" style="width: 120px;"></span>
+          <span class="skel" style="width: 60px; height: 10px;"></span>
+        </div>
+        {% for _ in '5'|center:5 %}
+          <div class="st-skel-row">
+            <span class="skel circle" style="width: 36px; height: 36px;"></span>
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
+              <span class="skel line" style="width: 70%;"></span>
+              <span class="skel line" style="width: 45%; height: 10px;"></span>
+            </div>
+            <span class="skel" style="width: 70px; height: 14px;"></span>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="st-card">
+    <div class="st-card-label"><span>ตัวกรองแคบเกินไป</span><span style="color: var(--accent);">empty · filtered</span></div>
+    <div class="st-card-body">
+      <div class="st-illust accent"><svg><use href="#i-search"/></svg></div>
+      <div class="st-h">ไม่พบลูกค้าที่ตรง<em>เงื่อนไข</em></div>
+      <div class="st-desc">ลองล้างตัวกรองบางตัว หรือปรับเงื่อนไขให้กว้างขึ้น</div>
+      <div class="st-actions"><button class="btn sm">ล้างตัวกรองทั้งหมด</button></div>
+    </div>
+  </div>
+
+  <div class="st-card">
+    <div class="st-card-label"><span>เครือข่ายขาด</span><span style="color: var(--warn);">error · offline</span></div>
+    <div class="st-card-body">
+      <div class="st-illust warn"><svg><use href="#i-alert"/></svg></div>
+      <div class="st-h">เชื่อมต่อ<em>ไม่ได้</em></div>
+      <div class="st-desc">ตรวจอินเทอร์เน็ตของคุณ · ข้อมูลที่แก้ไขล่าสุดจะ sync เมื่อกลับมาออนไลน์</div>
+      <div class="st-actions"><button class="btn sm accent"><svg class="ico ico-sm"><use href="#i-refresh"/></svg> ลองอีกครั้ง</button></div>
+      <div class="st-help">บันทึกอัตโนมัติ 2 จุด รออัปโหลด</div>
+    </div>
+  </div>
+
+  <div class="st-card">
+    <div class="st-card-label"><span>เซิร์ฟเวอร์ผิดพลาด</span><span style="color: var(--danger);">error · 500</span></div>
+    <div class="st-card-body">
+      <div class="st-illust danger"><svg><use href="#i-alert"/></svg></div>
+      <div class="st-h">บางอย่าง<em>ผิดพลาด</em></div>
+      <div class="st-desc">ทีมงานได้รับแจ้งและกำลังตรวจสอบ · ลองรีโหลดอีก 1-2 นาที</div>
+      <div class="st-actions">
+        <button class="btn sm">รายงานปัญหา</button>
+        <button class="btn sm accent"><svg class="ico ico-sm"><use href="#i-refresh"/></svg> รีโหลด</button>
+      </div>
+      <div class="st-code">500 · err-2026-0512-a8f4</div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

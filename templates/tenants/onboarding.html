@@ -131,8 +131,9 @@
       ลูกค้าทักหาคุณผ่าน <strong>subdomain</strong> ที่จะตั้งให้ได้เอง · เลือก theme ที่ใช้บนเว็บ tenant และใบเสนอราคา · ใช้ <strong>custom domain</strong> เองภายหลังได้ตลอด
     </p>
 
-    <form method="post" enctype="multipart/form-data" x-data="{ theme: 'craft', slug: '{{ form.slug.value|default:tenant.slug }}' }">
+    <form method="post" enctype="multipart/form-data" x-data="{ theme: '{{ tenant.theme|default:'craft' }}', slug: '{{ form.slug.value|default:tenant.slug }}' }">
       {% csrf_token %}
+      <input type="hidden" name="theme" :value="theme">
 
       <div class="auth-field">
         <div class="label" style="display: flex; justify-content: space-between;">
