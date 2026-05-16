@@ -37,6 +37,7 @@ urlpatterns = [
         catalog_views.public_quote_request,
         name="public_quote_request",
     ),
+    path("c/<slug:tenant_slug>/search/", catalog_views.public_search, name="public_search"),
     path("", include("apps.core.urls")),
 ]
 

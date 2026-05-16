@@ -1,0 +1,68 @@
+{% extends "catalog/_ts_base.html" %}
+{% load static %}
+{% block title %}ค้นหา · {{ tenant.name }}{% endblock %}
+
+{% block content %}
+<section class="ts-section">
+  <form method="get" style="margin-bottom: 16px; position: relative; max-width: 540px;">
+    <svg style="position:absolute; left:14px; top:50%; transform:translateY(-50%); width:18px; height:18px; color:var(--mid);"><use href="#i-search"/></svg>
+    <input name="q" value="{{ q|default:'' }}" autofocus placeholder="ค้นหา รุ่น / รหัส / สเปค"
+           style="width:100%; padding:12px 14px 12px 40px; background: var(--paper-2); border: 1px solid var(--border); font: inherit; font-size: 15px;">
+  </form>
+
+  {% if q %}
+    <div class="muted" style="font-size: 13px; margin-bottom: 24px;">
+      ผลค้นหา · <strong style="color: var(--ink);">"{{ q }}"</strong> · {{ total }} รายการ ใน {{ sections|length }} หมวด
+    </div>
+  {% endif %}
+
+  {% if sections %}
+    {% for sec in sections %}
+      <div style="margin-bottom: 32px;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px;">
+          <h2 style="font-size: 18px; font-weight: 600; letter-spacing: -0.01em;">
+            {{ sec.category.name|default:"ไม่มีหมวด" }}
+            <span class="muted" style="font-size: 12px; font-weight: 400; margin-left: 6px;">{{ sec.items|length }}{% if sec.more %} (+{{ sec.more }}){% endif %}</span>
+          </h2>
+          {% if sec.category %}
+            <a href="{% url 'public_catalog' tenant_slug=tenant.slug %}?cat={{ sec.category.pk }}&q={{ q }}" class="auth-link">ดูทั้งหมวด →</a>
+          {% endif %}
+        </div>
+        <div class="ts-grid">
+          {% for p in sec.items %}
+            <a href="{% url 'public_product' tenant_slug=tenant.slug pk=p.pk %}" class="ts-card">
+              <div class="thumb">
+                {% with first=p.images.first %}{% if first %}<img src="{{ first.image.url }}" alt="">{% else %}<svg style="width:32px;height:32px;"><use href="#i-image"/></svg>{% endif %}{% endwith %}
+              </div>
+              <div class="body">
+                {% if p.code %}<div style="font-family: var(--font-mono); font-size: 10px; color: var(--mid); text-transform: uppercase; letter-spacing: 0.05em;">{{ p.code }}</div>{% endif %}
+                <div class="name">{{ p.name }}</div>
+                <div class="price">฿{{ p.default_price|floatformat:0 }}</div>
+              </div>
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+  {% elif q %}
+    <div class="h-empty" style="padding: 60px 24px;">
+      <svg class="ic" style="width: 48px; height: 48px;"><use href="#i-search"/></svg>
+      <div class="t">ไม่พบ "{{ q }}"</div>
+      <div class="d">ลองคำที่กว้างกว่า · หรือ <a href="{% url 'public_catalog' tenant_slug=tenant.slug %}" class="auth-link">ดูสินค้าทั้งหมด</a></div>
+    </div>
+  {% else %}
+    <div class="muted" style="padding: 40px; text-align: center;">พิมพ์คำที่ต้องการค้นหาด้านบน</div>
+  {% endif %}
+</section>
+
+<script>
+{# Wrap matching keywords in <mark> via simple regex (case-insensitive). #}
+const q = {{ q|escapejs }}.toString();
+if (q.length > 1) {
+  const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+  document.querySelectorAll('.ts-card .name').forEach(el => {
+    el.innerHTML = el.textContent.replace(re, '<mark style="background: var(--accent-soft); color: var(--accent-deep); padding: 0 2px;">$1</mark>');
+  });
+}
+</script>
+{% endblock %}

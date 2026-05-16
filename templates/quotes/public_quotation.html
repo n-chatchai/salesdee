@@ -1,51 +1,226 @@
+{# Frame g · LINE webview quote viewer. Mobile-first · sticky bottom CTA. NO accept button
+   (sales closes deal in app). Renders inside LINE in-app browser typically. #}
 {% load static %}<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ใบเสนอราคา {{ document.doc_number }} · {{ tenant_name }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>ใบเสนอราคา · {{ tenant_name|default:"salesdee" }}</title>
   <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
   <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
   <link rel="stylesheet" href="{% static 'css/quotes.css' %}">
+  <style>
+    body { background: var(--paper-3); }
+    body::before { display: none; }
+    .qv-frame {
+      max-width: 480px; margin: 0 auto;
+      background: var(--paper); min-height: 100vh;
+      display: flex; flex-direction: column;
+      padding-bottom: 120px;  /* sticky CTA space */
+    }
+    .qv-top {
+      position: sticky; top: 0; z-index: 10;
+      background: var(--paper);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 16px;
+      display: flex; align-items: center; justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--mid);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .qv-top .doc-no { color: var(--ink); font-weight: 700; }
+    .qv-body { padding: 20px 18px; flex: 1; }
+    .qv-brand { display: flex; gap: 12px; align-items: center; margin-bottom: 18px; }
+    .qv-brand .mark {
+      width: 48px; height: 48px;
+      background: var(--ink); color: var(--accent);
+      display: grid; place-items: center;
+      font-family: var(--font-sans);
+      font-weight: 700; font-size: 22px;
+      letter-spacing: -0.05em;
+    }
+    .qv-brand .info .name {
+      font-size: 16px; font-weight: 600;
+      color: var(--ink);
+    }
+    .qv-brand .info .sub { font-size: 12px; color: var(--mid); }
+    .qv-meta {
+      background: var(--paper-2);
+      border: 1px solid var(--border);
+      padding: 12px 14px;
+      margin-bottom: 18px;
+      font-size: 13px;
+    }
+    .qv-meta-row {
+      display: flex; justify-content: space-between;
+      padding: 4px 0;
+    }
+    .qv-meta-row .lbl { color: var(--mid); font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; }
+    .qv-meta-row .val { color: var(--ink-2); font-weight: 500; }
+
+    .qv-items-h {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--mid);
+      margin-bottom: 8px;
+    }
+    .qv-item {
+      display: flex; gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-2);
+    }
+    .qv-item:last-child { border-bottom: none; }
+    .qv-item-img {
+      width: 56px; height: 56px;
+      background: var(--paper-3);
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .qv-item-img img { width: 100%; height: 100%; object-fit: cover; }
+    .qv-item-body { flex: 1; min-width: 0; }
+    .qv-item-name { font-weight: 600; font-size: 13px; color: var(--ink); }
+    .qv-item-meta { font-size: 11px; color: var(--mid); margin-top: 2px; }
+    .qv-item-price { font-family: var(--font-mono); font-size: 13px; color: var(--accent); font-weight: 600; margin-top: 4px; }
+
+    .qv-totals {
+      margin: 18px 0;
+      padding: 14px;
+      background: var(--paper-2);
+      border: 1px solid var(--border);
+    }
+    .qv-trow {
+      display: flex; justify-content: space-between;
+      padding: 4px 0;
+      font-size: 13px;
+    }
+    .qv-trow.final {
+      padding-top: 10px;
+      margin-top: 6px;
+      border-top: 1px solid var(--border);
+      font-size: 17px;
+      font-weight: 600;
+    }
+    .qv-trow.final span:last-child { color: var(--accent); font-family: var(--font-mono); }
+
+    .qv-terms {
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+    .qv-terms .h {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--mid);
+      margin-bottom: 8px;
+    }
+    .qv-term {
+      display: flex; flex-direction: column; gap: 2px;
+      padding: 6px 0;
+      font-size: 12px;
+    }
+    .qv-term .lbl { color: var(--mid); }
+    .qv-term .val { color: var(--ink-2); }
+
+    .qv-cta-stack {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      max-width: 480px; margin: 0 auto;
+      background: var(--paper);
+      border-top: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex; flex-direction: column; gap: 8px;
+      box-shadow: 0 -4px 12px rgba(27, 42, 58, .06);
+    }
+    .qv-cta {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 12px;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .qv-cta.pdf { background: var(--paper-2); color: var(--ink); border: 1px solid var(--border); }
+    .qv-cta.line { background: var(--line-green); color: white; }
+    .qv-note { text-align: center; font-size: 11px; color: var(--mid); }
+  </style>
 </head>
 <body>
 {% include 'partials/_icons.svg.html' %}
 
-<div style="max-width: 800px; margin: 24px auto; padding: 24px;">
-  <div class="q-detail-head" style="margin-bottom: 24px;">
-    <div class="q-detail-num">{{ document.doc_number }}</div>
-    <div class="q-detail-title">{{ document.customer.name|default:"ลูกค้า" }} <em>· {{ tenant_name }}</em></div>
-    <div class="q-detail-meta">
-      <span class="q-status-pill {{ document.status }}">{{ document.get_status_display }}</span>
-      <span class="dot">·</span>
-      <div class="item">ออกเมื่อ <strong>{{ document.issue_date|date:"j M y" }}</strong></div>
-      {% if document.valid_until %}<span class="dot">·</span><div class="item">ยืนราคาถึง <strong>{{ document.valid_until|date:"j M y" }}</strong></div>{% endif %}
-    </div>
+<div class="qv-frame">
+  <div class="qv-top">
+    <span>ใบเสนอราคา</span>
+    <span class="doc-no">{{ document.doc_number|default:"—" }}</span>
   </div>
 
-  {% include "quotes/_quote_lines.html" with editable=False %}
-
-  {% if document.payment_terms %}
-    <div class="q-form-section" style="margin-top: 16px;">
-      <h3>เงื่อนไขการชำระเงิน</h3>
-      <div style="padding: 18px;">{{ document.payment_terms|linebreaks }}</div>
+  <div class="qv-body">
+    <div class="qv-brand">
+      <div class="mark">{{ tenant_name|default:"S"|slice:":1" }}</div>
+      <div class="info">
+        <div class="name">{{ tenant_name|default:"salesdee." }}</div>
+        <div class="sub">{{ company.name_en|default:"" }}</div>
+      </div>
     </div>
-  {% endif %}
 
-  <div style="margin-top: 24px; display: flex; gap: 8px; justify-content: center;">
-    <a href="{% url 'public_quotation_pdf' token=token %}" class="btn">
-      <svg class="ico ico-sm"><use href="#i-download"/></svg> ดาวน์โหลด PDF
-    </a>
-    {% if can_respond %}
-      <form method="post" action="{% url 'public_quotation_respond' token=token %}" style="display: inline;">
-        {% csrf_token %}
-        <button type="submit" name="response" value="accepted" class="btn accent">
-          <svg class="ico ico-sm"><use href="#i-check"/></svg> ยอมรับใบเสนอ
-        </button>
-      </form>
+    <div class="qv-meta">
+      <div class="qv-meta-row"><span class="lbl">เลขที่</span><span class="val">{{ document.doc_number }}</span></div>
+      <div class="qv-meta-row"><span class="lbl">วันที่</span><span class="val">{{ document.issue_date|date:"j M y" }}</span></div>
+      <div class="qv-meta-row"><span class="lbl">เรียน</span><span class="val">{{ document.customer.name|default:"ลูกค้า" }}</span></div>
+      {% if document.valid_until %}<div class="qv-meta-row"><span class="lbl">ยืนราคา</span><span class="val">ถึง {{ document.valid_until|date:"j M y" }}</span></div>{% endif %}
+    </div>
+
+    {% with lines=document.lines.all totals=totals %}
+      <div class="qv-items-h">รายการ · {{ lines|length }} ตัว</div>
+      {% for line in lines %}
+        <div class="qv-item">
+          <div class="qv-item-img">
+            {% if line.image %}<img src="{{ line.image.url }}" alt="">{% elif line.product %}{% with first=line.product.images.first %}{% if first %}<img src="{{ first.image.url }}" alt="">{% endif %}{% endwith %}{% endif %}
+          </div>
+          <div class="qv-item-body">
+            <div class="qv-item-name">{{ line.description|default:line.product.name|default:"-" }}</div>
+            <div class="qv-item-meta">{% if line.product.code %}{{ line.product.code }} · {% endif %}{{ line.quantity|floatformat:"-2" }} {{ line.unit }}{% if line.dimensions %} · {{ line.dimensions }}{% endif %}</div>
+            <div class="qv-item-price">฿{{ line.amount|floatformat:0 }}</div>
+          </div>
+        </div>
+      {% endfor %}
+
+      <div class="qv-totals">
+        <div class="qv-trow"><span>รวมก่อน VAT</span><span>฿{{ totals.subtotal|floatformat:0 }}</span></div>
+        {% if totals.end_discount_amount %}<div class="qv-trow"><span>ส่วนลด</span><span>−฿{{ totals.end_discount_amount|floatformat:0 }}</span></div>{% endif %}
+        {% if totals.vat_amount %}<div class="qv-trow"><span>VAT 7%</span><span>฿{{ totals.vat_amount|floatformat:0 }}</span></div>{% endif %}
+        <div class="qv-trow final"><span>รวมทั้งหมด</span><span>฿{{ totals.grand_total|floatformat:0 }}</span></div>
+      </div>
+    {% endwith %}
+
+    {% if document.payment_terms or document.lead_time or document.warranty %}
+      <div class="qv-terms">
+        <div class="h">เงื่อนไข</div>
+        {% if document.payment_terms %}<div class="qv-term"><span class="lbl">การชำระเงิน</span><span class="val">{{ document.payment_terms|linebreaks }}</span></div>{% endif %}
+        {% if document.lead_time %}<div class="qv-term"><span class="lbl">กำหนดส่ง</span><span class="val">{{ document.lead_time }}</span></div>{% endif %}
+        {% if document.warranty %}<div class="qv-term"><span class="lbl">รับประกัน</span><span class="val">{{ document.warranty }}</span></div>{% endif %}
+      </div>
     {% endif %}
   </div>
+</div>
+
+<div class="qv-cta-stack">
+  <a href="{% url 'public_quotation_pdf' token=token %}" class="qv-cta pdf">
+    <svg style="width:16px; height:16px;"><use href="#i-download"/></svg>
+    ดาวน์โหลด PDF
+  </a>
+  {% if company.line_id %}
+    <a href="https://line.me/R/ti/p/{{ company.line_id }}" target="_blank" class="qv-cta line">
+      <svg style="width:16px; height:16px;"><use href="#i-line-app"/></svg>
+      ติดต่อ · ทักไลน์ {{ company.line_id }} →
+    </a>
+  {% endif %}
+  <div class="qv-note">ตอบยืนยัน · ขอแก้ไข · หรือสอบถาม · ผ่านไลน์ได้เลย</div>
 </div>
 </body>
 </html>

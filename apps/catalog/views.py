@@ -246,6 +246,46 @@ def public_product(request: HttpRequest, tenant_slug: str, pk: int) -> HttpRespo
         )
 
 
+def public_search(request: HttpRequest, tenant_slug: str) -> HttpResponse:
+    """Public search · groups results by category (frame h)."""
+    tenant = _public_tenant(tenant_slug)
+    q = (request.GET.get("q") or "").strip()[:120]
+    with tenant_context(tenant):
+        from apps.tenants.models import CompanyProfile
+
+        company = CompanyProfile.objects.filter(tenant=tenant).first()
+        sections: list[dict] = []
+        total = 0
+        if q:
+            hits = list(
+                Product.objects.filter(is_active=True)
+                .filter(Q(name__icontains=q) | Q(code__icontains=q) | Q(description__icontains=q))
+                .select_related("category")
+                .order_by("category__order", "name")[:60]
+            )
+            total = len(hits)
+            by_cat: dict[int | None, list] = {}
+            for p in hits:
+                by_cat.setdefault(p.category_id, []).append(p)
+            cat_objs = {
+                c.pk: c
+                for c in ProductCategory.objects.filter(pk__in=[k for k in by_cat if k is not None])
+            }
+            for cat_id, items in by_cat.items():
+                sections.append(
+                    {
+                        "category": cat_objs.get(cat_id) if cat_id is not None else None,
+                        "items": items[:6],
+                        "more": max(0, len(items) - 6),
+                    }
+                )
+        return render(
+            request,
+            "catalog/public_search.html",
+            {"tenant": tenant, "company": company, "q": q, "sections": sections, "total": total},
+        )
+
+
 def public_quote_request(request: HttpRequest, tenant_slug: str) -> HttpResponse:
     """Public Path A endpoint · GET shows the form, POST creates a quote request.
     No login required. Rate-limited per-IP via the cache backend (5/hr soft cap)."""
